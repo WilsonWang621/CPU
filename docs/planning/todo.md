@@ -9,8 +9,14 @@
 - [ ] 固定 redirect 与旧包同拍时的优先级、取指路径 ID、预测查询/响应/采用通知、历史恢复和训练带宽。
 - [ ] 固定 D/MDU 事务 ID、D-cache 下级内存口的握手/最大在途数、store 确认和最终排空。
 - [ ] 共同审定[双发射端口预算](port-budget-and-ipc.md)：PRF 4R2W、两路 ALU/写回/提交、LSQ 两项入队与一路 AGU，以及 Cache/内存仲裁。
+<<<<<<< Updated upstream
 - [ ] 确认程序入口、结束、正式内存协议和提交轨迹格式。
 - [ ] 建立双方空壳、BackendSink、译码包发生器、MockMemory/MockDCache 与最小测试入口。
+=======
+- [x] 核对当前框架的程序入口、退出条件和 AXI4-Lite 外部协议，记录于 [G0 运行契约](g0-runtime-contract.md)。
+- [ ] 与 A 冻结内部排空握手、提交轨迹格式和错误响应处理；正式评测版本变化时复核运行契约。
+- [ ] 建立双方空壳、BackendSink、译码包发生器与最小测试入口。
+>>>>>>> Stashed changes
 
 ## A：后端、D-cache 与分支预测，初始预算 108 点
 
