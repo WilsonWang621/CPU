@@ -5,6 +5,7 @@ import mill._
 import mill.scalalib._
 
 object chisel extends ScalaModule {
+  def sources = Task.Sources(mill.api.BuildCtx.workspaceRoot / "src")
   def scalaVersion = "2.13.18"
   def chiselVersion = "7.7.0" // Includes the resolver for firtool 1.139.0.
 

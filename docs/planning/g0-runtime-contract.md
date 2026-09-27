@@ -10,7 +10,7 @@
 
 ## Top 与 AXI4-Lite 边界
 
-- 顶层模块名固定为 `student_top`，端口见 `chisel/src/StudentTop.scala`。CPU 是 AXI4-Lite master，外部 RAM 是 slave。AR/R、AW/W/B 五个通道分别用 `valid && ready` 在时钟上升沿完成交接。
+- 顶层模块名固定为 `student_top`，端口见 `src/StudentTop.scala`。CPU 是 AXI4-Lite master，外部 RAM 是 slave。AR/R、AW/W/B 五个通道分别用 `valid && ready` 在时钟上升沿完成交接。
 - 32 位总线地址必须 4 字节对齐。CPU 的字节/半字访问由内部生成对齐字地址、写入字节 lane 和 `wstrb`；外部 RAM 不接受非对齐的总线地址。
 - AW 和 W 可以在不同周期交接；master 在各自交接前必须保持 `valid` 和载荷稳定。写入只有在 AW、W 都被接收后才会服务。读响应和写响应也必须分别完成 R、B 通道交接。
 - 仿真从机的各通道队列深度为 16；新接收的请求最早下一周期服务。当前 `Makefile` 默认 `LATENCY=10`，可通过命令行调整。规划文档中的 3/20 周期是早期评测假设，不能当作当前框架的固定时序；性能实验应明确记录实际 `LATENCY`。

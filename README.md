@@ -7,7 +7,7 @@
 ```text
 .
 ├── README.md              # 仓库入口
-├── chisel/src/            # CPU 模板、CLA 与整数执行模块
+├── src/                   # Chisel CPU 模板、译码器与整数执行模块
 ├── tests/rtl/             # 整数执行模块的 Verilator 单测
 ├── docs/
 │   ├── project-requirements.md  # 项目目标与验收要求

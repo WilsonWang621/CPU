@@ -9,14 +9,9 @@
 - [ ] 固定 redirect 与旧包同拍时的优先级、取指路径 ID、预测查询/响应/采用通知、历史恢复和训练带宽。
 - [ ] 固定 D/MDU 事务 ID、D-cache 下级内存口的握手/最大在途数、store 确认和最终排空。
 - [ ] 共同审定[双发射端口预算](port-budget-and-ipc.md)：PRF 4R2W、两路 ALU/写回/提交、LSQ 两项入队与一路 AGU，以及 Cache/内存仲裁。
-<<<<<<< Updated upstream
-- [ ] 确认程序入口、结束、正式内存协议和提交轨迹格式。
-- [ ] 建立双方空壳、BackendSink、译码包发生器、MockMemory/MockDCache 与最小测试入口。
-=======
 - [x] 核对当前框架的程序入口、退出条件和 AXI4-Lite 外部协议，记录于 [G0 运行契约](g0-runtime-contract.md)。
 - [ ] 与 A 冻结内部排空握手、提交轨迹格式和错误响应处理；正式评测版本变化时复核运行契约。
-- [ ] 建立双方空壳、BackendSink、译码包发生器与最小测试入口。
->>>>>>> Stashed changes
+- [ ] 建立双方空壳、BackendSink、译码包发生器、MockMemory/MockDCache 与最小测试入口。
 
 ## A：后端、D-cache 与分支预测，初始预算 108 点
 
@@ -34,6 +29,9 @@
 - [ ] B1（14）：公共类型代码、构建工具、Top 骨架、BackendSink 和 MockDCache。
 - [ ] B2（8）：PC、取指缓冲、预测查询接入、重定向与旧取指/预测响应隔离。
 - [ ] B3（8）：RV32IM 双译码、立即数和完整译码包。
+  - [x] 单指令组合译码叶模块及独立 RTL 测试（本机 Chisel 6.5.0 离线验证），见[译码器说明](../instruction-decoder.md)。
+  - [ ] 固定 Chisel 7.7.0 工具链回归：当前依赖下载超时，运行 `bash tests/decoder/run.sh` 验收。
+  - [ ] 双槽译码包、PC/预测/pathId 封装及背压/重定向测试。
 - [ ] B4（12）：I-cache、跨行取指、回填和独立测试。
 - [ ] B5（10）：独立 RV32IM 参考模型、提交对拍工具及整机功能验收。
 - [ ] B6（12）：I/D 仲裁、统一内存适配、3/20 周期测试模型。

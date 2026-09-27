@@ -1,6 +1,6 @@
 # 整数执行通路：从 RecursiveCLA32 开始
 
-源码位于 [`chisel/src/RecursiveCLA32.scala`](../chisel/src/RecursiveCLA32.scala) 与 [`chisel/src/IntegerDatapath.scala`](../chisel/src/IntegerDatapath.scala)。模块包名与课程模板一致，均为 `cpu2026`。加法器保留所给的递归分组与进位计算方式；每实例是一个组合 32 位加法器，没有流水寄存器。
+源码位于 [`src/RecursiveCLA32.scala`](../src/RecursiveCLA32.scala) 与 [`src/IntegerDatapath.scala`](../src/IntegerDatapath.scala)。模块包名与课程模板一致，均为 `cpu2026`。加法器保留所给的递归分组与进位计算方式；每实例是一个组合 32 位加法器，没有流水寄存器。
 
 | 模块 | 输入 | 输出 | 加法器的用途 |
 | --- | --- | --- | --- |
