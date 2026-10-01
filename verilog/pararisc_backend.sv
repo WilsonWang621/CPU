@@ -7,6 +7,8 @@ module pararisc_backend #(parameter integer ROB_BITS = 4) (
   input wire [31:0] fetch_pc, fetch_i0, fetch_i1, fetch_pred0, fetch_pred1,
   output wire redirect,
   output wire [31:0] redirect_pc,
+  output wire frontend_redirect,
+  output wire [31:0] frontend_redirect_pc,
   output wire train_valid,
   output wire [31:0] train_pc, train_target,
   output wire train_taken, train_conditional, train_indirect,
@@ -36,6 +38,8 @@ module pararisc_backend #(parameter integer ROB_BITS = 4) (
   reg [31:0] mapped;
   reg [ROB_BITS-1:0] rat [0:31];
   reg halted;
+  reg early_valid;
+  reg [ROB_BITS-1:0] early_tag;
 
   reg ex0_valid, ex1_valid;
   reg [ROB_BITS-1:0] ex0_tag, ex1_tag;
@@ -104,6 +108,14 @@ module pararisc_backend #(parameter integer ROB_BITS = 4) (
     !exceptional[head1] && (!next_store || (!head_store && store_ready));
   assign redirect = (retire0 && wrong_path[head]) || (retire1 && wrong_path[head1]);
   assign redirect_pc = wrong_path[head] ? actual[head] : actual[head1];
+  wire [ROB_BITS-1:0] redirect_tag = wrong_path[head] ? head : head1;
+  wire [ROB_BITS-1:0] age0 = ex0_tag-head, age1 = ex1_tag-head, early_age=early_tag-head;
+  wire early0 = wb0 && ex0_branch && ex0_target != ex0_pred && (!early_valid || age0 < early_age);
+  wire early1 = wb1 && wb_ex1 && ex1_branch && ex1_target != ex1_pred && (!early_valid || age1 < early_age);
+  wire select_early1 = early1 && (!early0 || age1 < age0);
+  wire new_early = early0 || early1;
+  assign frontend_redirect = new_early || (redirect && (!early_valid || early_tag != redirect_tag));
+  assign frontend_redirect_pc = new_early ? (select_early1 ? ex1_target : ex0_target) : redirect_pc;
   wire [ROB_BITS-1:0] store_head = head_store ? head : head1;
   assign store_valid = !halted && count != 0 && done[head] && !exceptional[head] &&
     (head_store || (count > 1 && !wrong_path[head] && done[head1] && !exceptional[head1] && next_store));
@@ -164,7 +176,7 @@ module pararisc_backend #(parameter integer ROB_BITS = 4) (
     {1'b0,tail,32'b0} : read_source(source_a(fetch_i1));
   wire [ROB_BITS+32:0] src1b = dst0 != 0 && dst0 == source_b(fetch_i1) ?
     {1'b0,tail,32'b0} : read_source(source_b(fetch_i1));
-  assign fetch_ready = count <= N-2 && !redirect && !halted;
+  assign fetch_ready = count <= N-2 && !redirect && !halted && !early_valid && !new_early;
   wire dispatch = fetch_valid && fetch_ready;
 
   reg issue0, issue1, issue_load;
@@ -191,7 +203,8 @@ module pararisc_backend #(parameter integer ROB_BITS = 4) (
     issue0_a = 0; issue0_b = 0; issue1_a = 0; issue1_b = 0; mdu_a = 0; mdu_b = 0; load_a = 0;
     older_store = 0; age_i = 0; age_j = 0; candidate_address = 0;
     for (integer k=0; k<N; k=k+1) begin
-      if (ready_bits[k] && chosen < 2 && !redirect && !halted) begin
+      if (ready_bits[k] && chosen < 2 && !redirect && !halted &&
+          (!early_valid || (ROB_BITS'(k)-head) <= early_age)) begin
         if (inst[k][6:0] == 7'h03) begin
           older_store = 0; age_i = ROB_BITS'(k) - head;
           candidate_address = effective_a[k] + {{20{inst[k][31]}},inst[k][31:20]};
@@ -228,11 +241,13 @@ module pararisc_backend #(parameter integer ROB_BITS = 4) (
     if (reset) begin
       head <= 0; tail <= 0; count <= 0; live <= 0; issued <= 0; done <= 0;
       exceptional <= 0; wrong_path <= 0; address_done <= 0; a_ready <= 0; b_ready <= 0; mapped <= 0; halted <= 0;
+      early_valid <= 0; early_tag <= 0;
       ex0_valid <= 0; ex1_valid <= 0;
       lq_live <= 0; lq_sent <= 0; lq_head <= 0; lq_tail <= 0; lq_send <= 0; lq_count <= 0; ld_killed <= 0;
       for (i=0; i<32; i=i+1) begin rf[i] <= 0; rat[i] <= 0; end
     end else begin
       if (bus_fault || (count != 0 && done[head] && exceptional[head])) halted <= 1;
+      if (new_early) begin early_valid <= 1; early_tag <= select_early1 ? ex1_tag : ex0_tag; end
       ex0_valid <= issue0;
       if (issue0) begin
         ex0_tag <= pick0; ex0_inst <= inst[pick0]; ex0_pc <= pcs[pick0]; ex0_pred <= predicted[pick0];
@@ -314,6 +329,7 @@ module pararisc_backend #(parameter integer ROB_BITS = 4) (
         tail <= tail + (fetch_two ? 2 : 1);
       end
       if (redirect) begin
+        early_valid <= 0;
         head <= 0; tail <= 0; count <= 0; live <= 0; issued <= 0; done <= 0;
         mapped <= 0; exceptional <= 0; wrong_path <= 0; address_done <= 0; ex0_valid <= 0; ex1_valid <= 0;
         if (ld_active && ld_sent && !(load_resp_valid && load_resp_ready)) begin

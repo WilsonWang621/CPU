@@ -1,6 +1,5 @@
-// Four-line fully associative write-through buffer. A hit accepts one CPU word
-// per cycle. Dirty here means that the SRAM copy must be invalidated on eviction;
-// all stores are already ordered into the external write queue.
+// Four-line fully associative buffer. Hits accept one CPU word per cycle.
+// Ordered background updates keep SRAM coherent; misses wait for those updates.
 module pararisc_l0 #(parameter integer LINE_BITS=6) (
   input wire clock, reset,
   input wire req_valid,
@@ -86,16 +85,11 @@ module pararisc_l0 #(parameter integer LINE_BITS=6) (
             live[selected]<=1; tags[selected]<=req_addr[31:LINE_BITS];
             word_valid[selected]<=req_mask==4'hf ? WORDS'(1)<<word_index : {WORDS{1'b0}};
             replacement<=replacement+1;
-            if (live[selected] && dirty[selected]) begin
-              victim_addr<={tags[selected],{LINE_BITS{1'b0}}}; state<=INV_REQ; load_pending<=0;
-            end
           end else if (req_mask==4'hf) word_valid[selected][word_index]<=1;
           dirty[selected]<=1;
         end else if (!word_hit) begin
           pending_addr<=req_addr; target_way<=selected; load_pending<=1;
-          if (live[selected] && dirty[selected]) begin
-            victim_addr<={tags[selected],{LINE_BITS{1'b0}}}; state<=INV_REQ;
-          end else state<=READ_REQ;
+          state<=READ_REQ;
           if (!tag_hit) replacement<=replacement+1;
         end
       end

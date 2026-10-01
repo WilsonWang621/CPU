@@ -26,6 +26,8 @@ module student_top #(
 );
   wire f_valid, f_ready, f_two, redirect;
   wire [31:0] f_pc, f_i0, f_i1, f_p0, f_p1, redirect_pc;
+  wire frontend_redirect;
+  wire [31:0] frontend_redirect_pc;
   wire train_valid, train_taken, train_cond, train_ind;
   wire [31:0] train_pc, train_target;
   wire ic_req, ic_ready, ic_resp, ic_resp_ready;
@@ -39,7 +41,7 @@ module student_top #(
   wire [3:0] st_mask;
   wire bus_fault;
   pararisc_frontend frontend (
-    .clock(clock), .reset(reset), .redirect(redirect), .redirect_pc(redirect_pc),
+    .clock(clock), .reset(reset), .redirect(frontend_redirect), .redirect_pc(frontend_redirect_pc),
     .valid(f_valid), .ready(f_ready), .pc0(f_pc), .insn0(f_i0), .insn1(f_i1), .pred0(f_p0), .pred1(f_p1), .two(f_two),
     .train_valid(train_valid), .train_pc(train_pc), .train_target(train_target), .train_taken(train_taken),
     .train_conditional(train_cond), .train_indirect(train_ind), .cache_valid(ic_req), .cache_ready(ic_ready),
@@ -49,7 +51,8 @@ module student_top #(
     .clock(clock), .reset(reset), .bus_fault(bus_fault),
     .fetch_valid(f_valid), .fetch_ready(f_ready), .fetch_two(f_two), .fetch_pc(f_pc),
     .fetch_i0(f_i0), .fetch_i1(f_i1), .fetch_pred0(f_p0), .fetch_pred1(f_p1),
-    .redirect(redirect), .redirect_pc(redirect_pc), .train_valid(train_valid), .train_pc(train_pc),
+    .redirect(redirect), .redirect_pc(redirect_pc), .frontend_redirect(frontend_redirect),
+    .frontend_redirect_pc(frontend_redirect_pc), .train_valid(train_valid), .train_pc(train_pc),
     .train_target(train_target), .train_taken(train_taken), .train_conditional(train_cond), .train_indirect(train_ind),
     .store_valid(st_valid), .store_ready(st_ready), .store_addr(st_addr), .store_data(st_data), .store_mask(st_mask),
     .load_valid(load_req), .load_ready(load_ready), .load_addr(load_addr), .load_word(load_word), .load_resp_valid(load_resp),
@@ -97,22 +100,50 @@ module student_top #(
   );
   wire l1_req, l1_ready, l1_invalidate, l1_resp, l1_resp_ready;
   wire [31:0] l1_addr;
+  wire update_valid, update_ready, memory_ready;
+  wire [31:0] update_addr, update_data;
+  wire [3:0] update_mask;
+  reg [31:0] updates_addr [0:15], updates_data [0:15];
+  reg [3:0] updates_mask [0:15];
+  reg [3:0] updates_head, updates_tail;
+  reg [4:0] updates_count;
+  wire update_push=update_valid && update_ready;
+  wire update_pop=updates_count!=0 && memory_ready;
+  assign update_ready=updates_count<16;
+  assign l1_ready=updates_count==0 && !update_push && memory_ready;
+  always @(posedge clock) begin
+    if (reset) begin updates_head<=0; updates_tail<=0; updates_count<=0; end
+    else begin
+      if (update_push) begin
+        updates_addr[updates_tail]<=update_addr; updates_data[updates_tail]<=update_data;
+        updates_mask[updates_tail]<=update_mask; updates_tail<=updates_tail+1;
+      end
+      if (update_pop) updates_head<=updates_head+1;
+      case ({update_push,update_pop})
+        2'b10: updates_count<=updates_count+1;
+        2'b01: updates_count<=updates_count-1;
+        default: begin end
+      endcase
+    end
+  end
   pararisc_l0 #(.LINE_BITS(DC_LINE_BITS)) data_buffer (
     .clock(clock), .reset(reset), .req_valid(dc_req), .req_ready(dc_ready), .req_addr(dc_addr),
     .req_data(sq_data[sq_head]), .req_mask(sq_mask[sq_head]), .req_write(sq_count != 0),
     .resp_valid(load_resp), .resp_ready(load_resp_ready), .resp_data(load_data),
     .cache_req(l1_req), .cache_ready(l1_ready), .cache_addr(l1_addr), .cache_invalidate(l1_invalidate),
     .cache_resp_valid(l1_resp), .cache_resp_ready(l1_resp_ready), .cache_line(dc_line),
-    .store_valid(bus_store_valid), .store_addr(bus_store_addr), .store_data(bus_store_data),
-    .store_mask(bus_store_mask), .store_ready(bus_store_ready)
+    .store_valid(update_valid), .store_addr(update_addr), .store_data(update_data),
+    .store_mask(update_mask), .store_ready(update_ready)
   );
-  pararisc_cache #(.INDEX_BITS(DC_INDEX_BITS), .LINE_BITS(DC_LINE_BITS), .READ_ONLY(1)) dcache (
-    .clock(clock), .reset(reset), .req_valid(l1_req), .req_ready(l1_ready), .req_addr(l1_addr),
-    .req_data(32'b0), .req_mask(4'b0), .req_write(1'b0), .req_invalidate(l1_invalidate),
+  pararisc_cache #(.INDEX_BITS(DC_INDEX_BITS), .LINE_BITS(DC_LINE_BITS)) dcache (
+    .clock(clock), .reset(reset), .req_valid(updates_count!=0 || (l1_req && !update_push)),
+    .req_ready(memory_ready), .req_addr(updates_count!=0 ? updates_addr[updates_head] : l1_addr),
+    .req_data(updates_data[updates_head]), .req_mask(updates_mask[updates_head]), .req_write(updates_count!=0), .req_invalidate(1'b0),
     .resp_valid(l1_resp), .resp_ready(l1_resp_ready), .resp_line(dc_line),
     .miss_req(d_miss), .miss_addr(d_miss_addr), .miss_ready(d_miss_ready), .refill_valid(d_refill),
     .refill_beat(refill_beat[DC_LINE_BITS-3:0]), .refill_data(refill_data),
-    .store_valid(), .store_addr(), .store_data(), .store_mask(), .store_ready(1'b1)
+    .store_valid(bus_store_valid), .store_addr(bus_store_addr), .store_data(bus_store_data),
+    .store_mask(bus_store_mask), .store_ready(bus_store_ready)
   );
   pararisc_bus #(.DC_LINE_BITS(DC_LINE_BITS)) bus (
     .clock(clock), .reset(reset), .i_req(i_miss), .d_req(d_miss), .i_addr(i_miss_addr), .d_addr(d_miss_addr),

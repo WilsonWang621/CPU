@@ -1,0 +1,12 @@
+"python3" "/home/wangwenxuan/ACM/ParaRisc/scripts/synth.py" --filelist "build/rebuild-v8/rtl/filelist.f" --out "build/rebuild-v8/synth" \
+	--mode "diagnose" --clock-period "2.0" \
+	--appimage "/home/wangwenxuan/ACM/ParaRisc/cpu2026-tools-x86_64.AppImage"  \
+	  \
+	
+Warning: Replacing memory \words with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/rebuild-v8/rtl/pararisc_l0.sv:69
+Warning: Replacing memory \counters with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/rebuild-v8/rtl/pararisc_frontend.sv:36
+Warning: Replacing memory \dest with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/rebuild-v8/rtl/pararisc_backend.sv:318, /home/wangwenxuan/ACM/ParaRisc/build/rebuild-v8/rtl/pararisc_backend.sv:303
+Warning: Replacing memory \effective_b with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/rebuild-v8/rtl/pararisc_backend.sv:222, /home/wangwenxuan/ACM/ParaRisc/build/rebuild-v8/rtl/pararisc_backend.sv:193
+Warning: Replacing memory \effective_a with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/rebuild-v8/rtl/pararisc_backend.sv:210, /home/wangwenxuan/ACM/ParaRisc/build/rebuild-v8/rtl/pararisc_backend.sv:193
+ERROR: Port store_addr connected on instance dcache not found in module $paramod$9f3a52794107d8b8ce8d542ccb91feca9f6a2484\pararisc_cache or width is not matching
+make: *** [Makefile:91: synth] Error 1
