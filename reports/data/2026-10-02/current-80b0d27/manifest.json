@@ -1,0 +1,534 @@
+{
+  "commit": "80b0d27c47abaddf6cbff05fbfe6269a6f1dd6ef",
+  "testcases_commit": "29f980727f7d99a1842a58f34091c7579ba3fe85",
+  "latency": 20,
+  "max_cycles": 30000000,
+  "simulator": "/home/wangwenxuan/ACM/ParaRisc/build/metrics-80b0d27/sim",
+  "inputs": [
+    {
+      "path": "/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_alu.sv",
+      "sha256": "afa041ca51b4307d4e575b8e2d5ad548430102a2fff34befb6a85fe39733f15e"
+    },
+    {
+      "path": "/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_mdu.sv",
+      "sha256": "4bb402d003d98dc1cd9f23e1c9ad7fe810f0a774717ed41f47bf1f19d4d86a22"
+    },
+    {
+      "path": "/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_cache.sv",
+      "sha256": "2e836b621c1d28167ab44747568c11283ab8d247707876228199fecfd982bc31"
+    },
+    {
+      "path": "/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_l0.sv",
+      "sha256": "706483b983610d60d737efe0f7adc7ebcf07947a0757b5a903ed53073eb93669"
+    },
+    {
+      "path": "/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_bus.sv",
+      "sha256": "37826535ec9880583404e4908321cc0b4e59c3751a369ec8663d14aa93b2b39e"
+    },
+    {
+      "path": "/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_frontend.sv",
+      "sha256": "d2de0730f095a68d375e5422db016482ec1098ec03ca6793535cdcc53b0ba15f"
+    },
+    {
+      "path": "/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_backend.sv",
+      "sha256": "be92e39f3e75938aab0c8c93784356ac9d1ee0d418272fbef6165d3ca52b3485"
+    },
+    {
+      "path": "/home/wangwenxuan/ACM/ParaRisc/verilog/student_top.sv",
+      "sha256": "04d3eeca6a81eb5dc610b03096f7d06abe9944c2d1c314982d412c54ece930de"
+    },
+    {
+      "path": "scripts/ram/sram_fakeram.sv",
+      "sha256": "c0a2389d5c3211fbd2fbca22a2e2e86edc38eafa9260407d72a55841274098cc"
+    },
+    {
+      "path": "scripts/sim.cpp",
+      "sha256": "8dc91fce4c30e48b2caa73d62fc2fa89f71b3d938bf53bb622efa5d0572836ec"
+    },
+    {
+      "path": "scripts/testcase.py",
+      "sha256": "1bb479d37cac7d1f26aa1a016538429212ac49ed8ce7e73e5b56396f3d8c84f3"
+    }
+  ],
+  "cases": [
+    {
+      "name": "perf_median",
+      "passed": true,
+      "cycles": 9428,
+      "counters": {
+        "cycles": 9428,
+        "retired": 6988,
+        "dual": 2572,
+        "branches": 2407,
+        "redirects": 599,
+        "loads": 2009,
+        "stores": 403,
+        "imiss": 10,
+        "dmiss": 51,
+        "dispatch_stall": 2567,
+        "load_busy": 4922
+      },
+      "instructions": 6961,
+      "ipc": 0.7383326262197709,
+      "cpi": 1.3544031030024422
+    },
+    {
+      "name": "perf_multiply",
+      "passed": true,
+      "cycles": 17556,
+      "counters": {
+        "cycles": 17556,
+        "retired": 21749,
+        "dual": 7789,
+        "branches": 6930,
+        "redirects": 666,
+        "loads": 408,
+        "stores": 108,
+        "imiss": 11,
+        "dmiss": 20,
+        "dispatch_stall": 1032,
+        "load_busy": 1696
+      },
+      "instructions": 21722,
+      "ipc": 1.237297789929369,
+      "cpi": 0.8082128717429334
+    },
+    {
+      "name": "perf_qsort",
+      "passed": true,
+      "cycles": 142794,
+      "counters": {
+        "cycles": 142794,
+        "retired": 139927,
+        "dual": 59423,
+        "branches": 42680,
+        "redirects": 9897,
+        "loads": 34706,
+        "stores": 13751,
+        "imiss": 19,
+        "dmiss": 258,
+        "dispatch_stall": 17022,
+        "load_busy": 64223
+      },
+      "instructions": 139900,
+      "ipc": 0.979733042004566,
+      "cpi": 1.0206862044317369
+    },
+    {
+      "name": "perf_rsort",
+      "passed": true,
+      "cycles": 170914,
+      "counters": {
+        "cycles": 170914,
+        "retired": 195746,
+        "dual": 82129,
+        "branches": 13876,
+        "redirects": 31,
+        "loads": 37911,
+        "stores": 28683,
+        "imiss": 31,
+        "dmiss": 257,
+        "dispatch_stall": 20170,
+        "load_busy": 117257
+      },
+      "instructions": 195719,
+      "ipc": 1.145131469628,
+      "cpi": 0.8732621768964689
+    },
+    {
+      "name": "perf_towers",
+      "passed": true,
+      "cycles": 7411,
+      "counters": {
+        "cycles": 7411,
+        "retired": 5305,
+        "dual": 1629,
+        "branches": 410,
+        "redirects": 128,
+        "loads": 1550,
+        "stores": 1621,
+        "imiss": 35,
+        "dmiss": 1,
+        "dispatch_stall": 1423,
+        "load_busy": 3111
+      },
+      "instructions": 5278,
+      "ipc": 0.7121845904736203,
+      "cpi": 1.4041303524062145
+    },
+    {
+      "name": "perf_vvadd",
+      "passed": true,
+      "cycles": 5941,
+      "counters": {
+        "cycles": 5941,
+        "retired": 4579,
+        "dual": 2212,
+        "branches": 958,
+        "redirects": 7,
+        "loads": 1202,
+        "stores": 301,
+        "imiss": 7,
+        "dmiss": 58,
+        "dispatch_stall": 3211,
+        "load_busy": 4674
+      },
+      "instructions": 4524,
+      "ipc": 0.7614879649890591,
+      "cpi": 1.3132183908045978
+    },
+    {
+      "name": "correctness_add_to_100",
+      "passed": true,
+      "cycles": 411,
+      "counters": {
+        "cycles": 411,
+        "retired": 448,
+        "dual": 205,
+        "branches": 132,
+        "redirects": 5,
+        "loads": 103,
+        "stores": 1,
+        "imiss": 4,
+        "dmiss": 1,
+        "dispatch_stall": 2,
+        "load_busy": 147
+      }
+    },
+    {
+      "name": "correctness_array_test1",
+      "passed": true,
+      "cycles": 607,
+      "counters": {
+        "cycles": 607,
+        "retired": 158,
+        "dual": 29,
+        "branches": 58,
+        "redirects": 21,
+        "loads": 20,
+        "stores": 20,
+        "imiss": 9,
+        "dmiss": 0,
+        "dispatch_stall": 21,
+        "load_busy": 22
+      }
+    },
+    {
+      "name": "correctness_array_test2",
+      "passed": true,
+      "cycles": 725,
+      "counters": {
+        "cycles": 725,
+        "retired": 176,
+        "dual": 36,
+        "branches": 60,
+        "redirects": 23,
+        "loads": 29,
+        "stores": 25,
+        "imiss": 11,
+        "dmiss": 1,
+        "dispatch_stall": 20,
+        "load_busy": 78
+      }
+    },
+    {
+      "name": "correctness_basicopt1",
+      "passed": true,
+      "cycles": 135226,
+      "counters": {
+        "cycles": 135226,
+        "retired": 142086,
+        "dual": 56624,
+        "branches": 26338,
+        "redirects": 278,
+        "loads": 10093,
+        "stores": 15904,
+        "imiss": 12,
+        "dmiss": 229,
+        "dispatch_stall": 52055,
+        "load_busy": 20767
+      }
+    },
+    {
+      "name": "correctness_bulgarian",
+      "passed": true,
+      "cycles": 192087,
+      "counters": {
+        "cycles": 192087,
+        "retired": 265681,
+        "dual": 110039,
+        "branches": 79941,
+        "redirects": 5084,
+        "loads": 64121,
+        "stores": 17940,
+        "imiss": 44,
+        "dmiss": 1,
+        "dispatch_stall": 7520,
+        "load_busy": 74471
+      }
+    },
+    {
+      "name": "correctness_expr",
+      "passed": true,
+      "cycles": 617,
+      "counters": {
+        "cycles": 617,
+        "retired": 318,
+        "dual": 75,
+        "branches": 56,
+        "redirects": 13,
+        "loads": 8,
+        "stores": 8,
+        "imiss": 9,
+        "dmiss": 0,
+        "dispatch_stall": 60,
+        "load_busy": 10
+      }
+    },
+    {
+      "name": "correctness_gcd",
+      "passed": true,
+      "cycles": 385,
+      "counters": {
+        "cycles": 385,
+        "retired": 109,
+        "dual": 23,
+        "branches": 45,
+        "redirects": 15,
+        "loads": 6,
+        "stores": 6,
+        "imiss": 8,
+        "dmiss": 0,
+        "dispatch_stall": 13,
+        "load_busy": 6
+      }
+    },
+    {
+      "name": "correctness_hanoi",
+      "passed": true,
+      "cycles": 5085,
+      "counters": {
+        "cycles": 5085,
+        "retired": 3701,
+        "dual": 1386,
+        "branches": 554,
+        "redirects": 220,
+        "loads": 667,
+        "stores": 410,
+        "imiss": 32,
+        "dmiss": 0,
+        "dispatch_stall": 63,
+        "load_busy": 897
+      }
+    },
+    {
+      "name": "correctness_lvalue2",
+      "passed": true,
+      "cycles": 287,
+      "counters": {
+        "cycles": 287,
+        "retired": 80,
+        "dual": 15,
+        "branches": 44,
+        "redirects": 7,
+        "loads": 4,
+        "stores": 8,
+        "imiss": 5,
+        "dmiss": 0,
+        "dispatch_stall": 4,
+        "load_busy": 4
+      }
+    },
+    {
+      "name": "correctness_magic",
+      "passed": true,
+      "cycles": 464486,
+      "counters": {
+        "cycles": 464486,
+        "retired": 441965,
+        "dual": 115942,
+        "branches": 82275,
+        "redirects": 22639,
+        "loads": 103275,
+        "stores": 83572,
+        "imiss": 29,
+        "dmiss": 1,
+        "dispatch_stall": 18003,
+        "load_busy": 116881
+      }
+    },
+    {
+      "name": "correctness_manyarguments",
+      "passed": true,
+      "cycles": 275,
+      "counters": {
+        "cycles": 275,
+        "retired": 64,
+        "dual": 10,
+        "branches": 36,
+        "redirects": 7,
+        "loads": 3,
+        "stores": 4,
+        "imiss": 6,
+        "dmiss": 0,
+        "dispatch_stall": 3,
+        "load_busy": 3
+      }
+    },
+    {
+      "name": "correctness_multiarray",
+      "passed": true,
+      "cycles": 1879,
+      "counters": {
+        "cycles": 1879,
+        "retired": 1570,
+        "dual": 554,
+        "branches": 370,
+        "redirects": 36,
+        "loads": 182,
+        "stores": 245,
+        "imiss": 16,
+        "dmiss": 0,
+        "dispatch_stall": 122,
+        "load_busy": 260
+      }
+    },
+    {
+      "name": "correctness_naive",
+      "passed": true,
+      "cycles": 259,
+      "counters": {
+        "cycles": 259,
+        "retired": 64,
+        "dual": 11,
+        "branches": 36,
+        "redirects": 7,
+        "loads": 4,
+        "stores": 4,
+        "imiss": 5,
+        "dmiss": 0,
+        "dispatch_stall": 5,
+        "load_busy": 4
+      }
+    },
+    {
+      "name": "correctness_pi",
+      "passed": true,
+      "cycles": 11983929,
+      "counters": {
+        "cycles": 11983929,
+        "retired": 3117685,
+        "dual": 1166917,
+        "branches": 290236,
+        "redirects": 212,
+        "loads": 281809,
+        "stores": 287210,
+        "imiss": 12,
+        "dmiss": 0,
+        "dispatch_stall": 10276596,
+        "load_busy": 317489
+      }
+    },
+    {
+      "name": "correctness_qsort",
+      "passed": true,
+      "cycles": 873815,
+      "counters": {
+        "cycles": 873815,
+        "retired": 1097138,
+        "dual": 442551,
+        "branches": 236392,
+        "redirects": 21793,
+        "loads": 184238,
+        "stores": 69631,
+        "imiss": 19,
+        "dmiss": 604,
+        "dispatch_stall": 47066,
+        "load_busy": 242930
+      }
+    },
+    {
+      "name": "correctness_queens",
+      "passed": true,
+      "cycles": 268188,
+      "counters": {
+        "cycles": 268188,
+        "retired": 265194,
+        "dual": 75551,
+        "branches": 52901,
+        "redirects": 13144,
+        "loads": 75395,
+        "stores": 36800,
+        "imiss": 21,
+        "dmiss": 0,
+        "dispatch_stall": 5505,
+        "load_busy": 107333
+      }
+    },
+    {
+      "name": "correctness_statement_test",
+      "passed": true,
+      "cycles": 1207,
+      "counters": {
+        "cycles": 1207,
+        "retired": 573,
+        "dual": 176,
+        "branches": 165,
+        "redirects": 29,
+        "loads": 67,
+        "stores": 73,
+        "imiss": 15,
+        "dmiss": 0,
+        "dispatch_stall": 20,
+        "load_busy": 79
+      }
+    },
+    {
+      "name": "correctness_superloop",
+      "passed": true,
+      "cycles": 341382,
+      "counters": {
+        "cycles": 341382,
+        "retired": 371634,
+        "dual": 118919,
+        "branches": 195427,
+        "redirects": 29345,
+        "loads": 4,
+        "stores": 4,
+        "imiss": 10,
+        "dmiss": 0,
+        "dispatch_stall": 570,
+        "load_busy": 5
+      }
+    },
+    {
+      "name": "correctness_tak",
+      "passed": true,
+      "cycles": 1314371,
+      "counters": {
+        "cycles": 1314371,
+        "retired": 1221254,
+        "dual": 310467,
+        "branches": 151619,
+        "redirects": 53255,
+        "loads": 272855,
+        "stores": 272854,
+        "imiss": 13,
+        "dmiss": 0,
+        "dispatch_stall": 41483,
+        "load_busy": 299827
+      }
+    }
+  ],
+  "summary": {
+    "correctness_passed": 19,
+    "correctness_total": 19,
+    "performance_passed": 6,
+    "ipc_geomean": 0.906756831866734,
+    "cpi_geomean": 1.102831503283308,
+    "total_benchmark_instructions": 374104,
+    "total_benchmark_cycles": 354044,
+    "ipc_method": "testcases/perf_*/metrics.json dynamic_instructions / CPU2026 cycles; geometric mean across six cases",
+    "counter_note": "PARARISC retired is a diagnostic counter and is not the scoring numerator; load_busy counts cycles with a nonempty load queue, not exclusively stalled cycles."
+  }
+}

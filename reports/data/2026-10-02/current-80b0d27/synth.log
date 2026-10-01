@@ -1,0 +1,27 @@
+"python3" "/home/wangwenxuan/ACM/ParaRisc/scripts/synth.py" --filelist "verilog/filelist.f" --out "build/metrics-80b0d27/synth" \
+	--mode "opt" --clock-period "2.0" \
+	--appimage "/home/wangwenxuan/ACM/ParaRisc/cpu2026-tools-x86_64.AppImage"  \
+	  \
+	
+Warning: Replacing memory \words with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_l0.sv:68
+Warning: Replacing memory \counters with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_frontend.sv:36
+Warning: Replacing memory \dest with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_backend.sv:318, /home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_backend.sv:303
+Warning: Replacing memory \effective_b with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_backend.sv:222, /home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_backend.sv:193
+Warning: Replacing memory \effective_a with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_backend.sv:210, /home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_backend.sv:193
+Synthesis mode: opt (flattened and optimized)
+
+Total area:           27,418.569 um^2
+  Combinational:      8,405.705 um^2
+  Sequential:         4,221.493 um^2
+  SRAM:               14,791.370 um^2
+
+Estimated frequency:  67.77 MHz
+Minimum period:       14.7568 ns
+Clock target:         2.000 ns
+Worst setup slack:    -12.7562 ns
+
+Critical path:
+  _220549_/QN
+    -> _220388_/D
+
+Reports: /home/wangwenxuan/ACM/ParaRisc/build/metrics-80b0d27/synth/opt/report.txt, report.json, timing.rpt
