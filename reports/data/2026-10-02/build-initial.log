@@ -1,0 +1,59 @@
+"python3" "/home/wangwenxuan/ACM/ParaRisc/scripts/build.py" --filelist "verilog/filelist.f" --out "build/validation-2026-10-02/current" --jobs 4 \
+	--appimage "/home/wangwenxuan/ACM/ParaRisc/cpu2026-tools-x86_64.AppImage" --cxx "g++" --ar "ar" --make "make" \
+	
+[build] Using AppImage Verilator
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/verilog/student_top.sv:63:54: Bits of signal are not used: 'insn'[24:15,11:7]
+                                                                                  : ... note: In instance 'student_top'
+   63 |   function automatic logic simple(input logic [31:0] insn);
+      |                                                      ^~~~
+                       ... For warning description see https://verilator.org/warn/UNUSEDSIGNAL?v=5.020
+                       ... Use "/* verilator lint_off UNUSEDSIGNAL */" and lint_on around source to disable this message.
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/verilog/student_top.sv:69:60: Bits of signal are not used: 'insn'[31:15,11:7]
+                                                                                  : ... note: In instance 'student_top'
+   69 |   function automatic logic branch_legal(input logic [31:0] insn);
+      |                                                            ^~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/verilog/student_top.sv:85:62: Bits of signal are not used: 'insn'[24:12,6:0]
+                                                                                  : ... note: In instance 'student_top'
+   85 |   function automatic [31:0] branch_offset(input logic [31:0] insn);
+      |                                                              ^~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/verilog/student_top.sv:89:24: Bits of signal are not used: 'insn'[11:7]
+                                                                                  : ... note: In instance 'student_top'
+   89 |     input logic [31:0] insn, insn_pc, lhs, rhs
+      |                        ^~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/verilog/student_top.sv:157:15: Bits of signal are not used: 'dc_read_address'[1:0]
+                                                                                   : ... note: In instance 'student_top'
+  157 |   wire [31:0] dc_read_address = state == D_FINISH ? memory_addr :
+      |               ^~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/verilog/student_top.sv:167:22: Bits of signal are not used: 'product'[65:64]
+                                                                                   : ... note: In instance 'student_top'
+  167 |   wire signed [65:0] product = mul_a * mul_b;
+      |                      ^~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/verilog/student_top.sv:337:15: Bits of signal are not used: 'fetch_pc'[1:0]
+                                                                                   : ... note: In instance 'student_top'
+  337 |   wire [31:0] fetch_pc = complete ? next_pc : pc;
+      |               ^~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/verilog/student_top.sv:344:16: Bits of signal are not used: 'dc_write_addr'[1:0]
+                                                                                   : ... note: In instance 'student_top'
+  344 |   logic [31:0] dc_write_addr, dc_write_value;
+      |                ^~~~~~~~~~~~~
+%Warning-BLKSEQ: /home/wangwenxuan/ACM/ParaRisc/scripts/ram/sram_fakeram.sv:43:35: Blocking assignment '=' in sequential logic process
+                                                                                 : ... Suggest using delayed assignment '<='
+   43 |                         next_word = words[addr];
+      |                                   ^
+%Warning-BLKSEQ: /home/wangwenxuan/ACM/ParaRisc/scripts/ram/sram_fakeram.sv:46:42: Blocking assignment '=' in sequential logic process
+                                                                                 : ... Suggest using delayed assignment '<='
+   46 |                                 next_word[lane*WRITE_GRANULARITY +: WRITE_GRANULARITY]
+      |                                          ^
+make[1]: Entering directory '/home/wangwenxuan/ACM/ParaRisc/build/validation-2026-10-02/current/obj'
+/usr/bin/g++  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -Os -c -o sim.o /home/wangwenxuan/ACM/ParaRisc/scripts/sim.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -c -o verilated.o /tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/verilated.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -c -o verilated_vcd_c.o /tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/verilated_vcd_c.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -c -o verilated_threads.o /tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/verilated_threads.cpp
+/home/wangwenxuan/miniconda3/envs/pacman/bin/python3 /tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/bin/verilator_includer -DVL_INCLUDE_OPT=include Vstudent_top.cpp Vstudent_top___024root__DepSet_h3ec42a3f__0.cpp Vstudent_top___024root__DepSet_h383d3863__0.cpp Vstudent_top__Trace__0.cpp Vstudent_top__ConstPool_0.cpp Vstudent_top___024root__Slow.cpp Vstudent_top___024root__DepSet_h3ec42a3f__0__Slow.cpp Vstudent_top___024root__DepSet_h383d3863__0__Slow.cpp Vstudent_top__Syms.cpp Vstudent_top__Trace__0__Slow.cpp Vstudent_top__TraceDecls__0__Slow.cpp > Vstudent_top__ALL.cpp
+echo "" > Vstudent_top__ALL.verilator_deplist.tmp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -c -o Vstudent_top__ALL.o Vstudent_top__ALL.cpp
+Archive /usr/bin/ar -rcs Vstudent_top__ALL.a Vstudent_top__ALL.o
+/usr/bin/g++     sim.o verilated.o verilated_vcd_c.o verilated_threads.o Vstudent_top__ALL.a    -pthread -lpthread -latomic   -o /home/wangwenxuan/ACM/ParaRisc/build/validation-2026-10-02/current/sim
+rm Vstudent_top__ALL.verilator_deplist.tmp
+make[1]: Leaving directory '/home/wangwenxuan/ACM/ParaRisc/build/validation-2026-10-02/current/obj'
+/home/wangwenxuan/ACM/ParaRisc/build/validation-2026-10-02/current/sim

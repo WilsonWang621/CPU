@@ -1,0 +1,26 @@
+"python3" "/home/wangwenxuan/ACM/ParaRisc/scripts/synth.py" --filelist "build/rebuild-v4/rtl/filelist.f" --out "build/rebuild-v4/synth" \
+	--mode "opt" --clock-period "2.0" \
+	--appimage "/home/wangwenxuan/ACM/ParaRisc/cpu2026-tools-x86_64.AppImage"  \
+	  \
+	
+Warning: Replacing memory \counters with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/rebuild-v4/rtl/pararisc_frontend.sv:36
+Warning: Replacing memory \dest with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/rebuild-v4/rtl/pararisc_backend.sv:297, /home/wangwenxuan/ACM/ParaRisc/build/rebuild-v4/rtl/pararisc_backend.sv:282
+Warning: Replacing memory \effective_b with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/rebuild-v4/rtl/pararisc_backend.sv:206, /home/wangwenxuan/ACM/ParaRisc/build/rebuild-v4/rtl/pararisc_backend.sv:180
+Warning: Replacing memory \effective_a with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/rebuild-v4/rtl/pararisc_backend.sv:201, /home/wangwenxuan/ACM/ParaRisc/build/rebuild-v4/rtl/pararisc_backend.sv:180
+Synthesis mode: opt (flattened and optimized)
+
+Total area:           24,792.668 um^2
+  Combinational:      6,224.464 um^2
+  Sequential:         3,389.850 um^2
+  SRAM:               15,178.354 um^2
+
+Estimated frequency:  77.20 MHz
+Minimum period:       12.9531 ns
+Clock target:         2.000 ns
+Worst setup slack:    -10.9524 ns
+
+Critical path:
+  _167140_/QN
+    -> _167046_/D
+
+Reports: /home/wangwenxuan/ACM/ParaRisc/build/rebuild-v4/synth/opt/report.txt, report.json, timing.rpt

@@ -33,7 +33,7 @@ ifneq ($(strip $(BLACKBOXES)),)
 $(error BLACKBOXES has been removed; instantiate sram_fakeram instead)
 endif
 
-.PHONY: code help build run test test-m perf synth clean
+.PHONY: code help build run test test-m test-core perf synth clean
 
 # OJ always builds RTL and collects ./code. SIM affects local run/test/perf only.
 code:
@@ -47,6 +47,7 @@ help:
 	@echo 'make build [FILELIST=verilog/filelist.f BUILD=build JOBS=4]'
 	@echo 'make run PROGRAM=program.bin EXPECTED=186 [WAVE=trace.vcd] [LOG=run.log]'
 	@echo 'make test [Case=correctness_add_to_100] [SIM=/path/to/prebuilt/sim]'
+	@echo 'make test-core [SIM=/path/to/prebuilt/sim] (directed RV32IM/cache and seeded arithmetic tests)'
 	@echo 'make perf [Case=perf_median] [SIM=/path/to/prebuilt/sim]'
 	@echo 'make synth [MODE=opt|diagnose CLOCK_PERIOD_NS=2.0 FILELIST=verilog/filelist.f]'
 	@echo '  Outputs: SYNTH_OUT/MODE/ (SYNTH_OUT defaults to build/synth)'
@@ -59,7 +60,7 @@ build:
 		$(if $(VERILATOR),--verilator "$(VERILATOR)",)
 
 ifeq ($(strip $(SIM)),)
-run test perf: build
+run test perf test-core: build
 endif
 
 run:
@@ -76,6 +77,10 @@ test:
 
 test-m:
 	bash tests/integration/run-rv32m.sh
+
+test-core:
+	"$(PYTHON)" tests/integration/run-regressions.py \
+		--sim "$(if $(strip $(SIM)),$(SIM),$(BUILD)/sim)" --out "$(BUILD)/core-regressions"
 
 perf:
 	"$(PYTHON)" "$(FRAMEWORK_DIR)/scripts/testcase.py" --kind perf --build "$(BUILD)" \

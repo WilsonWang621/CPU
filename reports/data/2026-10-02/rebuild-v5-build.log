@@ -1,0 +1,116 @@
+"python3" "/home/wangwenxuan/ACM/ParaRisc/scripts/build.py" --filelist "verilog/filelist.f" --out "build/rebuild-v5" --jobs 8 \
+	--appimage "/home/wangwenxuan/ACM/ParaRisc/cpu2026-tools-x86_64.AppImage" --cxx "g++" --ar "ar" --make "make" \
+	
+[build] Using AppImage Verilator
+%Warning-PINCONNECTEMPTY: /home/wangwenxuan/ACM/ParaRisc/verilog/student_top.sv:96:60: Cell pin connected by name with empty reference: 'store_valid'
+   96 |     .refill_beat(refill_beat), .refill_data(refill_data), .store_valid(), .store_addr(), .store_data(), .store_mask(), .store_ready(1'b1)
+      |                                                            ^~~~~~~~~~~
+                          ... For warning description see https://verilator.org/warn/PINCONNECTEMPTY?v=5.020
+                          ... Use "/* verilator lint_off PINCONNECTEMPTY */" and lint_on around source to disable this message.
+%Warning-PINCONNECTEMPTY: /home/wangwenxuan/ACM/ParaRisc/verilog/student_top.sv:96:76: Cell pin connected by name with empty reference: 'store_addr'
+   96 |     .refill_beat(refill_beat), .refill_data(refill_data), .store_valid(), .store_addr(), .store_data(), .store_mask(), .store_ready(1'b1)
+      |                                                                            ^~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /home/wangwenxuan/ACM/ParaRisc/verilog/student_top.sv:96:91: Cell pin connected by name with empty reference: 'store_data'
+   96 |     .refill_beat(refill_beat), .refill_data(refill_data), .store_valid(), .store_addr(), .store_data(), .store_mask(), .store_ready(1'b1)
+      |                                                                                           ^~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /home/wangwenxuan/ACM/ParaRisc/verilog/student_top.sv:96:106: Cell pin connected by name with empty reference: 'store_mask'
+   96 |     .refill_beat(refill_beat), .refill_data(refill_data), .store_valid(), .store_addr(), .store_data(), .store_mask(), .store_ready(1'b1)
+      |                                                                                                          ^~~~~~~~~~
+%Warning-WIDTHEXPAND: /home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_cache.sv:44:30: Bit extraction of var[26:0] requires 5 bit index, not 3 bits.
+                                                                                    : ... note: In instance 'student_top.icache'
+   44 |   wire hit = tag_hit && tag_q[addr[4:2]];
+      |                              ^
+%Warning-WIDTHEXPAND: /home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_cache.sv:94:28: Operator EQ expects 32 bits on the LHS, but LHS's VARREF 'init_row' generates 2 bits.
+                                                                                    : ... note: In instance 'student_top.icache'
+   94 |         INIT: if (init_row == VALID_ROWS-1) state <= IDLE; else init_row <= init_row + 1;
+      |                            ^~
+%Warning-WIDTHEXPAND: /home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_backend.sv:167:30: Operator LTE expects 32 bits on the LHS, but LHS's VARREF 'count' generates 5 bits.
+                                                                                       : ... note: In instance 'student_top.backend'
+  167 |   assign fetch_ready = count <= N-2 && !redirect && !halted;
+      |                              ^~
+%Warning-WIDTHEXPAND: /home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_cache.sv:44:30: Bit extraction of var[24:0] requires 5 bit index, not 3 bits.
+                                                                                    : ... note: In instance 'student_top.dcache'
+   44 |   wire hit = tag_hit && tag_q[addr[4:2]];
+      |                              ^
+%Warning-WIDTHEXPAND: /home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_cache.sv:94:28: Operator EQ expects 32 bits on the LHS, but LHS's VARREF 'init_row' generates 4 bits.
+                                                                                    : ... note: In instance 'student_top.dcache'
+   94 |         INIT: if (init_row == VALID_ROWS-1) state <= IDLE; else init_row <= init_row + 1;
+      |                            ^~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_frontend.sv:10:21: Bits of signal are not used: 'train_pc'[1:0]
+                                                                                        : ... note: In instance 'student_top.frontend'
+   10 |   input wire [31:0] train_pc, train_target,
+      |                     ^~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_frontend.sv:25:14: Bits of signal are not used: 'pending_addr'[4:0]
+                                                                                        : ... note: In instance 'student_top.frontend'
+   25 |   reg [31:0] pending_addr;
+      |              ^~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_backend.sv:45:20: Signal is not used: 'ex0_taken'
+                                                                                       : ... note: In instance 'student_top.backend'
+   45 |   wire ex0_branch, ex0_taken, ex0_fault, ex1_branch, ex1_taken, ex1_fault;
+      |                    ^~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_backend.sv:45:54: Signal is not used: 'ex1_taken'
+                                                                                       : ... note: In instance 'student_top.backend'
+   45 |   wire ex0_branch, ex0_taken, ex0_fault, ex1_branch, ex1_taken, ex1_fault;
+      |                                                      ^~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_backend.sv:60:15: Bits of signal are not used: 'ld_address'[31:5]
+                                                                                       : ... note: In instance 'student_top.backend'
+   60 |   wire [31:0] ld_address = lq_address[lq_head];
+      |               ^~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_backend.sv:114:46: Bits of signal are not used: 'insn'[31:7]
+                                                                                        : ... note: In instance 'student_top.backend'
+  114 |   function automatic is_control(input [31:0] insn);
+      |                                              ^~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_backend.sv:126:53: Bits of signal are not used: 'insn'[31:12]
+                                                                                        : ... note: In instance 'student_top.backend'
+  126 |   function automatic [4:0] destination(input [31:0] insn);
+      |                                                     ^~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_backend.sv:132:50: Bits of signal are not used: 'insn'[31:20,14:7]
+                                                                                        : ... note: In instance 'student_top.backend'
+  132 |   function automatic [4:0] source_a(input [31:0] insn);
+      |                                                  ^~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_backend.sv:138:50: Bits of signal are not used: 'insn'[31:25,19:7]
+                                                                                        : ... note: In instance 'student_top.backend'
+  138 |   function automatic [4:0] source_b(input [31:0] insn);
+      |                                                  ^~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_backend.sv:178:14: Bits of signal are not used: 'candidate_address'[1:0]
+                                                                                        : ... note: In instance 'student_top.backend'
+  178 |   reg [31:0] candidate_address;
+      |              ^~~~~~~~~~~~~~~~~
+%Warning-BLKSEQ: /home/wangwenxuan/ACM/ParaRisc/scripts/ram/sram_fakeram.sv:43:35: Blocking assignment '=' in sequential logic process
+                                                                                 : ... Suggest using delayed assignment '<='
+   43 |                         next_word = words[addr];
+      |                                   ^
+%Warning-BLKSEQ: /home/wangwenxuan/ACM/ParaRisc/scripts/ram/sram_fakeram.sv:47:37: Blocking assignment '=' in sequential logic process
+                                                                                 : ... Suggest using delayed assignment '<='
+   47 |                                     = wdata[lane*WRITE_GRANULARITY +: WRITE_GRANULARITY];
+      |                                     ^
+%Warning-BLKSEQ: /home/wangwenxuan/ACM/ParaRisc/scripts/ram/sram_fakeram.sv:46:42: Blocking assignment '=' in sequential logic process
+                                                                                 : ... Suggest using delayed assignment '<='
+   46 |                                 next_word[lane*WRITE_GRANULARITY +: WRITE_GRANULARITY]
+      |                                          ^
+make[1]: Entering directory '/home/wangwenxuan/ACM/ParaRisc/build/rebuild-v5/obj'
+/usr/bin/g++  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -Os -c -o sim.o /home/wangwenxuan/ACM/ParaRisc/scripts/sim.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -c -o verilated.o /tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/verilated.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -c -o verilated_vcd_c.o /tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/verilated_vcd_c.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -c -o verilated_threads.o /tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/verilated_threads.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -x c++-header Vstudent_top__pch.h -o Vstudent_top__pch.h.fast.gch
+/usr/bin/g++   -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -x c++-header Vstudent_top__pch.h -o Vstudent_top__pch.h.slow.gch
+echo "" > Vstudent_top__ALL.verilator_deplist.tmp
+/usr/bin/g++   -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top__ConstPool_0.o Vstudent_top__ConstPool_0.cpp
+/usr/bin/g++   -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top___024root__Slow.o Vstudent_top___024root__Slow.cpp
+/usr/bin/g++   -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top___024root__DepSet_h3ec42a3f__0__Slow.o Vstudent_top___024root__DepSet_h3ec42a3f__0__Slow.cpp
+/usr/bin/g++   -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top___024root__DepSet_h383d3863__0__Slow.o Vstudent_top___024root__DepSet_h383d3863__0__Slow.cpp
+/usr/bin/g++   -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top___024root__DepSet_h383d3863__1__Slow.o Vstudent_top___024root__DepSet_h383d3863__1__Slow.cpp
+/usr/bin/g++   -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top__Syms.o Vstudent_top__Syms.cpp
+/usr/bin/g++   -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top__Trace__0__Slow.o Vstudent_top__Trace__0__Slow.cpp
+/usr/bin/g++   -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top__TraceDecls__0__Slow.o Vstudent_top__TraceDecls__0__Slow.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.fast -c -o Vstudent_top.o Vstudent_top.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.fast -c -o Vstudent_top___024root__DepSet_h3ec42a3f__0.o Vstudent_top___024root__DepSet_h3ec42a3f__0.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.fast -c -o Vstudent_top___024root__DepSet_h383d3863__0.o Vstudent_top___024root__DepSet_h383d3863__0.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.fast -c -o Vstudent_top___024root__DepSet_h383d3863__1.o Vstudent_top___024root__DepSet_h383d3863__1.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.fast -c -o Vstudent_top__Trace__0.o Vstudent_top__Trace__0.cpp
+Archive /usr/bin/ar -rcs Vstudent_top__ALL.a Vstudent_top.o Vstudent_top___024root__DepSet_h3ec42a3f__0.o Vstudent_top___024root__DepSet_h383d3863__0.o Vstudent_top___024root__DepSet_h383d3863__1.o Vstudent_top__Trace__0.o Vstudent_top__ConstPool_0.o Vstudent_top___024root__Slow.o Vstudent_top___024root__DepSet_h3ec42a3f__0__Slow.o Vstudent_top___024root__DepSet_h383d3863__0__Slow.o Vstudent_top___024root__DepSet_h383d3863__1__Slow.o Vstudent_top__Syms.o Vstudent_top__Trace__0__Slow.o Vstudent_top__TraceDecls__0__Slow.o
+/usr/bin/g++     sim.o verilated.o verilated_vcd_c.o verilated_threads.o Vstudent_top__ALL.a    -pthread -lpthread -latomic   -o /home/wangwenxuan/ACM/ParaRisc/build/rebuild-v5/sim
+rm Vstudent_top__ALL.verilator_deplist.tmp
+make[1]: Leaving directory '/home/wangwenxuan/ACM/ParaRisc/build/rebuild-v5/obj'
+/home/wangwenxuan/ACM/ParaRisc/build/rebuild-v5/sim
