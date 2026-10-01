@@ -1,5 +1,8 @@
-# RTL paths are relative to this file in verilog/.
-# The top-level module must be named student_top.
-# Example entries:
-# student_top.sv
-# core.sv
+pararisc_alu.sv
+pararisc_mdu.sv
+pararisc_cache.sv
+pararisc_l0.sv
+pararisc_bus.sv
+pararisc_frontend.sv
+pararisc_backend.sv
+student_top.sv
