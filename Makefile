@@ -33,7 +33,7 @@ ifneq ($(strip $(BLACKBOXES)),)
 $(error BLACKBOXES has been removed; instantiate sram_fakeram instead)
 endif
 
-.PHONY: code help build run test perf synth clean
+.PHONY: code help build run test test-m perf synth clean
 
 # OJ always builds RTL and collects ./code. SIM affects local run/test/perf only.
 code:
@@ -73,6 +73,9 @@ test:
 	"$(PYTHON)" "$(FRAMEWORK_DIR)/scripts/testcase.py" --kind correctness --build "$(BUILD)" \
 		--testcases "$(TESTCASES)" --max-cycles $(MAX_CYCLES) --latency $(LATENCY) \
 		$(if $(SIM),--sim "$(SIM)",) $(if $(Case),--case "$(Case)",)
+
+test-m:
+	bash tests/integration/run-rv32m.sh
 
 perf:
 	"$(PYTHON)" "$(FRAMEWORK_DIR)/scripts/testcase.py" --kind perf --build "$(BUILD)" \

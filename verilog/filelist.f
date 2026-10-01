@@ -3,3 +3,4 @@
 # Example entries:
 # student_top.sv
 # core.sv
+student_top.sv

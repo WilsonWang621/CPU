@@ -26,8 +26,8 @@ ASAP7_LIB ?=
 # STA = /opt/opensta/bin/sta
 # ASAP7_LIB = /opt/asap7/lib
 
-# For systems without FUSE, uncomment to extract AppImages at launch:
-# export APPIMAGE_EXTRACT_AND_RUN = 1
+# This host has no FUSE; run the course AppImage through its extraction fallback.
+export APPIMAGE_EXTRACT_AND_RUN = 1
 
 # Optional prebuilt simulator. When set, run/test/perf skip RTL compilation.
 # test/perf require the CPU2026-OJ stdin/stdout protocol; perf also requires
@@ -44,7 +44,9 @@ SIM ?=
 # MODE = opt
 # CLOCK_PERIOD_NS = 2.0
 # SYNTH_OUT = build/synth
-# MAX_CYCLES = 100000000
+# The correctness_pi testcase needs more than the framework's 1,000,000-cycle
+# local default. This changes local run/test/perf only, not the OJ's test limits.
+MAX_CYCLES = 30000000
 # LATENCY = 10
 # WAVE = trace.vcd
 # LOG = run.log
