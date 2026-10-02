@@ -494,6 +494,17 @@ wire [31:0] alu_result [0:(2)-1];
 wire  branch_taken;
   wire  branch_bad;
   wire  branch_fire;
+  wire  branch_capture;
+reg  branch_pending;
+  reg  branch_bad_q;
+  reg  branch_taken_q;
+reg [31:0] branch_next_q;
+  reg [31:0] branch_pc_q;
+reg [29:0] branch_prediction_q;
+reg [HB-1:0] branch_history_q;
+reg [RW-1:0] branch_rid_q;
+reg [CPW-1:0] branch_checkpoint_q;
+reg [5:0] branch_op_q;
 wire [31:0] execute_pc [0:(2)-1];
   wire [31:0] execute_b [0:(2)-1];
 wire  mdu_valid;
@@ -544,7 +555,8 @@ reg [31:0] shifted;
   assign load_replay_count=0;
   assign exit_head=state==RUN && rob_count!=0 && rob[head][ROB_T_DONE_LSB+:ROB_T_DONE_WIDTH] && rob[head][ROB_T_EXITING_LSB+:ROB_T_EXITING_WIDTH] && rob[head][ROB_T_FAULT_LSB+:ROB_T_FAULT_WIDTH]==0;
   assign fault_head=state==RUN && rob_count!=0 && rob[head][ROB_T_DONE_LSB+:ROB_T_DONE_WIDTH] && rob[head][ROB_T_FAULT_LSB+:ROB_T_FAULT_WIDTH]!=0;
-  assign flush_all=exit_head || fault_head || state!=RUN;
+  
+  assign flush_all=state!=RUN;
   assign stop_frontend=flush_all;
   assign exit_send=state==DRAIN && store_count==0 && cache_idle && frontend_idle && controller_idle;
   assign exit_accept=exit_send && mem_req_ready;
@@ -574,7 +586,7 @@ reg [31:0] shifted;
     .BHT_ENTRIES(BHT_ENTRIES),.BTB_ENTRIES(BTB_ENTRIES),.LOCAL_HISTORY_BITS(LOCAL_HISTORY_BITS),
     .HISTORY_ENTRIES(HISTORY_ENTRIES),.RAM_BYTES(RAM_BYTES)) frontend (.clk(clk),.rst(rst),.stop(stop_frontend),.redirect(redirect),.redirect_pc(redirect_pc),.pop_count(pop_count),
     .packet_valid(fetch_valid),.packet_pc(fetch_pc),.packet_inst(fetch_inst),.packet_prediction(fetch_prediction),
-    .packet_fault(fetch_fault),.packet_inst_valid(fetch_iv),.packet_history(fetch_history),.train_history(executing[0][ISSUE_T_HISTORY_LSB+:ISSUE_T_HISTORY_WIDTH]),.train_valid(train_valid),.train_taken(train_taken),.train_op(train_op),.train_pc(train_pc),.train_target(train_target),
+    .packet_fault(fetch_fault),.packet_inst_valid(fetch_iv),.packet_history(fetch_history),.train_history(branch_history_q),.train_valid(train_valid),.train_taken(train_taken),.train_op(train_op),.train_pc(train_pc),.train_target(train_target),
     .mem_req_valid(client_req_valid[0]),.mem_req_ready(client_req_ready[0]),.mem_req_addr(client_req_addr[31:0]),
     .mem_rsp_valid(client_rsp_valid[0]),.mem_rsp_ready(client_rsp_ready[0]),.mem_rsp_data(client_rsp_data[31:0]),
     .mem_rsp_error(client_rsp_error[0]),.idle(frontend_idle),.miss_count(icache_miss_count));
@@ -678,17 +690,31 @@ integer r;
 for(r=0;r<ROB_ENTRIES;r=r+1) mdu_kill[r]=!rob[r][ROB_T_VALID_LSB+:ROB_T_VALID_WIDTH];
 end
   end
-  assign branch_fire=select_valid[0] && is_branch(executing[0][ISSUE_T_OP_LSB+:ISSUE_T_OP_WIDTH]) && !flush_all && !mdu_result_valid;
-  assign redirect=branch_fire && !branch_bad && branch_next!={executing[0][ISSUE_T_PREDICTION_LSB+:ISSUE_T_PREDICTION_WIDTH],2'b0};
-  assign redirect_pc=branch_next;
-  assign redirect_rid=executing[0][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH];
-  assign redirect_checkpoint=executing[0][ISSUE_T_CHECKPOINT_LSB+:ISSUE_T_CHECKPOINT_WIDTH];
-  assign train_valid=branch_fire && !branch_bad;
-  assign train_op=executing[0][ISSUE_T_OP_LSB+:ISSUE_T_OP_WIDTH];
-  assign train_taken=branch_taken;
-  assign train_pc=execute_pc[0];
-  assign train_target=branch_next;
-  assign mdu_valid=select_valid[0] && is_mdu(executing[0][ISSUE_T_OP_LSB+:ISSUE_T_OP_WIDTH]) && !flush_all && !mdu_result_valid;
+
+  assign branch_capture=select_valid[0] && is_branch(executing[0][ISSUE_T_OP_LSB+:ISSUE_T_OP_WIDTH]) &&
+                        !flush_all && !mdu_result_valid && !(redirect && (((executing[0][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])<head)==(redirect_rid<head) ? (executing[0][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])>redirect_rid:(executing[0][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])<head));
+  always @(posedge clk) begin
+    if(rst) branch_pending<=0;
+    else branch_pending<=branch_capture;
+    branch_bad_q<=branch_bad;branch_taken_q<=branch_taken;
+    branch_next_q<=branch_next;branch_pc_q<=execute_pc[0];
+    branch_prediction_q<=executing[0][ISSUE_T_PREDICTION_LSB+:ISSUE_T_PREDICTION_WIDTH];
+    branch_history_q<=executing[0][ISSUE_T_HISTORY_LSB+:ISSUE_T_HISTORY_WIDTH];
+    branch_rid_q<=executing[0][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH];branch_checkpoint_q<=executing[0][ISSUE_T_CHECKPOINT_LSB+:ISSUE_T_CHECKPOINT_WIDTH];
+    branch_op_q<=executing[0][ISSUE_T_OP_LSB+:ISSUE_T_OP_WIDTH];
+  end
+  assign branch_fire=branch_pending && !flush_all;
+  assign redirect=branch_fire && !branch_bad_q && branch_next_q!={branch_prediction_q,2'b0};
+  assign redirect_pc=branch_next_q;
+  assign redirect_rid=branch_rid_q;
+  assign redirect_checkpoint=branch_checkpoint_q;
+  assign train_valid=branch_fire && !branch_bad_q;
+  assign train_op=branch_op_q;
+  assign train_taken=branch_taken_q;
+  assign train_pc=branch_pc_q;
+  assign train_target=branch_next_q;
+  assign mdu_valid=select_valid[0] && is_mdu(executing[0][ISSUE_T_OP_LSB+:ISSUE_T_OP_WIDTH]) && !flush_all &&
+                   !mdu_result_valid && !(redirect && (((executing[0][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])<head)==(redirect_rid<head) ? (executing[0][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])>redirect_rid:(executing[0][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])<head));
   assign mdu_result_ready=!flush_all;
   assign memory_address=executing[2][ISSUE_T_A_LSB+:ISSUE_T_A_WIDTH]+executing[2][ISSUE_T_IMM_LSB+:ISSUE_T_IMM_WIDTH];
   assign memory_data=executing[2][ISSUE_T_B_LSB+:ISSUE_T_B_WIDTH]<<(8*memory_address[1:0]);
@@ -735,9 +761,9 @@ for(w=0;w<3;w=w+1) begin wb_rid[w]=executing[w][ISSUE_T_RID_LSB+:ISSUE_T_RID_WID
 end
     if(!flush_all) begin
       if(mdu_result_valid) begin
-        wb_valid[0]=rob[narrow_6(mdu_result_tag)][ROB_T_VALID_LSB+:ROB_T_VALID_WIDTH];
+        wb_valid[0]=rob[narrow_6(mdu_result_tag)][ROB_T_VALID_LSB+:ROB_T_VALID_WIDTH] && !(redirect && (((narrow_6(mdu_result_tag))<head)==(redirect_rid<head) ? (narrow_6(mdu_result_tag))>redirect_rid:(narrow_6(mdu_result_tag))<head));
         wb_rid[0]=narrow_6(mdu_result_tag);wb_value[0]=mdu_result;
-      end else if(select_valid[0]) begin
+      end else if(select_valid[0] && !(redirect && (((executing[0][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])<head)==(redirect_rid<head) ? (executing[0][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])>redirect_rid:(executing[0][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])<head))) begin
         if(is_mdu(executing[0][ISSUE_T_OP_LSB+:ISSUE_T_OP_WIDTH])) issue_fire[0]=mdu_ready;
         else begin
           issue_fire[0]=1;wb_valid[0]=1;
@@ -1019,7 +1045,7 @@ end
     always @(posedge clk) begin
       if(rst) begin checkpoint_valid[cp]<=0;checkpoint_owner[cp]<=0;end
       else begin
-        if((branch_fire && executing[0][ISSUE_T_CHECKPOINT_LSB+:ISSUE_T_CHECKPOINT_WIDTH]==narrow_3(cp)) || (redirect && (((checkpoint_owner[cp])<head)==(redirect_rid<head) ? (checkpoint_owner[cp])>redirect_rid:(checkpoint_owner[cp])<head)) || flush_all)
+        if((branch_fire && branch_checkpoint_q==narrow_3(cp)) || (redirect && (((checkpoint_owner[cp])<head)==(redirect_rid<head) ? (checkpoint_owner[cp])>redirect_rid:(checkpoint_owner[cp])<head)) || flush_all)
           checkpoint_valid[cp]<=0;
         if(save_checkpoint && free_checkpoint==narrow_3(cp)) begin
           checkpoint_valid[cp]<=1;checkpoint_owner[cp]<=dispatch_rid[save_after_lane];
@@ -2021,14 +2047,11 @@ for(offset=0;offset<MSHRS;offset=offset+1)
 end
     send_fill=!rst && out_space && narrow_1(count)<CREDITS-1 && !store_accept && send_valid;
     send_word=misses[send_slot][MISS_T_CRITICAL_LSB+:MISS_T_CRITICAL_WIDTH]+misses[send_slot][MISS_T_ISSUED_LSB+(WW-1):MISS_T_ISSUED_LSB+(0)];
-    data_write_valid=0;data_write_address=0;data_write_value=0;data_write_mask=0;
-    if(fill_fire && !mem_rsp_error) begin
-      data_write_valid=1;data_write_address={response_line,response_word};
-      data_write_value=mem_rsp_data;data_write_mask=15;
-    end else if(store_accept && store_tag_hit) begin
-      data_write_valid=1;data_write_address={store_line,store_address[OFFSET-1:2]};
-      data_write_value=store_data;data_write_mask=store_mask;
-    end
+
+    data_write_valid=(fill_fire && !mem_rsp_error) || (!fill_fire && store_accept && store_tag_hit);
+    data_write_address=fill_fire ? {response_line,response_word}:{store_line,store_address[OFFSET-1:2]};
+    data_write_value=fill_fire ? mem_rsp_data:store_data;
+    data_write_mask=fill_fire ? 4'b1111:store_mask;
     data_read_address=result_valid ? {waiters[result_tag][WAITER_T_PHYSICAL_LSB+:WAITER_T_PHYSICAL_WIDTH],waiters[result_tag][WAITER_T_WORD_INDEX_LSB+:WAITER_T_WORD_INDEX_WIDTH]}:
                                      {load_line,load_address[OFFSET-1:2]};
   end
@@ -2048,12 +2071,13 @@ end
   wire [31:0] read_word;
 
   for(bank=0;bank<WRITE_BANKS;bank=bank+1) begin: write_stages
-    wire accept=data_write_valid && data_write_address[LB+WW-1:BANK_WORD_BITS]==narrow_5(bank);
+    wire select_bank=data_write_address[LB+WW-1:BANK_WORD_BITS]==narrow_5(bank);
+    wire accept=data_write_valid && select_bank;
     always @(posedge clk) begin
       if(rst) pending_valid[bank]<=0;
       else begin
         pending_valid[bank]<=accept;
-        if(accept) begin
+        if(select_bank) begin
           pending_address[bank]<=data_write_address[BANK_WORD_BITS-1:0];
           pending_data[bank]<=data_write_value;
           pending_mask[bank]<=data_write_mask;

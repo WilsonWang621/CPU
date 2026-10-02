@@ -160,14 +160,12 @@ module v2_dcache #(
       end
     send_fill=!rst && out_space && int'(count)<CREDITS-1 && !store_accept && send_valid;
     send_word=misses[send_slot].critical+misses[send_slot].issued[WW-1:0];
-    data_write_valid=0;data_write_address=0;data_write_value=0;data_write_mask=0;
-    if(fill_fire && !mem_rsp_error) begin
-      data_write_valid=1;data_write_address={response_line,response_word};
-      data_write_value=mem_rsp_data;data_write_mask=15;
-    end else if(store_accept && store_tag_hit) begin
-      data_write_valid=1;data_write_address={store_line,store_address[OFFSET-1:2]};
-      data_write_value=store_data;data_write_mask=store_mask;
-    end
+    // Prepare the write payload without waiting for load/recovery permission.
+    // Only the pending valid bit publishes the write at the capture edge.
+    data_write_valid=(fill_fire && !mem_rsp_error) || (!fill_fire && store_accept && store_tag_hit);
+    data_write_address=fill_fire ? {response_line,response_word}:{store_line,store_address[OFFSET-1:2]};
+    data_write_value=fill_fire ? mem_rsp_data:store_data;
+    data_write_mask=fill_fire ? 4'b1111:store_mask;
     data_read_address=result_valid ? {waiters[result_tag].physical,waiters[result_tag].word_index}:
                                      {load_line,load_address[OFFSET-1:2]};
   end
@@ -184,12 +182,13 @@ module v2_dcache #(
   // BANK_WORDS storage rows. Forward this pending byte write on every read,
   // preserving the original visibility at the capture edge.
   for(genvar bank=0;bank<WRITE_BANKS;bank=bank+1) begin: write_stages
-    wire accept=data_write_valid && data_write_address[LB+WW-1:BANK_WORD_BITS]==BANK_BITS'(bank);
+    wire select_bank=data_write_address[LB+WW-1:BANK_WORD_BITS]==BANK_BITS'(bank);
+    wire accept=data_write_valid && select_bank;
     always_ff @(posedge clk) begin
       if(rst) pending_valid[bank]<=0;
       else begin
         pending_valid[bank]<=accept;
-        if(accept) begin
+        if(select_bank) begin
           pending_address[bank]<=data_write_address[BANK_WORD_BITS-1:0];
           pending_data[bank]<=data_write_value;
           pending_mask[bank]<=data_write_mask;

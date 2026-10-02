@@ -144,7 +144,14 @@ module cpu_top #(
   logic [31:0] wb_value [3],wb_address[3];
   logic [3:0] wb_fault [3];
   logic [31:0] alu_result[2],branch_value,branch_next;
-  logic branch_taken,branch_bad,branch_fire;
+  logic branch_taken,branch_bad,branch_fire,branch_capture;
+  logic branch_pending,branch_bad_q,branch_taken_q;
+  logic [31:0] branch_next_q,branch_pc_q;
+  logic [29:0] branch_prediction_q;
+  logic [HB-1:0] branch_history_q;
+  rid_t branch_rid_q;
+  logic [CPW-1:0] branch_checkpoint_q;
+  op_t branch_op_q;
   logic [31:0] execute_pc[2],execute_b[2];
   logic mdu_valid,mdu_ready,mdu_mul_ready,mdu_div_ready,mdu_result_valid,mdu_result_ready;
   logic [31:0] mdu_result;
@@ -184,7 +191,8 @@ module cpu_top #(
   assign load_replay_count=0;
   assign exit_head=state==RUN && rob_count!=0 && rob[head].done && rob[head].exiting && rob[head].fault==0;
   assign fault_head=state==RUN && rob_count!=0 && rob[head].done && rob[head].fault!=0;
-  assign flush_all=exit_head || fault_head || state!=RUN;
+  // The terminal state publishes the squash after retirement stops.
+  assign flush_all=state!=RUN;
   assign stop_frontend=flush_all;
   assign exit_send=state==DRAIN && store_count==0 && cache_idle && frontend_idle && controller_idle;
   assign exit_accept=exit_send && mem_req_ready;
@@ -215,7 +223,7 @@ module cpu_top #(
     .HISTORY_ENTRIES(HISTORY_ENTRIES),.RAM_BYTES(RAM_BYTES)) frontend (
     .clk,.rst,.stop(stop_frontend),.redirect,.redirect_pc,.pop_count,
     .packet_valid(fetch_valid),.packet_pc(fetch_pc),.packet_inst(fetch_inst),.packet_prediction(fetch_prediction),
-    .packet_fault(fetch_fault),.packet_inst_valid(fetch_iv),.packet_history(fetch_history),.train_history(executing[0].history),.train_valid,.train_taken,.train_op,.train_pc,.train_target,
+    .packet_fault(fetch_fault),.packet_inst_valid(fetch_iv),.packet_history(fetch_history),.train_history(branch_history_q),.train_valid,.train_taken,.train_op,.train_pc,.train_target,
     .mem_req_valid(client_req_valid[0]),.mem_req_ready(client_req_ready[0]),.mem_req_addr(client_req_addr[31:0]),
     .mem_rsp_valid(client_rsp_valid[0]),.mem_rsp_ready(client_rsp_ready[0]),.mem_rsp_data(client_rsp_data[31:0]),
     .mem_rsp_error(client_rsp_error[0]),.idle(frontend_idle),.miss_count(icache_miss_count));
@@ -309,17 +317,32 @@ module cpu_top #(
     mdu_kill='1;
     for(integer r=0;r<ROB_ENTRIES;r=r+1) mdu_kill[r]=!rob[r].valid;
   end
-  assign branch_fire=select_valid[0] && is_branch(executing[0].op) && !flush_all && !mdu_result_valid;
-  assign redirect=branch_fire && !branch_bad && branch_next!={executing[0].prediction,2'b0};
-  assign redirect_pc=branch_next;
-  assign redirect_rid=executing[0].rid;
-  assign redirect_checkpoint=executing[0].checkpoint;
-  assign train_valid=branch_fire && !branch_bad;
-  assign train_op=executing[0].op;
-  assign train_taken=branch_taken;
-  assign train_pc=execute_pc[0];
-  assign train_target=branch_next;
-  assign mdu_valid=select_valid[0] && is_mdu(executing[0].op) && !flush_all && !mdu_result_valid;
+  // Execute branches immediately, but publish prediction recovery from a
+  // register. A resolving branch cannot retire before this recovery cycle.
+  assign branch_capture=select_valid[0] && is_branch(executing[0].op) &&
+                        !flush_all && !mdu_result_valid && !younger(executing[0].rid);
+  always_ff @(posedge clk) begin
+    if(rst) branch_pending<=0;
+    else branch_pending<=branch_capture;
+    branch_bad_q<=branch_bad;branch_taken_q<=branch_taken;
+    branch_next_q<=branch_next;branch_pc_q<=execute_pc[0];
+    branch_prediction_q<=executing[0].prediction;
+    branch_history_q<=executing[0].history;
+    branch_rid_q<=executing[0].rid;branch_checkpoint_q<=executing[0].checkpoint;
+    branch_op_q<=executing[0].op;
+  end
+  assign branch_fire=branch_pending && !flush_all;
+  assign redirect=branch_fire && !branch_bad_q && branch_next_q!={branch_prediction_q,2'b0};
+  assign redirect_pc=branch_next_q;
+  assign redirect_rid=branch_rid_q;
+  assign redirect_checkpoint=branch_checkpoint_q;
+  assign train_valid=branch_fire && !branch_bad_q;
+  assign train_op=branch_op_q;
+  assign train_taken=branch_taken_q;
+  assign train_pc=branch_pc_q;
+  assign train_target=branch_next_q;
+  assign mdu_valid=select_valid[0] && is_mdu(executing[0].op) && !flush_all &&
+                   !mdu_result_valid && !younger(executing[0].rid);
   assign mdu_result_ready=!flush_all;
   assign memory_address=executing[2].a+executing[2].imm;
   assign memory_data=executing[2].b<<(8*memory_address[1:0]);
@@ -360,9 +383,9 @@ module cpu_top #(
     for(integer w=0;w<3;w=w+1) begin wb_rid[w]=executing[w].rid;wb_value[w]=0;wb_fault[w]=0;wb_address[w]=0;end
     if(!flush_all) begin
       if(mdu_result_valid) begin
-        wb_valid[0]=rob[rid_t'(mdu_result_tag)].valid;
+        wb_valid[0]=rob[rid_t'(mdu_result_tag)].valid && !younger(rid_t'(mdu_result_tag));
         wb_rid[0]=rid_t'(mdu_result_tag);wb_value[0]=mdu_result;
-      end else if(select_valid[0]) begin
+      end else if(select_valid[0] && !younger(executing[0].rid)) begin
         if(is_mdu(executing[0].op)) issue_fire[0]=mdu_ready;
         else begin
           issue_fire[0]=1;wb_valid[0]=1;
@@ -604,7 +627,7 @@ module cpu_top #(
     always_ff @(posedge clk) begin
       if(rst) begin checkpoint_valid[cp]<=0;checkpoint_owner[cp]<=0;end
       else begin
-        if((branch_fire && executing[0].checkpoint==CPW'(cp)) || younger(checkpoint_owner[cp]) || flush_all)
+        if((branch_fire && branch_checkpoint_q==CPW'(cp)) || younger(checkpoint_owner[cp]) || flush_all)
           checkpoint_valid[cp]<=0;
         if(save_checkpoint && free_checkpoint==CPW'(cp)) begin
           checkpoint_valid[cp]<=1;checkpoint_owner[cp]<=dispatch_rid[save_after_lane];
