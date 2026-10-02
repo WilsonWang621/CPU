@@ -1,0 +1,69 @@
+{
+  "stage": 1,
+  "experiment": "v4-sram-sectors",
+  "parameters": {
+    "rob": 16,
+    "iq": 8,
+    "ic-bytes": 4096,
+    "dc-bytes": 4096,
+    "line-bytes": 32,
+    "ways": 2,
+    "issue-width": 1
+  },
+  "rtl_sha256": "bba8f51b6f300497b6d219e2d508d41e90163743aa46e939566456279612d966",
+  "performance": [
+    {
+      "case": "perf_median",
+      "passed": true,
+      "cycles": 13651,
+      "instructions": 6961,
+      "ipc": 0.509926012746319
+    },
+    {
+      "case": "perf_multiply",
+      "passed": true,
+      "cycles": 26758,
+      "instructions": 21722,
+      "ipc": 0.8117946034830705
+    },
+    {
+      "case": "perf_qsort",
+      "passed": true,
+      "cycles": 254044,
+      "instructions": 139900,
+      "ipc": 0.5506920061091779
+    },
+    {
+      "case": "perf_rsort",
+      "passed": true,
+      "cycles": 296671,
+      "instructions": 195719,
+      "ipc": 0.6597173299715847
+    },
+    {
+      "case": "perf_towers",
+      "passed": true,
+      "cycles": 8713,
+      "instructions": 5278,
+      "ipc": 0.6057615057959371
+    },
+    {
+      "case": "perf_vvadd",
+      "passed": true,
+      "cycles": 8412,
+      "instructions": 4524,
+      "ipc": 0.5378031383737518
+    }
+  ],
+  "correctness": {
+    "status": "not_run"
+  },
+  "synthesis": {
+    "status": "passed",
+    "fmax_mhz": 121.01158118648074,
+    "area_um2": 11953.76524999959
+  },
+  "tier2_pass": false,
+  "ipc_geomean": 0.6049100955745789,
+  "stage_frequency_pass": false
+}

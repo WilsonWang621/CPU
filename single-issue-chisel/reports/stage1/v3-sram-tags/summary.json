@@ -1,0 +1,166 @@
+{
+  "stage": 1,
+  "experiment": "v3-sram-tags",
+  "parameters": {
+    "rob": 16,
+    "iq": 8,
+    "ic-bytes": 4096,
+    "dc-bytes": 4096,
+    "line-bytes": 32,
+    "ways": 2,
+    "issue-width": 1
+  },
+  "rtl_sha256": "bb234d42a83db4271e57de64cf9cb30d3765484373d152032b84de801d101add",
+  "performance": [
+    {
+      "case": "perf_median",
+      "passed": true,
+      "cycles": 13651,
+      "instructions": 6961,
+      "ipc": 0.509926012746319
+    },
+    {
+      "case": "perf_multiply",
+      "passed": true,
+      "cycles": 26758,
+      "instructions": 21722,
+      "ipc": 0.8117946034830705
+    },
+    {
+      "case": "perf_qsort",
+      "passed": true,
+      "cycles": 254044,
+      "instructions": 139900,
+      "ipc": 0.5506920061091779
+    },
+    {
+      "case": "perf_rsort",
+      "passed": true,
+      "cycles": 296671,
+      "instructions": 195719,
+      "ipc": 0.6597173299715847
+    },
+    {
+      "case": "perf_towers",
+      "passed": true,
+      "cycles": 8713,
+      "instructions": 5278,
+      "ipc": 0.6057615057959371
+    },
+    {
+      "case": "perf_vvadd",
+      "passed": true,
+      "cycles": 8412,
+      "instructions": 4524,
+      "ipc": 0.5378031383737518
+    }
+  ],
+  "correctness": {
+    "status": "passed",
+    "records": [
+      {
+        "case": "correctness_add_to_100",
+        "passed": true,
+        "cycles": 614
+      },
+      {
+        "case": "correctness_array_test1",
+        "passed": true,
+        "cycles": 617
+      },
+      {
+        "case": "correctness_array_test2",
+        "passed": true,
+        "cycles": 682
+      },
+      {
+        "case": "correctness_basicopt1",
+        "passed": true,
+        "cycles": 557738
+      },
+      {
+        "case": "correctness_bulgarian",
+        "passed": true,
+        "cycles": 313794
+      },
+      {
+        "case": "correctness_expr",
+        "passed": true,
+        "cycles": 747
+      },
+      {
+        "case": "correctness_gcd",
+        "passed": true,
+        "cycles": 608
+      },
+      {
+        "case": "correctness_hanoi",
+        "passed": true,
+        "cycles": 6731
+      },
+      {
+        "case": "correctness_lvalue2",
+        "passed": true,
+        "cycles": 357
+      },
+      {
+        "case": "correctness_magic",
+        "passed": true,
+        "cycles": 616831
+      },
+      {
+        "case": "correctness_manyarguments",
+        "passed": true,
+        "cycles": 369
+      },
+      {
+        "case": "correctness_multiarray",
+        "passed": true,
+        "cycles": 2579
+      },
+      {
+        "case": "correctness_naive",
+        "passed": true,
+        "cycles": 341
+      },
+      {
+        "case": "correctness_pi",
+        "passed": true,
+        "cycles": 21985240
+      },
+      {
+        "case": "correctness_qsort",
+        "passed": true,
+        "cycles": 1417901
+      },
+      {
+        "case": "correctness_queens",
+        "passed": true,
+        "cycles": 391987
+      },
+      {
+        "case": "correctness_statement_test",
+        "passed": true,
+        "cycles": 1469
+      },
+      {
+        "case": "correctness_superloop",
+        "passed": true,
+        "cycles": 501016
+      },
+      {
+        "case": "correctness_tak",
+        "passed": true,
+        "cycles": 1570750
+      }
+    ]
+  },
+  "synthesis": {
+    "status": "passed",
+    "fmax_mhz": 107.75544564874251,
+    "area_um2": 12316.249712000983
+  },
+  "tier2_pass": false,
+  "ipc_geomean": 0.6049100955745789,
+  "stage_frequency_pass": false
+}

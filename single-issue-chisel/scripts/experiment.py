@@ -26,7 +26,7 @@ def main():
     a = argparse.ArgumentParser(description=__doc__)
     a.add_argument("name")
     a.add_argument("--stage", type=int, choices=(1,2,3), default=1)
-    for key, default in (("rob",16),("iq",8),("ic-bytes",4096),("dc-bytes",4096),("line-bytes",32),("ways",2),("banks",4)):
+    for key, default in (("rob",16),("iq",8),("ic-bytes",4096),("dc-bytes",4096),("line-bytes",32),("ways",2),("banks",4),("early-recovery",1),("prefetch",1),("btb-entries",128),("history-bits",1)):
         a.add_argument("--"+key,type=int,default=default)
     a.add_argument("--jobs",type=int,default=8)
     a.add_argument("--skip-correctness",action="store_true")
@@ -40,17 +40,29 @@ def main():
     if out.exists() and not args.reuse_build:
         a.error("experiment already exists; choose a new name")
     out.mkdir(parents=True,exist_ok=True); build.mkdir(parents=True,exist_ok=True)
-    config = {k:getattr(args,k.replace("-","_")) for k in ("rob","iq","ic-bytes","dc-bytes","line-bytes","ways","banks")}
+    config = {k:getattr(args,k.replace("-","_")) for k in ("rob","iq","ic-bytes","dc-bytes","line-bytes","ways","banks","early-recovery","prefetch","btb-entries","history-bits")}
     config["issue-width"] = 1
+    if args.stage > 1:
+        prior = PROJECT/"reports"/("stage"+str(args.stage-1))
+        summaries = [json.loads(p.read_text()) for p in prior.glob("*/summary.json")]
+        if not any(s.get("tier2_pass",False) for s in summaries):
+            a.error("the preceding stage has no verified Tier2 baseline")
     sources = out/"source"; sources.mkdir(exist_ok=True)
-    for p in (PROJECT/"src/main/scala/tier2").glob("*.scala"):
+    if args.reuse_build:
+        manifest = json.loads((out/"manifest.json").read_text())
+        config = manifest["parameters"]
+        for p in sources.iterdir():
+            if sha(p) != manifest["source_sha256"][p.name]:
+                raise ValueError("frozen source hash changed: "+str(p))
+    else:
+      for p in (PROJECT/"src/main/scala/tier2").glob("*.scala"):
         shutil.copy2(p,sources/p.name)
-    shutil.copy2(PROJECT/"build.sbt",sources/"build.sbt")
-    manifest = {"stage":args.stage,"experiment":args.name,"parameters":config,"latency":20,"max_cycles":30000000,
+      shutil.copy2(PROJECT/"build.sbt",sources/"build.sbt")
+      manifest = {"stage":args.stage,"experiment":args.name,"parameters":config,"latency":20,"max_cycles":30000000,
                 "source_sha256":{p.name:sha(p) for p in sources.iterdir()},
                 "source_commit":subprocess.check_output(["git","rev-parse","HEAD"],cwd=FRAMEWORK,text=True).strip(),
                 "worktree_diff":subprocess.check_output(["git","diff","--","single-issue-chisel/src"],cwd=FRAMEWORK,text=True)}
-    (out/"manifest.json").write_text(json.dumps(manifest,indent=2)+"\n")
+      (out/"manifest.json").write_text(json.dumps(manifest,indent=2)+"\n")
     rtl = out/"rtl"; rtl.mkdir(exist_ok=True)
     if not args.reuse_build:
         command = "run --out "+str(rtl)+" "+" ".join("--"+k+" "+str(v) for k,v in config.items() if k != "issue-width")
@@ -59,6 +71,9 @@ def main():
         run([sys.executable,FRAMEWORK/"scripts/build.py","--filelist",rtl/"filelist.f","--out",build/"sim","--jobs",args.jobs],out/"build.log")
     simulator = build/"sim/sim"
     result = {"stage":args.stage,"experiment":args.name,"parameters":config,"rtl_sha256":sha(rtl/"student_top.sv"),"performance":[],"correctness":{"status":"not_run"},"synthesis":{"status":"not_run"},"tier2_pass":False}
+    if args.reuse_build and (out/"summary.json").exists():
+        result = json.loads((out/"summary.json").read_text())
+    result["simulator_sha256"] = sha(simulator)
     for kind in ("perf", "correctness"):
         if kind == "correctness" and args.skip_correctness:
             continue

@@ -1,0 +1,93 @@
+package tier2
+
+import chisel3._
+import chisel3.util._
+
+case class Config(rob: Int = 16, iq: Int = 8, icBytes: Int = 4096,
+                  dcBytes: Int = 4096, lineBytes: Int = 32, ways: Int = 2,
+                  issueWidth: Int = 1, debug: Boolean = false) {
+  require(issueWidth == 1, "This architecture has one issue port")
+  require(rob >= 8 && isPow2(rob) && iq >= 2 && isPow2(iq))
+  require(isPow2(icBytes) && isPow2(dcBytes) && isPow2(lineBytes))
+  require(ways == 1 || ways == 2)
+  val tagBits = log2Ceil(rob)
+  val prfSize = 32 + rob // architectural words plus ROB value words
+}
+
+class Axi extends Bundle {
+  val araddr = Output(UInt(32.W)); val arvalid = Output(Bool()); val arready = Input(Bool())
+  val rdata = Input(UInt(32.W)); val rresp = Input(UInt(2.W)); val rvalid = Input(Bool()); val rready = Output(Bool())
+  val awaddr = Output(UInt(32.W)); val awvalid = Output(Bool()); val awready = Input(Bool())
+  val wdata = Output(UInt(32.W)); val wstrb = Output(UInt(4.W)); val wvalid = Output(Bool()); val wready = Input(Bool())
+  val bresp = Input(UInt(2.W)); val bvalid = Input(Bool()); val bready = Output(Bool())
+}
+class MemReq extends Bundle {
+  val addr = UInt(32.W); val data = UInt(32.W); val mask = UInt(4.W); val write = Bool()
+}
+class MemRsp extends Bundle { val data = UInt(32.W); val error = Bool() }
+class MemPort extends Bundle {
+  val req = Decoupled(new MemReq)
+  val rsp = Flipped(Decoupled(new MemRsp))
+}
+
+/** The course supplies both the behavioral model and the counted SRAM Liberty. */
+class Sram(depth: Int, width: Int = 32, granularity: Int = 8)
+  extends BlackBox(Map("DEPTH" -> depth, "WIDTH" -> width, "WRITE_GRANULARITY" -> granularity)) {
+  override def desiredName = "sram_fakeram"
+  val io = IO(new Bundle {
+    val clk = Input(Clock()); val en = Input(Bool()); val we = Input(Bool())
+    val wmask = Input(UInt((width / granularity).W))
+    val addr = Input(UInt(log2Ceil(depth).W)); val wdata = Input(UInt(width.W)); val rdata = Output(UInt(width.W))
+  })
+}
+
+/** Registered requests, independently backpressured AW and W, ordered responses. */
+class Bus extends Module {
+  val io = IO(new Bundle { val in = Flipped(new MemPort); val axi = new Axi })
+  val directions = Module(new Queue(Bool(), 32))
+  val pending = RegInit(false.B); val req = Reg(new MemReq)
+  val awSent = RegInit(false.B); val wSent = RegInit(false.B)
+  io.axi.araddr := Cat(req.addr(31,2),0.U(2.W)); io.axi.awaddr := Cat(req.addr(31,2),0.U(2.W))
+  io.axi.wdata := req.data; io.axi.wstrb := req.mask
+  io.axi.arvalid := pending && !req.write && !reset.asBool
+  io.axi.awvalid := pending && req.write && !awSent && !reset.asBool
+  io.axi.wvalid := pending && req.write && !wSent && !reset.asBool
+  val launched = pending && Mux(req.write, (awSent || io.axi.awready) && (wSent || io.axi.wready), io.axi.arready)
+  io.in.req.ready := (!pending || launched) && directions.io.enq.ready && !reset.asBool
+  directions.io.enq.valid := io.in.req.fire
+  directions.io.enq.bits := io.in.req.bits.write
+  when(io.axi.awvalid && io.axi.awready) { awSent := true.B }
+  when(io.axi.wvalid && io.axi.wready) { wSent := true.B }
+  when(launched) { pending := false.B; awSent := false.B; wSent := false.B }
+  when(io.in.req.fire) { pending := true.B; req := io.in.req.bits; awSent := false.B; wSent := false.B }
+  val writing = directions.io.deq.bits
+  io.in.rsp.valid := directions.io.deq.valid && Mux(writing, io.axi.bvalid, io.axi.rvalid) && !reset.asBool
+  io.in.rsp.bits.data := io.axi.rdata
+  io.in.rsp.bits.error := Mux(writing, io.axi.bresp.orR, io.axi.rresp.orR)
+  directions.io.deq.ready := io.in.rsp.fire
+  io.axi.rready := directions.io.deq.valid && !writing && io.in.rsp.ready && !reset.asBool
+  io.axi.bready := directions.io.deq.valid && writing && io.in.rsp.ready && !reset.asBool
+}
+
+class MemoryArbiter extends Module {
+  val io = IO(new Bundle { val clients = Vec(2, Flipped(new MemPort)); val out = new MemPort })
+  val owners = Module(new Queue(Bool(), 32))
+  val arb = Module(new RRArbiter(new MemReq, 2))
+  for (i <- 0 until 2) { arb.io.in(i) <> io.clients(i).req }
+  io.out.req.valid := arb.io.out.valid && owners.io.enq.ready
+  io.out.req.bits := arb.io.out.bits
+  arb.io.out.ready := io.out.req.ready && owners.io.enq.ready
+  owners.io.enq.valid := io.out.req.fire; owners.io.enq.bits := arb.io.chosen.asBool
+  for(i <- 0 until 2) {
+    io.clients(i).rsp.valid := io.out.rsp.valid && owners.io.deq.valid && owners.io.deq.bits === (i == 1).B
+    io.clients(i).rsp.bits := io.out.rsp.bits
+  }
+  io.out.rsp.ready := owners.io.deq.valid && Mux(owners.io.deq.bits, io.clients(1).rsp.ready, io.clients(0).rsp.ready)
+  owners.io.deq.ready := io.out.rsp.fire
+}
+
+object Util {
+  def sext(x: UInt, width: Int = 32): UInt = Cat(Fill(width - x.getWidth, x(x.getWidth - 1)), x)
+  def choose[T <: Data](index: UInt, values: Seq[T]): T = Mux1H(values.indices.map(i => (index === i.U) -> values(i)))
+  def add(a: UInt, b: UInt): UInt = a + b
+}

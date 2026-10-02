@@ -1,0 +1,70 @@
+{
+  "stage": 1,
+  "experiment": "v5b-banked-cache",
+  "parameters": {
+    "rob": 16,
+    "iq": 8,
+    "ic-bytes": 4096,
+    "dc-bytes": 4096,
+    "line-bytes": 32,
+    "ways": 2,
+    "banks": 4,
+    "issue-width": 1
+  },
+  "rtl_sha256": "80556133e2c225762be5495bdde17e4be10bacc04adb00cdc138984b35cbf479",
+  "performance": [
+    {
+      "case": "perf_median",
+      "passed": true,
+      "cycles": 13651,
+      "instructions": 6961,
+      "ipc": 0.509926012746319
+    },
+    {
+      "case": "perf_multiply",
+      "passed": true,
+      "cycles": 26753,
+      "instructions": 21722,
+      "ipc": 0.8119463237767727
+    },
+    {
+      "case": "perf_qsort",
+      "passed": true,
+      "cycles": 249111,
+      "instructions": 139900,
+      "ipc": 0.5615970390709363
+    },
+    {
+      "case": "perf_rsort",
+      "passed": true,
+      "cycles": 287908,
+      "instructions": 195719,
+      "ipc": 0.6797970184920182
+    },
+    {
+      "case": "perf_towers",
+      "passed": true,
+      "cycles": 7814,
+      "instructions": 5278,
+      "ipc": 0.6754543127719478
+    },
+    {
+      "case": "perf_vvadd",
+      "passed": true,
+      "cycles": 8114,
+      "instructions": 4524,
+      "ipc": 0.5575548434804043
+    }
+  ],
+  "correctness": {
+    "status": "not_run"
+  },
+  "synthesis": {
+    "status": "passed",
+    "fmax_mhz": 98.94675814088318,
+    "area_um2": 12991.209246002893
+  },
+  "tier2_pass": false,
+  "ipc_geomean": 0.6248661812702052,
+  "stage_frequency_pass": false
+}
