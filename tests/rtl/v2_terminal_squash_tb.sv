@@ -36,6 +36,8 @@ module v2_terminal_squash_tb;
       dut.queue[4][dut.ISSUE_T_READY_B_LSB]=1;
       dut.queue[4][dut.ISSUE_T_RID_LSB+:3]=1;
       dut.queue[4][dut.ISSUE_T_OP_LSB+:6]=dut.OP_STORE;
+      dut.balanced_selection[2].prepared_selection.grant_valid=1;
+      dut.balanced_selection[2].prepared_selection.grant_index=0;
       dut.queue[4][dut.ISSUE_T_A_LSB+:32]=32'h100;
       dut.queue[4][dut.ISSUE_T_B_LSB+:32]=32'hdeadbeef;
       dut.queue[4][dut.ISSUE_T_SIZE_LSB+:2]=2;

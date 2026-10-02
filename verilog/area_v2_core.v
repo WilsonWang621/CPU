@@ -211,12 +211,12 @@ function automatic [8-1:0] narrow_2;
   begin narrow_2=value; end
 endfunction
 
-function automatic [ST-1:0] narrow_3;
+function automatic [QW-1:0] narrow_3;
   input [63:0] value;
   begin narrow_3=value; end
 endfunction
 
-function automatic [QW-1:0] narrow_4;
+function automatic [ST-1:0] narrow_4;
   input [63:0] value;
   begin narrow_4=value; end
 endfunction
@@ -668,8 +668,34 @@ reg [31:0] shifted;
       assign select_owner[bank][q*(RW+1)+:(RW+1)]={queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_GENERATION_LSB+:ISSUE_T_GENERATION_WIDTH],queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH]};
       assign payloads[q*ISSUE_BITS+:ISSUE_BITS]=queue[(bank)*(IQ_ENTRIES)+(q)];
     end
-    v2_select #(.ENTRIES(IQ_ENTRIES),.SLOT_BITS(RW+1),.EXTENDED_ORDER(1)) choose (
-      .ready(select_ready[bank]),.owner(select_owner[bank]),.rob_head({(RW+1){1'b0}}),.valid(selected_valid[bank]),.index(selected[bank]));
+    if(bank==2) begin: prepared_selection
+      wire [IQ_ENTRIES-1:0] next_candidates;
+      wire [IQ_ENTRIES*(RW+1)-1:0] next_owners;
+      wire next_valid;
+      wire [QW-1:0] next_index;
+reg  grant_valid;
+reg [QW-1:0] grant_index;
+      for(q=0;q<IQ_ENTRIES;q=q+1) begin: next_row
+        wire lane0=dispatch_valid[0] && dispatch_bank[0]==2 && dispatch_index[0]==narrow_3(q);
+        wire lane1=dispatch_valid[1] && dispatch_bank[1]==2 && dispatch_index[1]==narrow_3(q);
+        wire removed=(issue_fire[2] && selected[2]==narrow_3(q)) || (redirect && (((queue[(2)*(IQ_ENTRIES)+(q)][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])<head)==(redirect_rid<head) ? (queue[(2)*(IQ_ENTRIES)+(q)][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])>redirect_rid:(queue[(2)*(IQ_ENTRIES)+(q)][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])<head)) || flush_all;
+        assign next_candidates[q]=(queue[(2)*(IQ_ENTRIES)+(q)][ISSUE_T_VALID_LSB+:ISSUE_T_VALID_WIDTH] && !removed) || lane0 || lane1;
+        assign next_owners[q*(RW+1)+:(RW+1)]=lane1 ? dispatch_order[(RW+1)+:(RW+1)]:
+          lane0 ? dispatch_order[0+:(RW+1)]:select_owner[2][q*(RW+1)+:(RW+1)];
+      end
+
+      v2_select #(.ENTRIES(IQ_ENTRIES),.SLOT_BITS(RW+1),.EXTENDED_ORDER(1)) choose_next (
+        .ready(next_candidates),.owner(next_owners),.rob_head({(RW+1){1'b0}}),.valid(next_valid),.index(next_index));
+      always @(posedge clk) begin
+        if(rst) begin grant_valid<=0;grant_index<=0;end
+        else begin grant_valid<=next_valid;grant_index<=next_index;end
+      end
+      assign selected_valid[bank]=grant_valid;
+      assign selected[bank]=grant_index;
+    end else begin: current_selection
+      v2_select #(.ENTRIES(IQ_ENTRIES),.SLOT_BITS(RW+1),.EXTENDED_ORDER(1)) choose (
+        .ready(select_ready[bank]),.owner(select_owner[bank]),.rob_head({(RW+1){1'b0}}),.valid(selected_valid[bank]),.index(selected[bank]));
+    end
     for(first=0;first<ISSUE_BITS;first=first+32) begin: read_payload
       wire [IQ_ENTRIES*(ISSUE_BITS-first<32 ? ISSUE_BITS-first:32)-1:0] slice_words;
       for(row=0;row<IQ_ENTRIES;row=row+1) begin: slice_row
@@ -683,7 +709,7 @@ reg [31:0] shifted;
     assign select_valid[bank]=selected_valid[bank] && (bank!=2 || (executing[bank][ISSUE_T_READY_A_LSB+:ISSUE_T_READY_A_WIDTH] && executing[bank][ISSUE_T_READY_B_LSB+:ISSUE_T_READY_B_WIDTH]));
   end
   for(s=0;s<STORE_SLOTS;s=s+1) begin: store_candidates
-    assign store_owners[s*ST+:ST]=narrow_3(s);
+    assign store_owners[s*ST+:ST]=narrow_4(s);
     assign store_forward_candidates[s]=stores[s][STORE_T_VALID_LSB+:STORE_T_VALID_WIDTH] && stores[s][STORE_T_ADDRESS_LSB+(31):STORE_T_ADDRESS_LSB+(2)]==memory_address[31:2] &&
                                        (|(stores[s][STORE_T_MASK_LSB+:STORE_T_MASK_WIDTH] & memory_mask));
     assign store_send_candidates[s]=stores[s][STORE_T_VALID_LSB+:STORE_T_VALID_WIDTH] && stores[s][STORE_T_COMMITTED_LSB+:STORE_T_COMMITTED_WIDTH] && !stores[s][STORE_T_ISSUED_LSB+:STORE_T_ISSUED_WIDTH];
@@ -703,7 +729,7 @@ integer q;
 for(q=0;q<IQ_ENTRIES;q=q+1) begin
         if(queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_VALID_LSB+:ISSUE_T_VALID_WIDTH]) begin
           occupancy[bank]=occupancy[bank]+1'b1;
-        end else if(!free_queue_valid[bank]) begin free_queue_valid[bank]=1;free_queue[bank]=narrow_4(q);end
+        end else if(!free_queue_valid[bank]) begin free_queue_valid[bank]=1;free_queue[bank]=narrow_3(q);end
       end
 end
     end
@@ -946,7 +972,7 @@ end
       if(redirect) tail_generation<=branch_generation_q ^ (&redirect_rid);
       else tail_generation<=allocation_end[RW];
       store_count<=store_count+narrow_10(store_allocate)-narrow_10(store_pop)-squashed_stores;
-      store_head<=store_head+narrow_3(store_pop);store_tail<=store_tail+narrow_3(store_allocate)-narrow_3(squashed_stores);
+      store_head<=store_head+narrow_4(store_pop);store_tail<=store_tail+narrow_4(store_allocate)-narrow_4(squashed_stores);
       if(dispatch_count!=0) steer<=!steer;
       if(redirect) branch_miss_count<=branch_miss_count+1;
       retired_count<=retired_count+narrow_11(commit_count)+narrow_11(exit_accept);
@@ -1036,7 +1062,7 @@ end
       wire next_ready_a,next_ready_b;
       wire [31:0] next_value_a,next_value_b;
       for(lane=0;lane<2;lane=lane+1) begin: preparation
-        assign prepare_lane[lane]=dispatch_prepare[lane] && dispatch_bank[lane]==narrow_8(bank) && dispatch_index[lane]==narrow_4(q);
+        assign prepare_lane[lane]=dispatch_prepare[lane] && dispatch_bank[lane]==narrow_8(bank) && dispatch_index[lane]==narrow_3(q);
       end
       v2_operand #(.SLOT_BITS(RW)) operand_a (
         .live(queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_VALID_LSB+:ISSUE_T_VALID_WIDTH]),.prepare(|prepare_lane),
@@ -1055,11 +1081,11 @@ end
       always @(posedge clk) begin
         if(rst) queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_VALID_LSB+:ISSUE_T_VALID_WIDTH]<=0;
         else begin
-          if((issue_fire[bank] && selected[bank]==narrow_4(q)) || (redirect && (((queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])<head)==(redirect_rid<head) ? (queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])>redirect_rid:(queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])<head)) || flush_all) queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_VALID_LSB+:ISSUE_T_VALID_WIDTH]<=0;
+          if((issue_fire[bank] && selected[bank]==narrow_3(q)) || (redirect && (((queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])<head)==(redirect_rid<head) ? (queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])>redirect_rid:(queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])<head)) || flush_all) queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_VALID_LSB+:ISSUE_T_VALID_WIDTH]<=0;
           begin: loop_2
 integer lane;
 for(lane=0;lane<2;lane=lane+1)
-            if(dispatch_valid[lane] && dispatch_bank[lane]==narrow_8(bank) && dispatch_index[lane]==narrow_4(q))
+            if(dispatch_valid[lane] && dispatch_bank[lane]==narrow_8(bank) && dispatch_index[lane]==narrow_3(q))
               queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_VALID_LSB+:ISSUE_T_VALID_WIDTH]<=1;
 end
         end
@@ -1070,7 +1096,7 @@ end
           begin: loop_1
 integer lane;
 for(lane=0;lane<2;lane=lane+1)
-            if(dispatch_prepare[lane] && dispatch_bank[lane]==narrow_8(bank) && dispatch_index[lane]==narrow_4(q)) begin
+            if(dispatch_prepare[lane] && dispatch_bank[lane]==narrow_8(bank) && dispatch_index[lane]==narrow_3(q)) begin
               queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH]<=dispatch_payload[lane][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH];queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_OP_LSB+:ISSUE_T_OP_WIDTH]<=dispatch_payload[lane][ISSUE_T_OP_LSB+:ISSUE_T_OP_WIDTH];
               queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_GENERATION_LSB+:ISSUE_T_GENERATION_WIDTH]<=dispatch_payload[lane][ISSUE_T_GENERATION_LSB+:ISSUE_T_GENERATION_WIDTH];
               queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_SOURCE_A_LSB+:ISSUE_T_SOURCE_A_WIDTH]<=dispatch_payload[lane][ISSUE_T_SOURCE_A_LSB+:ISSUE_T_SOURCE_A_WIDTH];queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_SOURCE_B_LSB+:ISSUE_T_SOURCE_B_WIDTH]<=dispatch_payload[lane][ISSUE_T_SOURCE_B_LSB+:ISSUE_T_SOURCE_B_WIDTH];
@@ -1101,16 +1127,16 @@ end
     always @(posedge clk) begin
       if(rst) stores[s][STORE_T_VALID_LSB+:STORE_T_VALID_WIDTH]<=0;
       else begin
-        if(store_pop && store_head==narrow_3(s)) stores[s][STORE_T_VALID_LSB+:STORE_T_VALID_WIDTH]<=0;
-        if(cache_store_valid && cache_store_ready && store_send_slot==narrow_3(s)) stores[s][STORE_T_ISSUED_LSB+:STORE_T_ISSUED_WIDTH]<=1;
-        if(cache_store_done && cache_store_done_tag==narrow_3(s)) stores[s][STORE_T_DONE_LSB+:STORE_T_DONE_WIDTH]<=1;
+        if(store_pop && store_head==narrow_4(s)) stores[s][STORE_T_VALID_LSB+:STORE_T_VALID_WIDTH]<=0;
+        if(cache_store_valid && cache_store_ready && store_send_slot==narrow_4(s)) stores[s][STORE_T_ISSUED_LSB+:STORE_T_ISSUED_WIDTH]<=1;
+        if(cache_store_done && cache_store_done_tag==narrow_4(s)) stores[s][STORE_T_DONE_LSB+:STORE_T_DONE_WIDTH]<=1;
         begin: loop_0
 integer lane;
 for(lane=0;lane<2;lane=lane+1)
-          if(narrow_7(commit_count)>lane && retirement_meta[lane][RETIRE_META_T_STORE_LSB+:RETIRE_META_T_STORE_WIDTH] && retirement_meta[lane][RETIRE_META_T_STORE_SLOT_LSB+:RETIRE_META_T_STORE_SLOT_WIDTH]==narrow_3(s)) stores[s][STORE_T_COMMITTED_LSB+:STORE_T_COMMITTED_WIDTH]<=1;
+          if(narrow_7(commit_count)>lane && retirement_meta[lane][RETIRE_META_T_STORE_LSB+:RETIRE_META_T_STORE_WIDTH] && retirement_meta[lane][RETIRE_META_T_STORE_SLOT_LSB+:RETIRE_META_T_STORE_SLOT_WIDTH]==narrow_4(s)) stores[s][STORE_T_COMMITTED_LSB+:STORE_T_COMMITTED_WIDTH]<=1;
 end
         if(!stores[s][STORE_T_COMMITTED_LSB+:STORE_T_COMMITTED_WIDTH] && ((redirect && (((stores[s][STORE_T_RID_LSB+:STORE_T_RID_WIDTH])<head)==(redirect_rid<head) ? (stores[s][STORE_T_RID_LSB+:STORE_T_RID_WIDTH])>redirect_rid:(stores[s][STORE_T_RID_LSB+:STORE_T_RID_WIDTH])<head)) || flush_all)) stores[s][STORE_T_VALID_LSB+:STORE_T_VALID_WIDTH]<=0;
-        if(store_allocate && store_tail==narrow_3(s)) begin
+        if(store_allocate && store_tail==narrow_4(s)) begin
           stores[s][STORE_T_VALID_LSB+:STORE_T_VALID_WIDTH]<=1;stores[s][STORE_T_COMMITTED_LSB+:STORE_T_COMMITTED_WIDTH]<=0;stores[s][STORE_T_ISSUED_LSB+:STORE_T_ISSUED_WIDTH]<=0;stores[s][STORE_T_DONE_LSB+:STORE_T_DONE_WIDTH]<=0;
           stores[s][STORE_T_RID_LSB+:STORE_T_RID_WIDTH]<=executing[2][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH];stores[s][STORE_T_ADDRESS_LSB+:STORE_T_ADDRESS_WIDTH]<=memory_address;stores[s][STORE_T_DATA_LSB+:STORE_T_DATA_WIDTH]<=memory_data;stores[s][STORE_T_MASK_LSB+:STORE_T_MASK_WIDTH]<=memory_mask;
           stores[s][STORE_T_PC_LSB+:STORE_T_PC_WIDTH]<=rob[executing[2][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH]][ROB_T_PC_LSB+:ROB_T_PC_WIDTH];stores[s][STORE_T_INST_LSB+:STORE_T_INST_WIDTH]<=rob[executing[2][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH]][ROB_T_INST_LSB+:ROB_T_INST_WIDTH];
