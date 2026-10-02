@@ -1,0 +1,33 @@
+--- a/verilog/area_v2/cpu_top.sv
++++ b/verilog/area_v2/cpu_top.sv
+@@ -89,6 +89,12 @@
+   store_t stores [STORE_SLOTS];
+   load_t loads [LOAD_SLOTS];
+   rid_t head,tail;
++  (* keep *) rid_t second_head;
++  wire [RW-1:0] next_head=head+rid_t'(commit_count);
++  always_ff @(posedge clk) begin
++    if(rst) second_head<=1;
++    else second_head<=next_head+1'b1;
++  end
+   logic tail_generation;
+   wire [RW:0] allocation_end={tail_generation,tail}+(RW+1)'(dispatch_count);
+   wire [2*(RW+1)-1:0] dispatch_order;
+@@ -232,7 +238,7 @@
+     assign result_status_words[row*6+:6]={rob[row].valid,rob[row].done,rob[row].fault};
+   end
+   for(genvar lane=0;lane<2;lane=lane+1) begin: retirement_reads
+-    assign commit_rid[lane]=head+rid_t'(lane);
++    assign commit_rid[lane]=lane==0 ? head:second_head;
+     wire [RETIRE_META_BITS-1:0] meta_word;
+     assign retirement_meta[lane]=meta_word;
+     v2_retire_read #(.ENTRIES(ROB_ENTRIES),.WORD_BITS(RETIRE_META_BITS),.LANE(lane)) read_metadata (
+@@ -580,7 +586,7 @@
+     end else begin
+       retire_valid<=0;retire_store<=0;
+       if(state!=DONE && state!=FAULT) cycle_count<=cycle_count+1;
+-      head<=head+rid_t'(commit_count);
++      head<=next_head;
+       if(redirect) begin tail<=redirect_rid+1'b1;rob_count<=(RW+1)'(age(redirect_rid))+1-(RW+1)'(commit_count);end
+       else begin tail<=tail+rid_t'(dispatch_count);rob_count<=rob_count+(RW+1)'(dispatch_count)-(RW+1)'(commit_count);end
+       if(redirect) tail_generation<=branch_generation_q ^ (&redirect_rid);
