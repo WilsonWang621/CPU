@@ -121,6 +121,7 @@ class DataCache(p: Config) extends Module {
   val io = IO(new Bundle {
     val req = Flipped(Decoupled(new BankRequest(p))); val rsp = Decoupled(new BankResponse(p)); val mem = new MemPort
     val fill = Valid(new MemReq)
+    val candidates = Input(Vec(p.banks,Valid(new LoadRequest(p))))
     val loadReady = Output(Vec(p.banks,Bool()))
     val store = Flipped(Valid(new MemReq))
     val storeReady = Output(Bool())
@@ -160,15 +161,17 @@ class DataCache(p: Config) extends Module {
       pendingStore := stores.io.deq.valid; queuedStore := stores.io.deq.bits
       stores.io.deq.ready := c.io.cpu.req.ready
     }
-    val proactive = prefetch.io.deq.valid && prefetchBank === i.U && !real && !pendingStore
+    val candidateDemand = if(p.bankedLoadPayload) io.candidates(i).valid else real
+    val proactive = prefetch.io.deq.valid && prefetchBank === i.U && !candidateDemand && !pendingStore
     val demandReady = c.io.cpu.req.ready && !pendingStore
     storeCredits(i) := (if(p.storeEntries > 0) storeReady else c.io.cpu.req.ready)
     io.loadReady(i) := c.io.loadReady && !pendingStore && !(io.store.valid && storeBank === i.U)
     ready(i) := (if(p.storeEntries > 0) Mux(io.req.bits.mem.write,storeReady,demandReady) else demandReady)
-    prefetchReady(i) := !real && !pendingStore && c.io.cpu.req.ready
+    prefetchReady(i) := !candidateDemand && !pendingStore && c.io.cpu.req.ready
     c.io.cpu.req.valid := pendingStore || real || proactive
     c.io.cpu.req.bits := Mux(pendingStore,queuedStore,Mux(real,io.req.bits.mem,0.U.asTypeOf(new MemReq)))
-    val selectedAddress = Mux(pendingStore,queuedStore.addr,Mux(real,io.req.bits.mem.addr,prefetch.io.deq.bits))
+    val demandAddress = if(p.bankedLoadPayload) io.candidates(i).bits.addr else io.req.bits.mem.addr
+    val selectedAddress = Mux(pendingStore,queuedStore.addr,Mux(candidateDemand,demandAddress,prefetch.io.deq.bits))
     c.io.cpu.req.bits.addr := selectedAddress
     if(p.banks != 1) { c.io.cpu.req.bits.addr := Cat(0.U(b.W),selectedAddress(31,o+b),selectedAddress(o-1,0)) }
     // A retired store awaiting this bank can make an older raw refill stale.

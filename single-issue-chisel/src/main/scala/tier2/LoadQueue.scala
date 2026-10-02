@@ -9,6 +9,7 @@ class LoadQueue(p: Config, entries: Int = 4) extends LocalLogic {
   val io = IO(new Bundle {
     val enq = Flipped(Decoupled(new LoadRequest(p))); val deq = Decoupled(new LoadRequest(p))
     val available = Input(Vec(p.banks,Bool()))
+    val candidates = Output(Vec(p.banks,Valid(new LoadRequest(p))))
     val live = Input(UInt(p.rob.W))
     val stores = Input(UInt(p.rob.W)); val wrapped = Input(UInt(p.rob.W))
     val freeCount = Output(UInt(log2Ceil(entries+1).W))
@@ -30,7 +31,17 @@ class LoadQueue(p: Config, entries: Int = 4) extends LocalLogic {
       Mux(io.wrapped(i) === io.wrapped(info.tag),i.U < info.tag,!io.wrapped(i))).reduce(_ || _)
     !info.waitForStores || !olderStore
   }
-  val eligible = (0 until entries).map(i => valid(i) && !stale(rows(i).info) && storesReady(rows(i).info) && io.available(bank(rows(i).addr)))
+  val admissible = (0 until entries).map(i => valid(i) && !stale(rows(i).info) && storesReady(rows(i).info))
+  val eligible = (0 until entries).map(i => admissible(i) && io.available(bank(rows(i).addr)))
+  // Prepare each bank's oldest candidate without its late cache readiness.
+  // The global selector still admits at most one load in each cycle.
+  for(b <- 0 until p.banks) {
+    val selected = Util.orderTree((0 until entries).map(i =>
+      (admissible(i) && bank(rows(i).addr) === b.U,rows(i).info.tag,i.U(log2Ceil(entries).W))),io.head,false)
+    io.candidates(b).valid := selected._1 || (space && io.enq.valid && bank(io.enq.bits.addr) === b.U &&
+      !stale(io.enq.bits.info) && storesReady(io.enq.bits.info))
+    io.candidates(b).bits := Mux(selected._1,Util.choose(selected._3,rows.toSeq),io.enq.bits)
+  }
   val choice = Util.orderTree((0 until entries).map(i => (eligible(i),rows(i).info.tag,i.U(log2Ceil(entries).W))),io.head,false)
   val flowReady = io.available(bank(io.enq.bits.addr)) && !stale(io.enq.bits.info) && storesReady(io.enq.bits.info)
   io.deq.valid := choice._1 || (space && io.enq.valid && flowReady)

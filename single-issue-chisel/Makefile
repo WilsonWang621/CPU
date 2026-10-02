@@ -6,8 +6,7 @@ MAX_CYCLES ?= 30000000
 OUT ?= single-issue-chisel/build/default
 .PHONY: generate build test perf synth
 generate:
-	$(SBT) -batch run
-	@echo student_top.sv > rtl/filelist.f
+	python3 scripts/generate_baseline.py
 build:
 	$(MAKE) -C $(ROOT) build FILELIST=single-issue-chisel/rtl/filelist.f BUILD=$(OUT)/sim JOBS=$(JOBS)
 test:
