@@ -1,0 +1,38 @@
+{
+  "repository": "https://github.com/tianhangj/RISC-V-CPU-2026",
+  "commit": "f3ed8dd3bbaf0caae0b245e20bdd0f5ef95477c4",
+  "head_verified": "2026-10-03",
+  "author_reported": {
+    "fmax_mhz": 331.42,
+    "area_um2": 6569.85,
+    "ipc_geomean": 0.2166,
+    "clock_target_ns": 3.333,
+    "local_reproduction": false
+  },
+  "source_sha256": {
+    "verilog/mul_div.sv": "f34fc599ea866b0b5f67896601c4bbc4a685ec2949520610c036b698cf599602",
+    "verilog/lsu.sv": "52c76801177c0b0ab6938956d90cc95fdc4648cebc185ad188a72b259eebd58a",
+    "verilog/filelist.f": "0c0b675727f588bd769f953c56edf047c6b0ec31791a09afc009c6fef6f012c1",
+    "verilog/decode.sv": "bf36229acbade87a7bb51e655d53c8cc74826126296b1e33daaffa9824a3f9fc",
+    "verilog/iq_mem.sv": "52f5eb6e8897dc7470e419e62830043088975b2346c49383f9ebdd87578df99a",
+    "verilog/issue_sched.sv": "f456bdae708e07cfa3e037294992869f777731446ab0ae0a8f4412892a6dfc24",
+    "verilog/fetch.sv": "120988d446202e692eeafd00580a43ba9203c30acc52ac0c370e13a181f72400",
+    "verilog/branch_predictor.sv": "479b1a48caf31abd56a9d55ada14a1e34f175d6c9fd5d075ba46f9eda70ceb28",
+    "verilog/iq_alu.sv": "383818778791510ca3f78e9a47243fda7f87fcf75b6286fcfe5ccf5a483d2a61",
+    "verilog/axi_bridge.sv": "6e9c7224f3269d0f5acb26a811d22bd693cddf5bd7fb10409d743cd1a82e52d0",
+    "verilog/rename.sv": "ac2bf3e1d871dc4de149195ca001053e0d4d71f41a784b2433cb1e4a37f90ac5",
+    "verilog/wb_arb.sv": "541a55a0a04e51ad5621bd9b19d94ccde9a133e242a7390ae32795e575479ffc",
+    "verilog/student_top.sv": "df739761755744c891e7658780337ff5eca326d7a9f7154b8e17c3097fe17c97",
+    "verilog/branch_ctrl.sv": "27a4ad8b0f86203570a0334219add79038dbc11c37fd6175d012d0b34363911a",
+    "verilog/alu.sv": "330dd8dc87dd7b104db987ddf1314523c176af887ca61961906617f11ae984b3",
+    "verilog/prf.sv": "b5443e0bf2b4b095386a8a1b0a5a90440d1c42e8c0e816701f8e9eb215305b22",
+    "verilog/rob.sv": "3c03bcef3399bfcd330e1cb4f18e62f7989b2f7d10665e4c626a2965f42bd301",
+    "verilog/icache.sv": "ee9b68200a25c65d3ad661840b4e18f3dd93db0099be6ef5b9389acdea504b46"
+  },
+  "lessons": [
+    "bounded queue sizes and local clock enables",
+    "separate candidate selection from operand reads",
+    "register completion and wakeup stages where IPC margin permits",
+    "reference lacks Tier2 IPC; do not adopt its queue reductions wholesale"
+  ]
+}
