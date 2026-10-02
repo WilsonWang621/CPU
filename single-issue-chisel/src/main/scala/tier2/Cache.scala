@@ -1,12 +1,20 @@
 package tier2
 import chisel3._
 import chisel3.util._
+import chisel3.experimental.{annotate,ChiselAnnotation}
 
 /** Synchronous tag and data SRAMs with per-word validity.
   * One-cycle load hits, pipelined word refills, buffered write-through stores.
   * Store allocation preserves written sectors without fetching unused words.
   */
-class Cache(bytes: Int, ways: Int, lineBytes: Int, writeEntries: Int = 16, readonly: Boolean = false, readAhead: Boolean = false) extends Module {
+class Cache(bytes: Int, ways: Int, lineBytes: Int, writeEntries: Int = 16, readonly: Boolean = false, readAhead: Boolean = false, preserveHierarchy: Boolean = false) extends Module {
+  if(preserveHierarchy) {
+    val owner = this
+    annotate(new ChiselAnnotation {
+      override def toFirrtl: firrtl.annotations.Annotation =
+        firrtl.AttributeAnnotation(owner.toTarget,"keep_hierarchy = 1")
+    })
+  }
   val io = IO(new Bundle { val cpu = Flipped(new MemPort); val mem = new MemPort; val fill = Valid(new MemReq); val loadReady = Output(Bool()) })
   val sets = bytes / ways / lineBytes
   val ob = log2Ceil(lineBytes); val sb = log2Ceil(sets); val wb = ob-2
@@ -132,15 +140,31 @@ class DataCache(p: Config) extends Module {
   val storeBank = if(p.banks == 1) 0.U else io.store.bits.addr(o+b-1,o)
   val prefetch = Module(new PreparedQueue(UInt(32.W),4))
   val recent = Reg(Vec(4,UInt((32-o).W))); val recentValid = RegInit(VecInit(Seq.fill(4)(false.B)))
-  val recentTail = RegInit(0.U(2.W)); val line = io.req.bits.mem.addr(31,o)
+  val recentTail = RegInit(0.U(2.W))
+  val demandAccepted = io.req.fire && !io.req.bits.mem.write
+  val trainAddress = Wire(UInt(32.W)); val trainValid = Wire(Bool())
+  if(p.prefetchTrainStages == 1 && p.bankedLoadPayload) {
+    val accepted = VecInit((0 until p.banks).map(i => RegNext(demandAccepted && bank === i.U,false.B)))
+    val addresses = (0 until p.banks).map { i =>
+      val address = Reg(UInt(32.W)); address := io.candidates(i).bits.addr; address
+    }
+    trainAddress := Util.select(accepted.toSeq,addresses)
+    trainValid := accepted.asUInt.orR
+  } else if(p.prefetchTrainStages == 1) {
+    trainAddress := RegNext(io.req.bits.mem.addr)
+    trainValid := RegNext(demandAccepted,false.B)
+  } else {
+    trainAddress := io.req.bits.mem.addr; trainValid := demandAccepted
+  }
+  val line = trainAddress(31,o)
   val seen = (0 until 4).map(i => recentValid(i) && recent(i) === line).reduce(_ || _)
   val sequential = (0 until 4).map(i => recentValid(i) && recent(i)+1.U === line).reduce(_ || _)
   val nextLine = Cat(line+1.U,0.U(o.W))
-  prefetch.io.enq.valid := p.prefetch.B && io.req.fire && !io.req.bits.mem.write && !seen && sequential && nextLine < "h10000000".U
+  prefetch.io.enq.valid := p.prefetch.B && trainValid && !seen && sequential && nextLine < "h10000000".U
   prefetch.io.enq.bits := nextLine
-  when(io.req.fire && !io.req.bits.mem.write && !seen) { recent(recentTail) := line; recentValid(recentTail) := true.B; recentTail := recentTail+1.U }
+  when(trainValid && !seen) { recent(recentTail) := line; recentValid(recentTail) := true.B; recentTail := recentTail+1.U }
   val prefetchBank = if(p.banks == 1) 0.U else prefetch.io.deq.bits(o+b-1,o)
-  val caches = Seq.fill(p.banks)(Module(new Cache(p.dcBytes/p.banks,p.ways,p.lineBytes,2,readAhead=p.ramReadAhead)))
+  val caches = Seq.fill(p.banks)(Module(new Cache(p.dcBytes/p.banks,p.ways,p.lineBytes,2,readAhead=p.ramReadAhead,preserveHierarchy=p.cacheHierarchy)))
   val ready = Wire(Vec(p.banks,Bool()))
   val storeCredits = Wire(Vec(p.banks,Bool()))
   val prefetchReady = Wire(Vec(p.banks,Bool()))
@@ -211,7 +235,7 @@ class Frontend(p: Config) extends Module {
     val redirect = Flipped(Valid(UInt(32.W))); val train = Flipped(Valid(new Training))
     val commit = Flipped(Valid(new Training))
   })
-  val cache = Module(new Cache(p.icBytes,1,p.lineBytes,readonly=true,readAhead=p.ramReadAhead)); io.mem <> cache.io.mem
+  val cache = Module(new Cache(p.icBytes,1,p.lineBytes,readonly=true,readAhead=p.ramReadAhead,preserveHierarchy=p.cacheHierarchy)); io.mem <> cache.io.mem
   val pc = RegInit(0.U(32.W)); val epoch = RegInit(0.U(4.W))
   val entries = p.btbEntries; val idxBits = log2Ceil(entries)
   val bvalid = RegInit(VecInit(Seq.fill(entries)(false.B)))
