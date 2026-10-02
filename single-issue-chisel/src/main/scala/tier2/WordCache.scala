@@ -28,7 +28,7 @@ class WordCacheEntry extends LocalLogic {
 }
 
 /** Raw cache fills and committed byte stores keep a small associative L0 coherent. */
-class WordCache(entries: Int) extends Module {
+class WordCache(entries: Int, replacement: Int = 0) extends Module {
   require(entries > 0 && isPow2(entries))
   val io = IO(new Bundle {
     val address = Input(UInt(32.W)); val hit = Output(Bool()); val data = Output(UInt(32.W))
@@ -36,7 +36,17 @@ class WordCache(entries: Int) extends Module {
     val store = Flipped(Valid(new MemReq))
   })
   val rows = Seq.fill(entries)(Module(new WordCacheEntry))
-  val victim = RegInit(1.U(entries.W))
+  val victim = Wire(UInt(entries.W))
+  val advance = Wire(Bool())
+  if(replacement==0) {
+    val pointer = RegInit(1.U(entries.W)); victim := pointer
+    when(advance) { if(entries==1) { pointer := 1.U } else { pointer := Cat(pointer(entries-2,0),pointer(entries-1)) } }
+  } else {
+    // A 63-cycle LFSR keeps allocation off the commit control path.
+    val random = RegInit(1.U(6.W))
+    random := Cat(random(4,0),random(5)^random(4))
+    victim := (if(entries==1) 1.U else UIntToOH(random(log2Ceil(entries)-1,0),entries))
+  }
   val anyFill = rows.map(_.io.fillHit).reduce(_ || _); val anyStore = rows.map(_.io.storeHit).reduce(_ || _)
   for(i <- 0 until entries) {
     val row = rows(i).io
@@ -46,7 +56,5 @@ class WordCache(entries: Int) extends Module {
     row.victim := victim(i); row.anyFillHit := anyFill; row.anyStoreHit := anyStore
   }
   io.hit := rows.map(_.io.hit).reduce(_ || _); io.data := rows.map(_.io.data).reduce(_ | _)
-  when((io.fill.valid && !anyFill) || (io.store.valid && io.store.bits.mask.andR && !anyStore)) {
-    if(entries==1) { victim := 1.U } else { victim := Cat(victim(entries-2,0),victim(entries-1)) }
-  }
+  advance := (io.fill.valid && !anyFill) || (io.store.valid && io.store.bits.mask.andR && !anyStore)
 }
