@@ -10,6 +10,8 @@ class Core(p: Config) extends Module {
   io.axi <> bus.io.axi; bus.io.in <> arb.io.out
   arb.io.clients(0) <> fetch.io.mem; arb.io.clients(1) <> dc.io.mem
   val head = RegInit(0.U(p.tagBits.W)); val tail = RegInit(0.U(p.tagBits.W))
+  val headSelect = RegInit(1.U(p.rob.W))
+  def atHead[T <: Data](xs: Vec[T]): T = Mux1H(headSelect.asBools,xs)
   val count = RegInit(0.U((p.tagBits+1).W))
   val live = RegInit(VecInit(Seq.fill(p.rob)(false.B)))
   val generations = RegInit(VecInit(Seq.fill(p.rob)(0.U(8.W))))
@@ -19,12 +21,20 @@ class Core(p: Config) extends Module {
   val rd = Reg(Vec(p.rob,UInt(5.W))); val writes = Reg(Vec(p.rob,Bool()))
   val pc = Reg(Vec(p.rob,UInt(32.W))); val inst = Reg(Vec(p.rob,UInt(32.W)))
   val predicted = Reg(Vec(p.rob,UInt(32.W))); val actual = Reg(Vec(p.rob,UInt(32.W)))
+  val history = Reg(Vec(p.rob,UInt(2.W)))
   val control = Reg(Vec(p.rob,Bool())); val conditional = Reg(Vec(p.rob,Bool()))
   val taken = Reg(Vec(p.rob,Bool())); val calls = Reg(Vec(p.rob,Bool())); val returns = Reg(Vec(p.rob,Bool()))
   val stores = Reg(Vec(p.rob,Bool())); val storeAddr = Reg(Vec(p.rob,UInt(32.W)))
   val storeData = Reg(Vec(p.rob,UInt(32.W))); val storeMask = Reg(Vec(p.rob,UInt(4.W)))
   val arch = RegInit(VecInit(Seq.fill(32)(0.U(32.W))))
   val mapped = RegInit(VecInit(Seq.fill(32)(false.B))); val mapping = Reg(Vec(32,UInt(p.tagBits.W)))
+  val cpValid = RegInit(VecInit(Seq.fill(p.checkpoints)(false.B)))
+  val cpOwner = Reg(Vec(p.checkpoints,UInt(p.tagBits.W)))
+  val cpMapped = Reg(Vec(p.checkpoints,Vec(32,Bool())))
+  val cpMapping = Reg(Vec(p.checkpoints,Vec(32,UInt(p.tagBits.W))))
+  val branchCheckpoint = Reg(Vec(p.rob,UInt(p.cpBits.W)))
+  val freeCheckpoint = PriorityEncoder(~cpValid.asUInt)
+  val checkpointAvailable = !cpValid.asUInt.andR
   val halted = RegInit(false.B)
   val qvalid = RegInit(VecInit(Seq.fill(p.iq)(false.B)))
   val qd = Reg(Vec(p.iq,new Decoded)); val qpc = Reg(Vec(p.iq,UInt(32.W)))
@@ -38,19 +48,23 @@ class Core(p: Config) extends Module {
   val retire = Wire(Bool()); val flush = Wire(Bool())
   val recoveryTag = Reg(UInt(p.tagBits.W)); val recoveryPC = Reg(UInt(32.W))
   val recoveryValid = RegInit(false.B)
-  def younger(tag: UInt): Bool = (tag-head)(p.tagBits-1,0) > (recoveryTag-head)(p.tagBits-1,0)
+  val recoveryCheckpoint = Reg(UInt(p.checkpoints.W))
+  def before(a: UInt,b: UInt): Bool = Mux((a < head) === (b < head),a < b,!(a < head))
+  def younger(tag: UInt): Bool = before(recoveryTag,tag)
   def survives(tag: UInt): Bool = !flush || (if(p.earlyRecovery) !younger(tag) else false.B)
-  recoveryValid := xv && (xd.branch || xd.jal || xd.jalr) && alu.io.next =/= predicted(xt) && survives(xt)
+  val branchMiss = xv && (xd.branch || xd.jal || xd.jalr) && alu.io.next =/= predicted(xt) && survives(xt)
+  recoveryValid := branchMiss
   when(xv) { recoveryTag := xt; recoveryPC := alu.io.next }
+  when(xv && (xd.branch || xd.jal || xd.jalr)) { recoveryCheckpoint := UIntToOH(branchCheckpoint(xt),p.checkpoints) }
   val loadRequests = Module(new Queue(new LoadRequest(p),4,flow=true))
   val badAddress = (alu.io.addr >= "h10000000".U && !(xd.store && alu.io.addr === "h80000000".U)) ||
     (xd.fn(1,0) === 2.U && alu.io.addr(1,0) =/= 0.U) || (xd.fn(1,0) === 1.U && alu.io.addr(0))
-  val headStore = count =/= 0.U && done(head) && stores(head) && !halted
+  val headStore = count =/= 0.U && atHead(done) && atHead(stores) && !halted
   val pendingLoad = loadRequests.io.deq.bits.info
   val staleLoad = !live(pendingLoad.tag) || pendingLoad.epoch =/= generations(pendingLoad.tag) || !survives(pendingLoad.tag)
   dc.io.req.valid := headStore || (loadRequests.io.deq.valid && !staleLoad)
-  dc.io.req.bits.mem.addr := Mux(headStore,storeAddr(head),loadRequests.io.deq.bits.addr)
-  dc.io.req.bits.mem.data := storeData(head); dc.io.req.bits.mem.mask := storeMask(head)
+  dc.io.req.bits.mem.addr := Mux(headStore,atHead(storeAddr),loadRequests.io.deq.bits.addr)
+  dc.io.req.bits.mem.data := atHead(storeData); dc.io.req.bits.mem.mask := atHead(storeMask)
   dc.io.req.bits.mem.write := headStore; dc.io.req.bits.info := loadRequests.io.deq.bits.info
   dc.io.rsp.ready := true.B
   val loadAccept = dc.io.req.fire && !headStore
@@ -64,24 +78,33 @@ class Core(p: Config) extends Module {
   val forwardingMask = Wire(UInt(4.W)); val forwardingData = Wire(UInt(32.W))
   val readMask = (MuxLookup(xd.fn(1,0),15.U(4.W))(Seq(0.U -> 1.U(4.W),1.U -> 3.U(4.W))) << alu.io.addr(1,0))(3,0)
   val fullyForwarded = (forwardingMask & readMask) === readMask
-  val bypassLoad = xv && xd.load && !badAddress && fullyForwarded
-  loadRequests.io.enq.valid := xv && xd.load && !badAddress && !fullyForwarded && survives(xt)
+  val l0Hit = WireDefault(false.B); val l0Word = WireDefault(0.U(32.W))
+  if(p.l0Entries > 0) {
+    val l0 = Module(new WordCache(p.l0Entries))
+    l0.io.address := alu.io.addr; l0Hit := l0.io.hit; l0Word := l0.io.data
+    l0.io.fill.valid := dc.io.fill.valid
+    l0.io.fill.bits.address := dc.io.fill.bits.addr
+    l0.io.fill.bits.data := dc.io.fill.bits.data
+    l0.io.store.valid := retire && atHead(stores)
+    l0.io.store.bits := dc.io.req.bits.mem
+  }
+  val bypassLoad = xv && xd.load && !badAddress && (fullyForwarded || l0Hit)
+  loadRequests.io.enq.valid := xv && xd.load && !badAddress && !fullyForwarded && !l0Hit && survives(xt)
   loadRequests.io.enq.bits.addr := alu.io.addr
   loadRequests.io.enq.bits.info.tag := xt; loadRequests.io.enq.bits.info.fn := xd.fn
   loadRequests.io.enq.bits.info.offset := alu.io.addr(1,0); loadRequests.io.enq.bits.info.epoch := generations(xt)
   loadRequests.io.enq.bits.info.prefetch := false.B
-  val storeAges = (0 until p.rob).map(i => (i.U(p.tagBits.W)-head)(p.tagBits-1,0))
-  val loadAge = (xt-head)(p.tagBits-1,0)
-  val matchingStores = (0 until p.rob).map(i => live(i) && stores(i) && done(i) && storeAges(i) < loadAge && storeAddr(i)(31,2) === alu.io.addr(31,2))
+  val matchingStores = (0 until p.rob).map(i => live(i) && stores(i) && done(i) && before(i.U(p.tagBits.W),xt) && storeAddr(i)(31,2) === alu.io.addr(31,2))
   val forwarding = (0 until 4).map(b => {
-    val picked = Util.ageTree((0 until p.rob).map(i => (matchingStores(i) && storeMask(i)(b),storeAges(i),storeData(i)(8*b+7,8*b))),true)
+    val picked = Util.orderTree((0 until p.rob).map(i => (matchingStores(i) && storeMask(i)(b),i.U(p.tagBits.W),storeData(i)(8*b+7,8*b))),head,true)
     (picked._1,picked._3)
   })
   forwardingMask := VecInit(forwarding.map(_._1)).asUInt
   forwardingData := Cat(forwarding.reverse.map(_._2))
   loadRequests.io.enq.bits.info.forwardMask := forwardingMask
   loadRequests.io.enq.bits.info.forwardData := forwardingData
-  val forwardShifted = forwardingData >> Cat(alu.io.addr(1,0),0.U(3.W))
+  val bypassWord = Cat((0 until 4).reverse.map(b => Mux(forwardingMask(b),forwardingData(8*b+7,8*b),l0Word(8*b+7,8*b))))
+  val forwardShifted = bypassWord >> Cat(alu.io.addr(1,0),0.U(3.W))
   val forwardValue = MuxLookup(xd.fn,forwardShifted)(Seq(0.U -> Util.sext(forwardShifted(7,0)),1.U -> Util.sext(forwardShifted(15,0)),
     4.U -> Cat(0.U(24.W),forwardShifted(7,0)),5.U -> Cat(0.U(16.W),forwardShifted(15,0))))
   md.io.req.valid := xv && xd.muldiv && survives(xt)
@@ -108,10 +131,11 @@ class Core(p: Config) extends Module {
       storeMask(i) := (MuxLookup(xd.fn,15.U(4.W))(Seq(0.U -> 1.U(4.W),1.U -> 3.U(4.W))) << alu.io.addr(1,0))(3,0)
     }
     when(xv && xt === i.U && (xd.load || xd.store) && badAddress) { fault(i) := true.B }
+    when(xv && xt === i.U && xd.load) { storeAddr(i) := alu.io.addr }
   }
   val eligible = Wire(Vec(p.iq,Bool()))
   for(i <- 0 until p.iq) {
-    val olderStore = (0 until p.rob).map(j => live(j) && stores(j) && !done(j) && ((j.U(p.tagBits.W)-head)(p.tagBits-1,0) < (qtag(i)-head)(p.tagBits-1,0))).reduce(_ || _)
+    val olderStore = (0 until p.rob).map(j => live(j) && stores(j) && !done(j) && before(j.U(p.tagBits.W),qtag(i))).reduce(_ || _)
     eligible(i) := qvalid(i) && (qar(i) || wake(qat(i))) && (qbr(i) || wake(qbt(i))) &&
       (!qd(i).load || (!olderStore && loadRequests.io.enq.ready)) && (!qd(i).muldiv || (md.io.req.ready && !(xv && xd.muldiv)))
     when(!qar(i) && wake(qat(i))) { qar(i) := true.B; qa(i) := bypass(qat(i),qa(i)) }
@@ -124,21 +148,20 @@ class Core(p: Config) extends Module {
       (a._1 || b._1,Mux(pickA,a._2,b._2),Mux(pickA,a._3,b._3))
     }
   }
-  val winner = oldest((0 until p.iq).map(i => (eligible(i),(qtag(i)-head)(p.tagBits-1,0),i.U(log2Ceil(p.iq).W))))
+  val winner = Util.orderTree((0 until p.iq).map(i => (eligible(i),qtag(i),i.U(log2Ceil(p.iq).W))),head,false)
   val issue = winner._1 && xspace && !flush && !halted
   val qi = winner._3
   when(xComplete) { xv := false.B }
   when(issue) {
-    xv := true.B; xd := Util.choose(qi,qd.toSeq); xpc := Util.choose(qi,qpc.toSeq); xt := Util.choose(qi,qtag.toSeq)
-    xa := Mux(qar(qi),Util.choose(qi,qa.toSeq),bypass(qat(qi),qa(qi)))
-    xb := Mux(qbr(qi),Util.choose(qi,qb.toSeq),bypass(qbt(qi),qb(qi)))
+    xv := true.B
     qvalid(qi) := false.B
   }
   val free = PriorityEncoder(~qvalid.asUInt)
   decoder.io.inst := fetch.io.out.bits.inst
   val d = decoder.io.d
   val dispatch = fetch.io.out.fire
-  fetch.io.out.ready := count < p.rob.U && !qvalid.asUInt.andR && !flush && !halted
+  fetch.io.out.ready := count < p.rob.U && !qvalid.asUInt.andR && !flush && !halted &&
+    (!(d.branch || d.jal || d.jalr) || checkpointAvailable)
   def source(rs: UInt, used: Bool): (Bool,UInt,UInt) = {
     val tag = mapping(rs); val waiting = used && rs =/= 0.U && mapped(rs)
     val ready = !waiting || done(tag) || wake(tag)
@@ -149,48 +172,97 @@ class Core(p: Config) extends Module {
   val unknownStore = (0 until p.rob).map(i => live(i) && stores(i) && !done(i)).reduce(_ || _)
   val direct = dispatch && !winner._1 && xspace && s1._1 && s2._1 &&
     (!d.load || (!unknownStore && loadRequests.io.enq.ready)) && (!d.muldiv || (md.io.req.ready && !(xv && xd.muldiv)))
-  when(direct) { xv := true.B; xd := d; xpc := fetch.io.out.bits.pc; xt := tail; xa := s1._2; xb := s2._2 }
+  when(direct) { xv := true.B }
+  // Wide execution payload preparation does not depend on recovery permission.
+  when(xspace) {
+    xd := Mux(winner._1,Util.choose(qi,qd.toSeq),d)
+    xpc := Mux(winner._1,Util.choose(qi,qpc.toSeq),fetch.io.out.bits.pc)
+    xt := Mux(winner._1,Util.choose(qi,qtag.toSeq),tail)
+    xa := Mux(winner._1,Mux(qar(qi),Util.choose(qi,qa.toSeq),bypass(qat(qi),qa(qi))),s1._2)
+    xb := Mux(winner._1,Mux(qbr(qi),Util.choose(qi,qb.toSeq),bypass(qbt(qi),qb(qi))),s2._2)
+  }
   when(dispatch) {
     generations(tail) := generations(tail)+1.U
-    fault(tail) := d.illegal
-    live(tail) := true.B; done(tail) := false.B; rd(tail) := d.rd; writes(tail) := d.writes && d.rd =/= 0.U
-    pc(tail) := fetch.io.out.bits.pc; inst(tail) := fetch.io.out.bits.inst; predicted(tail) := fetch.io.out.bits.next
-    control(tail) := d.branch || d.jal || d.jalr; conditional(tail) := d.branch; stores(tail) := d.store
-    calls(tail) := (d.jal || d.jalr) && (d.rd === 1.U || d.rd === 5.U)
-    returns(tail) := d.jalr && (d.rs1 === 1.U || d.rs1 === 5.U) && d.rd =/= d.rs1
+    live(tail) := true.B; done(tail) := false.B
     tail := tail+1.U
-    qvalid(free) := !direct; qd(free) := d; qpc(free) := fetch.io.out.bits.pc; qtag(free) := tail
-    qa(free) := s1._2; qar(free) := s1._1; qat(free) := s1._3
-    qb(free) := s2._2; qbr(free) := s2._1; qbt(free) := s2._3
+    qvalid(free) := !direct
   }
-  retire := count =/= 0.U && done(head) && !halted && (!stores(head) || dc.io.req.ready)
-  flush := (if(p.earlyRecovery) recoveryValid else retire && control(head) && actual(head) =/= predicted(head))
-  fetch.io.redirect.valid := flush; fetch.io.redirect.bits := (if(p.earlyRecovery) recoveryPC else actual(head))
-  fetch.io.train.valid := retire && control(head)
-  fetch.io.train.bits.pc := pc(head); fetch.io.train.bits.target := storeAddr(head)
-  fetch.io.train.bits.taken := taken(head); fetch.io.train.bits.conditional := conditional(head)
-  fetch.io.train.bits.call := calls(head); fetch.io.train.bits.ret := returns(head)
-  fetch.io.train.bits.history := 0.U
-  fetch.io.commit.valid := fetch.io.train.valid; fetch.io.commit.bits := fetch.io.train.bits
+  // Prepare empty slots regardless of permission to publish their valid bit.
+  for(i <- 0 until p.rob) {
+    when(!live(i) && tail === i.U) {
+      fault(i) := d.illegal; rd(i) := d.rd; writes(i) := d.writes && d.rd =/= 0.U
+      pc(i) := fetch.io.out.bits.pc; inst(i) := fetch.io.out.bits.inst; predicted(i) := fetch.io.out.bits.next
+      history(i) := fetch.io.out.bits.history
+      control(i) := d.branch || d.jal || d.jalr; conditional(i) := d.branch; stores(i) := d.store
+      calls(i) := (d.jal || d.jalr) && (d.rd === 1.U || d.rd === 5.U)
+      returns(i) := d.jalr && (d.rs1 === 1.U || d.rs1 === 5.U) && d.rd =/= d.rs1
+      branchCheckpoint(i) := freeCheckpoint
+    }
+  }
+  for(i <- 0 until p.iq) {
+    when(!qvalid(i) && free === i.U) {
+      qd(i) := d; qpc(i) := fetch.io.out.bits.pc; qtag(i) := tail
+      qa(i) := s1._2; qar(i) := s1._1; qat(i) := s1._3
+      qb(i) := s2._2; qbr(i) := s2._1; qbt(i) := s2._3
+    }
+  }
+  retire := count =/= 0.U && atHead(done) && !halted && (!atHead(stores) || dc.io.req.ready)
+  flush := (if(p.earlyRecovery) recoveryValid else retire && atHead(control) && atHead(actual) =/= atHead(predicted))
+  fetch.io.redirect.valid := (if(p.fastRedirect && p.earlyRecovery) branchMiss else flush)
+  fetch.io.redirect.bits := (if(p.fastRedirect && p.earlyRecovery) alu.io.next else if(p.earlyRecovery) recoveryPC else atHead(actual))
+  val committedTraining = Wire(new Training)
+  committedTraining.pc := atHead(pc); committedTraining.target := atHead(storeAddr)
+  committedTraining.taken := atHead(taken); committedTraining.conditional := atHead(conditional)
+  committedTraining.call := atHead(calls); committedTraining.ret := atHead(returns)
+  committedTraining.history := atHead(history)
+  val trainNow = retire && atHead(control)
+  fetch.io.commit.valid := RegNext(trainNow,false.B)
+  fetch.io.commit.bits := RegEnable(committedTraining,trainNow)
+  val executedTraining = Wire(new Training)
+  executedTraining.pc := xpc
+  executedTraining.target := Mux(xd.branch || xd.jal,alu.io.pc+xd.imm,alu.io.addr)
+  executedTraining.taken := alu.io.taken; executedTraining.conditional := xd.branch
+  executedTraining.call := (xd.jal || xd.jalr) && (xd.rd === 1.U || xd.rd === 5.U)
+  executedTraining.ret := xd.jalr && (xd.rs1 === 1.U || xd.rs1 === 5.U) && xd.rd =/= xd.rs1
+  executedTraining.history := history(xt)
+  val trainExecution = xv && (xd.branch || xd.jal || xd.jalr) && survives(xt)
+  fetch.io.train.valid := RegNext(trainExecution,false.B)
+  fetch.io.train.bits := RegEnable(executedTraining,trainExecution)
   when(retire) {
-    assert(!fault(head),"Retiring faulting instruction")
+    assert(!atHead(fault),"Retiring faulting instruction")
     live(head) := false.B; head := head+1.U
-    when(stores(head) && storeAddr(head) === "h80000000".U) { halted := true.B }
+    headSelect := Cat(headSelect(p.rob-2,0),headSelect(p.rob-1))
+    when(atHead(stores) && atHead(storeAddr) === "h80000000".U) { halted := true.B }
   }
   for(r <- 1 until 32) {
-    when(retire && writes(head) && rd(head) === r.U) {
-      arch(r) := values(head)
+    when(retire && atHead(writes) && atHead(rd) === r.U) {
+      arch(r) := atHead(values)
       when(mapped(r) && mapping(r) === head) { mapped(r) := false.B }
     }
     when(dispatch && d.writes && d.rd === r.U) { mapped(r) := true.B; mapping(r) := tail }
     when(flush) {
       if(p.earlyRecovery) {
-        val newest = Util.ageTree((0 until p.rob).map(i =>
-          (live(i) && !younger(i.U(p.tagBits.W)) && !(retire && head === i.U) && writes(i) && rd(i) === r.U,
-           (i.U(p.tagBits.W)-head)(p.tagBits-1,0),i.U(p.tagBits.W))),true)
-        mapped(r) := newest._1; mapping(r) := newest._3
+        val restoredTag = Mux1H(recoveryCheckpoint.asBools,(0 until p.checkpoints).map(c => cpMapping(c)(r)))
+        val restoredMapped = Mux1H(recoveryCheckpoint.asBools,(0 until p.checkpoints).map(c => cpMapped(c)(r)))
+        mapped(r) := restoredMapped && !(retire && atHead(writes) && atHead(rd) === r.U && restoredTag === head)
+        mapping(r) := restoredTag
       } else { mapped(r) := false.B }
     }
+  }
+  for(c <- 0 until p.checkpoints) {
+    for(r <- 1 until 32) {
+      when(retire && atHead(writes) && atHead(rd) === r.U && cpMapping(c)(r) === head) { cpMapped(c)(r) := false.B }
+      // Prepare only an unallocated checkpoint; dispatch publishes cpValid.
+      when(!cpValid(c) && freeCheckpoint === c.U) {
+        val newWriter = d.writes && d.rd === r.U
+        val savedTag = Mux(newWriter,tail,mapping(r))
+        cpMapping(c)(r) := savedTag
+        cpMapped(c)(r) := (newWriter || mapped(r)) && !(retire && atHead(writes) && atHead(rd) === r.U && savedTag === head)
+      }
+    }
+    when(dispatch && (d.branch || d.jal || d.jalr) && freeCheckpoint === c.U) { cpValid(c) := true.B; cpOwner(c) := tail }
+    when(xv && (xd.branch || xd.jal || xd.jalr) && alu.io.next === predicted(xt) && branchCheckpoint(xt) === c.U) { cpValid(c) := false.B }
+    when(flush && (if(p.earlyRecovery) (younger(cpOwner(c)) || cpOwner(c) === recoveryTag) else true.B)) { cpValid(c) := false.B }
   }
   when(dispatch =/= retire) { count := Mux(dispatch,count+1.U,count-1.U) }
   when(flush) {
@@ -200,17 +272,21 @@ class Core(p: Config) extends Module {
       for(i <- 0 until p.rob) { when(younger(i.U(p.tagBits.W))) { live(i) := false.B; done(i) := false.B } }
       for(i <- 0 until p.iq) { when(younger(qtag(i))) { qvalid(i) := false.B } }
     } else {
-      head := 0.U; tail := 0.U; count := 0.U; xv := false.B
+      head := 0.U; headSelect := 1.U; tail := 0.U; count := 0.U; xv := false.B
       for(i <- 0 until p.rob) { live(i) := false.B; done(i) := false.B }
       for(i <- 0 until p.iq) { qvalid(i) := false.B }
     }
   }
   if(p.debug) {
   val events = Seq(retire,issue,dispatch,flush,!fetch.io.out.valid,count === p.rob.U,qvalid.asUInt.andR,
-    xv && !xComplete,loadAccept,loadReturn,headStore && !dc.io.req.ready)
+    xv && !xComplete,loadAccept,loadReturn,headStore && !dc.io.req.ready,
+    direct,count =/= 0.U && !atHead(done),xspace && !winner._1 && !direct,
+    loadRequests.io.deq.valid && !dc.io.req.ready,bypassLoad,
+    qvalid.asUInt.orR && !eligible.asUInt.orR,retire && atHead(conditional))
   val counters = events.map(e => { val n = RegInit(0.U(32.W)); when(e) { n := n+1.U }; n })
-  when(retire && stores(head) && storeAddr(head) === "h80000000".U) {
+  when(retire && atHead(stores) && atHead(storeAddr) === "h80000000".U) {
     printf(p"Tier2 retired=${counters(0)} issued=${counters(1)} dispatched=${counters(2)} flush=${counters(3)} fetch_empty=${counters(4)} rob_full=${counters(5)} iq_full=${counters(6)} ex_stall=${counters(7)} loads=${counters(8)} returns=${counters(9)} store_stall=${counters(10)}\n")
+    printf(p"Details direct=${counters(11)} head_wait=${counters(12)} issue_empty=${counters(13)} load_wait=${counters(14)} bypass_loads=${counters(15)} iq_wait=${counters(16)} conditional=${counters(17)}\n")
   }
   }
 }
@@ -233,7 +309,8 @@ object Generate extends App {
   def n(key: String, default: Int): Int = options.get(key).map(_.toInt).getOrElse(default)
   val p = Config(rob=n("--rob",16),iq=n("--iq",8),icBytes=n("--ic-bytes",4096),dcBytes=n("--dc-bytes",4096),
     lineBytes=n("--line-bytes",32),ways=n("--ways",2),debug=n("--debug",0) != 0,banks=n("--banks",4),earlyRecovery=n("--early-recovery",1) != 0,
-    prefetch=n("--prefetch",1) != 0)
+    prefetch=n("--prefetch",1) != 0,btbEntries=n("--btb-entries",128),historyBits=n("--history-bits",1),l0Entries=n("--l0-entries",0),
+    storeEntries=n("--store-entries",0),checkpoints=n("--checkpoints",4),fastRedirect=n("--fast-redirect",0) != 0)
   _root_.circt.stage.ChiselStage.emitSystemVerilogFile(new StudentTop(p), Array("--target-dir", options.getOrElse("--out","rtl")),
     Array("--disable-all-randomization", "--lowering-options=disallowLocalVariables,disallowPackedArrays"))
 }
