@@ -117,9 +117,14 @@ class Core(p: Config) extends Module {
   if(p.l0Entries > 0) {
     val l0 = Module(new WordCache(p.l0Entries))
     l0.io.address := addressWord.io.value; l0Hit := l0.io.hit; l0Word := l0.io.data
-    l0.io.fill.valid := dc.io.fill.valid
-    l0.io.fill.bits.address := dc.io.fill.bits.addr
-    l0.io.fill.bits.data := dc.io.fill.bits.data
+    val fill = (0 until p.l0FillStages).foldLeft(dc.io.fill) { (previous,_) =>
+      val next = Wire(Valid(new MemReq))
+      next.valid := RegNext(previous.valid,false.B); next.bits := RegNext(previous.bits)
+      next
+    }
+    l0.io.fill.valid := fill.valid
+    l0.io.fill.bits.address := fill.bits.addr
+    l0.io.fill.bits.data := fill.bits.data
     l0.io.store.valid := retire && atHead(stores)
     l0.io.store.bits := dc.io.store.bits
   }
@@ -381,7 +386,7 @@ object Generate extends App {
   val p = Config(rob=n("--rob",16),iq=n("--iq",8),icBytes=n("--ic-bytes",4096),dcBytes=n("--dc-bytes",4096),
     lineBytes=n("--line-bytes",32),ways=n("--ways",2),debug=n("--debug",0) != 0,banks=n("--banks",4),earlyRecovery=n("--early-recovery",1) != 0,
     prefetch=n("--prefetch",1) != 0,btbEntries=n("--btb-entries",128),historyBits=n("--history-bits",1),l0Entries=n("--l0-entries",0),
-    storeEntries=n("--store-entries",0),checkpoints=n("--checkpoints",4),fastRedirect=n("--fast-redirect",0) != 0,storeSlots=n("--store-slots",16),loadEntries=n("--load-entries",8))
+    storeEntries=n("--store-entries",0),checkpoints=n("--checkpoints",4),fastRedirect=n("--fast-redirect",0) != 0,storeSlots=n("--store-slots",16),loadEntries=n("--load-entries",8),l0FillStages=n("--l0-fill-stages",0))
   _root_.circt.stage.ChiselStage.emitSystemVerilogFile(new StudentTop(p), Array("--target-dir", options.getOrElse("--out","rtl")),
     Array("--disable-all-randomization", "--lowering-options=disallowLocalVariables,disallowPackedArrays"))
 }
