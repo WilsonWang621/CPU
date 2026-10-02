@@ -1,0 +1,49 @@
+[info] welcome to sbt 1.10.2 (Ubuntu Java 21.0.12.1)
+[info] loading project definition from /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/build/stage2/v69-registered-prefetch-training/generator/project
+[info] loading settings for project generator from build.sbt ...
+[info] set current project to generator (in build file:/home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/build/stage2/v69-registered-prefetch-training/generator/)
+[info] compiling 16 Scala sources to /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/build/stage2/v69-registered-prefetch-training/generator/target/scala-2.13/classes ...
+[warn] /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/build/stage2/v69-registered-prefetch-training/generator/src/main/scala/tier2/Attributes.scala:2:8: Importing from firrtl is deprecated as of Chisel's 3.6.0 release.
+[warn] import firrtl.annotations.{ModuleTarget,SingleTargetAnnotation}
+[warn]        ^
+[warn] one warning found
+[info] done compiling
+[info] running (fork) tier2.Generate --out /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage2/v69-registered-prefetch-training/rtl --rob 32 --iq 8 --ic-bytes 4096 --dc-bytes 4096 --line-bytes 64 --ways 2 --banks 4 --early-recovery 1 --prefetch 1 --btb-entries 64 --history-bits 1 --l0-entries 32 --store-entries 4 --checkpoints 4 --fast-redirect 1 --store-slots 8 --load-entries 8 --debug 0 --l0-fill-stages 1 --l0-replacement 1 --ram-read-ahead 0 --l0-store-stages 1 --banked-load-payload 1 --cache-hierarchy 0 --prefetch-train-stages 1
+[error] Exception in thread "main" chisel3.package$ChiselException: Width of DataCache.addresses_0: Reg[UInt] is unknown!
+[error] 	at ... ()
+[error] 	at tier2.Util$.select(Common.scala:118)
+[error] 	at tier2.DataCache.$anonfun$new$119(Cache.scala:149)
+[error] 	at chisel3.Data.$anonfun$$colon$eq$1(Data.scala:762)
+[error] 	at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.scala:18)
+[error] 	at chisel3.experimental.prefix$.apply(prefix.scala:33)
+[error] 	at chisel3.Data.$colon$eq(Data.scala:762)
+[error] 	at tier2.DataCache.<init>(Cache.scala:149)
+[error] 	at tier2.Core.$anonfun$dc$2(Core.scala:8)
+[error] 	at chisel3.Module$.evaluate(Module.scala:88)
+[error] 	at chisel3.Module$.do_apply(Module.scala:35)
+[error] 	at tier2.Core.$anonfun$dc$1(Core.scala:8)
+[error] 	at chisel3.internal.plugin.package$.autoNameRecursively(package.scala:33)
+[error] 	at tier2.Core.<init>(Core.scala:8)
+[error] 	at tier2.StudentTop.$anonfun$c$2(Core.scala:390)
+[error] 	at chisel3.Module$.evaluate(Module.scala:88)
+[error] 	at chisel3.Module$.do_apply(Module.scala:35)
+[error] 	at tier2.StudentTop.$anonfun$c$1(Core.scala:390)
+[error] 	at chisel3.internal.plugin.package$.autoNameRecursively(package.scala:33)
+[error] 	at tier2.StudentTop.<init>(Core.scala:390)
+[error] 	at tier2.Generate$.$anonfun$new$320(Core.scala:403)
+[error] 	at chisel3.Module$.evaluate(Module.scala:88)
+[error] 	at chisel3.Module$.do_apply(Module.scala:35)
+[error] 	at chisel3.stage.phases.Elaborate.$anonfun$transform$2(Elaborate.scala:52)
+[error] 	at chisel3.internal.Builder$.$anonfun$buildImpl$1(Builder.scala:1042)
+[error] 	at scala.util.DynamicVariable.withValue(DynamicVariable.scala:59)
+[error] 	at chisel3.internal.Builder$.buildImpl(Builder.scala:1032)
+[error] 	at chisel3.internal.Builder$.$anonfun$build$1(Builder.scala:1023)
+[error] 	at logger.Logger$.$anonfun$makeScope$4(Logger.scala:148)
+[error] 	at scala.util.DynamicVariable.withValue(DynamicVariable.scala:59)
+[error] 	at logger.Logger$.makeScope(Logger.scala:146)
+[error] 	at logger.Logger$.makeScope(Logger.scala:133)
+[error] 	at ... ()
+[error] 	at ... (Stack trace trimmed to user code only. Rerun with --full-stacktrace to see the full stack trace)
+[error] Nonzero exit code returned from runner: 1
+[error] (Compile / run) Nonzero exit code returned from runner: 1
+[error] Total time: 14 s, completed Oct 3, 2026, 7:16:15 AM
