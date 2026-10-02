@@ -71,6 +71,7 @@ class Core(p: Config) extends Module {
   val loadRequests = Module(new LoadQueue(p))
   loadRequests.io.available := dc.io.loadReady; loadRequests.io.live := live.asUInt
   loadRequests.io.epochs := generations; loadRequests.io.head := head
+  loadRequests.io.stores := stores.asUInt; loadRequests.io.wrapped := wrapped
   loadRequests.io.squash := flush; loadRequests.io.boundary := recoveryTag
   val badAddress = (alu.io.addr >= "h10000000".U && !(xd.store && alu.io.addr === "h80000000".U)) ||
     (xd.fn(1,0) === 2.U && alu.io.addr(1,0) =/= 0.U) || (xd.fn(1,0) === 1.U && alu.io.addr(0))
@@ -89,8 +90,7 @@ class Core(p: Config) extends Module {
   val loadReturn = dc.io.rsp.fire
   loadRequests.io.deq.ready := staleLoad || (dc.io.req.ready && !headStore)
   val returned = dc.io.rsp.bits.info
-  val merged = Cat((0 until 4).reverse.map(b => Mux(returned.forwardMask(b),returned.forwardData(8*b+7,8*b),dc.io.rsp.bits.rsp.data(8*b+7,8*b))))
-  val shiftedLoad = merged >> Cat(returned.offset,0.U(3.W))
+  val shiftedLoad = dc.io.rsp.bits.rsp.data >> Cat(returned.offset,0.U(3.W))
   val loadValue = MuxLookup(returned.fn,shiftedLoad)(Seq(0.U -> Util.sext(shiftedLoad(7,0)),1.U -> Util.sext(shiftedLoad(15,0)),
     4.U -> Cat(0.U(24.W),shiftedLoad(7,0)),5.U -> Cat(0.U(16.W),shiftedLoad(15,0))))
   val forwardingMask = Wire(UInt(4.W)); val forwardingData = Wire(UInt(32.W))
@@ -119,8 +119,10 @@ class Core(p: Config) extends Module {
   })
   forwardingMask := VecInit(forwarding.map(_._1)).asUInt
   forwardingData := Cat(forwarding.reverse.map(_._2))
-  loadRequests.io.enq.bits.info.forwardMask := forwardingMask
-  loadRequests.io.enq.bits.info.forwardData := forwardingData
+  // Fully forwarded/L0 loads complete here. A partial overlap on a cache
+  // miss waits for older stores in the load queue, then reads coherent bytes.
+  // No 32-bit speculative store snapshot travels through every cache MSHR.
+  loadRequests.io.enq.bits.info.waitForStores := (forwardingMask & readMask).orR
   val bypassWord = Cat((0 until 4).reverse.map(b => Mux(forwardingMask(b),forwardingData(8*b+7,8*b),l0Word(8*b+7,8*b))))
   val forwardShifted = bypassWord >> Cat(alu.io.addr(1,0),0.U(3.W))
   val forwardValue = MuxLookup(xd.fn,forwardShifted)(Seq(0.U -> Util.sext(forwardShifted(7,0)),1.U -> Util.sext(forwardShifted(15,0)),

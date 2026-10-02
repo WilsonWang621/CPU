@@ -35,7 +35,7 @@ class MemReq extends Bundle {
 class MemRsp extends Bundle { val data = UInt(32.W); val error = Bool() }
 class LoadInfo(p: Config) extends Bundle {
   val tag = UInt(p.tagBits.W); val fn = UInt(3.W); val offset = UInt(2.W); val epoch = UInt(8.W)
-  val forwardMask = UInt(4.W); val forwardData = UInt(32.W)
+  val waitForStores = Bool()
   val prefetch = Bool()
 }
 class LoadRequest(p: Config) extends Bundle { val addr = UInt(32.W); val info = new LoadInfo(p) }
