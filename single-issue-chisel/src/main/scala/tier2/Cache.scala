@@ -141,7 +141,7 @@ class DataCache(p: Config) extends Module {
   val prefetch = Module(new PreparedQueue(UInt(32.W),4))
   val recent = Reg(Vec(4,UInt((32-o).W))); val recentValid = RegInit(VecInit(Seq.fill(4)(false.B)))
   val recentTail = RegInit(0.U(2.W))
-  val demandAccepted = io.req.fire && !io.req.bits.mem.write
+  val demandAccepted = (if(p.trustedLoadCredit) io.req.valid else io.req.fire) && !io.req.bits.mem.write
   val trainAddress = Wire(UInt(32.W)); val trainValid = Wire(Bool())
   if(p.prefetchTrainStages == 1 && p.bankedLoadPayload) {
     val accepted = VecInit((0 until p.banks).map(i => RegNext(demandAccepted && bank === i.U,false.B)))
@@ -197,6 +197,12 @@ class DataCache(p: Config) extends Module {
     val demandAddress = if(p.bankedLoadPayload) io.candidates(i).bits.addr else io.req.bits.mem.addr
     val selectedAddress = Mux(pendingStore,queuedStore.addr,Mux(candidateDemand,demandAddress,prefetch.io.deq.bits))
     c.io.cpu.req.bits.addr := selectedAddress
+    if(p.debug && p.bankedLoadPayload) {
+      when(io.req.fire && bank === i.U) {
+        assert(io.candidates(i).valid,"Accepted load lacks a prepared bank candidate")
+        assert(selectedAddress === io.req.bits.mem.addr,"Prepared bank address differs from accepted load")
+      }
+    }
     if(p.banks != 1) { c.io.cpu.req.bits.addr := Cat(0.U(b.W),selectedAddress(31,o+b),selectedAddress(o-1,0)) }
     // A retired store awaiting this bank can make an older raw refill stale.
     // Keep it out of L0; retirement itself has already updated L0's bytes.

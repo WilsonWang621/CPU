@@ -106,7 +106,12 @@ class Core(p: Config) extends Module {
   dc.io.rsp.ready := true.B
   val loadAccept = dc.io.req.fire && !headStore
   val loadReturn = dc.io.rsp.fire
-  loadRequests.io.deq.ready := dc.io.req.ready && !headStore
+  // A valid dequeue already requires this bank's current admission credit.
+  loadRequests.io.deq.ready := (if(p.trustedLoadCredit) true.B else dc.io.req.ready) && !headStore
+  if(p.debug && p.trustedLoadCredit) {
+    when(dc.io.req.valid) { assert(dc.io.req.ready,"Qualified load offered without cache credit") }
+    assert(loadRequests.io.deq.fire === dc.io.req.fire,"Load queue and cache acceptance differ")
+  }
   val returned = dc.io.rsp.bits.info
   val shiftedLoad = dc.io.rsp.bits.rsp.data >> Cat(returned.offset,0.U(3.W))
   val loadValue = MuxLookup(returned.fn,shiftedLoad)(Seq(0.U -> Util.sext(shiftedLoad(7,0)),1.U -> Util.sext(shiftedLoad(15,0)),
@@ -399,7 +404,7 @@ object Generate extends App {
   val p = Config(rob=n("--rob",16),iq=n("--iq",8),icBytes=n("--ic-bytes",4096),dcBytes=n("--dc-bytes",4096),
     lineBytes=n("--line-bytes",32),ways=n("--ways",2),debug=n("--debug",0) != 0,banks=n("--banks",4),earlyRecovery=n("--early-recovery",1) != 0,
     prefetch=n("--prefetch",1) != 0,btbEntries=n("--btb-entries",128),historyBits=n("--history-bits",1),l0Entries=n("--l0-entries",0),
-    storeEntries=n("--store-entries",0),checkpoints=n("--checkpoints",4),fastRedirect=n("--fast-redirect",0) != 0,storeSlots=n("--store-slots",16),loadEntries=n("--load-entries",8),l0FillStages=n("--l0-fill-stages",0),l0Replacement=n("--l0-replacement",0),ramReadAhead=n("--ram-read-ahead",0) != 0,l0StoreStages=n("--l0-store-stages",0),bankedLoadPayload=n("--banked-load-payload",0) != 0,cacheHierarchy=n("--cache-hierarchy",0) != 0,prefetchTrainStages=n("--prefetch-train-stages",0))
+    storeEntries=n("--store-entries",0),checkpoints=n("--checkpoints",4),fastRedirect=n("--fast-redirect",0) != 0,storeSlots=n("--store-slots",16),loadEntries=n("--load-entries",8),l0FillStages=n("--l0-fill-stages",0),l0Replacement=n("--l0-replacement",0),ramReadAhead=n("--ram-read-ahead",0) != 0,l0StoreStages=n("--l0-store-stages",0),bankedLoadPayload=n("--banked-load-payload",0) != 0,cacheHierarchy=n("--cache-hierarchy",0) != 0,prefetchTrainStages=n("--prefetch-train-stages",0),trustedLoadCredit=n("--trusted-load-credit",0) != 0)
   _root_.circt.stage.ChiselStage.emitSystemVerilogFile(new StudentTop(p), Array("--target-dir", options.getOrElse("--out","rtl")),
     Array("--disable-all-randomization", "--lowering-options=disallowLocalVariables,disallowPackedArrays"))
 }
