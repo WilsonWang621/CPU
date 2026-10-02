@@ -1,0 +1,74 @@
+--- a/verilog/area_v2/cpu_top.sv
++++ b/verilog/area_v2/cpu_top.sv
+@@ -78,6 +78,12 @@
+   } load_t;
+   typedef enum logic [1:0] {RUN,DRAIN,DONE,FAULT} state_t;
+   state_t state;
++  // Store the run permission at the same edge as the terminal transition.
++  (* keep *) logic stopped;
++  always_ff @(posedge clk) begin
++    if(rst) stopped<=0;
++    else if(exit_head || fault_head || cache_store_error) stopped<=1;
++  end
+   rob_t rob [ROB_ENTRIES];
+   logic [31:0] values [ROB_ENTRIES],architectural [32];
+   wire [ROB_ENTRIES*32-1:0] result_words;
+@@ -181,6 +187,8 @@
+   logic [255:0] mdu_kill;
+   logic memory_allowed,memory_complete,store_allocate,load_allocate;
+   logic [31:0] memory_address,memory_data,load_word,load_result;
++  logic [31:0] prepared_address [IQ_ENTRIES];
++  wire [IQ_ENTRIES*32-1:0] prepared_address_words;
+   logic [3:0] memory_mask,memory_fault;
+   logic memory_exit,forward_match,forward_full;
+   logic [ST-1:0] forward_slot;
+@@ -214,7 +222,7 @@
+   assign exit_head=state==RUN && rob_count!=0 && retirement_meta[0].done && retirement_meta[0].exiting && retirement_meta[0].fault==0;
+   assign fault_head=state==RUN && rob_count!=0 && retirement_meta[0].done && retirement_meta[0].fault!=0;
+   // The terminal state publishes the squash after retirement stops.
+-  assign flush_all=state!=RUN;
++  assign flush_all=stopped;
+   assign stop_frontend=flush_all;
+   assign exit_send=state==DRAIN && store_count==0 && cache_idle && frontend_idle && controller_idle;
+   assign exit_accept=exit_send && mem_req_ready;
+@@ -386,7 +394,11 @@
+   assign mdu_valid=select_valid[0] && is_mdu(executing[0].op) && !flush_all &&
+                    !mdu_result_valid && !younger(executing[0].rid);
+   assign mdu_result_ready=!flush_all;
+-  assign memory_address=executing[2].a+executing[2].imm;
++  for(genvar q=0;q<IQ_ENTRIES;q=q+1) begin: memory_address_words
++    assign prepared_address_words[q*32+:32]=prepared_address[q];
++  end
++  v2_iq_read #(.ENTRIES(IQ_ENTRIES),.WORD_BITS(32)) read_memory_address (
++    .index(selected[2]),.words(prepared_address_words),.value(memory_address));
+   assign memory_data=executing[2].b<<(8*memory_address[1:0]);
+   assign memory_mask=(executing[2].size==0 ? 4'b0001:executing[2].size==1 ? 4'b0011:4'b1111)<<memory_address[1:0];
+   assign memory_exit=executing[2].op==OP_STORE && memory_address==32'h80000000 && executing[2].size==2;
+@@ -654,6 +666,16 @@
+         queue[bank][q].ready_a<=next_ready_a;queue[bank][q].a<=next_value_a;
+         queue[bank][q].ready_b<=next_ready_b;queue[bank][q].b<=next_value_b;
+       end
++      if(bank==2) begin: address_prepare
++        // Preparation and wakeup publish the base and effective address at
++        // the same edge. A ready live row keeps both until it leaves the IQ.
++        wire [31:0] address_immediate=queue[bank][q].valid ? queue[bank][q].imm:
++          (prepare_lane[1] ? dispatch_payload[1].imm:dispatch_payload[0].imm);
++        wire address_update=(!queue[bank][q].valid && |prepare_lane) ||
++                            (queue[bank][q].valid && !queue[bank][q].ready_a);
++        always_ff @(posedge clk)
++          if(address_update) prepared_address[q]<=next_value_a+address_immediate;
++      end
+       always_ff @(posedge clk) begin
+         if(rst) queue[bank][q].valid<=0;
+         else begin
+@@ -768,6 +790,10 @@
+         if(mdu_valid && mdu_ready && executing[0].rid==rid_t'(r)) monitored_mdu[r]<=1;
+       end
+       if(state==RUN) begin
++        for(integer q=0;q<IQ_ENTRIES;q=q+1)
++          if(queue[2][q].valid && queue[2][q].ready_a)
++            assert(prepared_address[q]==queue[2][q].a+queue[2][q].imm)
++              else $fatal(1,"prepared memory address mismatch slot %0d",q);
+         assert(live_count==int'(rob_count)) else $fatal(1,"ROB live/count mismatch");
+         for(integer a=1;a<32;a=a+1) begin
+           expected_pending=0;expected_tag=0;

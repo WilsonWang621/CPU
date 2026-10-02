@@ -50,11 +50,39 @@ module v2_terminal_squash_tb;
       if(!dut.stores[0][dut.STORE_T_VALID_LSB] || !dut.stores[0][dut.STORE_T_COMMITTED_LSB] || dut.store_count!=1) $fatal(1,"older committed store lost");
     end
   endtask
+  // Run permission must follow every terminal state transition, including
+  // an asynchronous store response error rather than a fault at ROB head.
+  always @(negedge clk)
+    if(!rst && dut.flush_all!==(dut.state!=dut.RUN))
+      $fatal(1,"terminal permission disagrees with CPU state");
+  task check_store_error;
+    begin
+      @(negedge clk);rst=1;
+      repeat(3) @(negedge clk);
+      rst=0;
+      dut.stores[0]=0;
+      dut.stores[0][dut.STORE_T_VALID_LSB]=1;
+      dut.stores[0][dut.STORE_T_COMMITTED_LSB]=1;
+      force dut.cache_store_done_tag=0;
+      force dut.cache_store_error=1;
+      @(posedge clk);#1;
+      if(dut.state!=dut.FAULT || !dut.flush_all || dut.commit_count!=0 || dut.memory_allowed)
+        $fatal(1,"store response error did not stop execution");
+      release dut.cache_store_error;
+      release dut.cache_store_done_tag;
+      repeat(3) @(negedge clk);
+      if(!dut.flush_all) $fatal(1,"terminal permission did not remain stopped");
+      rst=1;
+      @(posedge clk);#1;
+      if(dut.state!=dut.RUN || dut.flush_all) $fatal(1,"reset did not restore run permission");
+    end
+  endtask
   initial begin
     force dut.fetch_valid=0;
     check_terminal(0);
     check_terminal(1);
-    $display("Terminal squash: PASS exit/fault with younger store and older committed store");
+    check_store_error();
+    $display("Terminal squash: PASS exit/head fault/store response error, committed store ownership and reset");
     $finish;
   end
 endmodule

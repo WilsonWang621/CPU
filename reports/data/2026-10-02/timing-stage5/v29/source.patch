@@ -1,0 +1,20 @@
+--- a/verilog/area_v2/v2_dcache.sv
++++ b/verilog/area_v2/v2_dcache.sv
+@@ -97,8 +97,15 @@
+   assign load_set=load_address[SB+OFFSET-1:OFFSET];
+   assign store_set=store_address[SB+OFFSET-1:OFFSET];
+   for(genvar way=0;way<2;way=way+1) begin: tag_read
+-    assign load_matches[way]=tag_valid[{load_set,1'(way)}] && tags[{load_set,1'(way)}]==load_address[RB-1:SB+OFFSET];
+-    assign store_matches[way]=tag_valid[{store_set,1'(way)}] && tags[{store_set,1'(way)}]==store_address[RB-1:SB+OFFSET];
++    wire [SETS-1:0] load_candidates,store_candidates;
++    for(genvar row=0;row<SETS;row=row+1) begin: set_match
++      assign load_candidates[row]=load_set==SB'(row) && tag_valid[2*row+way] &&
++        tags[2*row+way]==load_address[RB-1:SB+OFFSET];
++      assign store_candidates[row]=store_set==SB'(row) && tag_valid[2*row+way] &&
++        tags[2*row+way]==store_address[RB-1:SB+OFFSET];
++    end
++    assign load_matches[way]=|load_candidates;
++    assign store_matches[way]=|store_candidates;
+   end
+   assign load_tag_hit=|load_matches;
+   assign store_tag_hit=|store_matches;

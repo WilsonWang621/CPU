@@ -1,0 +1,24 @@
+--- a/verilog/area_v2/cpu_top.sv
++++ b/verilog/area_v2/cpu_top.sv
+@@ -78,6 +78,12 @@
+   } load_t;
+   typedef enum logic [1:0] {RUN,DRAIN,DONE,FAULT} state_t;
+   state_t state;
++  // Store the run permission at the same edge as the terminal transition.
++  (* keep *) logic stopped;
++  always_ff @(posedge clk) begin
++    if(rst) stopped<=0;
++    else if(exit_head || fault_head || cache_store_error) stopped<=1;
++  end
+   rob_t rob [ROB_ENTRIES];
+   logic [31:0] values [ROB_ENTRIES],architectural [32];
+   wire [ROB_ENTRIES*32-1:0] result_words;
+@@ -214,7 +220,7 @@
+   assign exit_head=state==RUN && rob_count!=0 && retirement_meta[0].done && retirement_meta[0].exiting && retirement_meta[0].fault==0;
+   assign fault_head=state==RUN && rob_count!=0 && retirement_meta[0].done && retirement_meta[0].fault!=0;
+   // The terminal state publishes the squash after retirement stops.
+-  assign flush_all=state!=RUN;
++  assign flush_all=stopped;
+   assign stop_frontend=flush_all;
+   assign exit_send=state==DRAIN && store_count==0 && cache_idle && frontend_idle && controller_idle;
+   assign exit_accept=exit_send && mem_req_ready;
