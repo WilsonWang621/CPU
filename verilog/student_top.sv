@@ -1,7 +1,7 @@
 // ParaRisc: Area-v2 queues/checkpoints and an ordered AXI4-Lite adapter.
 module student_top #(
-  parameter integer ROB_BITS=5, IQ_ENTRIES=8, LOAD_SLOTS=8, STORE_SLOTS=16,
-  parameter integer CHECKPOINTS=4, ISSUE_WIDTH=2, COMMIT_WIDTH=2,
+  parameter integer ROB_BITS=5, IQ_ENTRIES=4, LOAD_SLOTS=8, STORE_SLOTS=16,
+  parameter integer CHECKPOINTS=3, ISSUE_WIDTH=2, COMMIT_WIDTH=2,
   parameter integer IC_INDEX_BITS=5, DC_INDEX_BITS=4, DC_LINE_BITS=6
 ) (
   input wire clock, reset,

@@ -4,30 +4,24 @@
 核心为 [`verilog/area_v2_core.v`](verilog/area_v2_core.v)。采用独立发射队列、树形仲裁、ROB 槽号重命名、
 分支检查点和非阻塞缓存，支持 AXI4-Lite、256 MiB 地址空间和退出响应处理。
 
-## 最新实测结果
+## 双发射最终基准
 
-2026-10-02；Verilator 5.020、Yosys 0.63、ASAP7 RVT TT、OpenSTA。
-内存延迟 20 周期，仿真上限 30,000,000 周期。
+2026-10-03，固定 v42，结束本条双发射优化路线。原样 `make synth`：
 
 | 指标 | 结果 |
 | --- | ---: |
-| correctness，延迟 20 / 3 周期 | 19/19 / 19/19 |
-| perf | 6/6 |
-| IPC 几何平均 | **1.1723** |
-| 完整实现频率，含物理缓冲树 | **368.27 MHz** |
-| 最小时钟周期 | **2.7154 ns** |
-| 3.333 ns 目标 WNS | **+0.6180 ns** |
-| 完整面积，含缓冲树 | **31,337.960 μm²** |
+| 默认综合频率 | **205.746 MHz** |
+| 总面积 | **32,388.245 μm²** |
+| 性能 IPC 几何平均（延迟 20） | **1.113846** |
+| 正确性 / 性能 | **19/19 / 6/6** |
+| 完整 RTL 定向检查 | 通过 |
 
-频率来自 `make synth-stage1`：保持课程的 0.2 ns I/O 延迟、0.05 ns 不确定度、5 fF 输出负载，
-计入真实缓冲单元面积并验证缓冲前后的全部引脚连接。结果属于理想时钟、无布线寄生的单元级 STA。
-默认 `make synth` 的标准原始映射为 **20.68 MHz**，尚未满足 300 MHz；直接时序映射但全局缓冲之前为 **82.87 MHz**。
-**368.27 MHz 不能当作默认综合或 OJ 未加物理缓冲流程的成绩。**
+**未达到 300 MHz。** 历史 368.27 MHz 来自额外物理缓冲流程，不能作为默认综合成绩。
+最终证据见 [阶段 6 报告](reports/frequency-stage6.md) 和
+[固定基准](reports/data/2026-10-02/timing-stage6/final-baseline.json)。
 
-完整交付说明、参数、差异和原始证据见 [频率阶段报告](reports/frequency-stage1.md)；
-[最终时序报告](reports/data/2026-10-02/timing-stage1/final-sta/report.txt)、
-[机器可读记录](reports/data/2026-10-02/timing-stage1/delivery.json)。
-旧实现的 67.77 MHz / IPC 0.9068 基线保存在 `reports/data/2026-10-02/current-80b0d27/`。
+后续单发射 Chisel 实现在独立目录 [single-issue-chisel](single-issue-chisel/)，目标为 Tier2：
+面积 ≤18,000 μm²、IPC ≥0.845、原样综合频率 >300 MHz。新核达标状态以该目录的实际验收记录为准。
 
 ## 编译与验证
 
@@ -59,7 +53,7 @@ make synth-stage1
 
 ## 默认结构
 
-32 项 ROB，两路分派/提交，两个整数端口与一个独立访存端口，三组 8 项发射队列，四个分支检查点，
+32 项 ROB，两路分派/提交，两个整数端口与一个独立访存端口，三组 4 项发射队列，三个分支检查点，
 8 个 Load 槽、16 个 Store 槽；1 KiB I-cache、2 KiB 两路 D-cache、64 B 行、四个 MSHR，AXI 最多 16 笔在途。
 顶层参数包括 `ROB_BITS`、`IQ_ENTRIES`、`LOAD_SLOTS`、`STORE_SLOTS`、`CHECKPOINTS`、`ISSUE_WIDTH`、`COMMIT_WIDTH`、
 `IC_INDEX_BITS`、`DC_INDEX_BITS` 与 `DC_LINE_BITS`。

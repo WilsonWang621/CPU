@@ -1,0 +1,67 @@
+--- a/verilog/area_v2/v2_rename.sv
++++ b/verilog/area_v2/v2_rename.sv
+@@ -21,6 +21,11 @@
+   input logic restore_valid,
+   input logic [CHECKPOINT_BITS-1:0] restore_index
+ );
++  wire [2*SLOT_BITS-1:0] local_commit_slot [4];
++  for(genvar group_id=0;group_id<4;group_id=group_id+1) begin: active_group
++    v2_timing_buffer #(.WIDTH(2*SLOT_BITS)) active_retirement_buffer (
++      .data_in(commit_slot),.data_out(local_commit_slot[group_id]));
++  end
+   logic [31:0] pending_q,pending_next,save_pending;
+   logic [SLOT_BITS-1:0] tag_q [32],tag_next [32],save_tag [32];
+   logic [31:0] checkpoint_pending [CHECKPOINTS];
+@@ -52,8 +57,8 @@
+     for (integer r=1;r<32;r=r+1)
+       for (integer c=0;c<2;c=c+1)
+         if (commit_valid[c] && commit_rd[c*5+:5]==5'(r)) begin
+-          if (tag_next[r]==commit_slot[c*SLOT_BITS+:SLOT_BITS]) pending_next[r]=0;
+-          if (save_tag[r]==commit_slot[c*SLOT_BITS+:SLOT_BITS]) save_pending[r]=0;
++          if (tag_next[r]==local_commit_slot[r/8][c*SLOT_BITS+:SLOT_BITS]) pending_next[r]=0;
++          if (save_tag[r]==local_commit_slot[r/8][c*SLOT_BITS+:SLOT_BITS]) save_pending[r]=0;
+         end
+     pending_next[0]=0;save_pending[0]=0;
+   end
+@@ -81,13 +86,18 @@
+     for (integer r=0;r<32;r=r+1) tag_q[r]<=tag_next[r];
+   end
+   for (genvar cp=0;cp<CHECKPOINTS;cp=cp+1) begin: snapshot
++    wire [2*SLOT_BITS-1:0] local_checkpoint_slot [4];
++    for(genvar group_id=0;group_id<4;group_id=group_id+1) begin: checkpoint_group
++      v2_timing_buffer #(.WIDTH(2*SLOT_BITS)) checkpoint_retirement_buffer (
++        .data_in(commit_slot),.data_out(local_checkpoint_slot[group_id]));
++    end
+     for (genvar r=0;r<32;r=r+1) begin: regmap
+       always_ff @(posedge clk) begin
+         if (rst) checkpoint_pending[cp][r]<=0;
+         else begin
+           for (integer c=0;c<2;c=c+1)
+             if (commit_valid[c] && commit_rd[c*5+:5]==5'(r) &&
+-                checkpoint_tag[cp][r]==commit_slot[c*SLOT_BITS+:SLOT_BITS])
++                checkpoint_tag[cp][r]==local_checkpoint_slot[r/8][c*SLOT_BITS+:SLOT_BITS])
+               checkpoint_pending[cp][r]<=0;
+           if (save_valid && save_index==CHECKPOINT_BITS'(cp) && !restore_valid) begin
+             checkpoint_pending[cp][r]<=save_pending[r];
+--- /dev/null
++++ b/verilog/area_v2/v2_timing_buffer.sv
+@@ -0,0 +1,19 @@
++// Combinational identity built from two real inverter banks. Preserved
++// boundaries prevent a wide tag distribution net from absorbing both stages.
++// Both stages remain ordinary RTL and are mapped and timed by the default flow.
++(* keep_hierarchy=1 *)
++module v2_timing_buffer #(parameter integer WIDTH=1)(
++  input wire [WIDTH-1:0] data_in,
++  output wire [WIDTH-1:0] data_out
++);
++  wire [WIDTH-1:0] inverted;
++  (* keep=1 *) v2_inverter_bank #(.WIDTH(WIDTH)) first (.data_in(data_in),.data_out(inverted));
++  (* keep=1 *) v2_inverter_bank #(.WIDTH(WIDTH)) second (.data_in(inverted),.data_out(data_out));
++endmodule
++(* keep_hierarchy=1 *)
++module v2_inverter_bank #(parameter integer WIDTH=1)(
++  input wire [WIDTH-1:0] data_in,
++  output wire [WIDTH-1:0] data_out
++);
++  assign data_out=~data_in;
++endmodule

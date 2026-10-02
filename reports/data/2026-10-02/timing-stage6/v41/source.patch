@@ -1,0 +1,31 @@
+--- a/verilog/area_v2/cpu_top.sv
++++ b/verilog/area_v2/cpu_top.sv
+@@ -1,6 +1,6 @@
+ module cpu_top #(
+   parameter integer ROB_ENTRIES=32, IQ_ENTRIES=8, LOAD_SLOTS=8, STORE_SLOTS=16,
+-  parameter integer CHECKPOINTS=4, RENAME_WIDTH=2, COMMIT_WIDTH=2, INTEGER_PORTS=2,
++  parameter integer CHECKPOINTS=3, RENAME_WIDTH=2, COMMIT_WIDTH=2, INTEGER_PORTS=2,
+   parameter integer ICACHE_BYTES=1024, DCACHE_BYTES=2048, DCACHE_LINE_BYTES=64, D_MSHRS=4,
+   parameter integer FETCH_QUEUE_ENTRIES=8, BHT_ENTRIES=256, BTB_ENTRIES=32, LOCAL_HISTORY_BITS=1, HISTORY_ENTRIES=64,
+   parameter integer MAX_MEM_OUTSTANDING=64, RAM_BYTES=268435456
+@@ -826,8 +826,7 @@
+ `endif
+   initial begin
+     if(ROB_ENTRIES<8 || ROB_ENTRIES>128 || (ROB_ENTRIES&(ROB_ENTRIES-1))!=0 ||
+-       IQ_ENTRIES<2 || (IQ_ENTRIES&(IQ_ENTRIES-1))!=0 || CHECKPOINTS<2 ||
+-       (CHECKPOINTS&(CHECKPOINTS-1))!=0 || RENAME_WIDTH<1 || RENAME_WIDTH>2 ||
++       IQ_ENTRIES<2 || (IQ_ENTRIES&(IQ_ENTRIES-1))!=0 || CHECKPOINTS<2 || RENAME_WIDTH<1 || RENAME_WIDTH>2 ||
+        COMMIT_WIDTH<1 || COMMIT_WIDTH>2 || INTEGER_PORTS<1 || INTEGER_PORTS>2 ||
+        LOAD_SLOTS<2 || (LOAD_SLOTS&(LOAD_SLOTS-1))!=0 || STORE_SLOTS<2 ||
+        (STORE_SLOTS&(STORE_SLOTS-1))!=0 || RAM_BYTES<4096 || (RAM_BYTES&(RAM_BYTES-1))!=0)
+--- a/verilog/student_top.sv
++++ b/verilog/student_top.sv
+@@ -1,7 +1,7 @@
+ // ParaRisc: Area-v2 queues/checkpoints and an ordered AXI4-Lite adapter.
+ module student_top #(
+   parameter integer ROB_BITS=5, IQ_ENTRIES=8, LOAD_SLOTS=8, STORE_SLOTS=16,
+-  parameter integer CHECKPOINTS=4, ISSUE_WIDTH=2, COMMIT_WIDTH=2,
++  parameter integer CHECKPOINTS=3, ISSUE_WIDTH=2, COMMIT_WIDTH=2,
+   parameter integer IC_INDEX_BITS=5, DC_INDEX_BITS=4, DC_LINE_BITS=6
+ ) (
+   input wire clock, reset,
