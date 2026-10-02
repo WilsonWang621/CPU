@@ -6,10 +6,11 @@ class Completion(p: Config) extends Bundle { val tag = UInt(p.tagBits.W); val da
 class MulDiv(p: Config) extends Module {
   val io = IO(new Bundle {
     val req = Flipped(Decoupled(new Bundle { val tag = UInt(p.tagBits.W); val a = UInt(32.W); val b = UInt(32.W); val fn = UInt(3.W) }))
-    val rsp = Valid(new Completion(p)); val kill = Input(Bool())
+    val rsp = Valid(new Completion(p)); val kill = Input(Bool()); val activeTag = Output(UInt(p.tagBits.W))
   })
   val idle :: mulSum :: mulFinish :: divide :: divFinish :: Nil = Enum(5)
   val state = RegInit(idle); val tag = Reg(UInt(p.tagBits.W)); val fn = Reg(UInt(3.W))
+  io.activeTag := tag
   val low = Reg(UInt(32.W)); val high = Reg(UInt(32.W)); val cross0 = Reg(UInt(32.W)); val cross1 = Reg(UInt(32.W))
   val correction = Reg(UInt(32.W)); val product = Reg(UInt(64.W))
   val quotient = Reg(UInt(32.W)); val divisor = Reg(UInt(32.W)); val rem = Reg(UInt(33.W))

@@ -5,11 +5,13 @@ import chisel3.util._
 
 case class Config(rob: Int = 16, iq: Int = 8, icBytes: Int = 4096,
                   dcBytes: Int = 4096, lineBytes: Int = 32, ways: Int = 2,
-                  issueWidth: Int = 1) {
+                  issueWidth: Int = 1, debug: Boolean = false, banks: Int = 4, earlyRecovery: Boolean = true,
+                  prefetch: Boolean = true) {
   require(issueWidth == 1, "This architecture has one issue port")
   require(rob >= 8 && isPow2(rob) && iq >= 2 && isPow2(iq))
   require(isPow2(icBytes) && isPow2(dcBytes) && isPow2(lineBytes))
   require(ways == 1 || ways == 2)
+  require(isPow2(banks) && banks <= 4)
   val tagBits = log2Ceil(rob)
   val prfSize = 32 + rob // architectural words plus ROB value words
 }
@@ -25,6 +27,14 @@ class MemReq extends Bundle {
   val addr = UInt(32.W); val data = UInt(32.W); val mask = UInt(4.W); val write = Bool()
 }
 class MemRsp extends Bundle { val data = UInt(32.W); val error = Bool() }
+class LoadInfo(p: Config) extends Bundle {
+  val tag = UInt(p.tagBits.W); val fn = UInt(3.W); val offset = UInt(2.W); val epoch = UInt(8.W)
+  val forwardMask = UInt(4.W); val forwardData = UInt(32.W)
+  val prefetch = Bool()
+}
+class LoadRequest(p: Config) extends Bundle { val addr = UInt(32.W); val info = new LoadInfo(p) }
+class BankRequest(p: Config) extends Bundle { val mem = new MemReq; val info = new LoadInfo(p) }
+class BankResponse(p: Config) extends Bundle { val rsp = new MemRsp; val info = new LoadInfo(p) }
 class MemPort extends Bundle {
   val req = Decoupled(new MemReq)
   val rsp = Flipped(Decoupled(new MemRsp))
@@ -47,7 +57,7 @@ class Bus extends Module {
   val directions = Module(new Queue(Bool(), 32))
   val pending = RegInit(false.B); val req = Reg(new MemReq)
   val awSent = RegInit(false.B); val wSent = RegInit(false.B)
-  io.axi.araddr := req.addr; io.axi.awaddr := req.addr
+  io.axi.araddr := Cat(req.addr(31,2),0.U(2.W)); io.axi.awaddr := Cat(req.addr(31,2),0.U(2.W))
   io.axi.wdata := req.data; io.axi.wstrb := req.mask
   io.axi.arvalid := pending && !req.write && !reset.asBool
   io.axi.awvalid := pending && req.write && !awSent && !reset.asBool
@@ -69,20 +79,20 @@ class Bus extends Module {
   io.axi.bready := directions.io.deq.valid && writing && io.in.rsp.ready && !reset.asBool
 }
 
-class MemoryArbiter extends Module {
-  val io = IO(new Bundle { val clients = Vec(2, Flipped(new MemPort)); val out = new MemPort })
-  val owners = Module(new Queue(Bool(), 32))
-  val arb = Module(new RRArbiter(new MemReq, 2))
-  for (i <- 0 until 2) { arb.io.in(i) <> io.clients(i).req }
+class MemoryArbiter(nClients: Int = 2) extends Module {
+  val io = IO(new Bundle { val clients = Vec(nClients, Flipped(new MemPort)); val out = new MemPort })
+  val owners = Module(new Queue(UInt(log2Ceil(nClients).W), 32))
+  val arb = Module(new RRArbiter(new MemReq, nClients))
+  for (i <- 0 until nClients) { arb.io.in(i) <> io.clients(i).req }
   io.out.req.valid := arb.io.out.valid && owners.io.enq.ready
   io.out.req.bits := arb.io.out.bits
   arb.io.out.ready := io.out.req.ready && owners.io.enq.ready
-  owners.io.enq.valid := io.out.req.fire; owners.io.enq.bits := arb.io.chosen.asBool
-  for(i <- 0 until 2) {
-    io.clients(i).rsp.valid := io.out.rsp.valid && owners.io.deq.valid && owners.io.deq.bits === (i == 1).B
+  owners.io.enq.valid := io.out.req.fire; owners.io.enq.bits := arb.io.chosen
+  for(i <- 0 until nClients) {
+    io.clients(i).rsp.valid := io.out.rsp.valid && owners.io.deq.valid && owners.io.deq.bits === i.U
     io.clients(i).rsp.bits := io.out.rsp.bits
   }
-  io.out.rsp.ready := owners.io.deq.valid && Mux(owners.io.deq.bits, io.clients(1).rsp.ready, io.clients(0).rsp.ready)
+  io.out.rsp.ready := owners.io.deq.valid && Mux1H((0 until nClients).map(i => (owners.io.deq.bits === i.U) -> io.clients(i).rsp.ready))
   owners.io.deq.ready := io.out.rsp.fire
 }
 
@@ -90,4 +100,12 @@ object Util {
   def sext(x: UInt, width: Int = 32): UInt = Cat(Fill(width - x.getWidth, x(x.getWidth - 1)), x)
   def choose[T <: Data](index: UInt, values: Seq[T]): T = Mux1H(values.indices.map(i => (index === i.U) -> values(i)))
   def add(a: UInt, b: UInt): UInt = a + b
+  def ageTree(xs: Seq[(Bool,UInt,UInt)], youngest: Boolean): (Bool,UInt,UInt) = {
+    if(xs.size == 1) xs.head else {
+      val (left,right) = xs.splitAt(xs.size/2); val a = ageTree(left,youngest); val b = ageTree(right,youngest)
+      val better = if(youngest) a._2 > b._2 else a._2 < b._2
+      val pickA = a._1 && (!b._1 || better)
+      (a._1 || b._1,Mux(pickA,a._2,b._2),Mux(pickA,a._3,b._3))
+    }
+  }
 }
