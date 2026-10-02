@@ -1,0 +1,74 @@
+{
+  "stage": 1,
+  "experiment": "v62-sram-read-result-hold",
+  "parameters": {
+    "rob": 32,
+    "iq": 8,
+    "ic-bytes": 4096,
+    "dc-bytes": 4096,
+    "line-bytes": 32,
+    "ways": 2,
+    "banks": 4,
+    "early-recovery": 1,
+    "prefetch": 1,
+    "btb-entries": 64,
+    "history-bits": 2,
+    "l0-entries": 32,
+    "store-entries": 4,
+    "checkpoints": 4,
+    "fast-redirect": 1,
+    "store-slots": 8,
+    "load-entries": 8,
+    "debug": 0,
+    "l0-fill-stages": 1,
+    "l0-replacement": 1,
+    "ram-read-ahead": 1,
+    "issue-width": 1
+  },
+  "rtl_sha256": "a1fdea98317769ddae814591bc49874f83e75136d9662c6e32ace8b6d92f4e62",
+  "performance": [
+    {
+      "case": "perf_median",
+      "passed": false,
+      "cycles": null
+    }
+  ],
+  "correctness": {
+    "status": "failed",
+    "records": [
+      {
+        "case": "correctness_add_to_100",
+        "passed": true,
+        "cycles": 585
+      },
+      {
+        "case": "correctness_array_test1",
+        "passed": true,
+        "cycles": 521
+      },
+      {
+        "case": "correctness_array_test2",
+        "passed": true,
+        "cycles": 722
+      },
+      {
+        "case": "correctness_basicopt1",
+        "passed": true,
+        "cycles": 528052
+      },
+      {
+        "case": "correctness_bulgarian",
+        "passed": false,
+        "cycles": null
+      }
+    ]
+  },
+  "synthesis": {
+    "status": "passed",
+    "fmax_mhz": 191.0804254525098,
+    "area_um2": 17792.197375999276
+  },
+  "tier2_pass": false,
+  "simulator_sha256": "1020d5dc0427a2575160ab8627f8619f6794cc10f293991ff5e6c518b92d1b03",
+  "stage_frequency_pass": false
+}
