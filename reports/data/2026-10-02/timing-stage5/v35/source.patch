@@ -1,0 +1,99 @@
+--- a/verilog/area_v2/cpu_top.sv
++++ b/verilog/area_v2/cpu_top.sv
+@@ -289,9 +289,12 @@
+     assign commit_slot[d*RW+:RW]=commit_rid[d];
+     assign dispatch_order[d*(RW+1)+:(RW+1)]={tail_generation,tail}+(RW+1)'(d);
+   end
+-  v2_rename #(.SLOT_BITS(RW),.CHECKPOINTS(CHECKPOINTS)) rename_maps (
++  wire [RW-1:0] rename_next_head=head+rid_t'(commit_count);
++  wire [2*RW-1:0] rename_next_slots={rid_t'(rename_next_head+1'b1),rename_next_head};
++  v2_rename #(.SLOT_BITS(RW),.CHECKPOINTS(CHECKPOINTS),.COMMIT_LOOKAHEAD(1)) rename_maps (
+     .clk,.rst,.dispatch_valid(rename_valid),.prepare_valid(rename_prepare),.dispatch_rd(rename_rd),.dispatch_slot(rename_slot),
+     .source_register,.source_pending,.source_slot,.commit_valid,.commit_rd,.commit_slot,
++    .commit_next_slot(rename_next_slots),
+     .save_valid(save_checkpoint),.save_after_lane,.save_index(free_checkpoint),
+     .restore_valid(redirect),.restore_index(redirect_checkpoint));
+   for(genvar p=0;p<2;p=p+1) begin: integer_units
+--- a/verilog/area_v2/v2_rename.sv
++++ b/verilog/area_v2/v2_rename.sv
+@@ -2,7 +2,7 @@
+ // clears its tag from every snapshot before the ROB slot can be reused. Thus
+ // restore never revives a stale mapping to a younger owner of the same slot.
+ module v2_rename #(
+-  parameter integer SLOT_BITS=5, CHECKPOINTS=4,
++  parameter integer SLOT_BITS=5, CHECKPOINTS=4, COMMIT_LOOKAHEAD=0,
+   parameter integer CHECKPOINT_BITS=$clog2(CHECKPOINTS)
+ )(
+   input logic clk,rst,
+@@ -15,12 +15,20 @@
+   output logic [4*SLOT_BITS-1:0] source_slot,
+   input logic [1:0] commit_valid,
+   input logic [9:0] commit_rd,
+-  input logic [2*SLOT_BITS-1:0] commit_slot,
++  input logic [2*SLOT_BITS-1:0] commit_slot,commit_next_slot,
+   input logic save_valid, save_after_lane,
+   input logic [CHECKPOINT_BITS-1:0] save_index,
+   input logic restore_valid,
+   input logic [CHECKPOINT_BITS-1:0] restore_index
+ );
++  wire [2*SLOT_BITS-1:0] local_commit_slot;
++  wire [CHECKPOINTS*2*SLOT_BITS-1:0] local_checkpoint_slots;
++  if(COMMIT_LOOKAHEAD!=0) begin: local_retirement
++    v2_commit_slots #(.SLOT_BITS(SLOT_BITS)) slots (
++      .clk,.rst,.next_slot(commit_next_slot),.slot(local_commit_slot));
++  end else begin: direct_retirement
++    assign local_commit_slot=commit_slot;
++  end
+   logic [31:0] pending_q,pending_next,save_pending;
+   logic [SLOT_BITS-1:0] tag_q [32],tag_next [32],save_tag [32];
+   logic [31:0] checkpoint_pending [CHECKPOINTS];
+@@ -52,8 +60,8 @@
+     for (integer r=1;r<32;r=r+1)
+       for (integer c=0;c<2;c=c+1)
+         if (commit_valid[c] && commit_rd[c*5+:5]==5'(r)) begin
+-          if (tag_next[r]==commit_slot[c*SLOT_BITS+:SLOT_BITS]) pending_next[r]=0;
+-          if (save_tag[r]==commit_slot[c*SLOT_BITS+:SLOT_BITS]) save_pending[r]=0;
++          if (tag_next[r]==local_commit_slot[c*SLOT_BITS+:SLOT_BITS]) pending_next[r]=0;
++          if (save_tag[r]==local_commit_slot[c*SLOT_BITS+:SLOT_BITS]) save_pending[r]=0;
+         end
+     pending_next[0]=0;save_pending[0]=0;
+   end
+@@ -81,13 +89,21 @@
+     for (integer r=0;r<32;r=r+1) tag_q[r]<=tag_next[r];
+   end
+   for (genvar cp=0;cp<CHECKPOINTS;cp=cp+1) begin: snapshot
++    wire [2*SLOT_BITS-1:0] checkpoint_commit_slot;
++    if(COMMIT_LOOKAHEAD!=0) begin: local_retirement
++      v2_commit_slots #(.SLOT_BITS(SLOT_BITS)) slots (
++        .clk,.rst,.next_slot(commit_next_slot),.slot(checkpoint_commit_slot));
++    end else begin: direct_retirement
++      assign checkpoint_commit_slot=commit_slot;
++    end
++    assign local_checkpoint_slots[cp*2*SLOT_BITS+:2*SLOT_BITS]=checkpoint_commit_slot;
+     for (genvar r=0;r<32;r=r+1) begin: regmap
+       always_ff @(posedge clk) begin
+         if (rst) checkpoint_pending[cp][r]<=0;
+         else begin
+           for (integer c=0;c<2;c=c+1)
+             if (commit_valid[c] && commit_rd[c*5+:5]==5'(r) &&
+-                checkpoint_tag[cp][r]==commit_slot[c*SLOT_BITS+:SLOT_BITS])
++                checkpoint_tag[cp][r]==checkpoint_commit_slot[c*SLOT_BITS+:SLOT_BITS])
+               checkpoint_pending[cp][r]<=0;
+           if (save_valid && save_index==CHECKPOINT_BITS'(cp) && !restore_valid) begin
+             checkpoint_pending[cp][r]<=save_pending[r];
+--- /dev/null
++++ b/verilog/area_v2/v2_commit_slots.sv
+@@ -0,0 +1,13 @@
++// Local copies of the retirement indices published at the next edge.
++// Separate instances bound the fanout of a tag used by checkpoint comparisons.
++(* keep_hierarchy=1 *)
++module v2_commit_slots #(parameter integer SLOT_BITS=5)(
++  input wire clk,rst,
++  input wire [2*SLOT_BITS-1:0] next_slot,
++  output logic [2*SLOT_BITS-1:0] slot
++);
++  always_ff @(posedge clk) begin
++    if(rst) slot<={SLOT_BITS'(1),{SLOT_BITS{1'b0}}};
++    else slot<=next_slot;
++  end
++endmodule
