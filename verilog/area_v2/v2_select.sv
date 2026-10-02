@@ -1,5 +1,6 @@
 module v2_select #(
-  parameter integer ENTRIES=8, SLOT_BITS=5, INDEX_BITS=$clog2(ENTRIES), YOUNGEST=0
+  parameter integer ENTRIES=8, SLOT_BITS=5, INDEX_BITS=$clog2(ENTRIES), YOUNGEST=0,
+  parameter integer EXTENDED_ORDER=0
 )(
   input logic [ENTRIES-1:0] ready,
   input logic [ENTRIES*SLOT_BITS-1:0] owner,
@@ -18,7 +19,7 @@ module v2_select #(
     if(n>=LEAVES) begin: leaf
       if(n-LEAVES<ENTRIES) begin: used
         assign position=owner[(n-LEAVES)*SLOT_BITS+:SLOT_BITS];
-        assign wrapped=position<rob_head;
+        assign wrapped=EXTENDED_ORDER!=0 ? 1'b0:position<rob_head;
         assign winner=ready[n-LEAVES];
       end else begin: padding
         assign position=0;assign wrapped=0;assign winner=0;
@@ -26,7 +27,12 @@ module v2_select #(
       assign selected=INDEX_BITS'(n-LEAVES);
     end else begin: branch
       wire same_side=node[2*n].wrapped==node[2*n+1].wrapped;
-      wire left_first=YOUNGEST!=0 ?
+      // An extra wrap bit makes all live tags fit in less than half the
+      // sequence space. Their difference orders them without reading head.
+      wire [SLOT_BITS-1:0] difference=node[2*n].position-node[2*n+1].position;
+      wire left_first=EXTENDED_ORDER!=0 ?
+        (YOUNGEST!=0 ? !difference[SLOT_BITS-1]:(difference[SLOT_BITS-1] || difference==0)):
+        YOUNGEST!=0 ?
         (same_side ? node[2*n].position>=node[2*n+1].position:node[2*n].wrapped):
         (same_side ? node[2*n].position<=node[2*n+1].position:!node[2*n].wrapped);
       wire left_wins=node[2*n].winner && (!node[2*n+1].winner || left_first);

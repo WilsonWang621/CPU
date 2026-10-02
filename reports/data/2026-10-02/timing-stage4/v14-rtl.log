@@ -1,0 +1,20 @@
+./scripts/area_v2/verify_rtl.sh
+AXI adapter: PASS 240 mixed requests; AW stalls=583 W stalls=329 B waits=119
+tests/rtl/pararisc_axi_adapter_tb.sv:73: $finish called at 10750 (1s)
+Area-v2 muldiv: PASS 2577 arithmetic cases, 24 flush cases
+tests/rtl/pararisc_mdu_tb.sv:87: $finish called at 231810 (1s)
+Rename preparation: PASS 5000 cycles; restores=1199 abandoned=660 bypasses=1779 saves=685 retire_matches=2467
+tests/rtl/v2_rename_prepare_tb.sv:128: $finish called at 50006000 (1ps)
+Frontend preparation: PASS 10000 cycles; instructions=3058 full=190 dual_pop=749 redirects=232 errors=22
+tests/rtl/v2_frontend_prepare_tb.sv:131: $finish called at 100026000 (1ps)
+Frontend preparation: PASS 10000 cycles; instructions=6148 full=3917 dual_pop=2256 redirects=263 errors=8
+Cached prediction targets: PASS checked=4624 backward=4385
+tests/rtl/v2_frontend_prepare_tb.sv:131: $finish called at 100026000 (1ps)
+Circular selection: PASS 20000 cases; wrapped=38552 ties=3135
+tests/rtl/v2_select_wrap_tb.sv:53: $finish called at 20000000 (1ps)
+Dcache writes: PASS cycles=4436 loads=2180 stores=2417 partial=2266 same_word=1167 consecutive=74
+tests/rtl/v2_dcache_write_tb.sv:109: $finish called at 44376000 (1ps)
+Terminal squash: PASS exit/fault with younger store and older committed store
+tests/rtl/v2_terminal_squash_tb.sv:58: $finish called at 106000 (1ps)
+Branch recovery: PASS wrap, retirement, younger branch/store cancellation and prediction history
+tests/rtl/v2_branch_recovery_tb.sv:86: $finish called at 146000 (1ps)

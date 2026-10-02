@@ -32,13 +32,14 @@ module v2_frontend #(
   localparam integer PACKET_BITS=$bits(packet_t);
   packet_t fifo [QUEUE_ENTRIES],incoming[2],read_packet[2];
   wire [QUEUE_ENTRIES*PACKET_BITS-1:0] queue_words;
-  wire [(CACHE_BYTES/8)*32-1:0] even_words,odd_words;
+  wire [(CACHE_BYTES/8)*64-1:0] even_words,odd_words;
   logic [QW-1:0] head,tail;
   logic [QW:0] count;
   logic [1:0] push;
   logic [31:0] pc,next_pc;
   logic blocked,next_blocked;
   (* ram_style="registers" *) logic [31:0] even_data [CACHE_BYTES/8],odd_data [CACHE_BYTES/8];
+  logic [31:0] even_target [CACHE_BYTES/8],odd_target [CACHE_BYTES/8];
   logic [31:CB] tags [LINES];
   logic [LINES-1:0] tag_valid;
   logic [7:0] valid_words [LINES],failed_words [LINES];
@@ -51,8 +52,8 @@ module v2_frontend #(
   logic allocate;
   logic [LB-1:0] fetch_line;
   logic line_hit,word_ready[2],word_error[2];
-  logic [31:0] fetch_pc[2],fetch_inst[2],prediction[2];
-  logic [31:0] even_read,odd_read;
+  logic [31:0] fetch_pc[2],fetch_inst[2],prediction[2],fetch_target[2];
+  logic [63:0] even_read,odd_read;
   logic [CB-4:0] even_index,odd_index;
   (* ram_style="registers" *) logic [1:0] bht [BHT_ENTRIES];
   logic [BHT_ENTRIES-1:0] bht_valid;
@@ -60,7 +61,7 @@ module v2_frontend #(
   (* ram_style="registers" *) logic [29:0] btb_target [BTB_ENTRIES];
   logic [BTB_ENTRIES-1:0] btb_valid;
   logic [1:0] counter[2],train_counter;
-  logic [31:0] immediate[2];
+  logic [31:0] fill_immediate,fill_target;
   localparam integer HI=$clog2(HISTORY_ENTRIES);
   logic [HB-1:0] local_history [HISTORY_ENTRIES];
   logic [HB-1:0] fetch_history [2];
@@ -76,13 +77,15 @@ module v2_frontend #(
   assign even_index=pc[2] ? fetch_pc[1][CB-1:3]:pc[CB-1:3];
   assign odd_index=pc[CB-1:3];
   for(genvar row=0;row<CACHE_BYTES/8;row=row+1) begin: instruction_words
-    assign even_words[row*32+:32]=even_data[row];
-    assign odd_words[row*32+:32]=odd_data[row];
+    assign even_words[row*64+:64]={even_target[row],even_data[row]};
+    assign odd_words[row*64+:64]={odd_target[row],odd_data[row]};
   end
-  v2_read #(.ENTRIES(CACHE_BYTES/8)) read_even (.index(even_index),.words(even_words),.value(even_read));
-  v2_read #(.ENTRIES(CACHE_BYTES/8)) read_odd (.index(odd_index),.words(odd_words),.value(odd_read));
-  assign fetch_inst[0]=pc[2] ? odd_read:even_read;
-  assign fetch_inst[1]=pc[2] ? even_read:odd_read;
+  v2_read #(.ENTRIES(CACHE_BYTES/8),.WORD_BITS(64)) read_even (.index(even_index),.words(even_words),.value(even_read));
+  v2_read #(.ENTRIES(CACHE_BYTES/8),.WORD_BITS(64)) read_odd (.index(odd_index),.words(odd_words),.value(odd_read));
+  assign fetch_inst[0]=pc[2] ? odd_read[31:0]:even_read[31:0];
+  assign fetch_inst[1]=pc[2] ? even_read[31:0]:odd_read[31:0];
+  assign fetch_target[0]=pc[2] ? odd_read[63:32]:even_read[63:32];
+  assign fetch_target[1]=pc[2] ? even_read[63:32]:odd_read[63:32];
   assign fetch_line=pc[CB-1:5];
   wire [LINES-1:0] line_matches;
   for(genvar row=0;row<LINES;row=row+1) begin: instruction_tags
@@ -114,16 +117,9 @@ module v2_frontend #(
     assign counter[p]=bht_valid[fetch_bht[p]] ? bht[fetch_bht[p]]:2'd1;
     always_comb begin
       prediction[p]=fetch_pc[p]+4;
-      immediate[p]=0;
       case(fetch_inst[p][6:0])
-        7'h6f: begin
-          immediate[p]={{11{fetch_inst[p][31]}},fetch_inst[p][31],fetch_inst[p][19:12],fetch_inst[p][20],fetch_inst[p][30:21],1'b0};
-          prediction[p]=fetch_pc[p]+immediate[p];
-        end
-        7'h63: begin
-          immediate[p]={{19{fetch_inst[p][31]}},fetch_inst[p][31],fetch_inst[p][7],fetch_inst[p][30:25],fetch_inst[p][11:8],1'b0};
-          if(counter[p][1]) prediction[p]=fetch_pc[p]+immediate[p];
-        end
+        7'h6f: prediction[p]=fetch_target[p];
+        7'h63: if(counter[p][1]) prediction[p]=fetch_target[p];
         7'h67: if(|target_hits) prediction[p]={target,2'b0};
         default: ;
       endcase
@@ -171,6 +167,17 @@ module v2_frontend #(
   assign send_word=critical+issued[2:0];
   assign return_word=critical+returned[2:0];
   assign return_address=fill_line+{27'b0,return_word,2'b0};
+  // Instruction bits and their full-address target share cache ownership.
+  // Do the long immediate addition during fill, before the fetch read path.
+  always_comb begin
+    fill_immediate=0;
+    case(mem_rsp_data[6:0])
+      7'h6f: fill_immediate={{11{mem_rsp_data[31]}},mem_rsp_data[31],mem_rsp_data[19:12],mem_rsp_data[20],mem_rsp_data[30:21],1'b0};
+      7'h63: fill_immediate={{19{mem_rsp_data[31]}},mem_rsp_data[31],mem_rsp_data[7],mem_rsp_data[30:25],mem_rsp_data[11:8],1'b0};
+      default: ;
+    endcase
+    fill_target=return_address+fill_immediate;
+  end
   assign mem_req_valid=!rst && busy && issued<8;
   assign mem_req_addr=fill_line+{27'b0,send_word,2'b0};
   assign mem_rsp_ready=1;
@@ -210,8 +217,8 @@ module v2_frontend #(
     always_ff @(posedge clk)
       if(!rst && mem_rsp_valid && !mem_rsp_error &&
          return_address[CB-1:3]==(CB-3)'(row)) begin
-        if(return_address[2]) odd_data[row]<=mem_rsp_data;
-        else even_data[row]<=mem_rsp_data;
+        if(return_address[2]) begin odd_data[row]<=mem_rsp_data;odd_target[row]<=fill_target;end
+        else begin even_data[row]<=mem_rsp_data;even_target[row]<=fill_target;end
       end
   end
   for(genvar row=0;row<QUEUE_ENTRIES;row=row+1) begin: queue_write

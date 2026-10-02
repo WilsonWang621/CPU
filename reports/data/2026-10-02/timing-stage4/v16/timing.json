@@ -1,0 +1,1615 @@
+{
+  "clock_port": "clock",
+  "clock_period_ns": 2.0,
+  "input_delay_ns": 0.2,
+  "output_delay_ns": 0.2,
+  "input_transition_ns": 0.05,
+  "clock_transition_ns": 0.05,
+  "clock_uncertainty_ns": 0.05,
+  "output_load_ff": 5.0,
+  "reset_value": 0,
+  "clock_model": "ideal",
+  "interconnect": "no_parasitics",
+  "frequency_resolution_ns": 0.001,
+  "minimum_period_ns": 7.7822265625,
+  "estimated_fmax_mhz": 128.4979294767223,
+  "worst_setup_slack_ns": -5.782143,
+  "critical_paths": [
+    {
+      "startpoint": "_454405_/QN",
+      "endpoint": "_436629_/D",
+      "slack_ns": -5.782,
+      "arrival_ns": 7.712999999999999,
+      "required_ns": 1.931,
+      "points": [
+        {
+          "pin": "_454405_/QN",
+          "cell": "DFFHQNx1_ASAP7_75t_R",
+          "arrival_ns": 0.36110000000000003
+        },
+        {
+          "pin": "_317340_/A",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 0.36110000000000003
+        },
+        {
+          "pin": "_317340_/Y",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 0.7414999999999999
+        },
+        {
+          "pin": "_386691_/A",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 0.7414999999999999
+        },
+        {
+          "pin": "_386691_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 2.1879999999999997
+        },
+        {
+          "pin": "_387079_/B",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 2.1879999999999997
+        },
+        {
+          "pin": "_387079_/Y",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.2439999999999998
+        },
+        {
+          "pin": "_387112_/B",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.2439999999999998
+        },
+        {
+          "pin": "_387112_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.46
+        },
+        {
+          "pin": "_387113_/A",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 3.46
+        },
+        {
+          "pin": "_387113_/Y",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 3.6060000000000003
+        },
+        {
+          "pin": "_388897_/B",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.6060000000000003
+        },
+        {
+          "pin": "_388897_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.7339999999999995
+        },
+        {
+          "pin": "_389071_/A2",
+          "cell": "AOI21xp33_ASAP7_75t_R",
+          "arrival_ns": 3.7339999999999995
+        },
+        {
+          "pin": "_389071_/Y",
+          "cell": "AOI21xp33_ASAP7_75t_R",
+          "arrival_ns": 3.9570000000000003
+        },
+        {
+          "pin": "_390046_/A",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.9570000000000003
+        },
+        {
+          "pin": "_390046_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.183999999999999
+        },
+        {
+          "pin": "_277476_/A",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.183999999999999
+        },
+        {
+          "pin": "_277476_/Y",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.576
+        },
+        {
+          "pin": "core.frontend.read_even.node[248].leaf.used.mask_word/_59_/A",
+          "cell": "AND2x2_ASAP7_75t_R",
+          "arrival_ns": 4.576
+        },
+        {
+          "pin": "core.frontend.read_even.node[248].leaf.used.mask_word/_59_/Y",
+          "cell": "AND2x2_ASAP7_75t_R",
+          "arrival_ns": 4.683
+        },
+        {
+          "pin": "_336690_/D",
+          "cell": "OR4x1_ASAP7_75t_R",
+          "arrival_ns": 4.683
+        },
+        {
+          "pin": "_336690_/Y",
+          "cell": "OR4x1_ASAP7_75t_R",
+          "arrival_ns": 4.722
+        },
+        {
+          "pin": "_336691_/E",
+          "cell": "NOR5xp2_ASAP7_75t_R",
+          "arrival_ns": 4.722
+        },
+        {
+          "pin": "_336691_/Y",
+          "cell": "NOR5xp2_ASAP7_75t_R",
+          "arrival_ns": 4.755
+        },
+        {
+          "pin": "_336696_/B",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 4.755
+        },
+        {
+          "pin": "_336696_/Y",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 4.777
+        },
+        {
+          "pin": "_336697_/B",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.777
+        },
+        {
+          "pin": "_336697_/Y",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.795
+        },
+        {
+          "pin": "_336698_/C",
+          "cell": "NAND3xp33_ASAP7_75t_R",
+          "arrival_ns": 4.795
+        },
+        {
+          "pin": "_336698_/Y",
+          "cell": "NAND3xp33_ASAP7_75t_R",
+          "arrival_ns": 4.832
+        },
+        {
+          "pin": "core.frontend.classify_even/_24_/C",
+          "cell": "NAND3xp33_ASAP7_75t_R",
+          "arrival_ns": 4.832
+        },
+        {
+          "pin": "core.frontend.classify_even/_24_/Y",
+          "cell": "NAND3xp33_ASAP7_75t_R",
+          "arrival_ns": 4.86
+        },
+        {
+          "pin": "core.frontend.classify_even/_25_/B",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.86
+        },
+        {
+          "pin": "core.frontend.classify_even/_25_/Y",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.884
+        },
+        {
+          "pin": "_387071_/B",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.884
+        },
+        {
+          "pin": "_387071_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.91
+        },
+        {
+          "pin": "_387073_/B",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 4.91
+        },
+        {
+          "pin": "_387073_/Y",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 5.073
+        },
+        {
+          "pin": "_388712_/A1",
+          "cell": "AOI211xp5_ASAP7_75t_R",
+          "arrival_ns": 5.073
+        },
+        {
+          "pin": "_388712_/Y",
+          "cell": "AOI211xp5_ASAP7_75t_R",
+          "arrival_ns": 5.1339999999999995
+        },
+        {
+          "pin": "_388713_/D",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 5.1339999999999995
+        },
+        {
+          "pin": "_388713_/Y",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 5.1659999999999995
+        },
+        {
+          "pin": "_388714_/B",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.1659999999999995
+        },
+        {
+          "pin": "_388714_/Y",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.194
+        },
+        {
+          "pin": "_388715_/B",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.194
+        },
+        {
+          "pin": "_388715_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.351
+        },
+        {
+          "pin": "_388716_/A",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 5.351
+        },
+        {
+          "pin": "_388716_/Y",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 5.501
+        },
+        {
+          "pin": "_388719_/A",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.501
+        },
+        {
+          "pin": "_388719_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.579
+        },
+        {
+          "pin": "_248648_/A2",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 5.579
+        },
+        {
+          "pin": "_248648_/Y",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 5.718999999999999
+        },
+        {
+          "pin": "_248702_/D",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 5.718999999999999
+        },
+        {
+          "pin": "_248702_/Y",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 6.292
+        },
+        {
+          "pin": "_248706_/A",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 6.292
+        },
+        {
+          "pin": "_248706_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 7.547
+        },
+        {
+          "pin": "_254480_/C",
+          "cell": "A2O1A1Ixp33_ASAP7_75t_R",
+          "arrival_ns": 7.547
+        },
+        {
+          "pin": "_254480_/Y",
+          "cell": "A2O1A1Ixp33_ASAP7_75t_R",
+          "arrival_ns": 7.673
+        },
+        {
+          "pin": "_254481_/B",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 7.673
+        },
+        {
+          "pin": "_254481_/Y",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 7.712999999999999
+        },
+        {
+          "pin": "_436629_/D",
+          "cell": "DFFHQNx1_ASAP7_75t_R",
+          "arrival_ns": 7.712999999999999
+        }
+      ]
+    },
+    {
+      "startpoint": "_454405_/QN",
+      "endpoint": "_436630_/D",
+      "slack_ns": -5.782,
+      "arrival_ns": 7.712999999999999,
+      "required_ns": 1.931,
+      "points": [
+        {
+          "pin": "_454405_/QN",
+          "cell": "DFFHQNx1_ASAP7_75t_R",
+          "arrival_ns": 0.36110000000000003
+        },
+        {
+          "pin": "_317340_/A",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 0.36110000000000003
+        },
+        {
+          "pin": "_317340_/Y",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 0.7414999999999999
+        },
+        {
+          "pin": "_386691_/A",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 0.7414999999999999
+        },
+        {
+          "pin": "_386691_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 2.1879999999999997
+        },
+        {
+          "pin": "_387079_/B",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 2.1879999999999997
+        },
+        {
+          "pin": "_387079_/Y",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.2439999999999998
+        },
+        {
+          "pin": "_387112_/B",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.2439999999999998
+        },
+        {
+          "pin": "_387112_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.46
+        },
+        {
+          "pin": "_387113_/A",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 3.46
+        },
+        {
+          "pin": "_387113_/Y",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 3.6060000000000003
+        },
+        {
+          "pin": "_388897_/B",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.6060000000000003
+        },
+        {
+          "pin": "_388897_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.7339999999999995
+        },
+        {
+          "pin": "_389071_/A2",
+          "cell": "AOI21xp33_ASAP7_75t_R",
+          "arrival_ns": 3.7339999999999995
+        },
+        {
+          "pin": "_389071_/Y",
+          "cell": "AOI21xp33_ASAP7_75t_R",
+          "arrival_ns": 3.9570000000000003
+        },
+        {
+          "pin": "_390046_/A",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.9570000000000003
+        },
+        {
+          "pin": "_390046_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.183999999999999
+        },
+        {
+          "pin": "_277476_/A",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.183999999999999
+        },
+        {
+          "pin": "_277476_/Y",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.576
+        },
+        {
+          "pin": "core.frontend.read_even.node[248].leaf.used.mask_word/_59_/A",
+          "cell": "AND2x2_ASAP7_75t_R",
+          "arrival_ns": 4.576
+        },
+        {
+          "pin": "core.frontend.read_even.node[248].leaf.used.mask_word/_59_/Y",
+          "cell": "AND2x2_ASAP7_75t_R",
+          "arrival_ns": 4.683
+        },
+        {
+          "pin": "_336690_/D",
+          "cell": "OR4x1_ASAP7_75t_R",
+          "arrival_ns": 4.683
+        },
+        {
+          "pin": "_336690_/Y",
+          "cell": "OR4x1_ASAP7_75t_R",
+          "arrival_ns": 4.722
+        },
+        {
+          "pin": "_336691_/E",
+          "cell": "NOR5xp2_ASAP7_75t_R",
+          "arrival_ns": 4.722
+        },
+        {
+          "pin": "_336691_/Y",
+          "cell": "NOR5xp2_ASAP7_75t_R",
+          "arrival_ns": 4.755
+        },
+        {
+          "pin": "_336696_/B",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 4.755
+        },
+        {
+          "pin": "_336696_/Y",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 4.777
+        },
+        {
+          "pin": "_336697_/B",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.777
+        },
+        {
+          "pin": "_336697_/Y",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.795
+        },
+        {
+          "pin": "_336698_/C",
+          "cell": "NAND3xp33_ASAP7_75t_R",
+          "arrival_ns": 4.795
+        },
+        {
+          "pin": "_336698_/Y",
+          "cell": "NAND3xp33_ASAP7_75t_R",
+          "arrival_ns": 4.832
+        },
+        {
+          "pin": "core.frontend.classify_even/_24_/C",
+          "cell": "NAND3xp33_ASAP7_75t_R",
+          "arrival_ns": 4.832
+        },
+        {
+          "pin": "core.frontend.classify_even/_24_/Y",
+          "cell": "NAND3xp33_ASAP7_75t_R",
+          "arrival_ns": 4.86
+        },
+        {
+          "pin": "core.frontend.classify_even/_25_/B",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.86
+        },
+        {
+          "pin": "core.frontend.classify_even/_25_/Y",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.884
+        },
+        {
+          "pin": "_387071_/B",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.884
+        },
+        {
+          "pin": "_387071_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.91
+        },
+        {
+          "pin": "_387073_/B",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 4.91
+        },
+        {
+          "pin": "_387073_/Y",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 5.073
+        },
+        {
+          "pin": "_388712_/A1",
+          "cell": "AOI211xp5_ASAP7_75t_R",
+          "arrival_ns": 5.073
+        },
+        {
+          "pin": "_388712_/Y",
+          "cell": "AOI211xp5_ASAP7_75t_R",
+          "arrival_ns": 5.1339999999999995
+        },
+        {
+          "pin": "_388713_/D",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 5.1339999999999995
+        },
+        {
+          "pin": "_388713_/Y",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 5.1659999999999995
+        },
+        {
+          "pin": "_388714_/B",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.1659999999999995
+        },
+        {
+          "pin": "_388714_/Y",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.194
+        },
+        {
+          "pin": "_388715_/B",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.194
+        },
+        {
+          "pin": "_388715_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.351
+        },
+        {
+          "pin": "_388716_/A",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 5.351
+        },
+        {
+          "pin": "_388716_/Y",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 5.501
+        },
+        {
+          "pin": "_388719_/A",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.501
+        },
+        {
+          "pin": "_388719_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.579
+        },
+        {
+          "pin": "_248648_/A2",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 5.579
+        },
+        {
+          "pin": "_248648_/Y",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 5.718999999999999
+        },
+        {
+          "pin": "_248702_/D",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 5.718999999999999
+        },
+        {
+          "pin": "_248702_/Y",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 6.292
+        },
+        {
+          "pin": "_248706_/A",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 6.292
+        },
+        {
+          "pin": "_248706_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 7.547
+        },
+        {
+          "pin": "_254477_/C",
+          "cell": "A2O1A1Ixp33_ASAP7_75t_R",
+          "arrival_ns": 7.547
+        },
+        {
+          "pin": "_254477_/Y",
+          "cell": "A2O1A1Ixp33_ASAP7_75t_R",
+          "arrival_ns": 7.673
+        },
+        {
+          "pin": "_254478_/B",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 7.673
+        },
+        {
+          "pin": "_254478_/Y",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 7.712999999999999
+        },
+        {
+          "pin": "_436630_/D",
+          "cell": "DFFHQNx1_ASAP7_75t_R",
+          "arrival_ns": 7.712999999999999
+        }
+      ]
+    },
+    {
+      "startpoint": "_454405_/QN",
+      "endpoint": "_436631_/D",
+      "slack_ns": -5.782,
+      "arrival_ns": 7.712999999999999,
+      "required_ns": 1.931,
+      "points": [
+        {
+          "pin": "_454405_/QN",
+          "cell": "DFFHQNx1_ASAP7_75t_R",
+          "arrival_ns": 0.36110000000000003
+        },
+        {
+          "pin": "_317340_/A",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 0.36110000000000003
+        },
+        {
+          "pin": "_317340_/Y",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 0.7414999999999999
+        },
+        {
+          "pin": "_386691_/A",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 0.7414999999999999
+        },
+        {
+          "pin": "_386691_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 2.1879999999999997
+        },
+        {
+          "pin": "_387079_/B",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 2.1879999999999997
+        },
+        {
+          "pin": "_387079_/Y",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.2439999999999998
+        },
+        {
+          "pin": "_387112_/B",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.2439999999999998
+        },
+        {
+          "pin": "_387112_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.46
+        },
+        {
+          "pin": "_387113_/A",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 3.46
+        },
+        {
+          "pin": "_387113_/Y",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 3.6060000000000003
+        },
+        {
+          "pin": "_388897_/B",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.6060000000000003
+        },
+        {
+          "pin": "_388897_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.7339999999999995
+        },
+        {
+          "pin": "_389071_/A2",
+          "cell": "AOI21xp33_ASAP7_75t_R",
+          "arrival_ns": 3.7339999999999995
+        },
+        {
+          "pin": "_389071_/Y",
+          "cell": "AOI21xp33_ASAP7_75t_R",
+          "arrival_ns": 3.9570000000000003
+        },
+        {
+          "pin": "_390046_/A",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.9570000000000003
+        },
+        {
+          "pin": "_390046_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.183999999999999
+        },
+        {
+          "pin": "_277476_/A",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.183999999999999
+        },
+        {
+          "pin": "_277476_/Y",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.576
+        },
+        {
+          "pin": "core.frontend.read_even.node[248].leaf.used.mask_word/_59_/A",
+          "cell": "AND2x2_ASAP7_75t_R",
+          "arrival_ns": 4.576
+        },
+        {
+          "pin": "core.frontend.read_even.node[248].leaf.used.mask_word/_59_/Y",
+          "cell": "AND2x2_ASAP7_75t_R",
+          "arrival_ns": 4.683
+        },
+        {
+          "pin": "_336690_/D",
+          "cell": "OR4x1_ASAP7_75t_R",
+          "arrival_ns": 4.683
+        },
+        {
+          "pin": "_336690_/Y",
+          "cell": "OR4x1_ASAP7_75t_R",
+          "arrival_ns": 4.722
+        },
+        {
+          "pin": "_336691_/E",
+          "cell": "NOR5xp2_ASAP7_75t_R",
+          "arrival_ns": 4.722
+        },
+        {
+          "pin": "_336691_/Y",
+          "cell": "NOR5xp2_ASAP7_75t_R",
+          "arrival_ns": 4.755
+        },
+        {
+          "pin": "_336696_/B",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 4.755
+        },
+        {
+          "pin": "_336696_/Y",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 4.777
+        },
+        {
+          "pin": "_336697_/B",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.777
+        },
+        {
+          "pin": "_336697_/Y",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.795
+        },
+        {
+          "pin": "_336698_/C",
+          "cell": "NAND3xp33_ASAP7_75t_R",
+          "arrival_ns": 4.795
+        },
+        {
+          "pin": "_336698_/Y",
+          "cell": "NAND3xp33_ASAP7_75t_R",
+          "arrival_ns": 4.832
+        },
+        {
+          "pin": "core.frontend.classify_even/_24_/C",
+          "cell": "NAND3xp33_ASAP7_75t_R",
+          "arrival_ns": 4.832
+        },
+        {
+          "pin": "core.frontend.classify_even/_24_/Y",
+          "cell": "NAND3xp33_ASAP7_75t_R",
+          "arrival_ns": 4.86
+        },
+        {
+          "pin": "core.frontend.classify_even/_25_/B",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.86
+        },
+        {
+          "pin": "core.frontend.classify_even/_25_/Y",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.884
+        },
+        {
+          "pin": "_387071_/B",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.884
+        },
+        {
+          "pin": "_387071_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.91
+        },
+        {
+          "pin": "_387073_/B",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 4.91
+        },
+        {
+          "pin": "_387073_/Y",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 5.073
+        },
+        {
+          "pin": "_388712_/A1",
+          "cell": "AOI211xp5_ASAP7_75t_R",
+          "arrival_ns": 5.073
+        },
+        {
+          "pin": "_388712_/Y",
+          "cell": "AOI211xp5_ASAP7_75t_R",
+          "arrival_ns": 5.1339999999999995
+        },
+        {
+          "pin": "_388713_/D",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 5.1339999999999995
+        },
+        {
+          "pin": "_388713_/Y",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 5.1659999999999995
+        },
+        {
+          "pin": "_388714_/B",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.1659999999999995
+        },
+        {
+          "pin": "_388714_/Y",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.194
+        },
+        {
+          "pin": "_388715_/B",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.194
+        },
+        {
+          "pin": "_388715_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.351
+        },
+        {
+          "pin": "_388716_/A",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 5.351
+        },
+        {
+          "pin": "_388716_/Y",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 5.501
+        },
+        {
+          "pin": "_388719_/A",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.501
+        },
+        {
+          "pin": "_388719_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.579
+        },
+        {
+          "pin": "_248648_/A2",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 5.579
+        },
+        {
+          "pin": "_248648_/Y",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 5.718999999999999
+        },
+        {
+          "pin": "_248702_/D",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 5.718999999999999
+        },
+        {
+          "pin": "_248702_/Y",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 6.292
+        },
+        {
+          "pin": "_248706_/A",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 6.292
+        },
+        {
+          "pin": "_248706_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 7.547
+        },
+        {
+          "pin": "_254474_/C",
+          "cell": "A2O1A1Ixp33_ASAP7_75t_R",
+          "arrival_ns": 7.547
+        },
+        {
+          "pin": "_254474_/Y",
+          "cell": "A2O1A1Ixp33_ASAP7_75t_R",
+          "arrival_ns": 7.673
+        },
+        {
+          "pin": "_254475_/B",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 7.673
+        },
+        {
+          "pin": "_254475_/Y",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 7.712999999999999
+        },
+        {
+          "pin": "_436631_/D",
+          "cell": "DFFHQNx1_ASAP7_75t_R",
+          "arrival_ns": 7.712999999999999
+        }
+      ]
+    },
+    {
+      "startpoint": "_454405_/QN",
+      "endpoint": "_436632_/D",
+      "slack_ns": -5.782,
+      "arrival_ns": 7.712999999999999,
+      "required_ns": 1.931,
+      "points": [
+        {
+          "pin": "_454405_/QN",
+          "cell": "DFFHQNx1_ASAP7_75t_R",
+          "arrival_ns": 0.36110000000000003
+        },
+        {
+          "pin": "_317340_/A",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 0.36110000000000003
+        },
+        {
+          "pin": "_317340_/Y",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 0.7414999999999999
+        },
+        {
+          "pin": "_386691_/A",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 0.7414999999999999
+        },
+        {
+          "pin": "_386691_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 2.1879999999999997
+        },
+        {
+          "pin": "_387079_/B",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 2.1879999999999997
+        },
+        {
+          "pin": "_387079_/Y",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.2439999999999998
+        },
+        {
+          "pin": "_387112_/B",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.2439999999999998
+        },
+        {
+          "pin": "_387112_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.46
+        },
+        {
+          "pin": "_387113_/A",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 3.46
+        },
+        {
+          "pin": "_387113_/Y",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 3.6060000000000003
+        },
+        {
+          "pin": "_388897_/B",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.6060000000000003
+        },
+        {
+          "pin": "_388897_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.7339999999999995
+        },
+        {
+          "pin": "_389071_/A2",
+          "cell": "AOI21xp33_ASAP7_75t_R",
+          "arrival_ns": 3.7339999999999995
+        },
+        {
+          "pin": "_389071_/Y",
+          "cell": "AOI21xp33_ASAP7_75t_R",
+          "arrival_ns": 3.9570000000000003
+        },
+        {
+          "pin": "_390046_/A",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.9570000000000003
+        },
+        {
+          "pin": "_390046_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.183999999999999
+        },
+        {
+          "pin": "_277476_/A",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.183999999999999
+        },
+        {
+          "pin": "_277476_/Y",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.576
+        },
+        {
+          "pin": "core.frontend.read_even.node[248].leaf.used.mask_word/_59_/A",
+          "cell": "AND2x2_ASAP7_75t_R",
+          "arrival_ns": 4.576
+        },
+        {
+          "pin": "core.frontend.read_even.node[248].leaf.used.mask_word/_59_/Y",
+          "cell": "AND2x2_ASAP7_75t_R",
+          "arrival_ns": 4.683
+        },
+        {
+          "pin": "_336690_/D",
+          "cell": "OR4x1_ASAP7_75t_R",
+          "arrival_ns": 4.683
+        },
+        {
+          "pin": "_336690_/Y",
+          "cell": "OR4x1_ASAP7_75t_R",
+          "arrival_ns": 4.722
+        },
+        {
+          "pin": "_336691_/E",
+          "cell": "NOR5xp2_ASAP7_75t_R",
+          "arrival_ns": 4.722
+        },
+        {
+          "pin": "_336691_/Y",
+          "cell": "NOR5xp2_ASAP7_75t_R",
+          "arrival_ns": 4.755
+        },
+        {
+          "pin": "_336696_/B",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 4.755
+        },
+        {
+          "pin": "_336696_/Y",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 4.777
+        },
+        {
+          "pin": "_336697_/B",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.777
+        },
+        {
+          "pin": "_336697_/Y",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.795
+        },
+        {
+          "pin": "_336698_/C",
+          "cell": "NAND3xp33_ASAP7_75t_R",
+          "arrival_ns": 4.795
+        },
+        {
+          "pin": "_336698_/Y",
+          "cell": "NAND3xp33_ASAP7_75t_R",
+          "arrival_ns": 4.832
+        },
+        {
+          "pin": "core.frontend.classify_even/_24_/C",
+          "cell": "NAND3xp33_ASAP7_75t_R",
+          "arrival_ns": 4.832
+        },
+        {
+          "pin": "core.frontend.classify_even/_24_/Y",
+          "cell": "NAND3xp33_ASAP7_75t_R",
+          "arrival_ns": 4.86
+        },
+        {
+          "pin": "core.frontend.classify_even/_25_/B",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.86
+        },
+        {
+          "pin": "core.frontend.classify_even/_25_/Y",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.884
+        },
+        {
+          "pin": "_387071_/B",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.884
+        },
+        {
+          "pin": "_387071_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.91
+        },
+        {
+          "pin": "_387073_/B",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 4.91
+        },
+        {
+          "pin": "_387073_/Y",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 5.073
+        },
+        {
+          "pin": "_388712_/A1",
+          "cell": "AOI211xp5_ASAP7_75t_R",
+          "arrival_ns": 5.073
+        },
+        {
+          "pin": "_388712_/Y",
+          "cell": "AOI211xp5_ASAP7_75t_R",
+          "arrival_ns": 5.1339999999999995
+        },
+        {
+          "pin": "_388713_/D",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 5.1339999999999995
+        },
+        {
+          "pin": "_388713_/Y",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 5.1659999999999995
+        },
+        {
+          "pin": "_388714_/B",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.1659999999999995
+        },
+        {
+          "pin": "_388714_/Y",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.194
+        },
+        {
+          "pin": "_388715_/B",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.194
+        },
+        {
+          "pin": "_388715_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.351
+        },
+        {
+          "pin": "_388716_/A",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 5.351
+        },
+        {
+          "pin": "_388716_/Y",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 5.501
+        },
+        {
+          "pin": "_388719_/A",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.501
+        },
+        {
+          "pin": "_388719_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.579
+        },
+        {
+          "pin": "_248648_/A2",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 5.579
+        },
+        {
+          "pin": "_248648_/Y",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 5.718999999999999
+        },
+        {
+          "pin": "_248702_/D",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 5.718999999999999
+        },
+        {
+          "pin": "_248702_/Y",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 6.292
+        },
+        {
+          "pin": "_248706_/A",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 6.292
+        },
+        {
+          "pin": "_248706_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 7.547
+        },
+        {
+          "pin": "_254471_/C",
+          "cell": "A2O1A1Ixp33_ASAP7_75t_R",
+          "arrival_ns": 7.547
+        },
+        {
+          "pin": "_254471_/Y",
+          "cell": "A2O1A1Ixp33_ASAP7_75t_R",
+          "arrival_ns": 7.673
+        },
+        {
+          "pin": "_254472_/B",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 7.673
+        },
+        {
+          "pin": "_254472_/Y",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 7.712999999999999
+        },
+        {
+          "pin": "_436632_/D",
+          "cell": "DFFHQNx1_ASAP7_75t_R",
+          "arrival_ns": 7.712999999999999
+        }
+      ]
+    },
+    {
+      "startpoint": "_454405_/QN",
+      "endpoint": "_436633_/D",
+      "slack_ns": -5.782,
+      "arrival_ns": 7.712999999999999,
+      "required_ns": 1.931,
+      "points": [
+        {
+          "pin": "_454405_/QN",
+          "cell": "DFFHQNx1_ASAP7_75t_R",
+          "arrival_ns": 0.36110000000000003
+        },
+        {
+          "pin": "_317340_/A",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 0.36110000000000003
+        },
+        {
+          "pin": "_317340_/Y",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 0.7414999999999999
+        },
+        {
+          "pin": "_386691_/A",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 0.7414999999999999
+        },
+        {
+          "pin": "_386691_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 2.1879999999999997
+        },
+        {
+          "pin": "_387079_/B",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 2.1879999999999997
+        },
+        {
+          "pin": "_387079_/Y",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.2439999999999998
+        },
+        {
+          "pin": "_387112_/B",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.2439999999999998
+        },
+        {
+          "pin": "_387112_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.46
+        },
+        {
+          "pin": "_387113_/A",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 3.46
+        },
+        {
+          "pin": "_387113_/Y",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 3.6060000000000003
+        },
+        {
+          "pin": "_388897_/B",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.6060000000000003
+        },
+        {
+          "pin": "_388897_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.7339999999999995
+        },
+        {
+          "pin": "_389071_/A2",
+          "cell": "AOI21xp33_ASAP7_75t_R",
+          "arrival_ns": 3.7339999999999995
+        },
+        {
+          "pin": "_389071_/Y",
+          "cell": "AOI21xp33_ASAP7_75t_R",
+          "arrival_ns": 3.9570000000000003
+        },
+        {
+          "pin": "_390046_/A",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 3.9570000000000003
+        },
+        {
+          "pin": "_390046_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.183999999999999
+        },
+        {
+          "pin": "_277476_/A",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.183999999999999
+        },
+        {
+          "pin": "_277476_/Y",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.576
+        },
+        {
+          "pin": "core.frontend.read_even.node[248].leaf.used.mask_word/_59_/A",
+          "cell": "AND2x2_ASAP7_75t_R",
+          "arrival_ns": 4.576
+        },
+        {
+          "pin": "core.frontend.read_even.node[248].leaf.used.mask_word/_59_/Y",
+          "cell": "AND2x2_ASAP7_75t_R",
+          "arrival_ns": 4.683
+        },
+        {
+          "pin": "_336690_/D",
+          "cell": "OR4x1_ASAP7_75t_R",
+          "arrival_ns": 4.683
+        },
+        {
+          "pin": "_336690_/Y",
+          "cell": "OR4x1_ASAP7_75t_R",
+          "arrival_ns": 4.722
+        },
+        {
+          "pin": "_336691_/E",
+          "cell": "NOR5xp2_ASAP7_75t_R",
+          "arrival_ns": 4.722
+        },
+        {
+          "pin": "_336691_/Y",
+          "cell": "NOR5xp2_ASAP7_75t_R",
+          "arrival_ns": 4.755
+        },
+        {
+          "pin": "_336696_/B",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 4.755
+        },
+        {
+          "pin": "_336696_/Y",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 4.777
+        },
+        {
+          "pin": "_336697_/B",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.777
+        },
+        {
+          "pin": "_336697_/Y",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.795
+        },
+        {
+          "pin": "_336698_/C",
+          "cell": "NAND3xp33_ASAP7_75t_R",
+          "arrival_ns": 4.795
+        },
+        {
+          "pin": "_336698_/Y",
+          "cell": "NAND3xp33_ASAP7_75t_R",
+          "arrival_ns": 4.832
+        },
+        {
+          "pin": "core.frontend.classify_even/_24_/C",
+          "cell": "NAND3xp33_ASAP7_75t_R",
+          "arrival_ns": 4.832
+        },
+        {
+          "pin": "core.frontend.classify_even/_24_/Y",
+          "cell": "NAND3xp33_ASAP7_75t_R",
+          "arrival_ns": 4.86
+        },
+        {
+          "pin": "core.frontend.classify_even/_25_/B",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.86
+        },
+        {
+          "pin": "core.frontend.classify_even/_25_/Y",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.884
+        },
+        {
+          "pin": "_387071_/B",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.884
+        },
+        {
+          "pin": "_387071_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 4.91
+        },
+        {
+          "pin": "_387073_/B",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 4.91
+        },
+        {
+          "pin": "_387073_/Y",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 5.073
+        },
+        {
+          "pin": "_388712_/A1",
+          "cell": "AOI211xp5_ASAP7_75t_R",
+          "arrival_ns": 5.073
+        },
+        {
+          "pin": "_388712_/Y",
+          "cell": "AOI211xp5_ASAP7_75t_R",
+          "arrival_ns": 5.1339999999999995
+        },
+        {
+          "pin": "_388713_/D",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 5.1339999999999995
+        },
+        {
+          "pin": "_388713_/Y",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 5.1659999999999995
+        },
+        {
+          "pin": "_388714_/B",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.1659999999999995
+        },
+        {
+          "pin": "_388714_/Y",
+          "cell": "NOR2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.194
+        },
+        {
+          "pin": "_388715_/B",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.194
+        },
+        {
+          "pin": "_388715_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.351
+        },
+        {
+          "pin": "_388716_/A",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 5.351
+        },
+        {
+          "pin": "_388716_/Y",
+          "cell": "INVx1_ASAP7_75t_R",
+          "arrival_ns": 5.501
+        },
+        {
+          "pin": "_388719_/A",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.501
+        },
+        {
+          "pin": "_388719_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 5.579
+        },
+        {
+          "pin": "_248648_/A2",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 5.579
+        },
+        {
+          "pin": "_248648_/Y",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 5.718999999999999
+        },
+        {
+          "pin": "_248702_/D",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 5.718999999999999
+        },
+        {
+          "pin": "_248702_/Y",
+          "cell": "NAND4xp25_ASAP7_75t_R",
+          "arrival_ns": 6.292
+        },
+        {
+          "pin": "_248706_/A",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 6.292
+        },
+        {
+          "pin": "_248706_/Y",
+          "cell": "NAND2xp33_ASAP7_75t_R",
+          "arrival_ns": 7.547
+        },
+        {
+          "pin": "_254468_/C",
+          "cell": "A2O1A1Ixp33_ASAP7_75t_R",
+          "arrival_ns": 7.547
+        },
+        {
+          "pin": "_254468_/Y",
+          "cell": "A2O1A1Ixp33_ASAP7_75t_R",
+          "arrival_ns": 7.673
+        },
+        {
+          "pin": "_254469_/B",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 7.673
+        },
+        {
+          "pin": "_254469_/Y",
+          "cell": "OAI21xp33_ASAP7_75t_R",
+          "arrival_ns": 7.712999999999999
+        },
+        {
+          "pin": "_436633_/D",
+          "cell": "DFFHQNx1_ASAP7_75t_R",
+          "arrival_ns": 7.712999999999999
+        }
+      ]
+    }
+  ],
+  "timing_analyzed": true
+}

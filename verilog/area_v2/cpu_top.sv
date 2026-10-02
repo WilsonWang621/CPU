@@ -43,7 +43,7 @@ module cpu_top #(
     logic [31:0] pc,inst,fault_address,address,wdata;
   } rob_t;
   typedef struct packed {
-    logic valid,ready_a,ready_b,use_imm,sign_extend;
+    logic valid,ready_a,ready_b,use_imm,sign_extend,generation;
     rid_t rid,source_a,source_b;
     op_t op;
     logic [29:0] pc,prediction;
@@ -79,6 +79,9 @@ module cpu_top #(
   store_t stores [STORE_SLOTS];
   load_t loads [LOAD_SLOTS];
   rid_t head,tail;
+  logic tail_generation;
+  wire [RW:0] allocation_end={tail_generation,tail}+(RW+1)'(dispatch_count);
+  wire [2*(RW+1)-1:0] dispatch_order;
   logic [RW:0] rob_count;
   logic [ST-1:0] store_head,store_tail;
   logic [ST:0] store_count;
@@ -132,7 +135,7 @@ module cpu_top #(
   logic [2:0] select_valid,issue_fire;
   logic [2:0] selected_valid;
   logic [IQ_ENTRIES-1:0] select_ready [3];
-  logic [IQ_ENTRIES*RW-1:0] select_owner [3];
+  logic [IQ_ENTRIES*(RW+1)-1:0] select_owner [3];
   logic [STORE_SLOTS-1:0] store_forward_candidates,store_send_candidates;
   logic [STORE_SLOTS*ST-1:0] store_owners;
   issue_t executing [3];
@@ -150,6 +153,7 @@ module cpu_top #(
   logic [29:0] branch_prediction_q;
   logic [HB-1:0] branch_history_q;
   rid_t branch_rid_q;
+  logic branch_generation_q;
   logic [CPW-1:0] branch_checkpoint_q;
   op_t branch_op_q;
   logic [31:0] execute_pc[2],execute_b[2];
@@ -254,6 +258,7 @@ module cpu_top #(
     assign source_register[(d*2+1)*5+:5]=decoded[d].rs2;
     assign rename_slot[d*RW+:RW]=dispatch_rid[d];
     assign commit_slot[d*RW+:RW]=commit_rid[d];
+    assign dispatch_order[d*(RW+1)+:(RW+1)]={tail_generation,tail}+(RW+1)'(d);
   end
   v2_rename #(.SLOT_BITS(RW),.CHECKPOINTS(CHECKPOINTS)) rename_maps (
     .clk,.rst,.dispatch_valid(rename_valid),.prepare_valid(rename_prepare),.dispatch_rd(rename_rd),.dispatch_slot(rename_slot),
@@ -278,13 +283,20 @@ module cpu_top #(
     wire [ISSUE_BITS-1:0] selected_payload;
     for(genvar q=0;q<IQ_ENTRIES;q=q+1) begin: candidate
       assign select_ready[bank][q]=queue[bank][q].valid && (bank==2 || (queue[bank][q].ready_a && queue[bank][q].ready_b));
-      assign select_owner[bank][q*RW+:RW]=queue[bank][q].rid;
+      assign select_owner[bank][q*(RW+1)+:(RW+1)]={queue[bank][q].generation,queue[bank][q].rid};
       assign payloads[q*ISSUE_BITS+:ISSUE_BITS]=queue[bank][q];
     end
-    v2_select #(.ENTRIES(IQ_ENTRIES),.SLOT_BITS(RW)) choose (
-      .ready(select_ready[bank]),.owner(select_owner[bank]),.rob_head(head),.valid(selected_valid[bank]),.index(selected[bank]));
-    v2_read #(.ENTRIES(IQ_ENTRIES),.WORD_BITS(ISSUE_BITS)) read_payload (
-      .index(selected[bank]),.words(payloads),.value(selected_payload));
+    v2_select #(.ENTRIES(IQ_ENTRIES),.SLOT_BITS(RW+1),.EXTENDED_ORDER(1)) choose (
+      .ready(select_ready[bank]),.owner(select_owner[bank]),.rob_head({(RW+1){1'b0}}),.valid(selected_valid[bank]),.index(selected[bank]));
+    for(genvar first=0;first<ISSUE_BITS;first=first+32) begin: read_payload
+      wire [IQ_ENTRIES*(ISSUE_BITS-first<32 ? ISSUE_BITS-first:32)-1:0] slice_words;
+      for(genvar row=0;row<IQ_ENTRIES;row=row+1) begin: slice_row
+        assign slice_words[row*(ISSUE_BITS-first<32 ? ISSUE_BITS-first:32)+:(ISSUE_BITS-first<32 ? ISSUE_BITS-first:32)]=
+          payloads[row*ISSUE_BITS+first+:(ISSUE_BITS-first<32 ? ISSUE_BITS-first:32)];
+      end
+      v2_iq_read #(.ENTRIES(IQ_ENTRIES),.WORD_BITS(ISSUE_BITS-first<32 ? ISSUE_BITS-first:32)) read_slice (
+        .index(selected[bank]),.words(slice_words),.value(selected_payload[first+:(ISSUE_BITS-first<32 ? ISSUE_BITS-first:32)]));
+    end
     assign executing[bank]=selected_payload;
     assign select_valid[bank]=selected_valid[bank] && (bank!=2 || (executing[bank].ready_a && executing[bank].ready_b));
   end
@@ -329,6 +341,7 @@ module cpu_top #(
     branch_prediction_q<=executing[0].prediction;
     branch_history_q<=executing[0].history;
     branch_rid_q<=executing[0].rid;branch_checkpoint_q<=executing[0].checkpoint;
+    branch_generation_q<=executing[0].generation;
     branch_op_q<=executing[0].op;
   end
   assign branch_fire=branch_pending && !flush_all;
@@ -468,6 +481,7 @@ module cpu_top #(
     source_id=0;register_id=0;pending=0;ready_value=0;source_value=0;
     for(integer lane=0;lane<2;lane=lane+1) begin
       dispatch_payload[lane]='0;dispatch_payload[lane].valid=1;dispatch_payload[lane].rid=dispatch_rid[lane];
+      dispatch_payload[lane].generation=dispatch_order[lane*(RW+1)+RW];
       dispatch_payload[lane].op=decoded[lane].op;dispatch_payload[lane].imm=decoded[lane].imm;
       dispatch_payload[lane].pc=fetch_pc[lane*32+2+:30];
       dispatch_payload[lane].history=fetch_history[lane*HB+:HB];
@@ -500,7 +514,7 @@ module cpu_top #(
   end
   always_ff @(posedge clk) begin: control_state
     if(rst) begin
-      state<=RUN;head<=0;tail<=0;rob_count<=0;store_head<=0;store_tail<=0;store_count<=0;steer<=0;
+      state<=RUN;head<=0;tail<=0;tail_generation<=0;rob_count<=0;store_head<=0;store_tail<=0;store_count<=0;steer<=0;
       fault_pc<=0;fault_inst<=0;fault_inst_valid<=0;fault_cause<=0;fault_addr<=0;
       cycle_count<=0;retired_count<=0;branch_miss_count<=0;
       retire_valid<=0;retire_pc<=0;retire_inst<=0;retire_rd<=0;retire_value<=0;
@@ -511,6 +525,8 @@ module cpu_top #(
       head<=head+rid_t'(commit_count);
       if(redirect) begin tail<=redirect_rid+1'b1;rob_count<=(RW+1)'(age(redirect_rid))+1-(RW+1)'(commit_count);end
       else begin tail<=tail+rid_t'(dispatch_count);rob_count<=rob_count+(RW+1)'(dispatch_count)-(RW+1)'(commit_count);end
+      if(redirect) tail_generation<=branch_generation_q ^ (&redirect_rid);
+      else tail_generation<=allocation_end[RW];
       store_count<=store_count+(ST+1)'(store_allocate)-(ST+1)'(store_pop)-squashed_stores;
       store_head<=store_head+ST'(store_pop);store_tail<=store_tail+ST'(store_allocate)-ST'(squashed_stores);
       if(dispatch_count!=0) steer<=!steer;
@@ -611,6 +627,7 @@ module cpu_top #(
           for(integer lane=0;lane<2;lane=lane+1)
             if(dispatch_prepare[lane] && dispatch_bank[lane]==2'(bank) && dispatch_index[lane]==QW'(q)) begin
               queue[bank][q].rid<=dispatch_payload[lane].rid;queue[bank][q].op<=dispatch_payload[lane].op;
+              queue[bank][q].generation<=dispatch_payload[lane].generation;
               queue[bank][q].ready_a<=dispatch_payload[lane].ready_a;queue[bank][q].ready_b<=dispatch_payload[lane].ready_b;
               queue[bank][q].source_a<=dispatch_payload[lane].source_a;queue[bank][q].source_b<=dispatch_payload[lane].source_b;
               queue[bank][q].pc<=dispatch_payload[lane].pc;queue[bank][q].prediction<=dispatch_payload[lane].prediction;
