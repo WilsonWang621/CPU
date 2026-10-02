@@ -11,14 +11,25 @@ module v2_branch_recovery_tb;
     .MAX_MEM_OUTSTANDING(4),.RAM_BYTES(4096)) dut (
     .clk(clk),.rst(rst),.mem_req_valid(request_valid),.mem_req_write(request_write),
     .mem_req_ready(1'b0),.mem_rsp_valid(1'b0),.mem_rsp_rdata(32'b0),.mem_rsp_error(1'b0));
-  task check_recovery(input integer branch_slot, input bit correct_prediction);
-    integer store_slot,young_slot;
+  task check_recovery(input integer branch_slot, input bit correct_prediction,
+                      input integer older_count);
+    integer store_slot,young_slot,oldest,r;
     begin
       @(negedge clk);rst=1;
       repeat(3) @(negedge clk);
       rst=0;
       store_slot=(branch_slot+1)%8;young_slot=(branch_slot+2)%8;
-      dut.head=branch_slot;dut.tail=(branch_slot+3)%8;dut.rob_count=3;
+      oldest=(branch_slot+8-older_count)%8;
+      dut.retirement_reads[0].read_metadata.selected=8'b1<<oldest;
+      dut.retirement_reads[0].read_value.selected=8'b1<<oldest;
+      dut.retirement_reads[1].read_metadata.selected=8'b1<<((oldest+1)%8);
+      dut.retirement_reads[1].read_value.selected=8'b1<<((oldest+1)%8);
+      dut.head=oldest;dut.tail=(branch_slot+3)%8;dut.rob_count=3+older_count;
+      for(r=0;r<older_count;r=r+1) begin
+        dut.rob[(oldest+r)%8]=0;
+        dut.rob[(oldest+r)%8][dut.ROB_T_VALID_LSB]=1;
+        dut.rob[(oldest+r)%8][dut.ROB_T_DONE_LSB]=1;
+      end
       dut.rob[branch_slot]=0;dut.rob[store_slot]=0;dut.rob[young_slot]=0;
       dut.rob[branch_slot][dut.ROB_T_VALID_LSB]=1;
       dut.rob[store_slot][dut.ROB_T_VALID_LSB]=1;
@@ -55,7 +66,7 @@ module v2_branch_recovery_tb;
       dut.queue[4][dut.ISSUE_T_B_LSB+:32]=32'hdeadbeef;
       dut.queue[4][dut.ISSUE_T_SIZE_LSB+:2]=2;
       #1;
-      if(!dut.branch_capture || dut.redirect || !dut.store_allocate || dut.commit_count!=0)
+      if(!dut.branch_capture || dut.redirect || !dut.store_allocate || dut.commit_count!=older_count)
         $fatal(1,"recovery fixture did not execute branch/store before retirement");
       @(posedge clk);#1;
       if(!dut.branch_fire || dut.redirect==correct_prediction || dut.redirect_rid!=branch_slot ||
@@ -63,10 +74,11 @@ module v2_branch_recovery_tb;
          dut.frontend.train_history!=1)
         $fatal(1,"registered recovery or predictor metadata incorrect");
       if(!dut.checkpoint_valid[0]) $fatal(1,"checkpoint freed before recovery");
+      if(dut.head!=branch_slot) $fatal(1,"older retirement did not advance head to branch");
       if(correct_prediction) begin
         if(!dut.branch_capture || !dut.wb_valid[0]) $fatal(1,"correct prediction blocked next branch");
       end else begin
-        if(dut.branch_capture || dut.wb_valid[0] || dut.mdu_valid || dut.commit_count!=1 ||
+        if(dut.branch_capture || dut.wb_valid[0] || dut.wb_valid[2] || dut.mdu_valid || dut.commit_count!=1 ||
            dut.cache_store_valid || !dut.stores[0][dut.STORE_T_VALID_LSB])
           $fatal(1,"younger work published during recovery");
         @(posedge clk);#1;
@@ -79,10 +91,13 @@ module v2_branch_recovery_tb;
   endtask
   initial begin
     force dut.fetch_valid=0;
-    check_recovery(0,0);
-    check_recovery(7,0);
-    check_recovery(7,1);
-    $display("Branch recovery: PASS wrap, retirement, younger branch/store cancellation and prediction history");
+    check_recovery(0,0,0);
+    check_recovery(7,0,0);
+    check_recovery(7,1,0);
+    check_recovery(0,0,2);
+    check_recovery(7,0,1);
+    check_recovery(7,1,2);
+    $display("Branch recovery: PASS wrap, 0/1/2 older commits, younger branch/store cancellation and prediction history");
     $finish;
   end
 endmodule

@@ -43,6 +43,16 @@ module cpu_top #(
     logic [31:0] pc,inst,fault_address,address,wdata;
   } rob_t;
   typedef struct packed {
+    logic done,exiting,store;
+    logic [3:0] fault;
+    logic [4:0] rd;
+    logic [ST-1:0] store_slot;
+  } retire_meta_t;
+  localparam integer RETIRE_META_BITS=$bits(retire_meta_t);
+  retire_meta_t retirement_meta [2];
+  wire [ROB_ENTRIES*RETIRE_META_BITS-1:0] retirement_words;
+  logic [31:0] retirement_value [2];
+  typedef struct packed {
     logic valid,ready_a,ready_b,use_imm,sign_extend,generation;
     rid_t rid,source_a,source_b;
     op_t op;
@@ -193,8 +203,8 @@ module cpu_top #(
   assign halted=state==DONE;
   assign faulted=state==FAULT;
   assign load_replay_count=0;
-  assign exit_head=state==RUN && rob_count!=0 && rob[head].done && rob[head].exiting && rob[head].fault==0;
-  assign fault_head=state==RUN && rob_count!=0 && rob[head].done && rob[head].fault!=0;
+  assign exit_head=state==RUN && rob_count!=0 && retirement_meta[0].done && retirement_meta[0].exiting && retirement_meta[0].fault==0;
+  assign fault_head=state==RUN && rob_count!=0 && retirement_meta[0].done && retirement_meta[0].fault!=0;
   // The terminal state publishes the squash after retirement stops.
   assign flush_all=state!=RUN;
   assign stop_frontend=flush_all;
@@ -203,13 +213,24 @@ module cpu_top #(
   assign mem_req_valid=state!=DONE && (exit_send || bus_req_valid);
   assign mem_req_write=exit_send || bus_req_write;
   assign mem_req_addr=exit_send ? 32'h80000000:bus_req_addr;
-  assign mem_req_wdata=exit_send ? values[head]:bus_req_data;
+  assign mem_req_wdata=exit_send ? retirement_value[0]:bus_req_data;
   assign mem_req_wstrb=exit_send ? 4'hf:bus_req_mask;
   assign bus_req_ready=mem_req_ready && !exit_send && state!=DONE;
   assign mem_rsp_ready=bus_rsp_ready;
   for(genvar row=0;row<ROB_ENTRIES;row=row+1) begin: result_read_words
+    assign retirement_words[row*RETIRE_META_BITS+:RETIRE_META_BITS]=
+      {rob[row].done,rob[row].exiting,rob[row].store,rob[row].fault,rob[row].rd,rob[row].store_slot};
     assign result_words[row*32+:32]=values[row];
     assign result_status_words[row*6+:6]={rob[row].valid,rob[row].done,rob[row].fault};
+  end
+  for(genvar lane=0;lane<2;lane=lane+1) begin: retirement_reads
+    assign commit_rid[lane]=head+rid_t'(lane);
+    wire [RETIRE_META_BITS-1:0] meta_word;
+    assign retirement_meta[lane]=meta_word;
+    v2_retire_read #(.ENTRIES(ROB_ENTRIES),.WORD_BITS(RETIRE_META_BITS),.LANE(lane)) read_metadata (
+      .clk,.rst,.advance(commit_count),.words(retirement_words),.value(meta_word));
+    v2_retire_read #(.ENTRIES(ROB_ENTRIES),.LANE(lane)) read_value (
+      .clk,.rst,.advance(commit_count),.words(result_words),.value(retirement_value[lane]));
   end
   for(genvar row=0;row<32;row=row+1) begin: architectural_read_words
     assign architectural_words[row*32+:32]=architectural[row];
@@ -429,14 +450,16 @@ module cpu_top #(
     logic blocked_retirement,committed_store;
     blocked_retirement=0;committed_store=0;commit_count=0;commit_valid=0;commit_rd=0;
     for(integer lane=0;lane<2;lane=lane+1) begin
-      commit_rid[lane]=head+rid_t'(lane);
       if(lane<COMMIT_WIDTH && !blocked_retirement && state==RUN && int'(rob_count)>lane &&
-         rob[commit_rid[lane]].done && rob[commit_rid[lane]].fault==0 && !rob[commit_rid[lane]].exiting &&
-         !younger(commit_rid[lane]) && (!committed_store || !rob[commit_rid[lane]].store)) begin
+         retirement_meta[lane].done && retirement_meta[lane].fault==0 && !retirement_meta[lane].exiting &&
+         // The head is oldest. Its successor crosses the recovery boundary
+         // only when the resolving branch is itself at the head.
+         (lane==0 || !redirect || redirect_rid!=head) &&
+         (!committed_store || !retirement_meta[lane].store)) begin
         commit_count=commit_count+1'b1;
-        commit_valid[lane]=rob[commit_rid[lane]].rd!=0;
-        commit_rd[lane*5+:5]=rob[commit_rid[lane]].rd;
-        if(rob[commit_rid[lane]].store) committed_store=1;
+        commit_valid[lane]=retirement_meta[lane].rd!=0;
+        commit_rd[lane*5+:5]=retirement_meta[lane].rd;
+        if(retirement_meta[lane].store) committed_store=1;
       end else blocked_retirement=1;
     end
   end
@@ -535,9 +558,9 @@ module cpu_top #(
       for(integer lane=0;lane<2;lane=lane+1)
         if(int'(commit_count)>lane) begin
           retire_valid[lane]<=1;retire_pc[lane*32+:32]<=rob[commit_rid[lane]].pc;
-          retire_inst[lane*32+:32]<=rob[commit_rid[lane]].inst;retire_rd[lane*5+:5]<=rob[commit_rid[lane]].rd;
-          retire_value[lane*32+:32]<=rob[commit_rid[lane]].rd==0 ? 32'd0:values[commit_rid[lane]];
-          retire_store[lane]<=rob[commit_rid[lane]].store;
+          retire_inst[lane*32+:32]<=rob[commit_rid[lane]].inst;retire_rd[lane*5+:5]<=retirement_meta[lane].rd;
+          retire_value[lane*32+:32]<=retirement_meta[lane].rd==0 ? 32'd0:retirement_value[lane];
+          retire_store[lane]<=retirement_meta[lane].store;
           retire_addr[lane*32+:32]<=rob[commit_rid[lane]].address;
           retire_wdata[lane*32+:32]<=rob[commit_rid[lane]].wdata;
           retire_wstrb[lane*4+:4]<=rob[commit_rid[lane]].mask;
@@ -546,11 +569,11 @@ module cpu_top #(
       if(exit_accept) begin
         state<=DONE;retire_valid<=1;retire_store<=1;retire_pc[31:0]<=rob[head].pc;retire_inst[31:0]<=rob[head].inst;
         retire_rd[4:0]<=0;retire_value[31:0]<=0;retire_addr[31:0]<=32'h80000000;
-        retire_wdata[31:0]<=values[head];retire_wstrb[3:0]<=15;
+        retire_wdata[31:0]<=retirement_value[0];retire_wstrb[3:0]<=15;
       end
       if(fault_head) begin
         state<=FAULT;fault_pc<=rob[head].pc;fault_inst<=rob[head].inst;fault_inst_valid<=rob[head].iv;
-        fault_cause<=rob[head].fault;fault_addr<=rob[head].fault_address;
+        fault_cause<=retirement_meta[0].fault;fault_addr<=rob[head].fault_address;
       end
       if(cache_store_error) begin
         state<=FAULT;fault_cause<=FAULT_STORE_BUS;fault_pc<=stores[cache_store_done_tag].pc;
@@ -593,11 +616,11 @@ module cpu_top #(
     end
   end
   for(genvar r=0;r<32;r=r+1) begin: architectural_registers
-    always_ff @(posedge clk) begin
-      if(rst || r==0) architectural[r]<=0;
-      else for(integer lane=0;lane<2;lane=lane+1)
-        if(commit_valid[lane] && commit_rd[lane*5+:5]==5'(r)) architectural[r]<=values[commit_rid[lane]];
-    end
+    wire [31:0] register_value;
+    assign architectural[r]=register_value;
+    v2_arch_word #(.REGISTER(r)) word_register (
+      .clk,.rst,.commit_valid,.commit_rd,
+      .commit_values({retirement_value[1],retirement_value[0]}),.value(register_value));
   end
   for(genvar bank=0;bank<3;bank=bank+1) begin: issue_banks
     for(genvar q=0;q<IQ_ENTRIES;q=q+1) begin: rows
@@ -660,7 +683,7 @@ module cpu_top #(
         if(cache_store_valid && cache_store_ready && store_send_slot==ST'(s)) stores[s].issued<=1;
         if(cache_store_done && cache_store_done_tag==ST'(s)) stores[s].done<=1;
         for(integer lane=0;lane<2;lane=lane+1)
-          if(int'(commit_count)>lane && rob[commit_rid[lane]].store && rob[commit_rid[lane]].store_slot==ST'(s)) stores[s].committed<=1;
+          if(int'(commit_count)>lane && retirement_meta[lane].store && retirement_meta[lane].store_slot==ST'(s)) stores[s].committed<=1;
         if(!stores[s].committed && (younger(stores[s].rid) || flush_all)) stores[s].valid<=0;
         if(store_allocate && store_tail==ST'(s)) begin
           stores[s].valid<=1;stores[s].committed<=0;stores[s].issued<=0;stores[s].done<=0;

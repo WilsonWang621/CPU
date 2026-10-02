@@ -1,0 +1,275 @@
+Startpoint: _428428_ (rising edge-triggered flip-flop clocked by core_clock)
+Endpoint: core.retirement_reads[0].read_metadata/_673_
+          (rising edge-triggered flip-flop clocked by core_clock)
+Path Group: core_clock
+Path Type: max
+
+Fanout       Cap      Slew     Delay      Time   Description
+-------------------------------------------------------------------------------------
+                    0.0500    0.0000    0.0000   clock core_clock (rise edge)
+                              0.0000    0.0000   clock network delay (ideal)
+                    0.0500    0.0000    0.0000 ^ _428428_/CLK (DFFHQNx1_ASAP7_75t_R)
+   268  212.4768    1.8353    0.9009    0.9009 ^ _428428_/QN (DFFHQNx1_ASAP7_75t_R)
+                    1.8353    0.0000    0.9009 ^ _293011_/B (NOR2xp33_ASAP7_75t_R)
+   123   95.7801    1.4182    1.7436    2.6446 v _293011_/Y (NOR2xp33_ASAP7_75t_R)
+                    1.4182    0.0000    2.6446 v _293020_/A (NAND2xp33_ASAP7_75t_R)
+   137  123.1620    3.0065    2.0259    4.6704 ^ _293020_/Y (NAND2xp33_ASAP7_75t_R)
+                    3.0065    0.0000    4.6704 ^ _293024_/A (NAND2xp33_ASAP7_75t_R)
+    72   34.9032    0.7626    1.1330    5.8034 v _293024_/Y (NAND2xp33_ASAP7_75t_R)
+                    0.7626    0.0000    5.8034 v _293028_/A2 (OAI22xp33_ASAP7_75t_R)
+     1    0.4796    0.1268    0.0936    5.8970 ^ _293028_/Y (OAI22xp33_ASAP7_75t_R)
+                    0.1268    0.0000    5.8970 ^ _293032_/C (OAI221xp5_ASAP7_75t_R)
+     1    0.4720    0.0900    0.0299    5.9269 v _293032_/Y (OAI221xp5_ASAP7_75t_R)
+                    0.0900    0.0000    5.9269 v _293033_/C (OAI221xp5_ASAP7_75t_R)
+     1    0.4649    0.2836    0.0305    5.9574 ^ _293033_/Y (OAI221xp5_ASAP7_75t_R)
+                    0.2836    0.0000    5.9574 ^ _293034_/B (OAI211xp5_ASAP7_75t_R)
+     5    2.2499    0.1405    0.0680    6.0253 v _293034_/Y (OAI211xp5_ASAP7_75t_R)
+                    0.1405    0.0000    6.0253 v _293037_/C (NAND5xp2_ASAP7_75t_R)
+    16    6.9595    0.1230    0.0991    6.1244 ^ _293037_/Y (NAND5xp2_ASAP7_75t_R)
+                    0.1230    0.0000    6.1244 ^ _293038_/A (INVx1_ASAP7_75t_R)
+   150   74.5258    0.4925    0.2871    6.4116 v _293038_/Y (INVx1_ASAP7_75t_R)
+                    0.4925    0.0000    6.4116 v _294968_/B (NOR2xp33_ASAP7_75t_R)
+   142   69.3778    1.7058    0.9721    7.3836 ^ _294968_/Y (NOR2xp33_ASAP7_75t_R)
+                    1.7058    0.0000    7.3836 ^ core.retirement_reads[0].read_metadata/_532_/A (XOR2xp5_ASAP7_75t_R)
+    32   16.6225    0.4612    0.4629    7.8466 v core.retirement_reads[0].read_metadata/_532_/Y (XOR2xp5_ASAP7_75t_R)
+                    0.4612    0.0000    7.8466 v core.retirement_reads[0].read_metadata/_649_/B (OR2x2_ASAP7_75t_R)
+     1    0.4952    0.0215    0.0780    7.9246 v core.retirement_reads[0].read_metadata/_649_/Y (OR2x2_ASAP7_75t_R)
+                    0.0215    0.0000    7.9246 v core.retirement_reads[0].read_metadata/_652_/A1 (AOI31xp33_ASAP7_75t_R)
+     1    0.5588    0.0533    0.0190    7.9436 ^ core.retirement_reads[0].read_metadata/_652_/Y (AOI31xp33_ASAP7_75t_R)
+                    0.0533    0.0000    7.9436 ^ core.retirement_reads[0].read_metadata/_673_/D (DFFHQNx1_ASAP7_75t_R)
+                                        7.9436   data arrival time
+
+                    0.0500    2.0000    2.0000   clock core_clock (rise edge)
+                              0.0000    2.0000   clock network delay (ideal)
+                             -0.0500    1.9500   clock uncertainty
+                              0.0000    1.9500   clock reconvergence pessimism
+                                        1.9500 ^ core.retirement_reads[0].read_metadata/_673_/CLK (DFFHQNx1_ASAP7_75t_R)
+                             -0.0117    1.9383   library setup time
+                                        1.9383   data required time
+-------------------------------------------------------------------------------------
+                                        1.9383   data required time
+                                       -7.9436   data arrival time
+-------------------------------------------------------------------------------------
+                                       -6.0053   slack (VIOLATED)
+
+
+Startpoint: _428428_ (rising edge-triggered flip-flop clocked by core_clock)
+Endpoint: core.retirement_reads[0].read_metadata/_674_
+          (rising edge-triggered flip-flop clocked by core_clock)
+Path Group: core_clock
+Path Type: max
+
+Fanout       Cap      Slew     Delay      Time   Description
+-------------------------------------------------------------------------------------
+                    0.0500    0.0000    0.0000   clock core_clock (rise edge)
+                              0.0000    0.0000   clock network delay (ideal)
+                    0.0500    0.0000    0.0000 ^ _428428_/CLK (DFFHQNx1_ASAP7_75t_R)
+   268  212.4768    1.8353    0.9009    0.9009 ^ _428428_/QN (DFFHQNx1_ASAP7_75t_R)
+                    1.8353    0.0000    0.9009 ^ _293011_/B (NOR2xp33_ASAP7_75t_R)
+   123   95.7801    1.4182    1.7436    2.6446 v _293011_/Y (NOR2xp33_ASAP7_75t_R)
+                    1.4182    0.0000    2.6446 v _293020_/A (NAND2xp33_ASAP7_75t_R)
+   137  123.1620    3.0065    2.0259    4.6704 ^ _293020_/Y (NAND2xp33_ASAP7_75t_R)
+                    3.0065    0.0000    4.6704 ^ _293024_/A (NAND2xp33_ASAP7_75t_R)
+    72   34.9032    0.7626    1.1330    5.8034 v _293024_/Y (NAND2xp33_ASAP7_75t_R)
+                    0.7626    0.0000    5.8034 v _293028_/A2 (OAI22xp33_ASAP7_75t_R)
+     1    0.4796    0.1268    0.0936    5.8970 ^ _293028_/Y (OAI22xp33_ASAP7_75t_R)
+                    0.1268    0.0000    5.8970 ^ _293032_/C (OAI221xp5_ASAP7_75t_R)
+     1    0.4720    0.0900    0.0299    5.9269 v _293032_/Y (OAI221xp5_ASAP7_75t_R)
+                    0.0900    0.0000    5.9269 v _293033_/C (OAI221xp5_ASAP7_75t_R)
+     1    0.4649    0.2836    0.0305    5.9574 ^ _293033_/Y (OAI221xp5_ASAP7_75t_R)
+                    0.2836    0.0000    5.9574 ^ _293034_/B (OAI211xp5_ASAP7_75t_R)
+     5    2.2499    0.1405    0.0680    6.0253 v _293034_/Y (OAI211xp5_ASAP7_75t_R)
+                    0.1405    0.0000    6.0253 v _293037_/C (NAND5xp2_ASAP7_75t_R)
+    16    6.9595    0.1230    0.0991    6.1244 ^ _293037_/Y (NAND5xp2_ASAP7_75t_R)
+                    0.1230    0.0000    6.1244 ^ _293038_/A (INVx1_ASAP7_75t_R)
+   150   74.5258    0.4925    0.2871    6.4116 v _293038_/Y (INVx1_ASAP7_75t_R)
+                    0.4925    0.0000    6.4116 v _294968_/B (NOR2xp33_ASAP7_75t_R)
+   142   69.3778    1.7058    0.9721    7.3836 ^ _294968_/Y (NOR2xp33_ASAP7_75t_R)
+                    1.7058    0.0000    7.3836 ^ core.retirement_reads[0].read_metadata/_532_/A (XOR2xp5_ASAP7_75t_R)
+    32   16.6225    0.4612    0.4629    7.8466 v core.retirement_reads[0].read_metadata/_532_/Y (XOR2xp5_ASAP7_75t_R)
+                    0.4612    0.0000    7.8466 v core.retirement_reads[0].read_metadata/_645_/B (OR2x2_ASAP7_75t_R)
+     1    0.4952    0.0215    0.0780    7.9246 v core.retirement_reads[0].read_metadata/_645_/Y (OR2x2_ASAP7_75t_R)
+                    0.0215    0.0000    7.9246 v core.retirement_reads[0].read_metadata/_648_/A1 (AOI31xp33_ASAP7_75t_R)
+     1    0.5588    0.0533    0.0190    7.9436 ^ core.retirement_reads[0].read_metadata/_648_/Y (AOI31xp33_ASAP7_75t_R)
+                    0.0533    0.0000    7.9436 ^ core.retirement_reads[0].read_metadata/_674_/D (DFFHQNx1_ASAP7_75t_R)
+                                        7.9436   data arrival time
+
+                    0.0500    2.0000    2.0000   clock core_clock (rise edge)
+                              0.0000    2.0000   clock network delay (ideal)
+                             -0.0500    1.9500   clock uncertainty
+                              0.0000    1.9500   clock reconvergence pessimism
+                                        1.9500 ^ core.retirement_reads[0].read_metadata/_674_/CLK (DFFHQNx1_ASAP7_75t_R)
+                             -0.0117    1.9383   library setup time
+                                        1.9383   data required time
+-------------------------------------------------------------------------------------
+                                        1.9383   data required time
+                                       -7.9436   data arrival time
+-------------------------------------------------------------------------------------
+                                       -6.0053   slack (VIOLATED)
+
+
+Startpoint: _428428_ (rising edge-triggered flip-flop clocked by core_clock)
+Endpoint: core.retirement_reads[0].read_metadata/_675_
+          (rising edge-triggered flip-flop clocked by core_clock)
+Path Group: core_clock
+Path Type: max
+
+Fanout       Cap      Slew     Delay      Time   Description
+-------------------------------------------------------------------------------------
+                    0.0500    0.0000    0.0000   clock core_clock (rise edge)
+                              0.0000    0.0000   clock network delay (ideal)
+                    0.0500    0.0000    0.0000 ^ _428428_/CLK (DFFHQNx1_ASAP7_75t_R)
+   268  212.4768    1.8353    0.9009    0.9009 ^ _428428_/QN (DFFHQNx1_ASAP7_75t_R)
+                    1.8353    0.0000    0.9009 ^ _293011_/B (NOR2xp33_ASAP7_75t_R)
+   123   95.7801    1.4182    1.7436    2.6446 v _293011_/Y (NOR2xp33_ASAP7_75t_R)
+                    1.4182    0.0000    2.6446 v _293020_/A (NAND2xp33_ASAP7_75t_R)
+   137  123.1620    3.0065    2.0259    4.6704 ^ _293020_/Y (NAND2xp33_ASAP7_75t_R)
+                    3.0065    0.0000    4.6704 ^ _293024_/A (NAND2xp33_ASAP7_75t_R)
+    72   34.9032    0.7626    1.1330    5.8034 v _293024_/Y (NAND2xp33_ASAP7_75t_R)
+                    0.7626    0.0000    5.8034 v _293028_/A2 (OAI22xp33_ASAP7_75t_R)
+     1    0.4796    0.1268    0.0936    5.8970 ^ _293028_/Y (OAI22xp33_ASAP7_75t_R)
+                    0.1268    0.0000    5.8970 ^ _293032_/C (OAI221xp5_ASAP7_75t_R)
+     1    0.4720    0.0900    0.0299    5.9269 v _293032_/Y (OAI221xp5_ASAP7_75t_R)
+                    0.0900    0.0000    5.9269 v _293033_/C (OAI221xp5_ASAP7_75t_R)
+     1    0.4649    0.2836    0.0305    5.9574 ^ _293033_/Y (OAI221xp5_ASAP7_75t_R)
+                    0.2836    0.0000    5.9574 ^ _293034_/B (OAI211xp5_ASAP7_75t_R)
+     5    2.2499    0.1405    0.0680    6.0253 v _293034_/Y (OAI211xp5_ASAP7_75t_R)
+                    0.1405    0.0000    6.0253 v _293037_/C (NAND5xp2_ASAP7_75t_R)
+    16    6.9595    0.1230    0.0991    6.1244 ^ _293037_/Y (NAND5xp2_ASAP7_75t_R)
+                    0.1230    0.0000    6.1244 ^ _293038_/A (INVx1_ASAP7_75t_R)
+   150   74.5258    0.4925    0.2871    6.4116 v _293038_/Y (INVx1_ASAP7_75t_R)
+                    0.4925    0.0000    6.4116 v _294968_/B (NOR2xp33_ASAP7_75t_R)
+   142   69.3778    1.7058    0.9721    7.3836 ^ _294968_/Y (NOR2xp33_ASAP7_75t_R)
+                    1.7058    0.0000    7.3836 ^ core.retirement_reads[0].read_metadata/_532_/A (XOR2xp5_ASAP7_75t_R)
+    32   16.6225    0.4612    0.4629    7.8466 v core.retirement_reads[0].read_metadata/_532_/Y (XOR2xp5_ASAP7_75t_R)
+                    0.4612    0.0000    7.8466 v core.retirement_reads[0].read_metadata/_641_/B (OR2x2_ASAP7_75t_R)
+     1    0.4952    0.0215    0.0780    7.9246 v core.retirement_reads[0].read_metadata/_641_/Y (OR2x2_ASAP7_75t_R)
+                    0.0215    0.0000    7.9246 v core.retirement_reads[0].read_metadata/_644_/A1 (AOI31xp33_ASAP7_75t_R)
+     1    0.5588    0.0533    0.0190    7.9436 ^ core.retirement_reads[0].read_metadata/_644_/Y (AOI31xp33_ASAP7_75t_R)
+                    0.0533    0.0000    7.9436 ^ core.retirement_reads[0].read_metadata/_675_/D (DFFHQNx1_ASAP7_75t_R)
+                                        7.9436   data arrival time
+
+                    0.0500    2.0000    2.0000   clock core_clock (rise edge)
+                              0.0000    2.0000   clock network delay (ideal)
+                             -0.0500    1.9500   clock uncertainty
+                              0.0000    1.9500   clock reconvergence pessimism
+                                        1.9500 ^ core.retirement_reads[0].read_metadata/_675_/CLK (DFFHQNx1_ASAP7_75t_R)
+                             -0.0117    1.9383   library setup time
+                                        1.9383   data required time
+-------------------------------------------------------------------------------------
+                                        1.9383   data required time
+                                       -7.9436   data arrival time
+-------------------------------------------------------------------------------------
+                                       -6.0053   slack (VIOLATED)
+
+
+Startpoint: _428428_ (rising edge-triggered flip-flop clocked by core_clock)
+Endpoint: core.retirement_reads[0].read_metadata/_676_
+          (rising edge-triggered flip-flop clocked by core_clock)
+Path Group: core_clock
+Path Type: max
+
+Fanout       Cap      Slew     Delay      Time   Description
+-------------------------------------------------------------------------------------
+                    0.0500    0.0000    0.0000   clock core_clock (rise edge)
+                              0.0000    0.0000   clock network delay (ideal)
+                    0.0500    0.0000    0.0000 ^ _428428_/CLK (DFFHQNx1_ASAP7_75t_R)
+   268  212.4768    1.8353    0.9009    0.9009 ^ _428428_/QN (DFFHQNx1_ASAP7_75t_R)
+                    1.8353    0.0000    0.9009 ^ _293011_/B (NOR2xp33_ASAP7_75t_R)
+   123   95.7801    1.4182    1.7436    2.6446 v _293011_/Y (NOR2xp33_ASAP7_75t_R)
+                    1.4182    0.0000    2.6446 v _293020_/A (NAND2xp33_ASAP7_75t_R)
+   137  123.1620    3.0065    2.0259    4.6704 ^ _293020_/Y (NAND2xp33_ASAP7_75t_R)
+                    3.0065    0.0000    4.6704 ^ _293024_/A (NAND2xp33_ASAP7_75t_R)
+    72   34.9032    0.7626    1.1330    5.8034 v _293024_/Y (NAND2xp33_ASAP7_75t_R)
+                    0.7626    0.0000    5.8034 v _293028_/A2 (OAI22xp33_ASAP7_75t_R)
+     1    0.4796    0.1268    0.0936    5.8970 ^ _293028_/Y (OAI22xp33_ASAP7_75t_R)
+                    0.1268    0.0000    5.8970 ^ _293032_/C (OAI221xp5_ASAP7_75t_R)
+     1    0.4720    0.0900    0.0299    5.9269 v _293032_/Y (OAI221xp5_ASAP7_75t_R)
+                    0.0900    0.0000    5.9269 v _293033_/C (OAI221xp5_ASAP7_75t_R)
+     1    0.4649    0.2836    0.0305    5.9574 ^ _293033_/Y (OAI221xp5_ASAP7_75t_R)
+                    0.2836    0.0000    5.9574 ^ _293034_/B (OAI211xp5_ASAP7_75t_R)
+     5    2.2499    0.1405    0.0680    6.0253 v _293034_/Y (OAI211xp5_ASAP7_75t_R)
+                    0.1405    0.0000    6.0253 v _293037_/C (NAND5xp2_ASAP7_75t_R)
+    16    6.9595    0.1230    0.0991    6.1244 ^ _293037_/Y (NAND5xp2_ASAP7_75t_R)
+                    0.1230    0.0000    6.1244 ^ _293038_/A (INVx1_ASAP7_75t_R)
+   150   74.5258    0.4925    0.2871    6.4116 v _293038_/Y (INVx1_ASAP7_75t_R)
+                    0.4925    0.0000    6.4116 v _294968_/B (NOR2xp33_ASAP7_75t_R)
+   142   69.3778    1.7058    0.9721    7.3836 ^ _294968_/Y (NOR2xp33_ASAP7_75t_R)
+                    1.7058    0.0000    7.3836 ^ core.retirement_reads[0].read_metadata/_532_/A (XOR2xp5_ASAP7_75t_R)
+    32   16.6225    0.4612    0.4629    7.8466 v core.retirement_reads[0].read_metadata/_532_/Y (XOR2xp5_ASAP7_75t_R)
+                    0.4612    0.0000    7.8466 v core.retirement_reads[0].read_metadata/_637_/B (OR2x2_ASAP7_75t_R)
+     1    0.4952    0.0215    0.0780    7.9246 v core.retirement_reads[0].read_metadata/_637_/Y (OR2x2_ASAP7_75t_R)
+                    0.0215    0.0000    7.9246 v core.retirement_reads[0].read_metadata/_640_/A1 (AOI31xp33_ASAP7_75t_R)
+     1    0.5588    0.0533    0.0190    7.9436 ^ core.retirement_reads[0].read_metadata/_640_/Y (AOI31xp33_ASAP7_75t_R)
+                    0.0533    0.0000    7.9436 ^ core.retirement_reads[0].read_metadata/_676_/D (DFFHQNx1_ASAP7_75t_R)
+                                        7.9436   data arrival time
+
+                    0.0500    2.0000    2.0000   clock core_clock (rise edge)
+                              0.0000    2.0000   clock network delay (ideal)
+                             -0.0500    1.9500   clock uncertainty
+                              0.0000    1.9500   clock reconvergence pessimism
+                                        1.9500 ^ core.retirement_reads[0].read_metadata/_676_/CLK (DFFHQNx1_ASAP7_75t_R)
+                             -0.0117    1.9383   library setup time
+                                        1.9383   data required time
+-------------------------------------------------------------------------------------
+                                        1.9383   data required time
+                                       -7.9436   data arrival time
+-------------------------------------------------------------------------------------
+                                       -6.0053   slack (VIOLATED)
+
+
+Startpoint: _428428_ (rising edge-triggered flip-flop clocked by core_clock)
+Endpoint: core.retirement_reads[0].read_metadata/_677_
+          (rising edge-triggered flip-flop clocked by core_clock)
+Path Group: core_clock
+Path Type: max
+
+Fanout       Cap      Slew     Delay      Time   Description
+-------------------------------------------------------------------------------------
+                    0.0500    0.0000    0.0000   clock core_clock (rise edge)
+                              0.0000    0.0000   clock network delay (ideal)
+                    0.0500    0.0000    0.0000 ^ _428428_/CLK (DFFHQNx1_ASAP7_75t_R)
+   268  212.4768    1.8353    0.9009    0.9009 ^ _428428_/QN (DFFHQNx1_ASAP7_75t_R)
+                    1.8353    0.0000    0.9009 ^ _293011_/B (NOR2xp33_ASAP7_75t_R)
+   123   95.7801    1.4182    1.7436    2.6446 v _293011_/Y (NOR2xp33_ASAP7_75t_R)
+                    1.4182    0.0000    2.6446 v _293020_/A (NAND2xp33_ASAP7_75t_R)
+   137  123.1620    3.0065    2.0259    4.6704 ^ _293020_/Y (NAND2xp33_ASAP7_75t_R)
+                    3.0065    0.0000    4.6704 ^ _293024_/A (NAND2xp33_ASAP7_75t_R)
+    72   34.9032    0.7626    1.1330    5.8034 v _293024_/Y (NAND2xp33_ASAP7_75t_R)
+                    0.7626    0.0000    5.8034 v _293028_/A2 (OAI22xp33_ASAP7_75t_R)
+     1    0.4796    0.1268    0.0936    5.8970 ^ _293028_/Y (OAI22xp33_ASAP7_75t_R)
+                    0.1268    0.0000    5.8970 ^ _293032_/C (OAI221xp5_ASAP7_75t_R)
+     1    0.4720    0.0900    0.0299    5.9269 v _293032_/Y (OAI221xp5_ASAP7_75t_R)
+                    0.0900    0.0000    5.9269 v _293033_/C (OAI221xp5_ASAP7_75t_R)
+     1    0.4649    0.2836    0.0305    5.9574 ^ _293033_/Y (OAI221xp5_ASAP7_75t_R)
+                    0.2836    0.0000    5.9574 ^ _293034_/B (OAI211xp5_ASAP7_75t_R)
+     5    2.2499    0.1405    0.0680    6.0253 v _293034_/Y (OAI211xp5_ASAP7_75t_R)
+                    0.1405    0.0000    6.0253 v _293037_/C (NAND5xp2_ASAP7_75t_R)
+    16    6.9595    0.1230    0.0991    6.1244 ^ _293037_/Y (NAND5xp2_ASAP7_75t_R)
+                    0.1230    0.0000    6.1244 ^ _293038_/A (INVx1_ASAP7_75t_R)
+   150   74.5258    0.4925    0.2871    6.4116 v _293038_/Y (INVx1_ASAP7_75t_R)
+                    0.4925    0.0000    6.4116 v _294968_/B (NOR2xp33_ASAP7_75t_R)
+   142   69.3778    1.7058    0.9721    7.3836 ^ _294968_/Y (NOR2xp33_ASAP7_75t_R)
+                    1.7058    0.0000    7.3836 ^ core.retirement_reads[0].read_metadata/_532_/A (XOR2xp5_ASAP7_75t_R)
+    32   16.6225    0.4612    0.4629    7.8466 v core.retirement_reads[0].read_metadata/_532_/Y (XOR2xp5_ASAP7_75t_R)
+                    0.4612    0.0000    7.8466 v core.retirement_reads[0].read_metadata/_633_/B (OR2x2_ASAP7_75t_R)
+     1    0.4952    0.0215    0.0780    7.9246 v core.retirement_reads[0].read_metadata/_633_/Y (OR2x2_ASAP7_75t_R)
+                    0.0215    0.0000    7.9246 v core.retirement_reads[0].read_metadata/_636_/A1 (AOI31xp33_ASAP7_75t_R)
+     1    0.5588    0.0533    0.0190    7.9436 ^ core.retirement_reads[0].read_metadata/_636_/Y (AOI31xp33_ASAP7_75t_R)
+                    0.0533    0.0000    7.9436 ^ core.retirement_reads[0].read_metadata/_677_/D (DFFHQNx1_ASAP7_75t_R)
+                                        7.9436   data arrival time
+
+                    0.0500    2.0000    2.0000   clock core_clock (rise edge)
+                              0.0000    2.0000   clock network delay (ideal)
+                             -0.0500    1.9500   clock uncertainty
+                              0.0000    1.9500   clock reconvergence pessimism
+                                        1.9500 ^ core.retirement_reads[0].read_metadata/_677_/CLK (DFFHQNx1_ASAP7_75t_R)
+                             -0.0117    1.9383   library setup time
+                                        1.9383   data required time
+-------------------------------------------------------------------------------------
+                                        1.9383   data required time
+                                       -7.9436   data arrival time
+-------------------------------------------------------------------------------------
+                                       -6.0053   slack (VIOLATED)
+
+

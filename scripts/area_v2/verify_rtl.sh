@@ -19,7 +19,13 @@ iverilog -g2012 -s v2_select_wrap_tb -o "$out/select" tests/rtl/v2_select_wrap_t
 vvp "$out/select"
 iverilog -g2012 -s v2_dcache_write_tb -o "$out/dcache" tests/rtl/v2_dcache_write_tb.sv verilog/area_v2_core.v
 vvp "$out/dcache"
+iverilog -g2012 -s v2_dcache_return_tb -o "$out/dcache_return" tests/rtl/v2_dcache_return_tb.sv verilog/area_v2_core.v
+vvp "$out/dcache_return"
 iverilog -g2012 -s v2_terminal_squash_tb -o "$out/terminal" tests/rtl/v2_terminal_squash_tb.sv verilog/area_v2_core.v
 vvp "$out/terminal"
 iverilog -g2012 -s v2_branch_recovery_tb -o "$out/branch_recovery" tests/rtl/v2_branch_recovery_tb.sv verilog/area_v2_core.v
 vvp "$out/branch_recovery"
+iverilog -g2012 -s v2_retire_read_tb -o "$out/retire_read" tests/rtl/v2_retire_read_tb.sv verilog/area_v2_core.v
+vvp "$out/retire_read"
+iverilog -g2012 -s v2_retire_boundary_tb -o "$out/retire_boundary" tests/rtl/v2_retire_boundary_tb.sv verilog/area_v2_core.v
+vvp "$out/retire_boundary"
