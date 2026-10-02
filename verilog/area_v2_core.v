@@ -2675,7 +2675,7 @@ for(p=0;p<2;p=p+1) begin
       incoming[p][PACKET_T_INST_LSB+:PACKET_T_INST_WIDTH]=fetch_inst[p];incoming[p][PACKET_T_IV_LSB+:PACKET_T_IV_WIDTH]=1;
     end
 end
-    if(!stop && !redirect && !blocked && narrow_4(count)-narrow_4(pop_count)<QUEUE_ENTRIES) begin
+    if(!stop && !redirect && !blocked && narrow_4(count)<QUEUE_ENTRIES) begin
       if(pc[1:0]!=0 || pc>=RAM_BYTES) begin
         incoming[0][PACKET_T_FAULT_LSB+:PACKET_T_FAULT_WIDTH]=pc[1:0]!=0 ? FAULT_FETCH_ALIGN:FAULT_FETCH_RANGE;
         incoming[0][PACKET_T_IV_LSB+:PACKET_T_IV_WIDTH]=0;incoming[0][PACKET_T_INST_LSB+:PACKET_T_INST_WIDTH]=0;push=1;next_blocked=1;
@@ -2684,7 +2684,7 @@ end
         if(word_error[0]) begin
           incoming[0][PACKET_T_FAULT_LSB+:PACKET_T_FAULT_WIDTH]=FAULT_FETCH_BUS;incoming[0][PACKET_T_IV_LSB+:PACKET_T_IV_WIDTH]=0;incoming[0][PACKET_T_INST_LSB+:PACKET_T_INST_WIDTH]=0;next_blocked=1;
         end else if(prediction[0]==sequential_pc[0] && pc[4:2]!=7 && word_ready[1] &&
-                    narrow_4(count)-narrow_4(pop_count)<QUEUE_ENTRIES-1) begin
+                    narrow_4(count)<QUEUE_ENTRIES-1) begin
           push=2;next_pc=prediction[1];
           if(word_error[1]) begin
             incoming[1][PACKET_T_FAULT_LSB+:PACKET_T_FAULT_WIDTH]=FAULT_FETCH_BUS;incoming[1][PACKET_T_IV_LSB+:PACKET_T_IV_WIDTH]=0;incoming[1][PACKET_T_INST_LSB+:PACKET_T_INST_WIDTH]=0;next_blocked=1;
@@ -2755,7 +2755,7 @@ end
 integer p;
 for(p=0;p<2;p=p+1)
 
-        if((narrow_4(count)+p<QUEUE_ENTRIES || (!rst && !redirect && narrow_4(push)>p)) &&
+        if(narrow_4(count)+p<QUEUE_ENTRIES &&
            narrow_2(tail+narrow_2(p))==narrow_2(row)) fifo[row]<=incoming[p];
 end
   end
