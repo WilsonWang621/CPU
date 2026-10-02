@@ -2,89 +2,132 @@ package tier2
 import chisel3._
 import chisel3.util._
 
-/** Pipelined synchronous SRAM hits; write-through, no write allocation.
-  * Refills use independent pipelined word requests on the ordered memory port.
-  * A store is accepted only when its cache update and write-buffer enqueue both occur.
+/** Synchronous tag and data SRAMs with per-word validity.
+  * One-cycle load hits, pipelined word refills, buffered write-through stores.
+  * Store allocation preserves written sectors without fetching unused words.
   */
-class Cache(bytes: Int, ways: Int, lineBytes: Int) extends Module {
+class Cache(bytes: Int, ways: Int, lineBytes: Int, writeEntries: Int = 16) extends Module {
   val io = IO(new Bundle { val cpu = Flipped(new MemPort); val mem = new MemPort })
   val sets = bytes / ways / lineBytes
-  val ob = log2Ceil(lineBytes); val sb = log2Ceil(sets); val wb = ob - 2
-  val words = bytes / ways / 4
-  val tags = Reg(Vec(ways, Vec(sets, UInt((32-ob-sb).W))))
+  val ob = log2Ceil(lineBytes); val sb = log2Ceil(sets); val wb = ob-2
+  val tagWidth = 32-ob-sb; val lineWords = lineBytes/4
   val valid = RegInit(VecInit(Seq.fill(ways)(VecInit(Seq.fill(sets)(false.B)))))
   val replace = RegInit(VecInit(Seq.fill(sets)(false.B)))
-  val ram = Seq.fill(ways)(Module(new Sram(words)))
+  val dataRam = Seq.fill(ways)(Module(new Sram(bytes/ways/4)))
+  val tagRam = Seq.fill(ways)(Module(new Sram(sets,tagWidth+lineWords,tagWidth+lineWords)))
   val idle :: check :: refill :: retry :: Nil = Enum(4)
-  val state = RegInit(idle)
-  val address = Reg(UInt(32.W)); val hits = Reg(UInt(ways.W))
+  val state = RegInit(idle); val request = Reg(new MemReq)
   val victim = Reg(UInt(math.max(1,log2Ceil(ways)).W))
   val sent = RegInit(0.U((wb+1).W)); val received = RegInit(0.U((wb+1).W))
-  val writeQueue = Module(new Queue(new MemReq, 16))
-  val direction = Module(new Queue(Bool(), 32))
-  val cpuSet = io.cpu.req.bits.addr(ob+sb-1,ob)
-  val cpuTag = io.cpu.req.bits.addr(31,ob+sb)
-  val cpuHits = VecInit((0 until ways).map(w => valid(w)(cpuSet) && tags(w)(cpuSet) === cpuTag)).asUInt
+  val earlyReturned = RegInit(false.B)
+  val writeQueue = Module(new Queue(new MemReq,writeEntries)); val direction = Module(new Queue(Bool(),16))
+  val index = request.addr(ob+sb-1,ob); val tag = request.addr(31,ob+sb); val word = request.addr(ob-1,2)
+  val tagHits = VecInit((0 until ways).map(w => valid(w)(index) && tagRam(w).io.rdata(tagWidth+lineWords-1,lineWords) === tag)).asUInt
+  val hits = VecInit((0 until ways).map(w => tagHits(w) && tagRam(w).io.rdata(lineWords-1,0)(word))).asUInt
   val hit = hits.orR
-  io.cpu.rsp.valid := state === check && hit
-  io.cpu.rsp.bits.data := Mux1H((0 until ways).map(w => hits(w) -> ram(w).io.rdata))
+  val earlyResponse = state === refill && !earlyReturned && direction.io.deq.valid && !direction.io.deq.bits && received === 0.U
+  io.cpu.rsp.valid := (state === check && !request.write && hit) || (earlyResponse && io.mem.rsp.valid)
+  io.cpu.rsp.bits.data := Mux1H((0 until ways).map(w => hits(w) -> dataRam(w).io.rdata))
   io.cpu.rsp.bits.error := false.B
-  io.cpu.req.ready := (state === idle || (io.cpu.rsp.fire)) && (!io.cpu.req.bits.write || writeQueue.io.enq.ready)
-  writeQueue.io.enq.valid := io.cpu.req.fire && io.cpu.req.bits.write
-  writeQueue.io.enq.bits := io.cpu.req.bits
-
-  val missSet = address(ob+sb-1,ob)
-  val fillReq = state === refill && sent < (lineBytes/4).U
+  when(earlyResponse) { io.cpu.rsp.bits.data := io.mem.rsp.bits.data }
+  io.cpu.req.ready := (state === idle || (state === check && io.cpu.rsp.fire)) && (!io.cpu.req.bits.write || writeQueue.io.enq.ready)
+  writeQueue.io.enq.valid := io.cpu.req.fire && io.cpu.req.bits.write; writeQueue.io.enq.bits := io.cpu.req.bits
+  val fillReq = state === refill && sent < lineWords.U
   io.mem.req.valid := direction.io.enq.ready && (writeQueue.io.deq.valid || fillReq)
   io.mem.req.bits := writeQueue.io.deq.bits
   when(!writeQueue.io.deq.valid) {
-    io.mem.req.bits.addr := Cat(address(31,ob),sent(wb-1,0),0.U(2.W))
+    io.mem.req.bits.addr := Cat(request.addr(31,ob),(word+sent)(wb-1,0),0.U(2.W))
     io.mem.req.bits.data := 0.U; io.mem.req.bits.mask := 0.U; io.mem.req.bits.write := false.B
   }
   writeQueue.io.deq.ready := io.mem.req.ready && direction.io.enq.ready
   direction.io.enq.valid := io.mem.req.fire; direction.io.enq.bits := io.mem.req.bits.write
-  io.mem.rsp.ready := direction.io.deq.valid
-  direction.io.deq.ready := io.mem.rsp.fire
+  io.mem.rsp.ready := direction.io.deq.valid && (!earlyResponse || io.cpu.rsp.ready); direction.io.deq.ready := io.mem.rsp.fire
   val filling = io.mem.rsp.fire && !direction.io.deq.bits
-  when(io.mem.req.fire && !io.mem.req.bits.write) { sent := sent + 1.U }
-  when(io.mem.rsp.fire) { assert(!io.mem.rsp.bits.error, "AXI memory response error") }
+  val lastFill = filling && received === (lineWords-1).U
+  val storing = state === check && request.write
+  val canStore = request.mask.andR || tagHits.orR
+  val newWay = if(ways==1) 0.U else Mux(!valid(0)(index),0.U,Mux(!valid(1)(index),1.U,replace(index).asUInt))
+  val storeWay = if(ways==1) 0.U else Mux(tagHits.orR,PriorityEncoder(tagHits),newWay)
+  when(io.mem.req.fire && !io.mem.req.bits.write) { sent := sent+1.U }
+  when(io.mem.rsp.fire) { assert(!io.mem.rsp.bits.error,"AXI memory response error") }
   for(w <- 0 until ways) {
-    val m = ram(w).io
-    m.clk := clock
-    m.en := io.cpu.req.fire || filling || state === retry || (state === check && !io.cpu.rsp.fire)
-    m.we := (io.cpu.req.fire && io.cpu.req.bits.write && cpuHits(w)) || (filling && victim === w.U)
-    m.addr := io.cpu.req.bits.addr(ob+sb-1,2)
-    when(!io.cpu.req.fire) { m.addr := address(ob+sb-1,2) }
-    m.wdata := io.cpu.req.bits.data; m.wmask := io.cpu.req.bits.mask
-    when(filling) {
-      m.en := victim === w.U
-      m.addr := Cat(missSet,received(wb-1,0))
-      m.wdata := io.mem.rsp.bits.data; m.wmask := 15.U
-    }
-    when(state === retry) { m.addr := address(ob+sb-1,2) }
-  }
-  when(io.cpu.rsp.fire) { state := idle }
-  when(io.cpu.req.fire) {
-    when(!io.cpu.req.bits.write) { state := check; address := io.cpu.req.bits.addr; hits := cpuHits }
-    if(ways == 2) { when(cpuHits.orR) { replace(cpuSet) := !cpuHits(1) } }
-  }
-  when(state === check && !hit) {
-    state := refill; sent := 0.U; received := 0.U
-    if(ways == 1) { victim := 0.U }
-    else { victim := Mux(!valid(0)(missSet),0.U,Mux(!valid(1)(missSet),1.U,replace(missSet).asUInt)) }
-  }
-  when(filling) {
-    received := received + 1.U
-    when(received === (lineBytes/4-1).U) {
-      state := retry
-      for(w <- 0 until ways) {
-        when(victim === w.U) { valid(w)(missSet) := true.B; tags(w)(missSet) := address(31,ob+sb) }
+    val d = dataRam(w).io; val t = tagRam(w).io
+    d.clk := clock; t.clk := clock
+    val reading = io.cpu.req.fire || state === retry || (state === check && !request.write && !io.cpu.rsp.fire)
+    val readAddr = Mux(io.cpu.req.fire,io.cpu.req.bits.addr,request.addr)
+    d.en := reading || (filling && victim === w.U) || (storing && canStore && storeWay === w.U)
+    d.we := (filling && victim === w.U) || (storing && canStore && storeWay === w.U)
+    d.addr := readAddr(ob+sb-1,2); d.wdata := request.data; d.wmask := request.mask
+    when(filling) { d.addr := Cat(index,(word+received)(wb-1,0)); d.wdata := io.mem.rsp.bits.data; d.wmask := 15.U }
+    t.en := reading || (lastFill && victim === w.U) || (storing && canStore && storeWay === w.U)
+    t.we := (lastFill && victim === w.U) || (storing && canStore && storeWay === w.U)
+    val sectors = Mux(tagHits(w),t.rdata(lineWords-1,0),0.U) | Mux(request.mask.andR,UIntToOH(word,lineWords),0.U)
+    t.addr := Mux(t.we,index,readAddr(ob+sb-1,ob)); t.wdata := Cat(tag,Mux(lastFill,Fill(lineWords,1.U(1.W)),sectors)); t.wmask := 1.U
+    for(s <- 0 until sets) {
+      when(lastFill && victim === w.U && index === s.U) { valid(w)(s) := true.B }
+      when(storing && canStore && storeWay === w.U && index === s.U) {
+        valid(w)(s) := true.B
       }
-      if(ways == 2) { replace(missSet) := !victim.asBool }
-      hits := UIntToOH(victim,ways)
     }
   }
+  when(io.cpu.rsp.fire && state === check) { state := idle }
+  when(io.cpu.rsp.fire && earlyResponse) { earlyReturned := true.B }
+  when(io.cpu.req.fire) { request := io.cpu.req.bits; state := check }
+  when(storing) { state := idle; if(ways==2) { replace(index) := !storeWay.asBool } }
+  when(state === check && !request.write && !hit) { state := refill; sent := 0.U; received := 0.U; earlyReturned := false.B; victim := Mux(tagHits.orR,PriorityEncoder(tagHits),newWay) }
+  when(filling) { received := received+1.U; when(lastFill) { state := Mux(earlyReturned || io.cpu.rsp.fire,idle,retry); if(ways==2) { replace(index) := !victim.asBool } } }
   when(state === retry) { state := check }
+}
+
+/** Independent banks overlap line misses while preserving response ownership. */
+class DataCache(p: Config) extends Module {
+  val io = IO(new Bundle {
+    val req = Flipped(Decoupled(new BankRequest(p))); val rsp = Decoupled(new BankResponse(p)); val mem = new MemPort
+  })
+  val b = log2Ceil(p.banks); val o = log2Ceil(p.lineBytes)
+  val bank = if(p.banks == 1) 0.U else io.req.bits.mem.addr(o+b-1,o)
+  val prefetch = Module(new Queue(UInt(32.W),4))
+  val recent = Reg(Vec(4,UInt((32-o).W))); val recentValid = RegInit(VecInit(Seq.fill(4)(false.B)))
+  val recentTail = RegInit(0.U(2.W)); val line = io.req.bits.mem.addr(31,o)
+  val seen = (0 until 4).map(i => recentValid(i) && recent(i) === line).reduce(_ || _)
+  val sequential = (0 until 4).map(i => recentValid(i) && recent(i)+1.U === line).reduce(_ || _)
+  val nextLine = Cat(line+1.U,0.U(o.W))
+  prefetch.io.enq.valid := p.prefetch.B && io.req.fire && !io.req.bits.mem.write && !seen && sequential && nextLine < "h10000000".U
+  prefetch.io.enq.bits := nextLine
+  when(io.req.fire && !io.req.bits.mem.write && !seen) { recent(recentTail) := line; recentValid(recentTail) := true.B; recentTail := recentTail+1.U }
+  val prefetchBank = if(p.banks == 1) 0.U else prefetch.io.deq.bits(o+b-1,o)
+  val caches = Seq.fill(p.banks)(Module(new Cache(p.dcBytes/p.banks,p.ways,p.lineBytes,math.max(2,16/p.banks))))
+  val ready = Wire(Vec(p.banks,Bool()))
+  val prefetchReady = Wire(Vec(p.banks,Bool()))
+  val responses = Module(new RRArbiter(new BankResponse(p),p.banks))
+  val requests = Module(new MemoryArbiter(math.max(2,p.banks)))
+  io.mem <> requests.io.out; io.rsp <> responses.io.out
+  for(i <- 0 until p.banks) {
+    val c = caches(i); val metadata = Module(new Queue(new LoadInfo(p),8))
+    val real = io.req.valid && bank === i.U
+    val proactive = prefetch.io.deq.valid && prefetchBank === i.U && !real
+    ready(i) := c.io.cpu.req.ready && (io.req.bits.mem.write || metadata.io.enq.ready)
+    prefetchReady(i) := !real && c.io.cpu.req.ready && metadata.io.enq.ready
+    c.io.cpu.req.valid := (real && (io.req.bits.mem.write || metadata.io.enq.ready)) || (proactive && metadata.io.enq.ready)
+    c.io.cpu.req.bits := Mux(real,io.req.bits.mem,0.U.asTypeOf(new MemReq))
+    val selectedAddress = Mux(real,io.req.bits.mem.addr,prefetch.io.deq.bits)
+    c.io.cpu.req.bits.addr := selectedAddress
+    if(p.banks != 1) { c.io.cpu.req.bits.addr := Cat(0.U(b.W),selectedAddress(31,o+b),selectedAddress(o-1,0)) }
+    metadata.io.enq.valid := c.io.cpu.req.fire && !c.io.cpu.req.bits.write; metadata.io.enq.bits := io.req.bits.info
+    when(!real) { metadata.io.enq.bits := 0.U.asTypeOf(new LoadInfo(p)); metadata.io.enq.bits.prefetch := true.B }
+    c.io.cpu.rsp.ready := (responses.io.in(i).ready || metadata.io.deq.bits.prefetch) && metadata.io.deq.valid
+    responses.io.in(i).valid := c.io.cpu.rsp.valid && metadata.io.deq.valid && !metadata.io.deq.bits.prefetch
+    responses.io.in(i).bits.rsp := c.io.cpu.rsp.bits; responses.io.in(i).bits.info := metadata.io.deq.bits
+    metadata.io.deq.ready := c.io.cpu.rsp.fire
+    requests.io.clients(i) <> c.io.mem
+    if(p.banks != 1) { requests.io.clients(i).req.bits.addr := Cat(c.io.mem.req.bits.addr(31-b,o),i.U(b.W),c.io.mem.req.bits.addr(o-1,0)) }
+  }
+  if(p.banks == 1) {
+    requests.io.clients(1).req.valid := false.B; requests.io.clients(1).req.bits := 0.U.asTypeOf(new MemReq)
+    requests.io.clients(1).rsp.ready := true.B
+  }
+  io.req.ready := Mux1H((0 until p.banks).map(i => (bank === i.U) -> ready(i)))
+  prefetch.io.deq.ready := Mux1H((0 until p.banks).map(i => (prefetchBank === i.U) -> prefetchReady(i)))
 }
 
 class FetchPacket extends Bundle { val pc = UInt(32.W); val inst = UInt(32.W); val next = UInt(32.W) }
@@ -112,7 +155,7 @@ class Frontend(p: Config) extends Module {
   val target = Mux(bret(ix) && depth =/= 0.U,ras((sp-1.U)(2,0)),Cat(btarget(ix),0.U(2.W)))
   val predicted = Mux(taken,target,pc+4.U)
   val meta = Module(new Queue(new Bundle { val pc = UInt(32.W); val next = UInt(32.W); val epoch = UInt(4.W) }, 2))
-  val fetched = withReset(reset.asBool || io.redirect.valid) { Module(new Queue(new FetchPacket, 8)) }
+  val fetched = withReset(reset.asBool || io.redirect.valid) { Module(new Queue(new FetchPacket, 8,flow=true)) }
   io.out <> fetched.io.deq
   cache.io.cpu.req.valid := meta.io.enq.ready && !io.redirect.valid
   cache.io.cpu.req.bits := 0.U.asTypeOf(new MemReq); cache.io.cpu.req.bits.addr := pc
