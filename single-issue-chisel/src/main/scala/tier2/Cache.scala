@@ -259,7 +259,11 @@ class Frontend(p: Config) extends Module {
   val rasValid = RegInit(VecInit(Seq.fill(8)(false.B)))
   val committedSp = RegInit(0.U(3.W)); val committedDepth = RegInit(0.U(4.W))
   // Recovery switches entry ownership instead of copying 8 wide words.
-  val rasTop = Util.choose((sp-1.U)(2,0),(0 until 8).map(i => Mux(rasValid(i),speculativeRas(i).io.value,committedRas(i).io.value)))
+  val pendingRas = Wire(Valid(new Bundle { val index = UInt(3.W); val data = UInt(32.W) }))
+  val rasTopIndex = (sp-1.U)(2,0)
+  val storedRasTop = Util.choose(rasTopIndex,(0 until 8).map(i => Mux(rasValid(i),speculativeRas(i).io.value,committedRas(i).io.value)))
+  val rasTop = if(p.rasWriteStages == 1) Mux(pendingRas.valid && pendingRas.bits.index === rasTopIndex &&
+    rasValid(rasTopIndex),pendingRas.bits.data,storedRasTop) else storedRasTop
   val ix = pc(idxBits+1,2)
   val targetHits = VecInit((0 until entries).map(i => ix === i.U && bvalid(i) && btag(i) === pc(31,idxBits+2)))
   val bpHit = targetHits.asUInt.orR
@@ -298,9 +302,21 @@ class Frontend(p: Config) extends Module {
   repair := cache.io.cpu.rsp.fire && !stale && corrected =/= meta.io.deq.bits.next
   val responseCall = cache.io.cpu.rsp.fire && !stale && call && !meta.io.deq.bits.callApplied
   val predictionCall = cache.io.cpu.req.fire && taken && callPrediction
+  if(p.rasWriteStages == 1) {
+    pendingRas.valid := RegNext(responseCall || predictionCall,false.B)
+    pendingRas.bits.index := RegNext(sp)
+    val predictionData = RegNext(pc+4.U)
+    val responseData = RegNext(incomingPC+4.U)
+    val predictionSelected = RegNext(predictionCall,false.B)
+    pendingRas.bits.data := Mux(predictionSelected,predictionData,responseData)
+  } else {
+    pendingRas.valid := responseCall || predictionCall
+    pendingRas.bits.index := sp
+    pendingRas.bits.data := Mux(predictionCall,pc+4.U,incomingPC+4.U)
+  }
   for(i <- 0 until 8) {
-    speculativeRas(i).io.index := sp; speculativeRas(i).io.write := responseCall || predictionCall
-    speculativeRas(i).io.data := Mux(predictionCall,pc+4.U,incomingPC+4.U)
+    speculativeRas(i).io.index := pendingRas.bits.index; speculativeRas(i).io.write := pendingRas.valid
+    speculativeRas(i).io.data := pendingRas.bits.data
     when((responseCall || predictionCall) && sp === i.U) { rasValid(i) := true.B }
   }
   when(cache.io.cpu.rsp.fire && !stale) {
