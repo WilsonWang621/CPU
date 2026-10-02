@@ -1,0 +1,167 @@
+Startpoint: _172140_ (rising edge-triggered flip-flop clocked by core_clock)
+Endpoint: c.dc.ram_0.lane_0
+          (rising edge-triggered flip-flop clocked by core_clock)
+Path Group: core_clock
+Path Type: max
+
+Fanout       Cap      Slew     Delay      Time   Description
+-------------------------------------------------------------------------------------
+                    0.0500    0.0000    0.0000   clock core_clock (rise edge)
+                              0.0000    0.0000   clock network delay (ideal)
+                    0.0500    0.0000    0.0000 ^ _172140_/CLK (DFFHQNx1_ASAP7_75t_R)
+  1411  770.1480    6.6317    3.0982    3.0982 ^ _172140_/QN (DFFHQNx1_ASAP7_75t_R)
+                    6.6317    0.0000    3.0982 ^ _087271_/A (INVx1_ASAP7_75t_R)
+  1282  701.5255    0.0000   17.1933   20.2915 v _087271_/Y (INVx1_ASAP7_75t_R)
+                    0.0000    0.0000   20.2915 v _153107_/A1 (OAI22xp33_ASAP7_75t_R)
+     4   20.0000    0.5162    0.2389   20.5304 ^ _153107_/Y (OAI22xp33_ASAP7_75t_R)
+                    0.3871    0.0000   20.5304 ^ c.dc.ram_0.lane_0/we_in (fakeram_asap7_512x8)
+                                       20.5304   data arrival time
+
+                    0.0500    2.0000    2.0000   clock core_clock (rise edge)
+                              0.0000    2.0000   clock network delay (ideal)
+                             -0.0500    1.9500   clock uncertainty
+                              0.0000    1.9500   clock reconvergence pessimism
+                                        1.9500 ^ c.dc.ram_0.lane_0/clk (fakeram_asap7_512x8)
+                             -0.0500    1.9000   library setup time
+                                        1.9000   data required time
+-------------------------------------------------------------------------------------
+                                        1.9000   data required time
+                                      -20.5304   data arrival time
+-------------------------------------------------------------------------------------
+                                      -18.6304   slack (VIOLATED)
+
+
+Startpoint: _172140_ (rising edge-triggered flip-flop clocked by core_clock)
+Endpoint: c.dc.ram_0.lane_1
+          (rising edge-triggered flip-flop clocked by core_clock)
+Path Group: core_clock
+Path Type: max
+
+Fanout       Cap      Slew     Delay      Time   Description
+-------------------------------------------------------------------------------------
+                    0.0500    0.0000    0.0000   clock core_clock (rise edge)
+                              0.0000    0.0000   clock network delay (ideal)
+                    0.0500    0.0000    0.0000 ^ _172140_/CLK (DFFHQNx1_ASAP7_75t_R)
+  1411  770.1480    6.6317    3.0982    3.0982 ^ _172140_/QN (DFFHQNx1_ASAP7_75t_R)
+                    6.6317    0.0000    3.0982 ^ _087271_/A (INVx1_ASAP7_75t_R)
+  1282  701.5255    0.0000   17.1933   20.2915 v _087271_/Y (INVx1_ASAP7_75t_R)
+                    0.0000    0.0000   20.2915 v _153107_/A1 (OAI22xp33_ASAP7_75t_R)
+     4   20.0000    0.5162    0.2389   20.5304 ^ _153107_/Y (OAI22xp33_ASAP7_75t_R)
+                    0.3871    0.0000   20.5304 ^ c.dc.ram_0.lane_1/we_in (fakeram_asap7_512x8)
+                                       20.5304   data arrival time
+
+                    0.0500    2.0000    2.0000   clock core_clock (rise edge)
+                              0.0000    2.0000   clock network delay (ideal)
+                             -0.0500    1.9500   clock uncertainty
+                              0.0000    1.9500   clock reconvergence pessimism
+                                        1.9500 ^ c.dc.ram_0.lane_1/clk (fakeram_asap7_512x8)
+                             -0.0500    1.9000   library setup time
+                                        1.9000   data required time
+-------------------------------------------------------------------------------------
+                                        1.9000   data required time
+                                      -20.5304   data arrival time
+-------------------------------------------------------------------------------------
+                                      -18.6304   slack (VIOLATED)
+
+
+Startpoint: _172140_ (rising edge-triggered flip-flop clocked by core_clock)
+Endpoint: c.dc.ram_0.lane_2
+          (rising edge-triggered flip-flop clocked by core_clock)
+Path Group: core_clock
+Path Type: max
+
+Fanout       Cap      Slew     Delay      Time   Description
+-------------------------------------------------------------------------------------
+                    0.0500    0.0000    0.0000   clock core_clock (rise edge)
+                              0.0000    0.0000   clock network delay (ideal)
+                    0.0500    0.0000    0.0000 ^ _172140_/CLK (DFFHQNx1_ASAP7_75t_R)
+  1411  770.1480    6.6317    3.0982    3.0982 ^ _172140_/QN (DFFHQNx1_ASAP7_75t_R)
+                    6.6317    0.0000    3.0982 ^ _087271_/A (INVx1_ASAP7_75t_R)
+  1282  701.5255    0.0000   17.1933   20.2915 v _087271_/Y (INVx1_ASAP7_75t_R)
+                    0.0000    0.0000   20.2915 v _153107_/A1 (OAI22xp33_ASAP7_75t_R)
+     4   20.0000    0.5162    0.2389   20.5304 ^ _153107_/Y (OAI22xp33_ASAP7_75t_R)
+                    0.3871    0.0000   20.5304 ^ c.dc.ram_0.lane_2/we_in (fakeram_asap7_512x8)
+                                       20.5304   data arrival time
+
+                    0.0500    2.0000    2.0000   clock core_clock (rise edge)
+                              0.0000    2.0000   clock network delay (ideal)
+                             -0.0500    1.9500   clock uncertainty
+                              0.0000    1.9500   clock reconvergence pessimism
+                                        1.9500 ^ c.dc.ram_0.lane_2/clk (fakeram_asap7_512x8)
+                             -0.0500    1.9000   library setup time
+                                        1.9000   data required time
+-------------------------------------------------------------------------------------
+                                        1.9000   data required time
+                                      -20.5304   data arrival time
+-------------------------------------------------------------------------------------
+                                      -18.6304   slack (VIOLATED)
+
+
+Startpoint: _172140_ (rising edge-triggered flip-flop clocked by core_clock)
+Endpoint: c.dc.ram_0.lane_3
+          (rising edge-triggered flip-flop clocked by core_clock)
+Path Group: core_clock
+Path Type: max
+
+Fanout       Cap      Slew     Delay      Time   Description
+-------------------------------------------------------------------------------------
+                    0.0500    0.0000    0.0000   clock core_clock (rise edge)
+                              0.0000    0.0000   clock network delay (ideal)
+                    0.0500    0.0000    0.0000 ^ _172140_/CLK (DFFHQNx1_ASAP7_75t_R)
+  1411  770.1480    6.6317    3.0982    3.0982 ^ _172140_/QN (DFFHQNx1_ASAP7_75t_R)
+                    6.6317    0.0000    3.0982 ^ _087271_/A (INVx1_ASAP7_75t_R)
+  1282  701.5255    0.0000   17.1933   20.2915 v _087271_/Y (INVx1_ASAP7_75t_R)
+                    0.0000    0.0000   20.2915 v _153107_/A1 (OAI22xp33_ASAP7_75t_R)
+     4   20.0000    0.5162    0.2389   20.5304 ^ _153107_/Y (OAI22xp33_ASAP7_75t_R)
+                    0.3871    0.0000   20.5304 ^ c.dc.ram_0.lane_3/we_in (fakeram_asap7_512x8)
+                                       20.5304   data arrival time
+
+                    0.0500    2.0000    2.0000   clock core_clock (rise edge)
+                              0.0000    2.0000   clock network delay (ideal)
+                             -0.0500    1.9500   clock uncertainty
+                              0.0000    1.9500   clock reconvergence pessimism
+                                        1.9500 ^ c.dc.ram_0.lane_3/clk (fakeram_asap7_512x8)
+                             -0.0500    1.9000   library setup time
+                                        1.9000   data required time
+-------------------------------------------------------------------------------------
+                                        1.9000   data required time
+                                      -20.5304   data arrival time
+-------------------------------------------------------------------------------------
+                                      -18.6304   slack (VIOLATED)
+
+
+Startpoint: _172140_ (rising edge-triggered flip-flop clocked by core_clock)
+Endpoint: c.dc.ram_1.lane_0
+          (rising edge-triggered flip-flop clocked by core_clock)
+Path Group: core_clock
+Path Type: max
+
+Fanout       Cap      Slew     Delay      Time   Description
+-------------------------------------------------------------------------------------
+                    0.0500    0.0000    0.0000   clock core_clock (rise edge)
+                              0.0000    0.0000   clock network delay (ideal)
+                    0.0500    0.0000    0.0000 ^ _172140_/CLK (DFFHQNx1_ASAP7_75t_R)
+  1411  770.1480    6.6317    3.0982    3.0982 ^ _172140_/QN (DFFHQNx1_ASAP7_75t_R)
+                    6.6317    0.0000    3.0982 ^ _087271_/A (INVx1_ASAP7_75t_R)
+  1282  701.5255    0.0000   17.1933   20.2915 v _087271_/Y (INVx1_ASAP7_75t_R)
+                    0.0000    0.0000   20.2915 v _154115_/A1 (AOI211xp5_ASAP7_75t_R)
+     4    1.7693    0.1214    0.0290   20.3204 ^ _154115_/Y (AOI211xp5_ASAP7_75t_R)
+                    0.1214    0.0000   20.3204 ^ _154116_/B (AOI21xp33_ASAP7_75t_R)
+     1    5.0000    0.1032    0.0646   20.3850 v _154116_/Y (AOI21xp33_ASAP7_75t_R)
+                    0.0774    0.0000   20.3850 v c.dc.ram_1.lane_0/ce_in (fakeram_asap7_512x8)
+                                       20.3850   data arrival time
+
+                    0.0500    2.0000    2.0000   clock core_clock (rise edge)
+                              0.0000    2.0000   clock network delay (ideal)
+                             -0.0500    1.9500   clock uncertainty
+                              0.0000    1.9500   clock reconvergence pessimism
+                                        1.9500 ^ c.dc.ram_1.lane_0/clk (fakeram_asap7_512x8)
+                             -0.0500    1.9000   library setup time
+                                        1.9000   data required time
+-------------------------------------------------------------------------------------
+                                        1.9000   data required time
+                                      -20.3850   data arrival time
+-------------------------------------------------------------------------------------
+                                      -18.4850   slack (VIOLATED)
+
+

@@ -1,0 +1,61 @@
+{
+  "stage": 1,
+  "experiment": "base-v1",
+  "config": {
+    "rob": 16,
+    "iq": 8,
+    "ic_bytes": 4096,
+    "dc_bytes": 4096,
+    "line_bytes": 32,
+    "ways": 2,
+    "issue_width": 1
+  },
+  "correctness": {
+    "passed": 19,
+    "failed": 0,
+    "latency": 20
+  },
+  "performance": [
+    {
+      "case": "perf_median",
+      "instructions": 6961,
+      "cycles": 16190,
+      "ipc": 0.4299567634342187
+    },
+    {
+      "case": "perf_multiply",
+      "instructions": 21722,
+      "cycles": 27224,
+      "ipc": 0.797898912724067
+    },
+    {
+      "case": "perf_qsort",
+      "instructions": 139900,
+      "cycles": 246640,
+      "ipc": 0.5672234836198508
+    },
+    {
+      "case": "perf_rsort",
+      "instructions": 195719,
+      "cycles": 314765,
+      "ipc": 0.6217940368211206
+    },
+    {
+      "case": "perf_towers",
+      "instructions": 5278,
+      "cycles": 9492,
+      "ipc": 0.556047197640118
+    },
+    {
+      "case": "perf_vvadd",
+      "instructions": 4524,
+      "cycles": 10338,
+      "ipc": 0.4376088218224028
+    }
+  ],
+  "ipc_geomean": 0.5556848072607271,
+  "area_um2": 13669.66387200525,
+  "fmax_mhz": 48.47107829215185,
+  "tier2_pass": false,
+  "rtl_sha256": "4c7e34c1f1d26597775f20a85c492d6ae09abe0d4b30c1428ed2cf9a0258b1b6"
+}
