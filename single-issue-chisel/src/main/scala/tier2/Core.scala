@@ -25,8 +25,17 @@ class Core(p: Config) extends Module {
   val predicted = Reg(Vec(p.rob,UInt(32.W))); val actual = Reg(Vec(p.rob,UInt(32.W)))
   val control = Reg(Vec(p.rob,Bool())); val conditional = Reg(Vec(p.rob,Bool()))
   val taken = Reg(Vec(p.rob,Bool())); val calls = Reg(Vec(p.rob,Bool())); val returns = Reg(Vec(p.rob,Bool()))
-  val stores = Reg(Vec(p.rob,Bool())); val storeAddr = Reg(Vec(p.rob,UInt(32.W)))
-  val storeData = Reg(Vec(p.rob,UInt(32.W))); val storeMask = Reg(Vec(p.rob,UInt(4.W)))
+  val stores = Reg(Vec(p.rob,Bool()))
+  val storeLive = RegInit(VecInit(Seq.fill(p.storeCapacity)(false.B)))
+  val storeOwner = Reg(Vec(p.storeCapacity,UInt(p.tagBits.W)))
+  val storeAddr = Reg(Vec(p.storeCapacity,UInt(32.W)))
+  val storeData = Reg(Vec(p.storeCapacity,UInt(32.W))); val storeMask = Reg(Vec(p.storeCapacity,UInt(4.W)))
+  val storeFree = PriorityEncoder(~storeLive.asUInt)
+  val storeSpace = !storeLive.asUInt.andR
+  val storeHeadSelect = (0 until p.storeCapacity).map(i => storeLive(i) && storeOwner(i) === head)
+  val retiredStoreAddress = Util.select(storeHeadSelect,storeAddr.toSeq)
+  val retiredStoreData = Util.select(storeHeadSelect,storeData.toSeq)
+  val retiredStoreMask = Util.select(storeHeadSelect,storeMask.toSeq)
   val architecturalWords = (1 until 32).map(i => Module(new LocalArchWord(i)))
   val arch = VecInit(Seq(0.U(32.W)) ++ architecturalWords.map(_.io.value))
   val mapped = RegInit(VecInit(Seq.fill(32)(false.B))); val mapping = Reg(Vec(32,UInt(p.tagBits.W)))
@@ -78,8 +87,8 @@ class Core(p: Config) extends Module {
     (xd.fn(1,0) === 2.U && addressWord.io.value(1,0) =/= 0.U) || (xd.fn(1,0) === 1.U && addressWord.io.value(0))
   val headStore = count =/= 0.U && atHead(done) && atHead(stores) && !halted
   dc.io.store.valid := headStore
-  dc.io.store.bits.addr := atHead(storeAddr); dc.io.store.bits.data := atHead(storeData)
-  dc.io.store.bits.mask := atHead(storeMask); dc.io.store.bits.write := true.B
+  dc.io.store.bits.addr := retiredStoreAddress; dc.io.store.bits.data := retiredStoreData
+  dc.io.store.bits.mask := retiredStoreMask; dc.io.store.bits.write := true.B
   val pendingLoad = loadRequests.io.deq.bits.info
   val staleLoad = !live(pendingLoad.tag) || pendingLoad.epoch =/= generations(pendingLoad.tag) || !survives(pendingLoad.tag)
   if(p.storeEntries > 0) {
@@ -87,8 +96,8 @@ class Core(p: Config) extends Module {
     dc.io.req.bits.mem := 0.U.asTypeOf(new MemReq); dc.io.req.bits.mem.addr := loadRequests.io.deq.bits.addr
   } else {
     dc.io.req.valid := headStore || (loadRequests.io.deq.valid && !staleLoad)
-    dc.io.req.bits.mem.addr := Mux(headStore,atHead(storeAddr),loadRequests.io.deq.bits.addr)
-    dc.io.req.bits.mem.data := atHead(storeData); dc.io.req.bits.mem.mask := atHead(storeMask)
+    dc.io.req.bits.mem.addr := Mux(headStore,retiredStoreAddress,loadRequests.io.deq.bits.addr)
+    dc.io.req.bits.mem.data := retiredStoreData; dc.io.req.bits.mem.mask := retiredStoreMask
     dc.io.req.bits.mem.write := headStore
   }
   dc.io.req.bits.info := loadRequests.io.deq.bits.info
@@ -119,9 +128,9 @@ class Core(p: Config) extends Module {
   loadRequests.io.enq.bits.info.tag := xt; loadRequests.io.enq.bits.info.fn := xd.fn
   loadRequests.io.enq.bits.info.offset := addressWord.io.value(1,0); loadRequests.io.enq.bits.info.epoch := generations(xt)
   loadRequests.io.enq.bits.info.prefetch := false.B
-  val matchingStores = (0 until p.rob).map(i => live(i) && stores(i) && done(i) && before(i.U(p.tagBits.W),xt) && storeAddr(i)(31,2) === addressWord.io.value(31,2))
+  val matchingStores = (0 until p.storeCapacity).map(i => storeLive(i) && done(storeOwner(i)) && before(storeOwner(i),xt) && storeAddr(i)(31,2) === addressWord.io.value(31,2))
   val forwarding = (0 until 4).map(b => {
-    val picked = Util.orderTreeWrapped((0 until p.rob).map(i => (matchingStores(i) && storeMask(i)(b),i.U(p.tagBits.W),storeData(i)(8*b+7,8*b))),wrapped.asBools,true)
+    val picked = Util.orderTreeWrapped((0 until p.storeCapacity).map(i => (matchingStores(i) && storeMask(i)(b),storeOwner(i),storeData(i)(8*b+7,8*b))),(0 until p.storeCapacity).map(i => wrapped(storeOwner(i))),true)
     (picked._1,picked._3)
   })
   forwardingMask := VecInit(forwarding.map(_._1)).asUInt
@@ -163,12 +172,8 @@ class Core(p: Config) extends Module {
     when(resultWords(i).io.completed) { done(i) := true.B }
     when(xv && xt === i.U && !xd.load && !xd.muldiv) {
       done(i) := true.B; actual(i) := alu.io.next; taken(i) := alu.io.taken
-      storeAddr(i) := Mux(xd.branch || xd.jal,xpc+xd.imm,addressWord.io.value)
-      storeData(i) := (xb << Cat(addressWord.io.value(1,0),0.U(3.W)))(31,0)
-      storeMask(i) := (MuxLookup(xd.fn,15.U(4.W))(Seq(0.U -> 1.U(4.W),1.U -> 3.U(4.W))) << addressWord.io.value(1,0))(3,0)
     }
     when(xv && xt === i.U && (xd.load || xd.store) && badAddress) { fault(i) := true.B }
-    when(xv && xt === i.U && xd.load) { storeAddr(i) := addressWord.io.value }
   }
   val eligible = Wire(Vec(p.iq,Bool()))
   for(i <- 0 until p.iq) {
@@ -198,12 +203,24 @@ class Core(p: Config) extends Module {
   val d = decoder.io.d
   val dispatch = fetch.io.out.fire
   fetch.io.out.ready := count < p.rob.U && !qvalid.asUInt.andR && !flush && !halted &&
-    (!(d.branch || d.jal || d.jalr) || checkpointAvailable)
+    (!(d.branch || d.jal || d.jalr) || checkpointAvailable) && (!d.store || storeSpace)
   def source(rs: UInt, used: Bool): (Bool,UInt,UInt) = {
     val tag = mapping(rs); val waiting = used && rs =/= 0.U && mapped(rs)
     val ready = !waiting || done(tag) || wake(tag)
     val data = Mux(!used || rs === 0.U,0.U,Mux(waiting,bypass(tag,Util.choose(tag,values.toSeq)),Util.choose(rs,arch.toSeq)))
     (ready,data,tag)
+  }
+  // Only stores reserve address/data slots; unrelated ROB instructions do
+  // not carry 68 unused payload bits. Squash releases only younger owners.
+  for(i <- 0 until p.storeCapacity) {
+    when(xv && xd.store && storeLive(i) && storeOwner(i) === xt) {
+      storeAddr(i) := addressWord.io.value
+      storeData(i) := (xb << Cat(addressWord.io.value(1,0),0.U(3.W)))(31,0)
+      storeMask(i) := (MuxLookup(xd.fn,15.U(4.W))(Seq(0.U -> 1.U(4.W),1.U -> 3.U(4.W))) << addressWord.io.value(1,0))(3,0)
+    }
+    when(retire && atHead(stores) && storeOwner(i) === head) { storeLive(i) := false.B }
+    when(dispatch && d.store && storeFree === i.U) { storeLive(i) := true.B; storeOwner(i) := tail }
+    when(flush && storeLive(i) && (if(p.earlyRecovery) younger(storeOwner(i)) else true.B)) { storeLive(i) := false.B }
   }
   val s1 = source(d.rs1,d.use1); val s2 = source(d.rs2,d.use2)
   val unknownStore = (0 until p.rob).map(i => live(i) && stores(i) && !done(i)).reduce(_ || _)
@@ -253,7 +270,7 @@ class Core(p: Config) extends Module {
   fetch.io.redirect.bits := (if(p.fastRedirect && p.earlyRecovery) alu.io.next else if(p.earlyRecovery) recoveryPC else atHead(actual))
   val committedTraining = Wire(new Training)
   // Calls already produce their return PC in the value array.
-  committedTraining.pc := retiredValue-4.U; committedTraining.target := atHead(storeAddr)
+  committedTraining.pc := retiredValue-4.U; committedTraining.target := retiredStoreAddress
   committedTraining.taken := atHead(taken); committedTraining.conditional := atHead(conditional)
   committedTraining.call := atHead(calls); committedTraining.ret := atHead(returns)
   committedTraining.history := 0.U
@@ -275,7 +292,7 @@ class Core(p: Config) extends Module {
     live(head) := false.B; head := head+1.U
     headSelect := Cat(headSelect(p.rob-2,0),headSelect(p.rob-1))
     wrapped := Mux(headSelect(p.rob-1),0.U,wrapped | headSelect)
-    when(atHead(stores) && atHead(storeAddr) === "h80000000".U) { halted := true.B }
+    when(atHead(stores) && retiredStoreAddress === "h80000000".U) { halted := true.B }
   }
   for(r <- 1 until 32) {
     architecturalWords(r-1).io.commit := retire && atHead(writes)
@@ -328,7 +345,7 @@ class Core(p: Config) extends Module {
     loadRequests.io.deq.valid && !dc.io.req.ready,bypassLoad,
     qvalid.asUInt.orR && !eligible.asUInt.orR,retire && atHead(conditional))
   val counters = events.map(e => { val n = RegInit(0.U(32.W)); when(e) { n := n+1.U }; n })
-  when(retire && atHead(stores) && atHead(storeAddr) === "h80000000".U) {
+  when(retire && atHead(stores) && retiredStoreAddress === "h80000000".U) {
     printf(p"Tier2 retired=${counters(0)} issued=${counters(1)} dispatched=${counters(2)} flush=${counters(3)} fetch_empty=${counters(4)} rob_full=${counters(5)} iq_full=${counters(6)} ex_stall=${counters(7)} loads=${counters(8)} returns=${counters(9)} store_stall=${counters(10)}\n")
     printf(p"Details direct=${counters(11)} head_wait=${counters(12)} issue_empty=${counters(13)} load_wait=${counters(14)} bypass_loads=${counters(15)} iq_wait=${counters(16)} conditional=${counters(17)}\n")
   }
@@ -354,7 +371,7 @@ object Generate extends App {
   val p = Config(rob=n("--rob",16),iq=n("--iq",8),icBytes=n("--ic-bytes",4096),dcBytes=n("--dc-bytes",4096),
     lineBytes=n("--line-bytes",32),ways=n("--ways",2),debug=n("--debug",0) != 0,banks=n("--banks",4),earlyRecovery=n("--early-recovery",1) != 0,
     prefetch=n("--prefetch",1) != 0,btbEntries=n("--btb-entries",128),historyBits=n("--history-bits",1),l0Entries=n("--l0-entries",0),
-    storeEntries=n("--store-entries",0),checkpoints=n("--checkpoints",4),fastRedirect=n("--fast-redirect",0) != 0)
+    storeEntries=n("--store-entries",0),checkpoints=n("--checkpoints",4),fastRedirect=n("--fast-redirect",0) != 0,storeSlots=n("--store-slots",16))
   _root_.circt.stage.ChiselStage.emitSystemVerilogFile(new StudentTop(p), Array("--target-dir", options.getOrElse("--out","rtl")),
     Array("--disable-all-randomization", "--lowering-options=disallowLocalVariables,disallowPackedArrays"))
 }
