@@ -195,10 +195,6 @@ module v2_frontend #(
       if(mem_rsp_valid) begin
         returned<=returned+1;
         if(returned==7) busy<=0;
-        if(!mem_rsp_error) begin
-          if(return_address[2]) odd_data[return_address[CB-1:3]]<=mem_rsp_data;
-          else even_data[return_address[CB-1:3]]<=mem_rsp_data;
-        end
       end
       if(train_valid && train_op>=OP_BEQ && train_op<=OP_BGEU) begin
         bht_valid[train_bht]<=1;
@@ -209,6 +205,14 @@ module v2_frontend #(
         btb_valid[train_btb]<=1;btb_tag[train_btb]<=train_pc[31:TW+2];btb_target[train_btb]<=train_target[31:2];
       end
     end
+  end
+  for(genvar row=0;row<CACHE_BYTES/8;row=row+1) begin: instruction_write
+    always_ff @(posedge clk)
+      if(!rst && mem_rsp_valid && !mem_rsp_error &&
+         return_address[CB-1:3]==(CB-3)'(row)) begin
+        if(return_address[2]) odd_data[row]<=mem_rsp_data;
+        else even_data[row]<=mem_rsp_data;
+      end
   end
   for(genvar row=0;row<QUEUE_ENTRIES;row=row+1) begin: queue_write
     always_ff @(posedge clk)

@@ -11,23 +11,29 @@ module v2_select #(
   // Give every level its own scalar wires. Older Verilator versions treat a
   // shared unpacked array as one dependency and misidentify a tree as a loop.
   for (genvar n=1;n<2*LEAVES;n=n+1) begin: node
-    wire [SLOT_BITS-1:0] age;
+    wire [SLOT_BITS-1:0] position;
+    wire wrapped;
     wire [INDEX_BITS-1:0] selected;
     wire winner;
     if(n>=LEAVES) begin: leaf
       if(n-LEAVES<ENTRIES) begin: used
-        assign age=owner[(n-LEAVES)*SLOT_BITS+:SLOT_BITS]-rob_head;
+        assign position=owner[(n-LEAVES)*SLOT_BITS+:SLOT_BITS];
+        assign wrapped=position<rob_head;
         assign winner=ready[n-LEAVES];
       end else begin: padding
-        assign age=0;assign winner=0;
+        assign position=0;assign wrapped=0;assign winner=0;
       end
       assign selected=INDEX_BITS'(n-LEAVES);
     end else begin: branch
-      wire left_wins=node[2*n].winner && (!node[2*n+1].winner ||
-        (YOUNGEST!=0 ? node[2*n].age>=node[2*n+1].age:node[2*n].age<=node[2*n+1].age));
+      wire same_side=node[2*n].wrapped==node[2*n+1].wrapped;
+      wire left_first=YOUNGEST!=0 ?
+        (same_side ? node[2*n].position>=node[2*n+1].position:node[2*n].wrapped):
+        (same_side ? node[2*n].position<=node[2*n+1].position:!node[2*n].wrapped);
+      wire left_wins=node[2*n].winner && (!node[2*n+1].winner || left_first);
       assign winner=node[2*n].winner || node[2*n+1].winner;
       assign selected=left_wins ? node[2*n].selected:node[2*n+1].selected;
-      assign age=left_wins ? node[2*n].age:node[2*n+1].age;
+      assign position=left_wins ? node[2*n].position:node[2*n+1].position;
+      assign wrapped=left_wins ? node[2*n].wrapped:node[2*n+1].wrapped;
     end
   end
   assign valid=node[1].winner;

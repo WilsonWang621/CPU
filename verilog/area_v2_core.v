@@ -195,7 +195,7 @@ module cpu_top #(
   output wire [63:0] icache_miss_count,
   output wire [63:0] dcache_miss_count
 );
-genvar bank,cp,d,l,p,q,r,s;
+genvar bank,cp,d,l,p,port_id,q,r,row,s;
 function automatic [8-1:0] narrow_0;
   input [63:0] value;
   begin narrow_0=value; end
@@ -365,6 +365,12 @@ reg [1:0] state;
 reg [ROB_T_WIDTH-1:0] rob [0:(ROB_ENTRIES)-1];
 reg [31:0] values [0:(ROB_ENTRIES)-1];
   reg [31:0] architectural [0:(32)-1];
+  wire [ROB_ENTRIES*32-1:0] result_words;
+  wire [ROB_ENTRIES*6-1:0] result_status_words;
+  wire [32*32-1:0] architectural_words;
+wire [31:0] source_result [0:(4)-1];
+  wire [31:0] source_architectural [0:(4)-1];
+wire [5:0] source_status [0:(4)-1];
 reg [ISSUE_T_WIDTH-1:0] queue [0:(3)*(IQ_ENTRIES)-1];
   reg [ISSUE_T_WIDTH-1:0] dispatch_payload [0:(2)-1];
 reg [STORE_T_WIDTH-1:0] stores [0:(STORE_SLOTS)-1];
@@ -549,6 +555,21 @@ reg [31:0] shifted;
   assign mem_req_wstrb=exit_send ? 4'hf:bus_req_mask;
   assign bus_req_ready=mem_req_ready && !exit_send && state!=DONE;
   assign mem_rsp_ready=bus_rsp_ready;
+  for(row=0;row<ROB_ENTRIES;row=row+1) begin: result_read_words
+    assign result_words[row*32+:32]=values[row];
+    assign result_status_words[row*6+:6]={rob[row][ROB_T_VALID_LSB+:ROB_T_VALID_WIDTH],rob[row][ROB_T_DONE_LSB+:ROB_T_DONE_WIDTH],rob[row][ROB_T_FAULT_LSB+:ROB_T_FAULT_WIDTH]};
+  end
+  for(row=0;row<32;row=row+1) begin: architectural_read_words
+    assign architectural_words[row*32+:32]=architectural[row];
+  end
+  for(port_id=0;port_id<4;port_id=port_id+1) begin: operand_reads
+    v2_read #(.ENTRIES(ROB_ENTRIES)) read_result (
+      .index(source_slot[port_id*RW+:RW]),.words(result_words),.value(source_result[port_id]));
+    v2_read #(.ENTRIES(ROB_ENTRIES),.WORD_BITS(6)) read_status (
+      .index(source_slot[port_id*RW+:RW]),.words(result_status_words),.value(source_status[port_id]));
+    v2_read #(.ENTRIES(32)) read_architectural (
+      .index(source_register[port_id*5+:5]),.words(architectural_words),.value(source_architectural[port_id]));
+  end
   v2_frontend #(.CACHE_BYTES(ICACHE_BYTES),.QUEUE_ENTRIES(FETCH_QUEUE_ENTRIES),
     .BHT_ENTRIES(BHT_ENTRIES),.BTB_ENTRIES(BTB_ENTRIES),.LOCAL_HISTORY_BITS(LOCAL_HISTORY_BITS),
     .HISTORY_ENTRIES(HISTORY_ENTRIES),.RAM_BYTES(RAM_BYTES)) frontend (.clk(clk),.rst(rst),.stop(stop_frontend),.redirect(redirect),.redirect_pc(redirect_pc),.pop_count(pop_count),
@@ -821,8 +842,10 @@ for(source_number=0;source_number<2;source_number=source_number+1) begin
         source_id=source_slot[(lane*2+source_number)*RW+:RW];
         pending=source_pending[lane*2+source_number] && register_id!=0 &&
                 (source_number==0 ? decoded[lane][DECODED_T_USES_RS1_LSB+:DECODED_T_USES_RS1_WIDTH]:decoded[lane][DECODED_T_USES_RS2_LSB+:DECODED_T_USES_RS2_WIDTH]);
-        ready_value=!pending || (rob[source_id][ROB_T_VALID_LSB+:ROB_T_VALID_WIDTH] && rob[source_id][ROB_T_DONE_LSB+:ROB_T_DONE_WIDTH] && rob[source_id][ROB_T_FAULT_LSB+:ROB_T_FAULT_WIDTH]==0);
-        source_value=pending ? values[source_id]:(register_id==0 ? 32'd0:architectural[register_id]);
+        ready_value=!pending || (source_status[lane*2+source_number][5:4]==2'b11 &&
+                                source_status[lane*2+source_number][3:0]==0);
+        source_value=pending ? source_result[lane*2+source_number]:
+                     (register_id==0 ? 32'd0:source_architectural[lane*2+source_number]);
         begin: loop_10
 integer w;
 for(w=0;w<3;w=w+1)
@@ -1740,7 +1763,7 @@ module v2_dcache #(
   output reg  idle,
   output reg [63:0] miss_count
 );
-genvar line,m,set_index,w,way;
+genvar byte_id,line,m,row,set_index,w,way;
 function automatic [1-1:0] narrow_0;
   input [63:0] value;
   begin narrow_0=value; end
@@ -1766,14 +1789,19 @@ function automatic [WW+1-1:0] narrow_4;
   begin narrow_4=value; end
 endfunction
 
-function automatic [LB-1:0] narrow_5;
+function automatic [LB+WW-1:0] narrow_5;
   input [63:0] value;
   begin narrow_5=value; end
 endfunction
 
-function automatic [SB-1:0] narrow_6;
+function automatic [LB-1:0] narrow_6;
   input [63:0] value;
   begin narrow_6=value; end
+endfunction
+
+function automatic [SB-1:0] narrow_7;
+  input [63:0] value;
+  begin narrow_7=value; end
 endfunction
 
 
@@ -1922,7 +1950,7 @@ reg [MSHRS-1:0] release_miss;
   assign out_space=!out_valid || request_fire;
   always @* begin: returning_load
     result_valid=0;result_tag=0;result_error=0;
-    begin: loop_6
+    begin: loop_5
 integer w;
 for(w=0;w<LOAD_SLOTS;w=w+1)
       if(!result_valid && waiters[w][WAITER_T_VALID_LSB+:WAITER_T_VALID_WIDTH] &&
@@ -1936,14 +1964,14 @@ end
     locked=0;
     free_valid=0;free_slot=0;merge_valid=0;merge_slot=0;
     release_miss=0;
-    begin: loop_5
+    begin: loop_4
 integer m;
 for(m=0;m<MSHRS;m=m+1) begin
       if(misses[m][MISS_T_VALID_LSB+:MISS_T_VALID_WIDTH]) begin
         locked[misses[m][MISS_T_PHYSICAL_LSB+:MISS_T_PHYSICAL_WIDTH]]=1;
         if(load_tag_hit && misses[m][MISS_T_PHYSICAL_LSB+:MISS_T_PHYSICAL_WIDTH]==load_line) begin merge_valid=1;merge_slot=narrow_3(m);end
         release_miss[m]=misses[m][MISS_T_RETURNED_LSB+:MISS_T_RETURNED_WIDTH]==narrow_4(WORDS);
-        begin: loop_4
+        begin: loop_3
 integer w;
 for(w=0;w<LOAD_SLOTS;w=w+1)
           if(waiters[w][WAITER_T_VALID_LSB+:WAITER_T_VALID_WIDTH] && waiters[w][WAITER_T_PHYSICAL_LSB+:WAITER_T_PHYSICAL_WIDTH]==misses[m][MISS_T_PHYSICAL_LSB+:MISS_T_PHYSICAL_WIDTH]) release_miss[m]=0;
@@ -1968,7 +1996,7 @@ end
                 !(allocate && store_tag_hit && selected_line==store_line);
     store_accept=store_valid && store_ready;
     send_valid=0;send_slot=0;
-    begin: loop_3
+    begin: loop_2
 integer offset;
 for(offset=0;offset<MSHRS;offset=offset+1)
       if(!send_valid && misses[narrow_3(round_robin+narrow_3(offset))][MISS_T_VALID_LSB+:MISS_T_VALID_WIDTH] &&
@@ -1991,17 +2019,31 @@ end
   end
   always @* begin: quiescent_state
     idle=!out_valid && count==0;
-    begin: loop_2
+    begin: loop_1
 integer m;
 for(m=0;m<MSHRS;m=m+1) if(misses[m][MISS_T_VALID_LSB+:MISS_T_VALID_WIDTH]) idle=0;
 end
-    begin: loop_1
+    begin: loop_0
 integer w;
 for(w=0;w<LOAD_SLOTS;w=w+1) if(waiters[w][WAITER_T_VALID_LSB+:WAITER_T_VALID_WIDTH]) idle=0;
 end
   end
-  assign load_data=data[data_read_address];
-  assign result_data=data[data_read_address];
+
+  wire [(CACHE_BYTES/4)*32-1:0] data_words;
+  wire [31:0] read_word;
+  for(row=0;row<CACHE_BYTES/4;row=row+1) begin: data_rows
+    assign data_words[row*32+:32]=data[row];
+    for(byte_id=0;byte_id<4;byte_id=byte_id+1) begin: byte_write
+      always @(posedge clk)
+        if(!rst && data_write_valid && data_write_mask[byte_id] &&
+           data_write_address==narrow_5(row))
+          data[row][byte_id*8+:8]<=data_write_value[byte_id*8+:8];
+    end
+  end
+  v2_read #(.ENTRIES(CACHE_BYTES/4)) read_data (
+    .index(data_read_address),.words(data_words),.value(read_word));
+  assign load_data=read_word;
+  assign result_data=read_word;
   always @(posedge clk) begin
     if(rst) begin
       head<=0;tail<=0;count<=0;out_valid<=0;out_owner<=0;
@@ -2023,12 +2065,6 @@ end
         out_data<=0;out_mask<=0;round_robin<=send_slot+1'b1;
       end
       if(allocate && !load_tag_hit) miss_count<=miss_count+1;
-      if(data_write_valid)
-        begin: loop_0
-integer b;
-for(b=0;b<4;b=b+1)
-          if(data_write_mask[b]) data[data_write_address][b*8+:8]<=data_write_value[b*8+:8];
-end
     end
   end
   for(m=0;m<MSHRS;m=m+1) begin: miss_rows
@@ -2068,16 +2104,16 @@ end
 reg [WORDS-1:0] valid_next;
     always @* begin
       valid_next=word_valid[line];
-      if(allocate && !load_tag_hit && selected_line==narrow_5(line)) valid_next=0;
-      if(fill_fire && response_line==narrow_5(line)) valid_next[response_word]=!mem_rsp_error;
-      if(store_accept && store_tag_hit && store_line==narrow_5(line) && store_mask==15)
+      if(allocate && !load_tag_hit && selected_line==narrow_6(line)) valid_next=0;
+      if(fill_fire && response_line==narrow_6(line)) valid_next[response_word]=!mem_rsp_error;
+      if(store_accept && store_tag_hit && store_line==narrow_6(line) && store_mask==15)
         valid_next[store_address[OFFSET-1:2]]=1;
     end
     always @(posedge clk) begin
       if(rst) begin tag_valid[line]<=0;word_valid[line]<=0;end
       else begin
         word_valid[line]<=valid_next;
-        if(allocate && !load_tag_hit && selected_line==narrow_5(line)) begin
+        if(allocate && !load_tag_hit && selected_line==narrow_6(line)) begin
           tag_valid[line]<=1;tags[line]<=load_address[RB-1:SB+OFFSET];
         end
       end
@@ -2087,8 +2123,8 @@ reg [WORDS-1:0] valid_next;
     always @(posedge clk) begin
       if(rst) replacement[set_index]<=0;
       else begin
-        if(load_accept && load_set==narrow_6(set_index)) replacement[set_index]<=!selected_line[0];
-        if(store_accept && store_tag_hit && store_set==narrow_6(set_index)) replacement[set_index]<=!store_line[0];
+        if(load_accept && load_set==narrow_7(set_index)) replacement[set_index]<=!selected_line[0];
+        if(store_accept && store_tag_hit && store_set==narrow_7(set_index)) replacement[set_index]<=!store_line[0];
       end
     end
   end
@@ -2163,14 +2199,19 @@ function automatic [QW+1-1:0] narrow_5;
   begin narrow_5=value; end
 endfunction
 
-function automatic [HI-1:0] narrow_6;
+function automatic [CB-3-1:0] narrow_6;
   input [63:0] value;
   begin narrow_6=value; end
 endfunction
 
-function automatic [HB-1:0] narrow_7;
+function automatic [HI-1:0] narrow_7;
   input [63:0] value;
   begin narrow_7=value; end
+endfunction
+
+function automatic [HB-1:0] narrow_8;
+  input [63:0] value;
+  begin narrow_8=value; end
 endfunction
 
   
@@ -2412,10 +2453,6 @@ end
       if(mem_rsp_valid) begin
         returned<=returned+1;
         if(returned==7) busy<=0;
-        if(!mem_rsp_error) begin
-          if(return_address[2]) odd_data[return_address[CB-1:3]]<=mem_rsp_data;
-          else even_data[return_address[CB-1:3]]<=mem_rsp_data;
-        end
       end
       if(train_valid && train_op>=OP_BEQ && train_op<=OP_BGEU) begin
         bht_valid[train_bht]<=1;
@@ -2426,6 +2463,14 @@ end
         btb_valid[train_btb]<=1;btb_tag[train_btb]<=train_pc[31:TW+2];btb_target[train_btb]<=train_target[31:2];
       end
     end
+  end
+  for(row=0;row<CACHE_BYTES/8;row=row+1) begin: instruction_write
+    always @(posedge clk)
+      if(!rst && mem_rsp_valid && !mem_rsp_error &&
+         return_address[CB-1:3]==narrow_6(row)) begin
+        if(return_address[2]) odd_data[row]<=mem_rsp_data;
+        else even_data[row]<=mem_rsp_data;
+      end
   end
   for(row=0;row<QUEUE_ENTRIES;row=row+1) begin: queue_write
     always @(posedge clk)
@@ -2462,7 +2507,7 @@ reg [7:0] valid_next;
     always @(posedge clk) begin
       if(rst) local_history[h]<=0;
       else if(LOCAL_HISTORY_BITS>0 && train_valid && train_op>=OP_BEQ && train_op<=OP_BGEU &&
-              train_pc[HI+1:2]==narrow_6(h)) local_history[h]<=(local_history[h]<<1) | narrow_7(train_taken);
+              train_pc[HI+1:2]==narrow_7(h)) local_history[h]<=(local_history[h]<<1) | narrow_8(train_taken);
     end
   end
   initial begin
@@ -2539,7 +2584,8 @@ localparam integer FETCH_T_WIDTH=FETCH_T_PC_LSB+FETCH_T_PC_WIDTH;
     if(n>=LEAVES) begin: leaf
       if(n-LEAVES<ENTRIES) begin: used
         wire selected=index==narrow_0(n-LEAVES);
-        assign word_value=words[(n-LEAVES)*WORD_BITS+:WORD_BITS] & {WORD_BITS{selected}};
+        v2_read_mask #(.WORD_BITS(WORD_BITS)) mask_word (
+          .selected(selected),.word(words[(n-LEAVES)*WORD_BITS+:WORD_BITS]),.value(word_value));
       end else begin: padding
         assign word_value=0;
       end
@@ -2548,6 +2594,15 @@ localparam integer FETCH_T_WIDTH=FETCH_T_PC_LSB+FETCH_T_PC_WIDTH;
     end
   end
   assign value=node[1].word_value;
+endmodule
+
+(* keep_hierarchy=1 *)
+module v2_read_mask #(parameter integer WORD_BITS=32)(
+  input wire selected,
+  input wire [WORD_BITS-1:0] word,
+  output wire [WORD_BITS-1:0] value
+);
+  assign value=word & {WORD_BITS{selected}};
 endmodule
 
 

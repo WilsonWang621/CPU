@@ -243,17 +243,25 @@ def lower(source, package):
                 for d,x in zip(dims[1:],subs[1:]):index=f'({index})*({d})+({x})'
                 edits.append((m.start(),pos,name+'['+index+']'))
         for a,b,r in reversed(edits):s=s[:a]+r+s[b:]
-    # Explicit modular-age expressions avoid implicit captures in nested
+    # Inline the source expressions to avoid implicit captures in nested
     # functions, which the course Verilog frontend treats as constant calls.
+    # Preserve the actual function body when the circular-order logic changes.
     for fn in ['age','younger']:
-        s=re.sub(r'function automatic (?:rid_t|logic) '+fn+r'\(.*?endfunction','',s,flags=re.S)
+        definition=re.search(r'function automatic (rid_t|logic) '+fn+
+                             r'\(input rid_t (\w+)\);\s*return\s+(.*?);\s*endfunction',s,flags=re.S)
+        if definition is None:
+            if re.search(r'\b'+fn+r'\(',s):raise ValueError('unsupported helper '+fn)
+            continue
+        result_type,argument,body=definition.groups()
+        s=s[:definition.start()]+s[definition.end():]
         edits=[]
         for m in re.finditer(r'\b'+fn+r'\(',s):
             start=m.end();depth=1;end=start
             while depth:
                 depth+=(s[end]=='(')-(s[end]==')');end+=1
             arg=s[start:end-1]
-            expression=f"RW'(({arg})-head)" if fn=='age' else f"(redirect && RW'(({arg})-head)>RW'(redirect_rid-head))"
+            expression=re.sub(r'\b'+argument+r'\b',lambda _:f'({arg})',body)
+            expression=f"RW'({expression})" if result_type=='rid_t' else f'({expression})'
             edits.append((m.start(),end,expression))
         for a,b,r in reversed(edits):s=s[:a]+r+s[b:]
     # Functions use traditional result assignment rather than SV return.

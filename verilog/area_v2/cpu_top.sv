@@ -70,6 +70,11 @@ module cpu_top #(
   state_t state;
   rob_t rob [ROB_ENTRIES];
   logic [31:0] values [ROB_ENTRIES],architectural [32];
+  wire [ROB_ENTRIES*32-1:0] result_words;
+  wire [ROB_ENTRIES*6-1:0] result_status_words;
+  wire [32*32-1:0] architectural_words;
+  logic [31:0] source_result [4],source_architectural [4];
+  logic [5:0] source_status [4];
   issue_t queue [3][IQ_ENTRIES],dispatch_payload[2];
   store_t stores [STORE_SLOTS];
   load_t loads [LOAD_SLOTS];
@@ -158,7 +163,9 @@ module cpu_top #(
     return rid-head;
   endfunction
   function automatic logic younger(input rid_t rid);
-    return redirect && age(rid)>age(redirect_rid);
+    // The circular order needs only the wrap side and the raw slot order.
+    // Avoid distributing head through a subtractor for every live entry.
+    return redirect && ((rid<head)==(redirect_rid<head) ? rid>redirect_rid:rid<head);
   endfunction
   function automatic logic [31:0] extend_load(input logic [31:0] word_value,
       input logic [1:0] offset,size,input logic sign_extend);
@@ -188,6 +195,21 @@ module cpu_top #(
   assign mem_req_wstrb=exit_send ? 4'hf:bus_req_mask;
   assign bus_req_ready=mem_req_ready && !exit_send && state!=DONE;
   assign mem_rsp_ready=bus_rsp_ready;
+  for(genvar row=0;row<ROB_ENTRIES;row=row+1) begin: result_read_words
+    assign result_words[row*32+:32]=values[row];
+    assign result_status_words[row*6+:6]={rob[row].valid,rob[row].done,rob[row].fault};
+  end
+  for(genvar row=0;row<32;row=row+1) begin: architectural_read_words
+    assign architectural_words[row*32+:32]=architectural[row];
+  end
+  for(genvar port_id=0;port_id<4;port_id=port_id+1) begin: operand_reads
+    v2_read #(.ENTRIES(ROB_ENTRIES)) read_result (
+      .index(source_slot[port_id*RW+:RW]),.words(result_words),.value(source_result[port_id]));
+    v2_read #(.ENTRIES(ROB_ENTRIES),.WORD_BITS(6)) read_status (
+      .index(source_slot[port_id*RW+:RW]),.words(result_status_words),.value(source_status[port_id]));
+    v2_read #(.ENTRIES(32)) read_architectural (
+      .index(source_register[port_id*5+:5]),.words(architectural_words),.value(source_architectural[port_id]));
+  end
   v2_frontend #(.CACHE_BYTES(ICACHE_BYTES),.QUEUE_ENTRIES(FETCH_QUEUE_ENTRIES),
     .BHT_ENTRIES(BHT_ENTRIES),.BTB_ENTRIES(BTB_ENTRIES),.LOCAL_HISTORY_BITS(LOCAL_HISTORY_BITS),
     .HISTORY_ENTRIES(HISTORY_ENTRIES),.RAM_BYTES(RAM_BYTES)) frontend (
@@ -434,8 +456,10 @@ module cpu_top #(
         source_id=source_slot[(lane*2+source_number)*RW+:RW];
         pending=source_pending[lane*2+source_number] && register_id!=0 &&
                 (source_number==0 ? decoded[lane].uses_rs1:decoded[lane].uses_rs2);
-        ready_value=!pending || (rob[source_id].valid && rob[source_id].done && rob[source_id].fault==0);
-        source_value=pending ? values[source_id]:(register_id==0 ? 32'd0:architectural[register_id]);
+        ready_value=!pending || (source_status[lane*2+source_number][5:4]==2'b11 &&
+                                source_status[lane*2+source_number][3:0]==0);
+        source_value=pending ? source_result[lane*2+source_number]:
+                     (register_id==0 ? 32'd0:source_architectural[lane*2+source_number]);
         for(integer w=0;w<3;w=w+1)
           if(pending && wb_valid[w] && wb_rid[w]==source_id && wb_fault[w]==0) begin ready_value=1;source_value=wb_value[w];end
         // A fresh intra-bundle writer has no value even if its old physical

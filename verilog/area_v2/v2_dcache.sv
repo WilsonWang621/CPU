@@ -38,6 +38,10 @@ module v2_dcache #(
   localparam integer SETS=CACHE_BYTES/(2*LINE_BYTES), SB=$clog2(SETS), LB=SB+1, LINES=2*SETS;
   localparam integer RB=$clog2(RAM_BYTES), TB=RB-SB-OFFSET, MB=$clog2(MSHRS);
   localparam integer FW=$clog2(CREDITS);
+  localparam integer WRITE_BANKS=CACHE_BYTES/4>=128 ? 8:2;
+  localparam integer BANK_WORDS=CACHE_BYTES/(4*WRITE_BANKS);
+  localparam integer BANK_BITS=$clog2(WRITE_BANKS), BANK_WORD_BITS=$clog2(BANK_WORDS);
+  localparam integer PENDING_BITS=37+BANK_WORD_BITS;
   typedef struct packed {
     logic valid;
     logic [LB-1:0] physical;
@@ -77,6 +81,12 @@ module v2_dcache #(
   logic [LB+WW-1:0] data_write_address,data_read_address;
   logic [31:0] data_write_value;
   logic [3:0] data_write_mask;
+  logic [WRITE_BANKS-1:0] pending_valid;
+  logic [BANK_WORD_BITS-1:0] pending_address [WRITE_BANKS];
+  logic [31:0] pending_data [WRITE_BANKS];
+  logic [3:0] pending_mask [WRITE_BANKS];
+  wire [WRITE_BANKS*PENDING_BITS-1:0] pending_words;
+  wire [PENDING_BITS-1:0] read_pending;
   logic [MSHRS-1:0] release_miss;
   assign load_set=load_address[SB+OFFSET-1:OFFSET];
   assign store_set=store_address[SB+OFFSET-1:OFFSET];
@@ -166,8 +176,48 @@ module v2_dcache #(
     for(integer m=0;m<MSHRS;m=m+1) if(misses[m].valid) idle=0;
     for(integer w=0;w<LOAD_SLOTS;w=w+1) if(waiters[w].valid) idle=0;
   end
-  assign load_data=data[data_read_address];
-  assign result_data=data[data_read_address];
+  // Decode each word once, rather than letting the binary read mux make
+  // every address bit drive thousands of bit-level gates.
+  wire [(CACHE_BYTES/4)*32-1:0] data_words;
+  wire [31:0] read_word;
+  // Capture into the selected bank first. Each data register now drives only
+  // BANK_WORDS storage rows. Forward this pending byte write on every read,
+  // preserving the original visibility at the capture edge.
+  for(genvar bank=0;bank<WRITE_BANKS;bank=bank+1) begin: write_stages
+    wire accept=data_write_valid && data_write_address[LB+WW-1:BANK_WORD_BITS]==BANK_BITS'(bank);
+    always_ff @(posedge clk) begin
+      if(rst) pending_valid[bank]<=0;
+      else begin
+        pending_valid[bank]<=accept;
+        if(accept) begin
+          pending_address[bank]<=data_write_address[BANK_WORD_BITS-1:0];
+          pending_data[bank]<=data_write_value;
+          pending_mask[bank]<=data_write_mask;
+        end
+      end
+    end
+    assign pending_words[bank*PENDING_BITS+:PENDING_BITS]=
+      {pending_valid[bank],pending_address[bank],pending_mask[bank],pending_data[bank]};
+  end
+  for(genvar row=0;row<CACHE_BYTES/4;row=row+1) begin: data_rows
+    assign data_words[row*32+:32]=data[row];
+    for(genvar byte_id=0;byte_id<4;byte_id=byte_id+1) begin: byte_write
+      always_ff @(posedge clk)
+        if(!rst && pending_valid[row/BANK_WORDS] && pending_mask[row/BANK_WORDS][byte_id] &&
+           pending_address[row/BANK_WORDS]==BANK_WORD_BITS'(row%BANK_WORDS))
+          data[row][byte_id*8+:8]<=pending_data[row/BANK_WORDS][byte_id*8+:8];
+    end
+  end
+  v2_read #(.ENTRIES(CACHE_BYTES/4)) read_data (
+    .index(data_read_address),.words(data_words),.value(read_word));
+  v2_read #(.ENTRIES(WRITE_BANKS),.WORD_BITS(PENDING_BITS)) read_write_stage (
+    .index(data_read_address[LB+WW-1:BANK_WORD_BITS]),.words(pending_words),.value(read_pending));
+  for(genvar byte_id=0;byte_id<4;byte_id=byte_id+1) begin: pending_forward
+    wire bypass=read_pending[PENDING_BITS-1] && read_pending[32+byte_id] &&
+                read_pending[36+:BANK_WORD_BITS]==data_read_address[BANK_WORD_BITS-1:0];
+    assign load_data[byte_id*8+:8]=bypass ? read_pending[byte_id*8+:8]:read_word[byte_id*8+:8];
+  end
+  assign result_data=load_data;
   always_ff @(posedge clk) begin
     if(rst) begin
       head<=0;tail<=0;count<=0;out_valid<=0;out_owner<='0;
@@ -189,9 +239,6 @@ module v2_dcache #(
         out_data<=0;out_mask<=0;round_robin<=send_slot+1'b1;
       end
       if(allocate && !load_tag_hit) miss_count<=miss_count+1;
-      if(data_write_valid)
-        for(integer b=0;b<4;b=b+1)
-          if(data_write_mask[b]) data[data_write_address][b*8+:8]<=data_write_value[b*8+:8];
     end
   end
   for(genvar m=0;m<MSHRS;m=m+1) begin: miss_rows
