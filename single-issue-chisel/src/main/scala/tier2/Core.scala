@@ -170,6 +170,8 @@ class Core(p: Config) extends Module {
   fetch.io.train.bits.pc := pc(head); fetch.io.train.bits.target := storeAddr(head)
   fetch.io.train.bits.taken := taken(head); fetch.io.train.bits.conditional := conditional(head)
   fetch.io.train.bits.call := calls(head); fetch.io.train.bits.ret := returns(head)
+  fetch.io.train.bits.history := 0.U
+  fetch.io.commit.valid := fetch.io.train.valid; fetch.io.commit.bits := fetch.io.train.bits
   when(retire) {
     assert(!fault(head),"Retiring faulting instruction")
     live(head) := false.B; head := head+1.U
