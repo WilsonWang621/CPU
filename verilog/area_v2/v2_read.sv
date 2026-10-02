@@ -13,16 +13,8 @@ module v2_read #(
     if(n>=LEAVES) begin: leaf
       if(n-LEAVES<ENTRIES) begin: used
         wire selected=index==INDEX_BITS'(n-LEAVES);
-        if(ENTRIES<=8 && WORD_BITS>64) begin: split_payload
-          for(genvar chunk=0;chunk<(WORD_BITS+31)/32;chunk=chunk+1) begin: chunks
-            v2_read_chunk #(.WORD_BITS((WORD_BITS-chunk*32<32 ? WORD_BITS-chunk*32:32)),.INDEX_BITS(INDEX_BITS),.ROW(n-LEAVES)) read_chunk (
-              .index(index),.word(words[(n-LEAVES)*WORD_BITS+chunk*32+:(WORD_BITS-chunk*32<32 ? WORD_BITS-chunk*32:32)]),
-              .value(word_value[chunk*32+:(WORD_BITS-chunk*32<32 ? WORD_BITS-chunk*32:32)]));
-          end
-        end else begin: shared_decode
-          v2_read_mask #(.WORD_BITS(WORD_BITS)) mask_word (
-            .selected(selected),.word(words[(n-LEAVES)*WORD_BITS+:WORD_BITS]),.value(word_value));
-        end
+        v2_read_mask #(.WORD_BITS(WORD_BITS)) mask_word (
+          .selected(selected),.word(words[(n-LEAVES)*WORD_BITS+:WORD_BITS]),.value(word_value));
       end else begin: padding
         assign word_value=0;
       end
@@ -33,3 +25,13 @@ module v2_read #(
   assign value=node[1].word_value;
 endmodule
 
+// Keep the per-word mask separate so the default ABC pass cannot turn the
+// decoded read back into a bit-level mux with a shared high-fanout selector.
+(* keep_hierarchy=1 *)
+module v2_read_mask #(parameter integer WORD_BITS=32)(
+  input wire selected,
+  input wire [WORD_BITS-1:0] word,
+  output wire [WORD_BITS-1:0] value
+);
+  assign value=word & {WORD_BITS{selected}};
+endmodule
