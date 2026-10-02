@@ -89,3 +89,5 @@ synth:
 clean:
 	rm -rf -- "$(BUILD)" "$(SYNTH_OUT)"
 	rm -f -- code
+
+include $(FRAMEWORK_DIR)/scripts/area_v2/targets.mk

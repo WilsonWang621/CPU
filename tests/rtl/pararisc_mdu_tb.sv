@@ -2,11 +2,14 @@ module pararisc_mdu_tb;
   reg clock=0, reset=1, flush=0, req_valid=0, resp_ready=0;
   reg [31:0] req_a=0, req_b=0;
   reg [2:0] req_op=0;
-  reg [3:0] req_tag=0;
+  reg [7:0] req_tag=0;
+  reg [255:0] kill_mask=0;
   wire req_ready, resp_valid;
   wire [31:0] resp_value;
-  wire [3:0] resp_tag;
-  pararisc_mdu dut(.*);
+  wire [7:0] resp_tag;
+  muldiv dut(.clk(clock),.rst(reset),.kill(flush),.kill_mask(kill_mask),
+    .req_valid(req_valid),.req_ready(req_ready),.req_a(req_a),.req_b(req_b),.req_op({3'b0,req_op}+6'd22),.req_tag(req_tag),
+    .rsp_valid(resp_valid),.rsp_ready(resp_ready),.rsp_result(resp_value),.rsp_tag(resp_tag),.mul_ready(),.div_ready());
   always #5 clock=~clock;
   integer checks=0;
   function automatic [31:0] reference(input [31:0] a,b,input [2:0] op);
@@ -36,10 +39,10 @@ module pararisc_mdu_tb;
   endfunction
   task automatic check(input [31:0] a,b,input [2:0] op);
     reg [31:0] expected;
-    reg [3:0] tag;
+    reg [7:0] tag;
     integer cycles;
     begin
-      expected=reference(a,b,op);tag=4'(checks);
+      expected=reference(a,b,op);tag=8'(checks);
       @(negedge clock);
       if(!req_ready) $fatal(1,"unit not ready");
       req_a=a;req_b=b;req_op=op;req_tag=tag;req_valid=1;
@@ -81,6 +84,6 @@ module pararisc_mdu_tb;
       cancel(0,delay_cycles);cancel(4,delay_cycles);
     end
     check(12345,67,4);
-    $display("pararisc_mdu: PASS %0d arithmetic cases, 24 flush cases",checks);$finish;
+    $display("Area-v2 muldiv: PASS %0d arithmetic cases, 24 flush cases",checks);$finish;
   end
 endmodule

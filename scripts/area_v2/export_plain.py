@@ -74,6 +74,70 @@ def layout(schemas):
     return '\n'.join(lines)+'\n'
 
 
+def plain_control(s):
+    # Expand SV shorthand connections to explicit Verilog named connections.
+    s=re.sub(r'(?<=[(,])\s*\.(\w+)\s*(?=[,)])',lambda m:'.'+m[1]+'('+m[1]+')',s)
+    # Preserve narrowing at its exact arithmetic boundary with small functions.
+    casts={}
+    edits=[]
+    pattern=re.compile(r"(?:\(([^()]*)\)|(\b\w+))\s*'\s*\(")
+    for m in pattern.finditer(s):
+        w=m[1] or m[2];start=m.end();depth=1;end=start
+        while depth:depth+=(s[end]=='(')-(s[end]==')');end+=1
+        # Replace only the cast prefix; nested casts are independent edits.
+        name=casts.setdefault(w,'narrow_'+str(len(casts)))
+        edits.append((m.start(),m.end(),name+'('))
+    for a,b,r in reversed(edits):s=s[:a]+r+s[b:]
+    functions=[]
+    for w,name in casts.items():
+        result='signed [31:0]' if w=='int' else '['+w+'-1:0]'
+        functions.append('function automatic '+result+' '+name+';\n  input [63:0] value;\n  begin '+name+'=value; end\nendfunction\n')
+    # Each procedural loop owns its integer in a named lexical block.
+    # That avoids sharing loop counters between combinational processes.
+    def token_end(text,start):
+        tokens=list(re.finditer(r'\b\w+\b|[^\s]',text[start:]))
+        values=[m.group(0) for m in tokens]
+        def balanced(i):
+            depth=0
+            for j in range(i,len(values)):
+                depth+=values[j]=='(';depth-=values[j]==')'
+                if depth==0:return j+1
+            raise ValueError('unbalanced statement')
+        def statement(i):
+            if values[i]=='begin':
+                depth=0
+                for j in range(i,len(values)):
+                    depth+=values[j]=='begin';depth-=values[j]=='end'
+                    if depth==0:return j+1
+            if values[i] in ('if','for','while','repeat'):
+                j=statement(balanced(i+1))
+                if values[i]=='if' and j<len(values) and values[j]=='else':j=statement(j+1)
+                return j
+            for j in range(i,len(values)):
+                if values[j]==';':return j+1
+            raise ValueError('unterminated statement')
+        j=statement(0)
+        return start+tokens[j-1].end()
+    number=0
+    while True:
+        matches=list(re.finditer(r'\bfor\s*\(\s*integer\s+(\w+)',s))
+        if not matches:break
+        m=matches[-1];name=m[1];header=s.index('(',m.start());depth=1;end=header+1
+        while depth:depth+=(s[end]=='(')-(s[end]==')');end+=1
+        start=end
+        while s[start].isspace():start+=1
+        finish=token_end(s,start)
+        old=s[m.start():finish]
+        old=re.sub(r'\bfor\s*\(\s*integer\s+','for(',old,count=1)
+        s=s[:m.start()]+'begin: loop_'+str(number)+'\ninteger '+name+';\n'+old+'\nend'+s[finish:]
+        number+=1
+    genvars=set(re.findall(r'\bfor\s*\(\s*genvar\s+(\w+)',s))
+    s=re.sub(r'\bfor\s*\(\s*genvar\s+','for(',s)
+    pos=s.index(');')+2
+    additions=('genvar '+','.join(sorted(genvars))+';\n' if genvars else '')+'\n'.join(functions)
+    return s[:pos]+'\n'+additions+s[pos:]
+
+
 def lower(source, package):
     s = no_comments(source)
     # Optional verification scopes contain no functional state.
@@ -119,10 +183,13 @@ def lower(source, package):
         packed = packed or (aliases.get(typ) if typ in aliases else f'[{typ.upper()}_WIDTH-1:0]' if typ in schemas else '')
         return 'logic '+packed+' '+', '.join(out)+';'
     s=decl.sub(declaration,s)
+    original_params=re.findall(r"\blocalparam\s+[^;]+;",s)
+    s=re.sub(r"\blocalparam\s+[^;]+;","",s)
+    prefix=package+"\n"+"\n".join(original_params)+"\n"+layout(schemas)
     # Expand the shared operation/fault definitions into each module.
-    s=s.replace('import cpu_pkg::*;',package+'\n'+layout(schemas))
+    s=s.replace('import cpu_pkg::*;',prefix)
     if 'import cpu_pkg' not in source:
-        pos=s.index(');')+2;s=s[:pos]+'\n'+package+'\n'+layout(schemas)+s[pos:]
+        pos=s.index(');')+2;s=s[:pos]+'\n'+prefix+s[pos:]
     # Replace record members, including a slice of a member, in one pass.
     def member(m):
         name=m.group(0); pos=m.end(); expression=name; subs=[]
@@ -130,6 +197,7 @@ def lower(source, package):
         while pos<len(s) and s[pos]=='[':
             sub,pos=brackets(s,pos);subs.append(sub)
             while pos<len(s) and s[pos].isspace():pos+=1
+        if any('.' in x for x in subs): return None
         dims=array_dimensions.get(name,[])
         if len(dims)>1 and len(subs)>=len(dims):
             index=subs[0]
@@ -150,11 +218,14 @@ def lower(source, package):
             else: raise ValueError(sub)
         else:expression+=f'[{prefix}_LSB+:{prefix}_WIDTH]'
         return m.start(),pos,expression
-    edits=[]
-    for m in re.finditer(r'\b(?:'+'|'.join(variables)+r')\b',s):
-        e=member(m)
-        if e:edits.append(e)
-    for a,b,r in reversed(edits):s=s[:a]+r+s[b:]
+    for _ in range(10):
+        edits=[]
+        for m in re.finditer(r'\b(?:'+'|'.join(variables)+r')\b',s):
+            e=member(m)
+            if e:edits.append(e)
+        if not edits:break
+        for a,b,r in reversed(edits):s=s[:a]+r+s[b:]
+    else:raise ValueError('record lowering did not converge')
     # Flatten non-record multidimensional arrays (the checkpoint RAT).
     for name,dims in array_dimensions.items():
         if len(dims)<2:continue
@@ -164,10 +235,23 @@ def lower(source, package):
             while pos<len(s) and s[pos].isspace():pos+=1
             for _ in dims:
                 if pos<len(s) and s[pos]=='[':sub,pos=brackets(s,pos);subs.append(sub)
-            if len(subs)==len(dims):
+            if len(subs)==len(dims) and all(":" not in x for x in subs):
                 index=subs[0]
                 for d,x in zip(dims[1:],subs[1:]):index=f'({index})*({d})+({x})'
                 edits.append((m.start(),pos,name+'['+index+']'))
+        for a,b,r in reversed(edits):s=s[:a]+r+s[b:]
+    # Explicit modular-age expressions avoid implicit captures in nested
+    # functions, which the course Verilog frontend treats as constant calls.
+    for fn in ['age','younger']:
+        s=re.sub(r'function automatic (?:rid_t|logic) '+fn+r'\(.*?endfunction','',s,flags=re.S)
+        edits=[]
+        for m in re.finditer(r'\b'+fn+r'\(',s):
+            start=m.end();depth=1;end=start
+            while depth:
+                depth+=(s[end]=='(')-(s[end]==')');end+=1
+            arg=s[start:end-1]
+            expression=f"RW'(({arg})-head)" if fn=='age' else f"(redirect && RW'(({arg})-head)>RW'(redirect_rid-head))"
+            edits.append((m.start(),end,expression))
         for a,b,r in reversed(edits):s=s[:a]+r+s[b:]
     # Functions use traditional result assignment rather than SV return.
     def function(m):
@@ -178,8 +262,10 @@ def lower(source, package):
         s=re.sub(r'\b'+name+r"\s*'",('RW' if name=='rid_t' else '6')+"'",s)
         s=re.sub(r'\b'+name+r'\b','logic '+packed,s)
     s=re.sub(r'\blogic\b','reg',s)
+    s=s.replace('localparam reg','localparam')
     s=s.replace('always_comb','always @*').replace('always_ff','always')
     s=re.sub(r"'0\b",'0',s)
+    s=re.sub(r"'1\b",'~0',s)
     # Classify declarations by actual procedural assignments. Other outputs
     # and continuous-assignment nets are wires, as required by Verilog.
     assigned=set()
@@ -187,6 +273,8 @@ def lower(source, package):
     for m in lhs.finditer(s):
         prefix=s[max(0,s.rfind(';',0,m.start())+1):m.start()]
         if not re.search(r'\b(assign|parameter|localparam)\b',prefix):assigned.add(m.group(1))
+    assigned.discard('fetch_fault')  # frontend output, never a procedural core destination
+    assigned-=set(re.findall(r'\bassign\s+(\w+)',s))
     # Split body declarations so mixed procedural/module outputs can differ.
     def classify(m):
         packed,body=m.groups();out=[]
@@ -195,14 +283,15 @@ def lower(source, package):
             out.append(('reg' if name in assigned else 'wire')+' '+(packed or '')+' '+item.strip()+';')
         return '\n  '.join(out)
     # Only full declarations, not port groups/function arguments.
-    s=re.sub(r'(?m)^\s*reg\s*(\[[^\]]+\])?\s*([^;]+);',classify,s)
+    s=re.sub(r'(?m)^\s*reg\b\s+(\[[^\]]+\])?\s*([^;]+);',classify,s)
     def port(m):
         direction,packed,body=m.groups();names=[x.strip() for x in body.split(',')]
-        return ',\n  '.join(direction+' '+('reg' if n in assigned else 'wire')+' '+(packed or '')+' '+n for n in names)
+        return ',\n  '.join(direction+' '+('reg' if direction=='output' and n in assigned else 'wire')+' '+(packed or '')+' '+n for n in names)
     s=re.sub(r'\b(input|output)\s+reg\s*(\[[^\]]+\])?\s*((?:\w+\s*,\s*)*\w+)(?=\s*[,\)])',port,s)
+    s=re.sub(r'function automatic.*?endfunction',lambda m:m.group(0).replace('input wire','input').replace('input reg','input').replace('function automatic reg','function automatic'),s,flags=re.S)
     s=re.sub(r'\n\s*\n\s*\n','\n\n',s)
     assert not re.search(r'\b(typedef|import|package|struct|return|logic)\b',s)
-    return s
+    return plain_control(s)
 
 
 def main():

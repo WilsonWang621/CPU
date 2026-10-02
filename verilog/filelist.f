@@ -1,8 +1,3 @@
-pararisc_alu.sv
-pararisc_mdu.sv
-pararisc_cache.sv
-pararisc_l0.sv
-pararisc_bus.sv
-pararisc_frontend.sv
-pararisc_backend.sv
+area_v2_core.v
+pararisc_axi_adapter.sv
 student_top.sv
