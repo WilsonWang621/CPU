@@ -144,6 +144,9 @@ def lower(source, package):
     s = re.sub(r'`ifdef V2_VERIFY.*?`endif', '', s, flags=re.S)
     s = re.sub(r'`ifndef SYNTHESIS.*?`endif', '', s, flags=re.S)
     schemas = {}; package = records(package, schemas); s = records(s, schemas)
+    # Packed record widths are symbolic in both descriptions and plain RTL.
+    for typ in schemas:
+        s = re.sub(r'\$bits\s*\(\s*'+typ+r'\s*\)', typ.upper()+'_WIDTH', s)
     def enum(m):
         hi, body, name = m.groups()
         values = []

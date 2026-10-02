@@ -7,6 +7,7 @@ module v2_rename #(
 )(
   input logic clk,rst,
   input logic [1:0] dispatch_valid,
+  input logic [1:0] prepare_valid,
   input logic [9:0] dispatch_rd,
   input logic [2*SLOT_BITS-1:0] dispatch_slot,
   input logic [19:0] source_register,
@@ -28,16 +29,11 @@ module v2_rename #(
   always_comb begin
     pending_next=pending_q;
     for (integer r=0;r<32;r=r+1) tag_next[r]=tag_q[r];
-    source_pending='0;source_slot='0;
     save_pending='0;
     for (integer r=0;r<32;r=r+1) save_tag[r]='0;
     // Source lookup sees the still-live retiring producer's ROB result.
     // Lane 1 observes lane 0's destination without an extra clock boundary.
     for (integer lane=0;lane<2;lane=lane+1) begin
-      for (integer s=0;s<2;s=s+1) begin
-        source_pending[lane*2+s]=pending_next[source_register[(lane*2+s)*5+:5]];
-        source_slot[(lane*2+s)*SLOT_BITS+:SLOT_BITS]=tag_next[source_register[(lane*2+s)*5+:5]];
-      end
       if (dispatch_valid[lane] && dispatch_rd[lane*5+:5]!=0) begin
         pending_next[dispatch_rd[lane*5+:5]]=1;
         tag_next[dispatch_rd[lane*5+:5]]=dispatch_slot[lane*SLOT_BITS+:SLOT_BITS];
@@ -60,6 +56,23 @@ module v2_rename #(
           if (save_tag[r]==commit_slot[c*SLOT_BITS+:SLOT_BITS]) save_pending[r]=0;
         end
     pending_next[0]=0;save_pending[0]=0;
+  end
+
+  // Lookup and intra-bundle forwarding use the prepared prefix. Recovery
+  // only gates publication and the actual RAT update, not these wide paths.
+  for(genvar port_id=0;port_id<4;port_id=port_id+1) begin: lookup
+    wire [4:0] register_id=source_register[port_id*5+:5];
+    wire bypass=port_id>=2 && prepare_valid[0] && dispatch_rd[4:0]!=0 &&
+                dispatch_rd[4:0]==register_id;
+    wire [32*(SLOT_BITS+1)-1:0] mappings;
+    wire [SLOT_BITS:0] mapping;
+    for(genvar r=0;r<32;r=r+1) begin: row
+      assign mappings[r*(SLOT_BITS+1)+:SLOT_BITS+1]={pending_q[r],tag_q[r]};
+    end
+    v2_read #(.ENTRIES(32),.WORD_BITS(SLOT_BITS+1)) read_mapping (
+      .index(register_id),.words(mappings),.value(mapping));
+    assign source_pending[port_id]=bypass || mapping[SLOT_BITS];
+    assign source_slot[port_id*SLOT_BITS+:SLOT_BITS]=bypass ? dispatch_slot[0+:SLOT_BITS]:mapping[SLOT_BITS-1:0];
   end
 
   always_ff @(posedge clk) begin

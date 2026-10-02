@@ -53,6 +53,7 @@ module cpu_top #(
     // Keep full words aligned in the packed simulation representation too.
     logic [31:0] a,b,imm;
   } issue_t;
+  localparam integer ISSUE_BITS=$bits(issue_t);
   typedef struct packed {
     logic valid,committed,issued,done;
     rid_t rid;
@@ -114,7 +115,7 @@ module cpu_top #(
   logic [3:0] source_pending;
   logic [4*RW-1:0] source_slot;
   logic save_checkpoint,save_after_lane;
-  logic [1:0] dispatch_valid;
+  logic [1:0] dispatch_valid,dispatch_prepare,rename_prepare;
   logic [1:0] dispatch_bank [2];
   logic [QW-1:0] dispatch_index [2];
   rid_t dispatch_rid [2],commit_rid [2];
@@ -225,7 +226,7 @@ module cpu_top #(
     assign commit_slot[d*RW+:RW]=commit_rid[d];
   end
   v2_rename #(.SLOT_BITS(RW),.CHECKPOINTS(CHECKPOINTS)) rename_maps (
-    .clk,.rst,.dispatch_valid(rename_valid),.dispatch_rd(rename_rd),.dispatch_slot(rename_slot),
+    .clk,.rst,.dispatch_valid(rename_valid),.prepare_valid(rename_prepare),.dispatch_rd(rename_rd),.dispatch_slot(rename_slot),
     .source_register,.source_pending,.source_slot,.commit_valid,.commit_rd,.commit_slot,
     .save_valid(save_checkpoint),.save_after_lane,.save_index(free_checkpoint),
     .restore_valid(redirect),.restore_index(redirect_checkpoint));
@@ -243,13 +244,18 @@ module cpu_top #(
     .req_a(executing[0].a),.req_b(executing[0].b),.req_tag(8'(executing[0].rid)),
     .rsp_valid(mdu_result_valid),.rsp_ready(mdu_result_ready),.rsp_result(mdu_result),.rsp_tag(mdu_result_tag));
   for(genvar bank=0;bank<3;bank=bank+1) begin: balanced_selection
+    wire [IQ_ENTRIES*ISSUE_BITS-1:0] payloads;
+    wire [ISSUE_BITS-1:0] selected_payload;
     for(genvar q=0;q<IQ_ENTRIES;q=q+1) begin: candidate
       assign select_ready[bank][q]=queue[bank][q].valid && (bank==2 || (queue[bank][q].ready_a && queue[bank][q].ready_b));
       assign select_owner[bank][q*RW+:RW]=queue[bank][q].rid;
+      assign payloads[q*ISSUE_BITS+:ISSUE_BITS]=queue[bank][q];
     end
     v2_select #(.ENTRIES(IQ_ENTRIES),.SLOT_BITS(RW)) choose (
       .ready(select_ready[bank]),.owner(select_owner[bank]),.rob_head(head),.valid(selected_valid[bank]),.index(selected[bank]));
-    assign executing[bank]=queue[bank][selected[bank]];
+    v2_read #(.ENTRIES(IQ_ENTRIES),.WORD_BITS(ISSUE_BITS)) read_payload (
+      .index(selected[bank]),.words(payloads),.value(selected_payload));
+    assign executing[bank]=selected_payload;
     assign select_valid[bank]=selected_valid[bank] && (bank!=2 || (executing[bank].ready_a && executing[bank].ready_b));
   end
   for(genvar s=0;s<STORE_SLOTS;s=s+1) begin: store_candidates
@@ -379,8 +385,10 @@ module cpu_top #(
   always_comb begin: dispatch_control
     logic blocked_dispatch;
     integer bank_choice;
-    blocked_dispatch=flush_all || redirect;
-    dispatch_valid=0;dispatch_count=0;rename_valid=0;rename_rd=0;used_bank=0;
+    // Work out the dispatch prefix without recovery gating. Only valid bits
+    // publish it; free destination rows can prepare their payload in parallel.
+    blocked_dispatch=0;
+    dispatch_prepare=0;dispatch_valid=0;dispatch_count=0;rename_prepare=0;rename_valid=0;rename_rd=0;used_bank=0;
     save_checkpoint=0;save_after_lane=0;
     for(integer lane=0;lane<2;lane=lane+1) begin
       dispatch_rid[lane]=tail+rid_t'(lane);dispatch_bank[lane]=0;dispatch_index[lane]=0;bank_choice=0;
@@ -391,17 +399,20 @@ module cpu_top #(
         else if(used_bank[1] || !free_queue_valid[1]) bank_choice=0;
         else bank_choice=(occupancy[1]<occupancy[0] || (occupancy[1]==occupancy[0] && steer)) ? 1:0;
         if(fetch_fault[lane*4+:4]!=0 || decoded[lane].illegal) begin
-          dispatch_valid[lane]=1;dispatch_count=dispatch_count+1'b1;
+          dispatch_prepare[lane]=1;dispatch_count=dispatch_count+1'b1;
           dispatch_bank[lane]=3;
         end else if(!used_bank[bank_choice] && free_queue_valid[bank_choice] &&
                     (!is_branch(decoded[lane].op) || (checkpoint_available && !save_checkpoint))) begin
-          dispatch_valid[lane]=1;dispatch_count=dispatch_count+1'b1;
+          dispatch_prepare[lane]=1;dispatch_count=dispatch_count+1'b1;
           dispatch_bank[lane]=2'(bank_choice);dispatch_index[lane]=free_queue[bank_choice];used_bank[bank_choice]=1;
-          rename_valid[lane]=decoded[lane].writes_rd;rename_rd[lane*5+:5]=decoded[lane].writes_rd ? decoded[lane].rd:5'd0;
+          rename_prepare[lane]=decoded[lane].writes_rd;rename_rd[lane*5+:5]=decoded[lane].writes_rd ? decoded[lane].rd:5'd0;
           if(is_branch(decoded[lane].op)) begin save_checkpoint=1;save_after_lane=1'(lane);end
         end else blocked_dispatch=1;
       end else blocked_dispatch=1;
     end
+    dispatch_valid=dispatch_prepare & {2{!flush_all && !redirect}};
+    rename_valid=rename_prepare & {2{!flush_all && !redirect}};
+    if(flush_all || redirect) begin dispatch_count=0;save_checkpoint=0;end
     pop_count=dispatch_count;
   end
   always_comb begin: capture_sources
@@ -429,7 +440,7 @@ module cpu_top #(
           if(pending && wb_valid[w] && wb_rid[w]==source_id && wb_fault[w]==0) begin ready_value=1;source_value=wb_value[w];end
         // A fresh intra-bundle writer has no value even if its old physical
         // row still contains a completed result from an earlier wrap.
-        if(lane==1 && rename_valid[0] && source_id==dispatch_rid[0] && pending) ready_value=0;
+        if(lane==1 && rename_prepare[0] && source_id==dispatch_rid[0] && pending) ready_value=0;
         if(source_number==0) begin
           dispatch_payload[lane].a=source_value;dispatch_payload[lane].ready_a=ready_value;
           dispatch_payload[lane].source_a=source_id;
@@ -501,13 +512,21 @@ module cpu_top #(
         if(younger(rid_t'(r)) || (flush_all && rid_t'(r)!=head)) rob[r].valid<=0;
         for(integer lane=0;lane<2;lane=lane+1)
           if(dispatch_valid[lane] && dispatch_rid[lane]==rid_t'(r)) begin
-            rob[r].valid<=1;rob[r].pc<=fetch_pc[lane*32+:32];rob[r].inst<=fetch_inst[lane*32+:32];rob[r].iv<=fetch_iv[lane];
-            rob[r].rd<=rename_rd[lane*5+:5];rob[r].store<=decoded[lane].op==OP_STORE;
-            rob[r].done<=dispatch_bank[lane]==3;rob[r].exiting<=0;
+            rob[r].valid<=1;rob[r].done<=dispatch_bank[lane]==3;rob[r].exiting<=0;
             rob[r].fault<=fetch_fault[lane*4+:4]!=0 ? fetch_fault[lane*4+:4]:decoded[lane].illegal ? FAULT_ILLEGAL:FAULT_NONE;
             rob[r].fault_address<=fetch_pc[lane*32+:32];rob[r].address<=0;rob[r].wdata<=0;rob[r].mask<=0;
           end
       end
+    end
+    // A live (including retiring) ROB row is never prepared. The allocator
+    // excludes same-edge reuse, so these writes also supply an accepted lane.
+    always_ff @(posedge clk) begin
+      if(!rst && !rob[r].valid)
+        for(integer lane=0;lane<2;lane=lane+1)
+          if(dispatch_rid[lane]==rid_t'(r)) begin
+            rob[r].pc<=fetch_pc[lane*32+:32];rob[r].inst<=fetch_inst[lane*32+:32];rob[r].iv<=fetch_iv[lane];
+            rob[r].rd<=rename_rd[lane*5+:5];rob[r].store<=decoded[lane].op==OP_STORE;
+          end
     end
   end
   for(genvar r=0;r<32;r=r+1) begin: architectural_registers
@@ -522,8 +541,18 @@ module cpu_top #(
       always_ff @(posedge clk) begin
         if(rst) queue[bank][q].valid<=0;
         else begin
+          if((issue_fire[bank] && selected[bank]==QW'(q)) || younger(queue[bank][q].rid) || flush_all) queue[bank][q].valid<=0;
+          for(integer lane=0;lane<2;lane=lane+1)
+            if(dispatch_valid[lane] && dispatch_bank[lane]==2'(bank) && dispatch_index[lane]==QW'(q))
+              queue[bank][q].valid<=1;
+        end
+      end
+      always_ff @(posedge clk) begin
+        // Free rows may retain arbitrary speculative data. Preparation cannot
+        // overwrite a live row, and each bank accepts at most one lane.
+        if(queue[bank][q].valid) begin
           for(integer w=0;w<3;w=w+1)
-            if(queue[bank][q].valid && wb_valid[w] && wb_fault[w]==0 && rob[wb_rid[w]].rd!=0) begin
+            if(wb_valid[w] && wb_fault[w]==0 && rob[wb_rid[w]].rd!=0) begin
               if(!queue[bank][q].ready_a && queue[bank][q].source_a==wb_rid[w]) begin
                 queue[bank][q].ready_a<=1;queue[bank][q].a<=wb_value[w];
               end
@@ -531,10 +560,18 @@ module cpu_top #(
                 queue[bank][q].ready_b<=1;queue[bank][q].b<=wb_value[w];
               end
             end
-          if((issue_fire[bank] && selected[bank]==QW'(q)) || younger(queue[bank][q].rid) || flush_all) queue[bank][q].valid<=0;
+        end else begin
           for(integer lane=0;lane<2;lane=lane+1)
-            if(dispatch_valid[lane] && dispatch_bank[lane]==2'(bank) && dispatch_index[lane]==QW'(q))
-              queue[bank][q]<=dispatch_payload[lane];
+            if(dispatch_prepare[lane] && dispatch_bank[lane]==2'(bank) && dispatch_index[lane]==QW'(q)) begin
+              queue[bank][q].rid<=dispatch_payload[lane].rid;queue[bank][q].op<=dispatch_payload[lane].op;
+              queue[bank][q].ready_a<=dispatch_payload[lane].ready_a;queue[bank][q].ready_b<=dispatch_payload[lane].ready_b;
+              queue[bank][q].source_a<=dispatch_payload[lane].source_a;queue[bank][q].source_b<=dispatch_payload[lane].source_b;
+              queue[bank][q].pc<=dispatch_payload[lane].pc;queue[bank][q].prediction<=dispatch_payload[lane].prediction;
+              queue[bank][q].history<=dispatch_payload[lane].history;queue[bank][q].checkpoint<=dispatch_payload[lane].checkpoint;
+              queue[bank][q].size<=dispatch_payload[lane].size;queue[bank][q].sign_extend<=dispatch_payload[lane].sign_extend;
+              queue[bank][q].use_imm<=dispatch_payload[lane].use_imm;
+              queue[bank][q].a<=dispatch_payload[lane].a;queue[bank][q].b<=dispatch_payload[lane].b;queue[bank][q].imm<=dispatch_payload[lane].imm;
+            end
         end
       end
     end

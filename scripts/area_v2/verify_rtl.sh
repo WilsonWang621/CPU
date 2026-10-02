@@ -7,3 +7,7 @@ iverilog -g2012 -s pararisc_axi_adapter_tb -o "$out/axi" tests/rtl/pararisc_axi_
 vvp "$out/axi"
 iverilog -g2012 -s pararisc_mdu_tb -o "$out/mdu" tests/rtl/pararisc_mdu_tb.sv verilog/area_v2_core.v
 vvp "$out/mdu"
+iverilog -g2012 -s v2_rename_prepare_tb -o "$out/rename" tests/rtl/v2_rename_prepare_tb.sv verilog/area_v2_core.v
+vvp "$out/rename"
+iverilog -g2012 -s v2_frontend_prepare_tb -o "$out/frontend" tests/rtl/v2_frontend_prepare_tb.sv verilog/area_v2_core.v
+vvp "$out/frontend"

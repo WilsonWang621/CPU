@@ -29,7 +29,10 @@ module v2_frontend #(
   localparam integer CB=$clog2(CACHE_BYTES), LINES=CACHE_BYTES/32, LB=$clog2(LINES);
   localparam integer QW=$clog2(QUEUE_ENTRIES), BW=$clog2(BHT_ENTRIES), TW=$clog2(BTB_ENTRIES);
   typedef struct packed {logic [3:0] fault;logic iv;logic [HB-1:0] history;logic [31:0] pc,inst,pred;} packet_t;
-  packet_t fifo [QUEUE_ENTRIES],incoming[2];
+  localparam integer PACKET_BITS=$bits(packet_t);
+  packet_t fifo [QUEUE_ENTRIES],incoming[2],read_packet[2];
+  wire [QUEUE_ENTRIES*PACKET_BITS-1:0] queue_words;
+  wire [(CACHE_BYTES/8)*32-1:0] even_words,odd_words;
   logic [QW-1:0] head,tail;
   logic [QW:0] count;
   logic [1:0] push;
@@ -72,13 +75,37 @@ module v2_frontend #(
   assign fetch_pc[1]=pc+4;
   assign even_index=pc[2] ? fetch_pc[1][CB-1:3]:pc[CB-1:3];
   assign odd_index=pc[CB-1:3];
-  assign even_read=even_data[even_index];
-  assign odd_read=odd_data[odd_index];
+  for(genvar row=0;row<CACHE_BYTES/8;row=row+1) begin: instruction_words
+    assign even_words[row*32+:32]=even_data[row];
+    assign odd_words[row*32+:32]=odd_data[row];
+  end
+  v2_read #(.ENTRIES(CACHE_BYTES/8)) read_even (.index(even_index),.words(even_words),.value(even_read));
+  v2_read #(.ENTRIES(CACHE_BYTES/8)) read_odd (.index(odd_index),.words(odd_words),.value(odd_read));
   assign fetch_inst[0]=pc[2] ? odd_read:even_read;
   assign fetch_inst[1]=pc[2] ? even_read:odd_read;
   assign fetch_line=pc[CB-1:5];
-  assign line_hit=tag_valid[fetch_line] && tags[fetch_line]==pc[31:CB];
+  wire [LINES-1:0] line_matches;
+  for(genvar row=0;row<LINES;row=row+1) begin: instruction_tags
+    assign line_matches[row]=fetch_line==LB'(row) && tag_valid[row] && tags[row]==pc[31:CB];
+  end
+  assign line_hit=|line_matches;
+  for(genvar row=0;row<QUEUE_ENTRIES;row=row+1) begin: packet_words
+    assign queue_words[row*PACKET_BITS+:PACKET_BITS]=fifo[row];
+  end
   for(genvar p=0;p<2;p=p+1) begin: predict
+    wire [QW-1:0] read_index=head+QW'(p);
+    v2_read #(.ENTRIES(QUEUE_ENTRIES),.WORD_BITS(PACKET_BITS)) read_queue (
+      .index(read_index),.words(queue_words),.value(read_packet[p]));
+    wire [BTB_ENTRIES-1:0] target_hits;
+    wire [BTB_ENTRIES*30-1:0] target_words;
+    wire [29:0] target;
+    for(genvar row=0;row<BTB_ENTRIES;row=row+1) begin: target_row
+      assign target_hits[row]=fetch_pc[p][TW+1:2]==TW'(row) && btb_valid[row] &&
+                              btb_tag[row]==fetch_pc[p][31:TW+2];
+      assign target_words[row*30+:30]=btb_target[row];
+    end
+    v2_read #(.ENTRIES(BTB_ENTRIES),.WORD_BITS(30)) read_target (
+      .index(fetch_pc[p][TW+1:2]),.words(target_words),.value(target));
     assign word_ready[p]=line_hit && (valid_words[fetch_line][fetch_pc[p][4:2]] || failed_words[fetch_line][fetch_pc[p][4:2]]);
     assign word_error[p]=failed_words[fetch_line][fetch_pc[p][4:2]];
     assign fetch_history[p]=LOCAL_HISTORY_BITS==0 ? '0:local_history[fetch_pc[p][HI+1:2]];
@@ -97,8 +124,7 @@ module v2_frontend #(
           immediate[p]={{19{fetch_inst[p][31]}},fetch_inst[p][31],fetch_inst[p][7],fetch_inst[p][30:25],fetch_inst[p][11:8],1'b0};
           if(counter[p][1]) prediction[p]=fetch_pc[p]+immediate[p];
         end
-        7'h67: if(btb_valid[fetch_pc[p][TW+1:2]] && btb_tag[fetch_pc[p][TW+1:2]]==fetch_pc[p][31:TW+2])
-          prediction[p]={btb_target[fetch_pc[p][TW+1:2]],2'b0};
+        7'h67: if(|target_hits) prediction[p]={target,2'b0};
         default: ;
       endcase
     end
@@ -106,13 +132,15 @@ module v2_frontend #(
   always_comb begin
     packet_valid=0;packet_pc=0;packet_inst=0;packet_prediction=0;packet_fault=0;packet_inst_valid=0;packet_history=0;
     for(integer p=0;p<2;p=p+1) begin
-      packet_valid[p]=int'(count)>p && !stop && !redirect;
-      packet_pc[p*32+:32]=fifo[QW'(head+QW'(p))].pc;
-      packet_inst[p*32+:32]=fifo[QW'(head+QW'(p))].inst;
-      packet_prediction[p*32+:32]=fifo[QW'(head+QW'(p))].pred;
-      packet_fault[p*4+:4]=fifo[QW'(head+QW'(p))].fault;
-      packet_inst_valid[p]=fifo[QW'(head+QW'(p))].iv;
-      packet_history[p*HB+:HB]=fifo[QW'(head+QW'(p))].history;
+      // The consumer gates publication on stop/redirect. Keep those global
+      // controls off the payload preparation of free backend rows.
+      packet_valid[p]=int'(count)>p;
+      packet_pc[p*32+:32]=read_packet[p].pc;
+      packet_inst[p*32+:32]=read_packet[p].inst;
+      packet_prediction[p*32+:32]=read_packet[p].pred;
+      packet_fault[p*4+:4]=read_packet[p].fault;
+      packet_inst_valid[p]=read_packet[p].iv;
+      packet_history[p*HB+:HB]=read_packet[p].history;
     end
   end
   always_comb begin: fetch_next
@@ -183,9 +211,12 @@ module v2_frontend #(
     end
   end
   for(genvar row=0;row<QUEUE_ENTRIES;row=row+1) begin: queue_write
-    always_ff @(posedge clk) if(!rst && !redirect)
+    always_ff @(posedge clk)
       for(integer p=0;p<2;p=p+1)
-        if(int'(push)>p && QW'(tail+QW'(p))==QW'(row)) fifo[row]<=incoming[p];
+        // Only start-of-cycle free slots are prepared. A full queue can still
+        // push on a pop edge; such a reused slot requires the actual push.
+        if((int'(count)+p<QUEUE_ENTRIES || (!rst && !redirect && int'(push)>p)) &&
+           QW'(tail+QW'(p))==QW'(row)) fifo[row]<=incoming[p];
   end
   for(genvar row=0;row<LINES;row=row+1) begin: tag_write
     logic [7:0] valid_next,failed_next;
