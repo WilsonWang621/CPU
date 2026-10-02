@@ -104,7 +104,14 @@ class MemoryArbiter(nClients: Int = 2) extends Module {
 
 object Util {
   def sext(x: UInt, width: Int = 32): UInt = Cat(Fill(width - x.getWidth, x(x.getWidth - 1)), x)
-  def choose[T <: Data](index: UInt, values: Seq[T]): T = Mux1H(values.indices.map(i => (index === i.U) -> values(i)))
+  def select[T <: Data](selects: Seq[Bool], values: Seq[T]): T = {
+    val width = values.head.getWidth
+    val masked = selects.zip(values).map { case (s,v) =>
+      val word = Module(new LocalMask(width)); word.io.selected := s; word.io.word := v.asUInt; word.io.value
+    }
+    masked.reduce(_ | _).asTypeOf(values.head)
+  }
+  def choose[T <: Data](index: UInt, values: Seq[T]): T = select(values.indices.map(i => index === i.U),values)
   def add(a: UInt, b: UInt): UInt = a + b
   def ageTree(xs: Seq[(Bool,UInt,UInt)], youngest: Boolean): (Bool,UInt,UInt) = {
     if(xs.size == 1) xs.head else {
@@ -116,6 +123,9 @@ object Util {
   }
   /** Circular ROB order without distributing head through N subtractors. */
   def orderTree(xs: Seq[(Bool,UInt,UInt)], head: UInt, youngest: Boolean): (Bool,UInt,UInt) = {
+    orderTreeWrapped(xs,xs.map(_._2 < head),youngest)
+  }
+  def orderTreeWrapped(xs: Seq[(Bool,UInt,UInt)], wrapped: Seq[Bool], youngest: Boolean): (Bool,UInt,UInt) = {
     def tree(items: Seq[(Bool,UInt,UInt,Bool)]): (Bool,UInt,UInt,Bool) = {
       if(items.size == 1) items.head else {
         val (left,right) = items.splitAt(items.size/2); val a = tree(left); val b = tree(right)
@@ -125,7 +135,7 @@ object Util {
         (a._1 || b._1,Mux(pickA,a._2,b._2),Mux(pickA,a._3,b._3),Mux(pickA,a._4,b._4))
       }
     }
-    val r = tree(xs.map(x => (x._1,x._2,x._3,x._2 < head)))
+    val r = tree(xs.zip(wrapped).map { case (x,w) => (x._1,x._2,x._3,w) })
     (r._1,r._2,r._3)
   }
 }
