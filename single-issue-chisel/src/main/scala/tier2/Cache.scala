@@ -6,7 +6,7 @@ import chisel3.util._
   * One-cycle load hits, pipelined word refills, buffered write-through stores.
   * Store allocation preserves written sectors without fetching unused words.
   */
-class Cache(bytes: Int, ways: Int, lineBytes: Int, writeEntries: Int = 16) extends Module {
+class Cache(bytes: Int, ways: Int, lineBytes: Int, writeEntries: Int = 16, readonly: Boolean = false) extends Module {
   val io = IO(new Bundle { val cpu = Flipped(new MemPort); val mem = new MemPort; val fill = Valid(new MemReq); val loadReady = Output(Bool()) })
   val sets = bytes / ways / lineBytes
   val ob = log2Ceil(lineBytes); val sb = log2Ceil(sets); val wb = ob-2
@@ -14,17 +14,26 @@ class Cache(bytes: Int, ways: Int, lineBytes: Int, writeEntries: Int = 16) exten
   val valid = RegInit(VecInit(Seq.fill(ways)(VecInit(Seq.fill(sets)(false.B)))))
   val replace = RegInit(VecInit(Seq.fill(sets)(false.B)))
   val dataRam = Seq.fill(ways)(Module(new Sram(bytes/ways/4)))
-  val tagRam = Seq.fill(ways)(Module(new Sram(sets,tagWidth+lineWords,tagWidth+lineWords)))
+  val tagRamWidth = tagWidth + (if(readonly) 0 else lineWords)
+  val tagRam = Seq.fill(ways)(Module(new Sram(sets,tagRamWidth,tagRamWidth)))
   val idle :: check :: refill :: retry :: Nil = Enum(4)
-  val state = RegInit(idle); val requestWord = Module(new LocalWord((new MemReq).getWidth))
-  val request = requestWord.io.value.asTypeOf(new MemReq)
+  val state = RegInit(idle)
+  // Instruction requests carry only an address. Keeping unused store fields
+  // across this hierarchy would otherwise retain registers and write queues.
+  val requestWord = Module(new LocalWord(if(readonly) 32 else (new MemReq).getWidth))
+  val request = Wire(new MemReq)
+  if(readonly) { request := 0.U.asTypeOf(new MemReq); request.addr := requestWord.io.value }
+  else { request := requestWord.io.value.asTypeOf(new MemReq) }
   val victim = Reg(UInt(math.max(1,log2Ceil(ways)).W))
   val sent = RegInit(0.U((wb+1).W)); val received = RegInit(0.U((wb+1).W))
   val earlyReturned = RegInit(false.B)
-  val writeQueue = Module(new PreparedQueue(new MemReq,writeEntries)); val direction = Module(new Queue(Bool(),16))
+  val writeEnq = Wire(Decoupled(new MemReq)); val writeDeq = Wire(Decoupled(new MemReq))
+  if(readonly) { writeEnq.ready := true.B; writeDeq.valid := false.B; writeDeq.bits := 0.U.asTypeOf(new MemReq) }
+  else { val writes = Module(new PreparedQueue(new MemReq,writeEntries)); writes.io.enq <> writeEnq; writeDeq <> writes.io.deq }
+  val direction = Module(new Queue(Bool(),16))
   val index = request.addr(ob+sb-1,ob); val tag = request.addr(31,ob+sb); val word = request.addr(ob-1,2)
-  val tagHits = VecInit((0 until ways).map(w => valid(w)(index) && tagRam(w).io.rdata(tagWidth+lineWords-1,lineWords) === tag)).asUInt
-  val hits = VecInit((0 until ways).map(w => tagHits(w) && tagRam(w).io.rdata(lineWords-1,0)(word))).asUInt
+  val tagHits = VecInit((0 until ways).map(w => valid(w)(index) && (if(readonly) tagRam(w).io.rdata else tagRam(w).io.rdata(tagRamWidth-1,lineWords)) === tag)).asUInt
+  val hits = if(readonly) tagHits else VecInit((0 until ways).map(w => tagHits(w) && tagRam(w).io.rdata(lineWords-1,0)(word))).asUInt
   val hit = hits.orR
   val earlyResponse = state === refill && !earlyReturned && direction.io.deq.valid && !direction.io.deq.bits && received === 0.U
   io.cpu.rsp.valid := (state === check && !request.write && hit) || (earlyResponse && io.mem.rsp.valid)
@@ -32,17 +41,17 @@ class Cache(bytes: Int, ways: Int, lineBytes: Int, writeEntries: Int = 16) exten
   io.cpu.rsp.bits.error := false.B
   when(earlyResponse) { io.cpu.rsp.bits.data := io.mem.rsp.bits.data }
   io.loadReady := state === idle || (state === check && io.cpu.rsp.fire)
-  requestWord.io.prepare := io.loadReady; requestWord.io.data := io.cpu.req.bits.asUInt
-  io.cpu.req.ready := io.loadReady && (!io.cpu.req.bits.write || writeQueue.io.enq.ready)
-  writeQueue.io.enq.valid := io.cpu.req.fire && io.cpu.req.bits.write; writeQueue.io.enq.bits := io.cpu.req.bits
+  requestWord.io.prepare := io.loadReady; requestWord.io.data := (if(readonly) io.cpu.req.bits.addr else io.cpu.req.bits.asUInt)
+  io.cpu.req.ready := io.loadReady && (if(readonly) true.B else !io.cpu.req.bits.write || writeEnq.ready)
+  writeEnq.valid := io.cpu.req.fire && io.cpu.req.bits.write; writeEnq.bits := io.cpu.req.bits
   val fillReq = state === refill && sent < lineWords.U
-  io.mem.req.valid := direction.io.enq.ready && (writeQueue.io.deq.valid || fillReq)
-  io.mem.req.bits := writeQueue.io.deq.bits
-  when(!writeQueue.io.deq.valid) {
+  io.mem.req.valid := direction.io.enq.ready && (writeDeq.valid || fillReq)
+  io.mem.req.bits := writeDeq.bits
+  when(!writeDeq.valid) {
     io.mem.req.bits.addr := Cat(request.addr(31,ob),(word+sent)(wb-1,0),0.U(2.W))
     io.mem.req.bits.data := 0.U; io.mem.req.bits.mask := 0.U; io.mem.req.bits.write := false.B
   }
-  writeQueue.io.deq.ready := io.mem.req.ready && direction.io.enq.ready
+  writeDeq.ready := io.mem.req.ready && direction.io.enq.ready
   direction.io.enq.valid := io.mem.req.fire; direction.io.enq.bits := io.mem.req.bits.write
   io.mem.rsp.ready := direction.io.deq.valid && (!earlyResponse || io.cpu.rsp.ready); direction.io.deq.ready := io.mem.rsp.fire
   val filling = io.mem.rsp.fire && !direction.io.deq.bits
@@ -68,8 +77,12 @@ class Cache(bytes: Int, ways: Int, lineBytes: Int, writeEntries: Int = 16) exten
     when(filling) { d.addr := Cat(index,(word+received)(wb-1,0)); d.wdata := io.mem.rsp.bits.data; d.wmask := 15.U }
     t.en := reading || (lastFill && victim === w.U) || (storing && canStore && storeWay === w.U)
     t.we := (lastFill && victim === w.U) || (storing && canStore && storeWay === w.U)
-    val sectors = Mux(tagHits(w),t.rdata(lineWords-1,0),0.U) | Mux(request.mask.andR,UIntToOH(word,lineWords),0.U)
-    t.addr := Mux(t.we,index,readAddr(ob+sb-1,ob)); t.wdata := Cat(tag,Mux(lastFill,Fill(lineWords,1.U(1.W)),sectors)); t.wmask := 1.U
+    t.addr := Mux(t.we,index,readAddr(ob+sb-1,ob)); t.wmask := 1.U
+    if(readonly) { t.wdata := tag }
+    else {
+      val sectors = Mux(tagHits(w),t.rdata(lineWords-1,0),0.U) | Mux(request.mask.andR,UIntToOH(word,lineWords),0.U)
+      t.wdata := Cat(tag,Mux(lastFill,Fill(lineWords,1.U(1.W)),sectors))
+    }
     for(s <- 0 until sets) {
       when(lastFill && victim === w.U && index === s.U) { valid(w)(s) := true.B }
       when(storing && canStore && storeWay === w.U && index === s.U) {
@@ -172,7 +185,7 @@ class Frontend(p: Config) extends Module {
     val redirect = Flipped(Valid(UInt(32.W))); val train = Flipped(Valid(new Training))
     val commit = Flipped(Valid(new Training))
   })
-  val cache = Module(new Cache(p.icBytes,1,p.lineBytes)); io.mem <> cache.io.mem
+  val cache = Module(new Cache(p.icBytes,1,p.lineBytes,readonly=true)); io.mem <> cache.io.mem
   val pc = RegInit(0.U(32.W)); val epoch = RegInit(0.U(4.W))
   val entries = p.btbEntries; val idxBits = log2Ceil(entries)
   val bvalid = RegInit(VecInit(Seq.fill(entries)(false.B)))
