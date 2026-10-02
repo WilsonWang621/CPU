@@ -1,0 +1,62 @@
+--- a/verilog/area_v2/cpu_top.sv
++++ b/verilog/area_v2/cpu_top.sv
+@@ -78,6 +78,12 @@
+   } load_t;
+   typedef enum logic [1:0] {RUN,DRAIN,DONE,FAULT} state_t;
+   state_t state;
++  // Store the run permission at the same edge as the terminal transition.
++  (* keep *) logic stopped;
++  always_ff @(posedge clk) begin
++    if(rst) stopped<=0;
++    else if(exit_head || fault_head || cache_store_error) stopped<=1;
++  end
+   rob_t rob [ROB_ENTRIES];
+   logic [31:0] values [ROB_ENTRIES],architectural [32];
+   wire [ROB_ENTRIES*32-1:0] result_words;
+@@ -214,7 +220,7 @@
+   assign exit_head=state==RUN && rob_count!=0 && retirement_meta[0].done && retirement_meta[0].exiting && retirement_meta[0].fault==0;
+   assign fault_head=state==RUN && rob_count!=0 && retirement_meta[0].done && retirement_meta[0].fault!=0;
+   // The terminal state publishes the squash after retirement stops.
+-  assign flush_all=state!=RUN;
++  assign flush_all=stopped;
+   assign stop_frontend=flush_all;
+   assign exit_send=state==DRAIN && store_count==0 && cache_idle && frontend_idle && controller_idle;
+   assign exit_accept=exit_send && mem_req_ready;
+@@ -315,8 +321,35 @@
+       assign select_owner[bank][q*(RW+1)+:(RW+1)]={queue[bank][q].generation,queue[bank][q].rid};
+       assign payloads[q*ISSUE_BITS+:ISSUE_BITS]=queue[bank][q];
+     end
+-    v2_select #(.ENTRIES(IQ_ENTRIES),.SLOT_BITS(RW+1),.EXTENDED_ORDER(1)) choose (
+-      .ready(select_ready[bank]),.owner(select_owner[bank]),.rob_head({(RW+1){1'b0}}),.valid(selected_valid[bank]),.index(selected[bank]));
++    if(bank==2) begin: prepared_selection
++      wire [IQ_ENTRIES-1:0] next_candidates;
++      wire [IQ_ENTRIES*(RW+1)-1:0] next_owners;
++      wire next_valid;
++      wire [QW-1:0] next_index;
++      logic grant_valid;
++      logic [QW-1:0] grant_index;
++      for(genvar q=0;q<IQ_ENTRIES;q=q+1) begin: next_row
++        wire lane0=dispatch_valid[0] && dispatch_bank[0]==2 && dispatch_index[0]==QW'(q);
++        wire lane1=dispatch_valid[1] && dispatch_bank[1]==2 && dispatch_index[1]==QW'(q);
++        wire removed=(issue_fire[2] && selected[2]==QW'(q)) || younger(queue[2][q].rid) || flush_all;
++        assign next_candidates[q]=(queue[2][q].valid && !removed) || lane0 || lane1;
++        assign next_owners[q*(RW+1)+:(RW+1)]=lane1 ? dispatch_order[(RW+1)+:(RW+1)]:
++          lane0 ? dispatch_order[0+:(RW+1)]:select_owner[2][q*(RW+1)+:(RW+1)];
++      end
++      // Select exactly the IQ state that will be published at this edge.
++      // Memory issue still waits for both operands of the oldest row.
++      v2_select #(.ENTRIES(IQ_ENTRIES),.SLOT_BITS(RW+1),.EXTENDED_ORDER(1)) choose_next (
++        .ready(next_candidates),.owner(next_owners),.rob_head({(RW+1){1'b0}}),.valid(next_valid),.index(next_index));
++      always_ff @(posedge clk) begin
++        if(rst) begin grant_valid<=0;grant_index<=0;end
++        else begin grant_valid<=next_valid;grant_index<=next_index;end
++      end
++      assign selected_valid[bank]=grant_valid;
++      assign selected[bank]=grant_index;
++    end else begin: current_selection
++      v2_select #(.ENTRIES(IQ_ENTRIES),.SLOT_BITS(RW+1),.EXTENDED_ORDER(1)) choose (
++        .ready(select_ready[bank]),.owner(select_owner[bank]),.rob_head({(RW+1){1'b0}}),.valid(selected_valid[bank]),.index(selected[bank]));
++    end
+     for(genvar first=0;first<ISSUE_BITS;first=first+32) begin: read_payload
+       wire [IQ_ENTRIES*(ISSUE_BITS-first<32 ? ISSUE_BITS-first:32)-1:0] slice_words;
+       for(genvar row=0;row<IQ_ENTRIES;row=row+1) begin: slice_row

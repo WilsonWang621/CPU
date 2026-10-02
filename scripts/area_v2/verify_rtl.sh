@@ -31,6 +31,8 @@ iverilog -g2012 -s v2_retire_read_tb -o "$out/retire_read" tests/rtl/v2_retire_r
 vvp "$out/retire_read"
 iverilog -g2012 -s v2_retire_boundary_tb -o "$out/retire_boundary" tests/rtl/v2_retire_boundary_tb.sv verilog/area_v2_core.v
 vvp "$out/retire_boundary"
+iverilog -g2012 -s v2_retire_index_tb -o "$out/retire_index" tests/rtl/v2_retire_index_tb.sv verilog/area_v2_core.v
+vvp "$out/retire_index"
 iverilog -g2012 -s v2_increment_tb -o "$out/increment" tests/rtl/v2_increment_tb.sv verilog/area_v2_core.v
 vvp "$out/increment"
 iverilog -g2012 -s v2_operand_tb -o "$out/operand" tests/rtl/v2_operand_tb.sv verilog/area_v2_core.v
