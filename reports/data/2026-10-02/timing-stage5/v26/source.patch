@@ -1,0 +1,79 @@
+diff --git a/tests/rtl/v2_branch_recovery_tb.sv b/tests/rtl/v2_branch_recovery_tb.sv
+index 54c4497..829259c 100644
+--- a/tests/rtl/v2_branch_recovery_tb.sv
++++ b/tests/rtl/v2_branch_recovery_tb.sv
+@@ -63,6 +63,8 @@ module v2_branch_recovery_tb;
+       dut.queue[4][dut.ISSUE_T_GENERATION_LSB]=store_slot<branch_slot;
+       dut.queue[4][dut.ISSUE_T_OP_LSB+:6]=dut.OP_STORE;
+       dut.queue[4][dut.ISSUE_T_A_LSB+:32]=32'h100;
++      // The injected ready row includes its already prepared address.
++      dut.prepared_address[0]=32'h100;
+       dut.queue[4][dut.ISSUE_T_B_LSB+:32]=32'hdeadbeef;
+       dut.queue[4][dut.ISSUE_T_SIZE_LSB+:2]=2;
+       #1;
+diff --git a/tests/rtl/v2_terminal_squash_tb.sv b/tests/rtl/v2_terminal_squash_tb.sv
+index d10fc48..1dc7a81 100644
+--- a/tests/rtl/v2_terminal_squash_tb.sv
++++ b/tests/rtl/v2_terminal_squash_tb.sv
+@@ -37,6 +37,7 @@ module v2_terminal_squash_tb;
+       dut.queue[4][dut.ISSUE_T_RID_LSB+:3]=1;
+       dut.queue[4][dut.ISSUE_T_OP_LSB+:6]=dut.OP_STORE;
+       dut.queue[4][dut.ISSUE_T_A_LSB+:32]=32'h100;
++      dut.prepared_address[0]=32'h100;
+       dut.queue[4][dut.ISSUE_T_B_LSB+:32]=32'hdeadbeef;
+       dut.queue[4][dut.ISSUE_T_SIZE_LSB+:2]=2;
+       #1;
+diff --git a/verilog/area_v2/cpu_top.sv b/verilog/area_v2/cpu_top.sv
+index 65cbfd7..ca00108 100644
+--- a/verilog/area_v2/cpu_top.sv
++++ b/verilog/area_v2/cpu_top.sv
+@@ -181,6 +181,8 @@ module cpu_top #(
+   logic [255:0] mdu_kill;
+   logic memory_allowed,memory_complete,store_allocate,load_allocate;
+   logic [31:0] memory_address,memory_data,load_word,load_result;
++  logic [31:0] prepared_address [IQ_ENTRIES];
++  wire [IQ_ENTRIES*32-1:0] prepared_address_words;
+   logic [3:0] memory_mask,memory_fault;
+   logic memory_exit,forward_match,forward_full;
+   logic [ST-1:0] forward_slot;
+@@ -386,7 +388,11 @@ module cpu_top #(
+   assign mdu_valid=select_valid[0] && is_mdu(executing[0].op) && !flush_all &&
+                    !mdu_result_valid && !younger(executing[0].rid);
+   assign mdu_result_ready=!flush_all;
+-  assign memory_address=executing[2].a+executing[2].imm;
++  for(genvar q=0;q<IQ_ENTRIES;q=q+1) begin: memory_address_words
++    assign prepared_address_words[q*32+:32]=prepared_address[q];
++  end
++  v2_iq_read #(.ENTRIES(IQ_ENTRIES),.WORD_BITS(32)) read_memory_address (
++    .index(selected[2]),.words(prepared_address_words),.value(memory_address));
+   assign memory_data=executing[2].b<<(8*memory_address[1:0]);
+   assign memory_mask=(executing[2].size==0 ? 4'b0001:executing[2].size==1 ? 4'b0011:4'b1111)<<memory_address[1:0];
+   assign memory_exit=executing[2].op==OP_STORE && memory_address==32'h80000000 && executing[2].size==2;
+@@ -654,6 +660,16 @@ module cpu_top #(
+         queue[bank][q].ready_a<=next_ready_a;queue[bank][q].a<=next_value_a;
+         queue[bank][q].ready_b<=next_ready_b;queue[bank][q].b<=next_value_b;
+       end
++      if(bank==2) begin: address_prepare
++        // Preparation and wakeup publish the base and effective address at
++        // the same edge. A ready live row keeps both until it leaves the IQ.
++        wire [31:0] address_immediate=queue[bank][q].valid ? queue[bank][q].imm:
++          (prepare_lane[1] ? dispatch_payload[1].imm:dispatch_payload[0].imm);
++        wire address_update=(!queue[bank][q].valid && |prepare_lane) ||
++                            (queue[bank][q].valid && !queue[bank][q].ready_a);
++        always_ff @(posedge clk)
++          if(address_update) prepared_address[q]<=next_value_a+address_immediate;
++      end
+       always_ff @(posedge clk) begin
+         if(rst) queue[bank][q].valid<=0;
+         else begin
+@@ -768,6 +784,10 @@ module cpu_top #(
+         if(mdu_valid && mdu_ready && executing[0].rid==rid_t'(r)) monitored_mdu[r]<=1;
+       end
+       if(state==RUN) begin
++        for(integer q=0;q<IQ_ENTRIES;q=q+1)
++          if(queue[2][q].valid && queue[2][q].ready_a)
++            assert(prepared_address[q]==queue[2][q].a+queue[2][q].imm)
++              else $fatal(1,"prepared memory address mismatch slot %0d",q);
+         assert(live_count==int'(rob_count)) else $fatal(1,"ROB live/count mismatch");
+         for(integer a=1;a<32;a=a+1) begin
+           expected_pending=0;expected_tag=0;
