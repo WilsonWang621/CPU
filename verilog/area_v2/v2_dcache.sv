@@ -64,6 +64,12 @@ module v2_dcache #(
   logic [TB-1:0] tags [LINES];
   logic [LINES-1:0] tag_valid;
   logic [WORDS-1:0] word_valid [LINES];
+  wire [WORDS-1:0] word_valid_next [LINES];
+  waiter_t waiter_next [LOAD_SLOTS];
+  logic return_valid_next,return_error_next;
+  logic return_pending;
+  logic [LT-1:0] return_tag_next;
+  logic [LB+WW-1:0] return_address_next,return_address;
   logic [SETS-1:0] replacement;
   logic [LINES-1:0] locked;
   logic [SB-1:0] load_set,store_set;
@@ -114,15 +120,26 @@ module v2_dcache #(
   assign store_done_tag=owners[head].tag;
   assign store_error=store_done && mem_rsp_error;
   assign out_space=!out_valid || request_fire;
+  // Select using the state that the cache publishes at the next edge.
+  // The data remains combinational, but its late priority selection no
+  // longer precedes the wide data read. This preserves the return cycle.
   always_comb begin: returning_load
-    result_valid=0;result_tag=0;result_error=0;
+    return_valid_next=0;return_tag_next=0;return_error_next=0;return_address_next=0;
     for(integer w=0;w<LOAD_SLOTS;w=w+1)
-      if(!result_valid && waiters[w].valid &&
-          (waiters[w].error || word_valid[waiters[w].physical][waiters[w].word_index])) begin
-        result_valid=1;result_tag=LT'(w);result_error=waiters[w].error;
+      if(!return_valid_next && waiter_next[w].valid &&
+          (waiter_next[w].error || word_valid_next[waiter_next[w].physical][waiter_next[w].word_index])) begin
+        return_valid_next=1;return_tag_next=LT'(w);return_error_next=waiter_next[w].error;
+        return_address_next={waiter_next[w].physical,waiter_next[w].word_index};
       end
-    if(rst) result_valid=0;
   end
+  always_ff @(posedge clk) begin
+    if(rst) begin return_pending<=0;result_tag<=0;result_error<=0;return_address<=0;end
+    else begin
+      return_pending<=return_valid_next;result_tag<=return_tag_next;result_error<=return_error_next;
+      return_address<=return_address_next;
+    end
+  end
+  assign result_valid=!rst && return_pending;
   always_comb begin
     locked=0;
     free_valid=0;free_slot=0;merge_valid=0;merge_slot=0;
@@ -166,7 +183,7 @@ module v2_dcache #(
     data_write_address=fill_fire ? {response_line,response_word}:{store_line,store_address[OFFSET-1:2]};
     data_write_value=fill_fire ? mem_rsp_data:store_data;
     data_write_mask=fill_fire ? 4'b1111:store_mask;
-    data_read_address=result_valid ? {waiters[result_tag].physical,waiters[result_tag].word_index}:
+    data_read_address=result_valid ? return_address:
                                      {load_line,load_address[OFFSET-1:2]};
   end
   always_comb begin: quiescent_state
@@ -177,11 +194,15 @@ module v2_dcache #(
   // Decode each word once, rather than letting the binary read mux make
   // every address bit drive thousands of bit-level gates.
   wire [(CACHE_BYTES/4)*32-1:0] data_words;
+  wire [WRITE_BANKS*32-1:0] bank_words;
   wire [31:0] read_word;
   // Capture into the selected bank first. Each data register now drives only
   // BANK_WORDS storage rows. Forward this pending byte write on every read,
   // preserving the original visibility at the capture edge.
   for(genvar bank=0;bank<WRITE_BANKS;bank=bank+1) begin: write_stages
+    v2_cache_read #(.ENTRIES(BANK_WORDS)) read_bank (
+      .index(data_read_address[BANK_WORD_BITS-1:0]),
+      .words(data_words[bank*BANK_WORDS*32+:BANK_WORDS*32]),.value(bank_words[bank*32+:32]));
     wire select_bank=data_write_address[LB+WW-1:BANK_WORD_BITS]==BANK_BITS'(bank);
     wire accept=data_write_valid && select_bank;
     always_ff @(posedge clk) begin
@@ -207,8 +228,8 @@ module v2_dcache #(
           data[row][byte_id*8+:8]<=pending_data[row/BANK_WORDS][byte_id*8+:8];
     end
   end
-  v2_read #(.ENTRIES(CACHE_BYTES/4)) read_data (
-    .index(data_read_address),.words(data_words),.value(read_word));
+  v2_cache_read #(.ENTRIES(WRITE_BANKS)) read_data (
+    .index(data_read_address[LB+WW-1:BANK_WORD_BITS]),.words(bank_words),.value(read_word));
   v2_read #(.ENTRIES(WRITE_BANKS),.WORD_BITS(PENDING_BITS)) read_write_stage (
     .index(data_read_address[LB+WW-1:BANK_WORD_BITS]),.words(pending_words),.value(read_pending));
   for(genvar byte_id=0;byte_id<4;byte_id=byte_id+1) begin: pending_forward
@@ -259,22 +280,25 @@ module v2_dcache #(
     end
   end
   for(genvar w=0;w<LOAD_SLOTS;w=w+1) begin: waiter_rows
-    always_ff @(posedge clk) begin
-      if(rst) waiters[w]<='0;
-      else begin
-        if(result_valid && result_ready && result_tag==LT'(w)) waiters[w].valid<=0;
+    always_comb begin
+        waiter_next[w]=waiters[w];
+        if(result_valid && result_ready && result_tag==LT'(w)) waiter_next[w].valid=0;
         if(fill_fire && mem_rsp_error && waiters[w].valid && waiters[w].physical==response_line &&
-            waiters[w].word_index==response_word) waiters[w].error<=1;
+            waiters[w].word_index==response_word) waiter_next[w].error=1;
         if(load_accept && !load_hit && load_tag==LT'(w)) begin
-          waiters[w].valid<=1;waiters[w].physical<=selected_line;waiters[w].word_index<=load_address[OFFSET-1:2];
-          waiters[w].error<=(merge_valid && misses[merge_slot].failed[load_address[OFFSET-1:2]]) ||
+          waiter_next[w].valid=1;waiter_next[w].physical=selected_line;waiter_next[w].word_index=load_address[OFFSET-1:2];
+          waiter_next[w].error=(merge_valid && misses[merge_slot].failed[load_address[OFFSET-1:2]]) ||
             (fill_fire && mem_rsp_error && response_line==selected_line && response_word==load_address[OFFSET-1:2]);
         end
-      end
+    end
+    always_ff @(posedge clk) begin
+      if(rst) waiters[w]<='0;
+      else waiters[w]<=waiter_next[w];
     end
   end
   for(genvar line=0;line<LINES;line=line+1) begin: metadata
     logic [WORDS-1:0] valid_next;
+    assign word_valid_next[line]=valid_next;
     always_comb begin
       valid_next=word_valid[line];
       if(allocate && !load_tag_hit && selected_line==LB'(line)) valid_next=0;

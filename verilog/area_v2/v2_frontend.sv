@@ -37,6 +37,13 @@ module v2_frontend #(
   logic [QW:0] count;
   logic [1:0] push;
   logic [31:0] pc,next_pc;
+  wire [29:0] next_word;
+  wire [28:0] next_pair;
+  wire [31:0] sequential_pc [2];
+  v2_increment #(.BITS(30)) step_word(.value(pc[31:2]),.result(next_word));
+  v2_increment #(.BITS(29)) step_pair(.value(pc[31:3]),.result(next_pair));
+  assign sequential_pc[0]={next_word,pc[1:0]};
+  assign sequential_pc[1]={next_pair,pc[2:0]};
   logic blocked,next_blocked;
   (* ram_style="registers" *) logic [31:0] even_data [CACHE_BYTES/8],odd_data [CACHE_BYTES/8];
   logic [31:0] even_target [CACHE_BYTES/8],odd_target [CACHE_BYTES/8];
@@ -73,7 +80,7 @@ module v2_frontend #(
   assign train_btb=train_pc[TW+1:2];
   assign train_counter=bht_valid[train_bht] ? bht[train_bht]:2'd1;
   assign fetch_pc[0]=pc;
-  assign fetch_pc[1]=pc+4;
+  assign fetch_pc[1]=sequential_pc[0];
   assign even_index=pc[2] ? fetch_pc[1][CB-1:3]:pc[CB-1:3];
   assign odd_index=pc[CB-1:3];
   for(genvar row=0;row<CACHE_BYTES/8;row=row+1) begin: instruction_words
@@ -116,7 +123,7 @@ module v2_frontend #(
       (fetch_pc[p][BW+1:2]<<LOCAL_HISTORY_BITS) | BW'(fetch_history[p]);
     assign counter[p]=bht_valid[fetch_bht[p]] ? bht[fetch_bht[p]]:2'd1;
     always_comb begin
-      prediction[p]=fetch_pc[p]+4;
+      prediction[p]=sequential_pc[p];
       case(fetch_inst[p][6:0])
         7'h6f: prediction[p]=fetch_target[p];
         7'h63: if(counter[p][1]) prediction[p]=fetch_target[p];
@@ -154,7 +161,7 @@ module v2_frontend #(
         push=1;next_pc=prediction[0];
         if(word_error[0]) begin
           incoming[0].fault=FAULT_FETCH_BUS;incoming[0].iv=0;incoming[0].inst=0;next_blocked=1;
-        end else if(prediction[0]==pc+4 && pc[4:2]!=7 && word_ready[1] &&
+        end else if(prediction[0]==sequential_pc[0] && pc[4:2]!=7 && word_ready[1] &&
                     int'(count)-int'(pop_count)<QUEUE_ENTRIES-1) begin
           push=2;next_pc=prediction[1];
           if(word_error[1]) begin

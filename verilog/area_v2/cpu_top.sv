@@ -154,6 +154,14 @@ module cpu_top #(
   logic [LT-1:0] free_load;
   logic [2:0] wb_valid;
   rid_t wb_rid [3];
+  wire [2:0] wb_good;
+  wire [3*RW-1:0] wb_slots;
+  wire [95:0] wb_values;
+  for(genvar w=0;w<3;w=w+1) begin: writeback_ports
+    assign wb_good[w]=wb_valid[w] && wb_fault[w]==0 && rob[wb_rid[w]].rd!=0;
+    assign wb_slots[w*RW+:RW]=wb_rid[w];
+    assign wb_values[w*32+:32]=wb_value[w];
+  end
   logic [31:0] wb_value [3],wb_address[3];
   logic [3:0] wb_fault [3];
   logic [31:0] alu_result[2],branch_value,branch_next;
@@ -624,6 +632,28 @@ module cpu_top #(
   end
   for(genvar bank=0;bank<3;bank=bank+1) begin: issue_banks
     for(genvar q=0;q<IQ_ENTRIES;q=q+1) begin: rows
+      wire [1:0] prepare_lane;
+      wire next_ready_a,next_ready_b;
+      wire [31:0] next_value_a,next_value_b;
+      for(genvar lane=0;lane<2;lane=lane+1) begin: preparation
+        assign prepare_lane[lane]=dispatch_prepare[lane] && dispatch_bank[lane]==2'(bank) && dispatch_index[lane]==QW'(q);
+      end
+      v2_operand #(.SLOT_BITS(RW)) operand_a (
+        .live(queue[bank][q].valid),.prepare(|prepare_lane),
+        .old_ready(queue[bank][q].ready_a),.old_value(queue[bank][q].a),.source(queue[bank][q].source_a),
+        .initial_ready(prepare_lane[1] ? dispatch_payload[1].ready_a:dispatch_payload[0].ready_a),
+        .initial_value(prepare_lane[1] ? dispatch_payload[1].a:dispatch_payload[0].a),
+        .wb_good,.wb_slots,.wb_values,.next_ready(next_ready_a),.next_value(next_value_a));
+      v2_operand #(.SLOT_BITS(RW)) operand_b (
+        .live(queue[bank][q].valid),.prepare(|prepare_lane),
+        .old_ready(queue[bank][q].ready_b),.old_value(queue[bank][q].b),.source(queue[bank][q].source_b),
+        .initial_ready(prepare_lane[1] ? dispatch_payload[1].ready_b:dispatch_payload[0].ready_b),
+        .initial_value(prepare_lane[1] ? dispatch_payload[1].b:dispatch_payload[0].b),
+        .wb_good,.wb_slots,.wb_values,.next_ready(next_ready_b),.next_value(next_value_b));
+      always_ff @(posedge clk) begin
+        queue[bank][q].ready_a<=next_ready_a;queue[bank][q].a<=next_value_a;
+        queue[bank][q].ready_b<=next_ready_b;queue[bank][q].b<=next_value_b;
+      end
       always_ff @(posedge clk) begin
         if(rst) queue[bank][q].valid<=0;
         else begin
@@ -636,28 +666,17 @@ module cpu_top #(
       always_ff @(posedge clk) begin
         // Free rows may retain arbitrary speculative data. Preparation cannot
         // overwrite a live row, and each bank accepts at most one lane.
-        if(queue[bank][q].valid) begin
-          for(integer w=0;w<3;w=w+1)
-            if(wb_valid[w] && wb_fault[w]==0 && rob[wb_rid[w]].rd!=0) begin
-              if(!queue[bank][q].ready_a && queue[bank][q].source_a==wb_rid[w]) begin
-                queue[bank][q].ready_a<=1;queue[bank][q].a<=wb_value[w];
-              end
-              if(!queue[bank][q].ready_b && queue[bank][q].source_b==wb_rid[w]) begin
-                queue[bank][q].ready_b<=1;queue[bank][q].b<=wb_value[w];
-              end
-            end
-        end else begin
+        if(!queue[bank][q].valid) begin
           for(integer lane=0;lane<2;lane=lane+1)
             if(dispatch_prepare[lane] && dispatch_bank[lane]==2'(bank) && dispatch_index[lane]==QW'(q)) begin
               queue[bank][q].rid<=dispatch_payload[lane].rid;queue[bank][q].op<=dispatch_payload[lane].op;
               queue[bank][q].generation<=dispatch_payload[lane].generation;
-              queue[bank][q].ready_a<=dispatch_payload[lane].ready_a;queue[bank][q].ready_b<=dispatch_payload[lane].ready_b;
               queue[bank][q].source_a<=dispatch_payload[lane].source_a;queue[bank][q].source_b<=dispatch_payload[lane].source_b;
               queue[bank][q].pc<=dispatch_payload[lane].pc;queue[bank][q].prediction<=dispatch_payload[lane].prediction;
               queue[bank][q].history<=dispatch_payload[lane].history;queue[bank][q].checkpoint<=dispatch_payload[lane].checkpoint;
               queue[bank][q].size<=dispatch_payload[lane].size;queue[bank][q].sign_extend<=dispatch_payload[lane].sign_extend;
               queue[bank][q].use_imm<=dispatch_payload[lane].use_imm;
-              queue[bank][q].a<=dispatch_payload[lane].a;queue[bank][q].b<=dispatch_payload[lane].b;queue[bank][q].imm<=dispatch_payload[lane].imm;
+              queue[bank][q].imm<=dispatch_payload[lane].imm;
             end
         end
       end
