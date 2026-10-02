@@ -112,6 +112,7 @@ module cpu_top #(
   logic [2*RW-1:0] rename_slot,commit_slot;
   logic [19:0] source_register;
   logic [3:0] source_pending;
+  logic source_bundle_bypass;
   logic [4*RW-1:0] source_slot;
   logic save_checkpoint,save_after_lane;
   logic [1:0] dispatch_valid;
@@ -224,9 +225,12 @@ module cpu_top #(
     assign rename_slot[d*RW+:RW]=dispatch_rid[d];
     assign commit_slot[d*RW+:RW]=commit_rid[d];
   end
+  assign source_bundle_bypass=decoded[0].writes_rd && !decoded[0].illegal && fetch_fault[3:0]==0;
   v2_rename #(.SLOT_BITS(RW),.CHECKPOINTS(CHECKPOINTS)) rename_maps (
     .clk,.rst,.dispatch_valid(rename_valid),.dispatch_rd(rename_rd),.dispatch_slot(rename_slot),
-    .source_register,.source_pending,.source_slot,.commit_valid,.commit_rd,.commit_slot,
+    .source_register,.source_pending,.source_slot,
+    .source_bypass_valid(source_bundle_bypass),.source_bypass_rd(decoded[0].rd),
+    .commit_valid,.commit_rd,.commit_slot,
     .save_valid(save_checkpoint),.save_after_lane,.save_index(free_checkpoint),
     .restore_valid(redirect),.restore_index(redirect_checkpoint));
   for(genvar p=0;p<2;p=p+1) begin: integer_units
@@ -384,6 +388,9 @@ module cpu_top #(
     save_checkpoint=0;save_after_lane=0;
     for(integer lane=0;lane<2;lane=lane+1) begin
       dispatch_rid[lane]=tail+rid_t'(lane);dispatch_bank[lane]=0;dispatch_index[lane]=0;bank_choice=0;
+      // Destination bits are decode data, not an acceptance indication.
+      // Keeping them independent of redirect avoids a control-to-data path.
+      rename_rd[lane*5+:5]=decoded[lane].writes_rd ? decoded[lane].rd:5'd0;
       if(lane<RENAME_WIDTH && !blocked_dispatch && fetch_valid[lane] && int'(rob_count)+lane<ROB_ENTRIES) begin
         if(decoded[lane].op==OP_LOAD || decoded[lane].op==OP_STORE) bank_choice=2;
         else if(is_branch(decoded[lane].op) || is_mdu(decoded[lane].op) || INTEGER_PORTS==1) bank_choice=0;
@@ -397,7 +404,7 @@ module cpu_top #(
                     (!is_branch(decoded[lane].op) || (checkpoint_available && !save_checkpoint))) begin
           dispatch_valid[lane]=1;dispatch_count=dispatch_count+1'b1;
           dispatch_bank[lane]=2'(bank_choice);dispatch_index[lane]=free_queue[bank_choice];used_bank[bank_choice]=1;
-          rename_valid[lane]=decoded[lane].writes_rd;rename_rd[lane*5+:5]=decoded[lane].writes_rd ? decoded[lane].rd:5'd0;
+          rename_valid[lane]=decoded[lane].writes_rd;
           if(is_branch(decoded[lane].op)) begin save_checkpoint=1;save_after_lane=1'(lane);end
         end else blocked_dispatch=1;
       end else blocked_dispatch=1;
@@ -429,7 +436,7 @@ module cpu_top #(
           if(pending && wb_valid[w] && wb_rid[w]==source_id && wb_fault[w]==0) begin ready_value=1;source_value=wb_value[w];end
         // A fresh intra-bundle writer has no value even if its old physical
         // row still contains a completed result from an earlier wrap.
-        if(lane==1 && rename_valid[0] && source_id==dispatch_rid[0] && pending) ready_value=0;
+        if(lane==1 && source_bundle_bypass && decoded[0].rd==register_id && pending) ready_value=0;
         if(source_number==0) begin
           dispatch_payload[lane].a=source_value;dispatch_payload[lane].ready_a=ready_value;
           dispatch_payload[lane].source_a=source_id;

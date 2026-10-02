@@ -1,0 +1,512 @@
+[Trace - 06:38:51 PM] Received request 'build/initialize - (1)'
+Params: {
+  "displayName": "Metals",
+  "version": "1.6.9",
+  "bspVersion": "2.2.0-M2",
+  "rootUri": "file:///home/tangz/CPU/",
+  "capabilities": {
+    "languageIds": [
+      "scala",
+      "java"
+    ],
+    "jvmCompileClasspathReceiver": true
+  },
+  "dataKind": "bloop-data-kind",
+  "data": {
+    "javaSemanticdbVersion": "0.12.3",
+    "semanticdbVersion": "4.17.4",
+    "supportedScalaVersions": [
+      "2.13.18",
+      "2.12.21",
+      "2.12.20",
+      "2.12.19",
+      "2.12.18",
+      "2.13.15",
+      "2.13.16",
+      "2.13.17"
+    ],
+    "enableBestEffortMode": false
+  }
+}
+
+
+[Trace - 06:38:51 PM] Sending response 'build/initialize - (1)'. Processing request took 44ms
+Result: {
+  "displayName": "mill-bsp",
+  "version": "1.1.2",
+  "bspVersion": "2.2.0-M2",
+  "capabilities": {
+    "compileProvider": {
+      "languageIds": [
+        "java",
+        "scala",
+        "kotlin"
+      ]
+    },
+    "testProvider": {
+      "languageIds": [
+        "java",
+        "scala",
+        "kotlin"
+      ]
+    },
+    "runProvider": {
+      "languageIds": [
+        "java",
+        "scala",
+        "kotlin"
+      ]
+    },
+    "debugProvider": {
+      "languageIds": []
+    },
+    "inverseSourcesProvider": true,
+    "dependencySourcesProvider": true,
+    "dependencyModulesProvider": true,
+    "resourcesProvider": true,
+    "outputPathsProvider": true,
+    "buildTargetChangedProvider": true,
+    "jvmRunEnvironmentProvider": true,
+    "jvmTestEnvironmentProvider": true,
+    "canReload": true,
+    "jvmCompileClasspathProvider": true
+  }
+}
+
+
+[Trace - 06:38:51 PM] Received notification 'build/initialized'
+Params: null
+
+
+[Trace - 06:38:51 PM] Received request 'workspace/buildTargets - (2)'
+Params: null
+
+
+[Trace - 06:38:53 PM] Sending response 'workspace/buildTargets - (2)'. Processing request took 1547ms
+Result: {
+  "targets": [
+    {
+      "id": {
+        "uri": "file:///home/tangz/CPU/chisel"
+      },
+      "displayName": "chisel",
+      "baseDirectory": "file:///home/tangz/CPU/chisel",
+      "tags": [
+        "library",
+        "application"
+      ],
+      "languageIds": [
+        "java",
+        "scala"
+      ],
+      "dependencies": [],
+      "capabilities": {
+        "canCompile": true,
+        "canTest": false,
+        "canRun": true,
+        "canDebug": false
+      },
+      "dataKind": "scala",
+      "data": {
+        "scalaOrganization": "org.scala-lang",
+        "scalaVersion": "2.13.18",
+        "scalaBinaryVersion": "2.13",
+        "platform": 1,
+        "jars": [
+          "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/org/scala-lang/scala-compiler/2.13.18/scala-compiler-2.13.18.jar",
+          "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/org/scala-lang/scala-reflect/2.13.18/scala-reflect-2.13.18.jar",
+          "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/org/scala-lang/scala-library/2.13.18/scala-library-2.13.18.jar",
+          "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/io/github/java-diff-utils/java-diff-utils/4.16/java-diff-utils-4.16.jar",
+          "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/org/jline/jline/3.29.0/jline-3.29.0-jdk8.jar"
+        ],
+        "jvmBuildTarget": {
+          "javaHome": "file:///usr/lib/jvm/java-21-openjdk-amd64/",
+          "javaVersion": "21.0.12.1"
+        }
+      }
+    },
+    {
+      "id": {
+        "uri": "file:///home/tangz/CPU/mill-build"
+      },
+      "displayName": "mill-build/",
+      "baseDirectory": "file:///home/tangz/CPU/mill-build",
+      "tags": [
+        "library",
+        "application"
+      ],
+      "languageIds": [
+        "java",
+        "scala"
+      ],
+      "dependencies": [],
+      "capabilities": {
+        "canCompile": true,
+        "canTest": false,
+        "canRun": true,
+        "canDebug": false
+      },
+      "dataKind": "scala",
+      "data": {
+        "scalaOrganization": "org.scala-lang",
+        "scalaVersion": "3.8.1",
+        "scalaBinaryVersion": "3",
+        "platform": 1,
+        "jars": [
+          "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/org/scala-lang/scala3-compiler_3/3.8.1/scala3-compiler_3-3.8.1.jar",
+          "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/org/scala-lang/scala-library/3.8.1/scala-library-3.8.1.jar",
+          "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/org/scala-lang/scala3-interfaces/3.8.1/scala3-interfaces-3.8.1.jar",
+          "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/org/scala-lang/tasty-core_3/3.8.1/tasty-core_3-3.8.1.jar",
+          "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/org/scala-lang/scala3-library_3/3.8.1/scala3-library_3-3.8.1.jar",
+          "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/org/scala-lang/modules/scala-asm/9.9.0-scala-1/scala-asm-9.9.0-scala-1.jar",
+          "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/org/scala-sbt/compiler-interface/1.10.7/compiler-interface-1.10.7.jar",
+          "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/org/scala-sbt/util-interface/1.10.7/util-interface-1.10.7.jar"
+        ],
+        "jvmBuildTarget": {
+          "javaHome": "file:///usr/lib/jvm/java-21-openjdk-amd64/",
+          "javaVersion": "21.0.12.1"
+        }
+      }
+    },
+    {
+      "id": {
+        "uri": "file:///home/tangz/CPU/mill-synthetic-root-target"
+      },
+      "displayName": "mill-synthetic-root",
+      "baseDirectory": "file:///home/tangz/CPU",
+      "tags": [
+        "manual"
+      ],
+      "languageIds": [],
+      "dependencies": [],
+      "capabilities": {
+        "canCompile": false,
+        "canTest": false,
+        "canRun": false,
+        "canDebug": false
+      }
+    }
+  ]
+}
+
+
+[Trace - 06:38:53 PM] Received request 'buildTarget/scalacOptions - (3)'
+Params: {
+  "targets": [
+    {
+      "uri": "file:///home/tangz/CPU/chisel"
+    },
+    {
+      "uri": "file:///home/tangz/CPU/mill-build"
+    }
+  ]
+}
+
+
+[Trace - 06:38:53 PM] Sending response 'buildTarget/scalacOptions - (3)'. Processing request took 59ms
+Result: {
+  "items": [
+    {
+      "target": {
+        "uri": "file:///home/tangz/CPU/chisel"
+      },
+      "options": [
+        "-Xplugin:/home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/org/chipsalliance/chisel-plugin_2.13.18/7.7.0/chisel-plugin_2.13.18-7.7.0.jar",
+        "-deprecation",
+        "-feature",
+        "-unchecked",
+        "-language:reflectiveCalls"
+      ],
+      "classpath": [],
+      "classDirectory": "file:///home/tangz/CPU/.bsp/out/chisel/compiledClassesAndSemanticDbFiles.dest"
+    },
+    {
+      "target": {
+        "uri": "file:///home/tangz/CPU/mill-build"
+      },
+      "options": [
+        "-Xplugin:/home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/scalac-mill-moduledefs-plugin_3.8.1/0.13.1/scalac-mill-moduledefs-plugin_3.8.1-0.13.1.jar",
+        "-Xplugin:/home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-runner-autooverride-plugin_3.8.1/1.1.2/mill-runner-autooverride-plugin_3.8.1-1.1.2.jar",
+        "-deprecation",
+        "-Wconf:msg\u003dwill be encoded on the classpath:silent"
+      ],
+      "classpath": [],
+      "classDirectory": "file:///home/tangz/CPU/.bsp/out/mill-build/compiledClassesAndSemanticDbFiles.dest"
+    }
+  ]
+}
+
+
+[Trace - 06:38:53 PM] Received request 'buildTarget/javacOptions - (4)'
+Params: {
+  "targets": [
+    {
+      "uri": "file:///home/tangz/CPU/chisel"
+    },
+    {
+      "uri": "file:///home/tangz/CPU/mill-build"
+    }
+  ]
+}
+
+
+[Trace - 06:38:53 PM] Sending response 'buildTarget/javacOptions - (4)'. Processing request took 54ms
+Result: {
+  "items": [
+    {
+      "target": {
+        "uri": "file:///home/tangz/CPU/chisel"
+      },
+      "options": [],
+      "classpath": [
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/org/scala-lang/scala-library/2.13.18/scala-library-2.13.18.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/org/chipsalliance/chisel_2.13/7.7.0/chisel_2.13-7.7.0.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/github/scopt/scopt_2.13/4.1.0/scopt_2.13-4.1.0.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/org/apache/commons/commons-text/1.15.0/commons-text-1.15.0.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/os-lib_2.13/0.10.7/os-lib_2.13-0.10.7.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/io/github/json4s/json4s-native_2.13/4.1.0/json4s-native_2.13-4.1.0.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/io/github/alexarchambault/data-class_2.13/0.2.7/data-class_2.13-0.2.7.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/org/scala-lang/scala-reflect/2.13.18/scala-reflect-2.13.18.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/upickle_2.13/3.3.1/upickle_2.13-3.3.1.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/org/chipsalliance/firtool-resolver_2.13/2.0.1/firtool-resolver_2.13-2.0.1.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.20.0/commons-lang3-3.20.0.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/geny_2.13/1.1.1/geny_2.13-1.1.1.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/io/github/json4s/json4s-core_2.13/4.1.0/json4s-core_2.13-4.1.0.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/io/github/json4s/json4s-native-core_2.13/4.1.0/json4s-native-core_2.13-4.1.0.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/ujson_2.13/3.3.1/ujson_2.13-3.3.1.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/upack_2.13/3.3.1/upack_2.13-3.3.1.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/upickle-implicits_2.13/3.3.1/upickle-implicits_2.13-3.3.1.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/org/scala-lang/modules/scala-xml_2.13/2.2.0/scala-xml_2.13-2.2.0.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/org/scala-lang/modules/scala-collection-compat_2.13/2.11.0/scala-collection-compat_2.13-2.11.0.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/io/github/json4s/json4s-ast_2.13/4.1.0/json4s-ast_2.13-4.1.0.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/io/github/json4s/json4s-scalap_2.13/4.1.0/json4s-scalap_2.13-4.1.0.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/upickle-core_2.13/3.3.1/upickle-core_2.13-3.3.1.jar",
+        "file:///home/tangz/CPU/chisel/compile-resources"
+      ],
+      "classDirectory": "file:///home/tangz/CPU/.bsp/out/chisel/compiledClassesAndSemanticDbFiles.dest"
+    },
+    {
+      "target": {
+        "uri": "file:///home/tangz/CPU/mill-build"
+      },
+      "options": [],
+      "classpath": [
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/sourcecode_3/0.4.4/sourcecode_3-0.4.4.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-libs_3/1.1.2/mill-libs_3-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-runner-autooverride-api_3/1.1.2/mill-runner-autooverride-api_3-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/org/scala-lang/scala-library/3.8.1/scala-library-3.8.1.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-moduledefs_3/0.13.1/mill-moduledefs_3-0.13.1.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/unroll-annotation_3/0.2.0/unroll-annotation_3-0.2.0.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-libs-kotlinlib_3/1.1.2/mill-libs-kotlinlib_3-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-libs-groovylib_3/1.1.2/mill-libs-groovylib_3-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-libs-androidlib_3/1.1.2/mill-libs-androidlib_3-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-libs-scalajslib_3/1.1.2/mill-libs-scalajslib_3-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-libs-scalanativelib_3/1.1.2/mill-libs-scalanativelib_3-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-libs-javascriptlib_3/1.1.2/mill-libs-javascriptlib_3-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-libs-pythonlib_3/1.1.2/mill-libs-pythonlib_3-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-libs-util_3/1.1.2/mill-libs-util_3-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-libs-script_3/1.1.2/mill-libs-script_3-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-libs-javalib_3/1.1.2/mill-libs-javalib_3-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-libs-javalib-testrunner_3/1.1.2/mill-libs-javalib-testrunner_3-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-libs-kotlinlib-api_3/1.1.2/mill-libs-kotlinlib-api_3-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-libs-kotlinlib-ksp2-api_3/1.1.2/mill-libs-kotlinlib-ksp2-api_3-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-libs-groovylib-api_3/1.1.2/mill-libs-groovylib-api_3-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-libs-androidlib-databinding_3/1.1.2/mill-libs-androidlib-databinding_3-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-libs-scalalib_3/1.1.2/mill-libs-scalalib_3-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-libs-scalajslib-api_3/1.1.2/mill-libs-scalajslib-api_3-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-libs-scalanativelib-api_3/1.1.2/mill-libs-scalanativelib-api_3-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/io/get-coursier/coursier_2.13/2.1.25-M23/coursier_2.13-2.1.25-M23.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/io/get-coursier/coursier-archive-cache_2.13/2.1.25-M23/coursier-archive-cache_2.13-2.1.25-M23.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/io/get-coursier/coursier-core_2.13/2.1.25-M23/coursier-core_2.13-2.1.25-M23.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/io/get-coursier/coursier-cache_2.13/2.1.25-M23/coursier-cache_2.13-2.1.25-M23.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/io/get-coursier/coursier-paths/2.1.25-M23/coursier-paths-2.1.25-M23.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/io/get-coursier/coursier-util_2.13/2.1.25-M23/coursier-util_2.13-2.1.25-M23.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/io/get-coursier/versions_2.13/0.5.1/versions_2.13-0.5.1.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/io/get-coursier/coursier-jvm_2.13/2.1.25-M23/coursier-jvm_2.13-2.1.25-M23.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/org/jline/jline/3.30.6/jline-3.30.6.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/fastparse_3/3.1.1/fastparse_3-3.1.1.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mainargs_3/0.7.8/mainargs_3-0.7.8.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/requests_3/0.9.3/requests_3-0.9.3.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-core-api_3/1.1.2/mill-core-api_3-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/org/scala-lang/modules/scala-xml_3/2.4.0/scala-xml_3-2.4.0.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/org/scala-lang/scala-reflect/2.13.18/scala-reflect-2.13.18.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-libs-rpc_3/1.1.2/mill-libs-rpc_3-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-libs-javalib-api_3/1.1.2/mill-libs-javalib-api_3-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-libs-javalib-testrunner-entrypoint/1.1.2/mill-libs-javalib-testrunner-entrypoint-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-libs-util-java11_3/1.1.2/mill-libs-util-java11_3-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-core-api-java11_3/1.1.2/mill-core-api-java11_3-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/org/scala-sbt/test-interface/1.0/test-interface-1.0.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/geny_3/1.1.1/geny_3-1.1.1.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/org/scala-lang/modules/scala-collection-compat_3/2.12.0/scala-collection-compat_3-2.12.0.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/os-lib_3/0.11.8/os-lib_3-0.11.8.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/upickle_3/4.4.2/upickle_3-4.4.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/upickle-implicits-named-tuples_3/4.4.2/upickle-implicits-named-tuples_3-4.4.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/pprint_3/0.9.6/pprint_3-0.9.6.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/fansi_3/0.5.1/fansi_3-0.5.1.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-core-api-daemon_3/1.1.2/mill-core-api-daemon_3-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-libs-daemon-server_3/1.1.2/mill-libs-daemon-server_3-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/os-zip/0.11.8/os-zip-0.11.8.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/ujson_3/4.4.2/ujson_3-4.4.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/upack_3/4.4.2/upack_3-4.4.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/upickle-implicits_3/4.4.2/upickle-implicits_3-4.4.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-core-constants/1.1.2/mill-core-constants-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/mill-libs-daemon-client_3/1.1.2/mill-libs-daemon-client_3-1.1.2.jar",
+        "file:///home/tangz/.cache/coursier/v1/https/repo.maven.apache.org/maven2/com/lihaoyi/upickle-core_3/4.4.2/upickle-core_3-4.4.2.jar",
+        "file:///home/tangz/CPU/mill-build/compile-resources"
+      ],
+      "classDirectory": "file:///home/tangz/CPU/.bsp/out/mill-build/compiledClassesAndSemanticDbFiles.dest"
+    }
+  ]
+}
+
+
+[Trace - 06:38:53 PM] Received request 'buildTarget/sources - (5)'
+Params: {
+  "targets": [
+    {
+      "uri": "file:///home/tangz/CPU/chisel"
+    },
+    {
+      "uri": "file:///home/tangz/CPU/mill-build"
+    }
+  ]
+}
+
+
+[Trace - 06:38:53 PM] Sending response 'buildTarget/sources - (5)'. Processing request took 17ms
+Result: {
+  "items": [
+    {
+      "target": {
+        "uri": "file:///home/tangz/CPU/chisel"
+      },
+      "sources": [
+        {
+          "uri": "file:///home/tangz/CPU/src",
+          "kind": 2,
+          "generated": false
+        },
+        {
+          "uri": "file:///home/tangz/CPU/.bsp/out/chisel/compileGeneratedSources.dest",
+          "kind": 2,
+          "generated": true
+        }
+      ]
+    },
+    {
+      "target": {
+        "uri": "file:///home/tangz/CPU/mill-build"
+      },
+      "sources": [
+        {
+          "uri": "file:///home/tangz/CPU/build.mill",
+          "kind": 1,
+          "generated": false
+        },
+        {
+          "uri": "file:///home/tangz/CPU/mill-build/src",
+          "kind": 2,
+          "generated": false
+        },
+        {
+          "uri": "file:///home/tangz/CPU/.bsp/out/mill-build/generatedScriptSources.dest/support",
+          "kind": 2,
+          "generated": true
+        },
+        {
+          "uri": "file:///home/tangz/CPU/.bsp/out/mill-build/compileGeneratedSources.dest",
+          "kind": 2,
+          "generated": true
+        }
+      ]
+    },
+    {
+      "target": {
+        "uri": "file:///home/tangz/CPU/mill-synthetic-root-target"
+      },
+      "sources": [
+        {
+          "uri": "file:///home/tangz/CPU/src",
+          "kind": 2,
+          "generated": false
+        }
+      ]
+    }
+  ]
+}
+
+
+[Trace - 06:38:53 PM] Received request 'buildTarget/dependencySources - (6)'
+Params: {
+  "targets": [
+    {
+      "uri": "file:///home/tangz/CPU/chisel"
+    },
+    {
+      "uri": "file:///home/tangz/CPU/mill-build"
+    }
+  ]
+}
+
+
+[Trace - 06:39:51 PM] Received request 'buildTarget/compile - (7)'
+Params: {
+  "targets": []
+}
+
+
+[Trace - 06:40:52 PM] Received request 'buildTarget/compile - (8)'
+Params: {
+  "targets": []
+}
+
+
+[Trace - 06:41:54 PM] Received request 'buildTarget/compile - (9)'
+Params: {
+  "targets": []
+}
+
+
+[Trace - 06:42:54 PM] Received request 'buildTarget/compile - (10)'
+Params: {
+  "targets": []
+}
+
+
+[Trace - 06:43:56 PM] Received request 'buildTarget/compile - (11)'
+Params: {
+  "targets": []
+}
+
+
+[Trace - 06:44:57 PM] Received request 'buildTarget/compile - (12)'
+Params: {
+  "targets": []
+}
+
+
+[Trace - 06:45:59 PM] Received request 'buildTarget/compile - (13)'
+Params: {
+  "targets": []
+}
+
+
+[Trace - 06:47:00 PM] Received request 'buildTarget/compile - (14)'
+Params: {
+  "targets": []
+}
+
+
+[Trace - 06:48:02 PM] Received request 'buildTarget/compile - (15)'
+Params: {
+  "targets": []
+}
+
+
+[Trace - 06:57:20 PM] Sending notification 'build/logMessage'
+Params: {
+  "type": 2,
+  "message": "chisel.internalBspJavaModule.bspBuildTargetDependencySources"
+}
+
+

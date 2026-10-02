@@ -447,6 +447,7 @@ wire [2*RW-1:0] rename_slot;
   wire [2*RW-1:0] commit_slot;
 wire [19:0] source_register;
 wire [3:0] source_pending;
+wire  source_bundle_bypass;
 wire [4*RW-1:0] source_slot;
 reg  save_checkpoint;
   reg  save_after_lane;
@@ -579,7 +580,9 @@ reg [31:0] shifted;
     assign rename_slot[d*RW+:RW]=dispatch_rid[d];
     assign commit_slot[d*RW+:RW]=commit_rid[d];
   end
-  v2_rename #(.SLOT_BITS(RW),.CHECKPOINTS(CHECKPOINTS)) rename_maps (.clk(clk),.rst(rst),.dispatch_valid(rename_valid),.dispatch_rd(rename_rd),.dispatch_slot(rename_slot),.source_register(source_register),.source_pending(source_pending),.source_slot(source_slot),.commit_valid(commit_valid),.commit_rd(commit_rd),.commit_slot(commit_slot),
+  assign source_bundle_bypass=decoded[0][DECODED_T_WRITES_RD_LSB+:DECODED_T_WRITES_RD_WIDTH] && !decoded[0][DECODED_T_ILLEGAL_LSB+:DECODED_T_ILLEGAL_WIDTH] && fetch_fault[3:0]==0;
+  v2_rename #(.SLOT_BITS(RW),.CHECKPOINTS(CHECKPOINTS)) rename_maps (.clk(clk),.rst(rst),.dispatch_valid(rename_valid),.dispatch_rd(rename_rd),.dispatch_slot(rename_slot),.source_register(source_register),.source_pending(source_pending),.source_slot(source_slot),
+    .source_bypass_valid(source_bundle_bypass),.source_bypass_rd(decoded[0][DECODED_T_RD_LSB+:DECODED_T_RD_WIDTH]),.commit_valid(commit_valid),.commit_rd(commit_rd),.commit_slot(commit_slot),
     .save_valid(save_checkpoint),.save_after_lane(save_after_lane),.save_index(free_checkpoint),
     .restore_valid(redirect),.restore_index(redirect_checkpoint));
   for(p=0;p<2;p=p+1) begin: integer_units
@@ -764,6 +767,8 @@ reg  blocked_dispatch;
 integer lane;
 for(lane=0;lane<2;lane=lane+1) begin
       dispatch_rid[lane]=tail+narrow_5(lane);dispatch_bank[lane]=0;dispatch_index[lane]=0;bank_choice=0;
+
+      rename_rd[lane*5+:5]=decoded[lane][DECODED_T_WRITES_RD_LSB+:DECODED_T_WRITES_RD_WIDTH] ? decoded[lane][DECODED_T_RD_LSB+:DECODED_T_RD_WIDTH]:5'd0;
       if(lane<RENAME_WIDTH && !blocked_dispatch && fetch_valid[lane] && narrow_6(rob_count)+lane<ROB_ENTRIES) begin
         if(decoded[lane][DECODED_T_OP_LSB+:DECODED_T_OP_WIDTH]==OP_LOAD || decoded[lane][DECODED_T_OP_LSB+:DECODED_T_OP_WIDTH]==OP_STORE) bank_choice=2;
         else if(is_branch(decoded[lane][DECODED_T_OP_LSB+:DECODED_T_OP_WIDTH]) || is_mdu(decoded[lane][DECODED_T_OP_LSB+:DECODED_T_OP_WIDTH]) || INTEGER_PORTS==1) bank_choice=0;
@@ -777,7 +782,7 @@ for(lane=0;lane<2;lane=lane+1) begin
                     (!is_branch(decoded[lane][DECODED_T_OP_LSB+:DECODED_T_OP_WIDTH]) || (checkpoint_available && !save_checkpoint))) begin
           dispatch_valid[lane]=1;dispatch_count=dispatch_count+1'b1;
           dispatch_bank[lane]=narrow_7(bank_choice);dispatch_index[lane]=free_queue[bank_choice];used_bank[bank_choice]=1;
-          rename_valid[lane]=decoded[lane][DECODED_T_WRITES_RD_LSB+:DECODED_T_WRITES_RD_WIDTH];rename_rd[lane*5+:5]=decoded[lane][DECODED_T_WRITES_RD_LSB+:DECODED_T_WRITES_RD_WIDTH] ? decoded[lane][DECODED_T_RD_LSB+:DECODED_T_RD_WIDTH]:5'd0;
+          rename_valid[lane]=decoded[lane][DECODED_T_WRITES_RD_LSB+:DECODED_T_WRITES_RD_WIDTH];
           if(is_branch(decoded[lane][DECODED_T_OP_LSB+:DECODED_T_OP_WIDTH])) begin save_checkpoint=1;save_after_lane=narrow_8(lane);end
         end else blocked_dispatch=1;
       end else blocked_dispatch=1;
@@ -817,7 +822,7 @@ for(w=0;w<3;w=w+1)
           if(pending && wb_valid[w] && wb_rid[w]==source_id && wb_fault[w]==0) begin ready_value=1;source_value=wb_value[w];end
 end
 
-        if(lane==1 && rename_valid[0] && source_id==dispatch_rid[0] && pending) ready_value=0;
+        if(lane==1 && source_bundle_bypass && decoded[0][DECODED_T_RD_LSB+:DECODED_T_RD_WIDTH]==register_id && pending) ready_value=0;
         if(source_number==0) begin
           dispatch_payload[lane][ISSUE_T_A_LSB+:ISSUE_T_A_WIDTH]=source_value;dispatch_payload[lane][ISSUE_T_READY_A_LSB+:ISSUE_T_READY_A_WIDTH]=ready_value;
           dispatch_payload[lane][ISSUE_T_SOURCE_A_LSB+:ISSUE_T_SOURCE_A_WIDTH]=source_id;
@@ -1360,7 +1365,7 @@ end
 endmodule
 
 module muldiv #(
-  parameter integer DIV_STEP_BITS=4
+  parameter integer DIV_STEP_BITS=2
 )(
   input wire  clk,
   input wire  rst,
@@ -1464,6 +1469,7 @@ reg  quotient_negative_q;
 reg [31:0] quotient_next;
 reg [32:0] remainder_next;
   reg [32:0] shifted;
+reg [33:0] trial_difference;
 reg [31:0] div_a_q;
   reg [31:0] div_b_q;
   wire [31:0] completed_quotient;
@@ -1555,14 +1561,15 @@ end
   always @* begin
     quotient_next=quotient_q;
     remainder_next=remainder_q;
-    shifted=0;
+    shifted=0;trial_difference=0;
     if(div_live) begin: loop_1
 integer bit_step;
 for(bit_step=0;bit_step<DIV_STEP_BITS;bit_step=bit_step+1) begin
       shifted={remainder_next[31:0],quotient_next[31]};
       quotient_next={quotient_next[30:0],1'b0};
-      if(shifted>={1'b0,divisor_q}) begin
-        remainder_next=shifted-{1'b0,divisor_q};
+      trial_difference={1'b0,shifted}-{2'b0,divisor_q};
+      if(!trial_difference[33]) begin
+        remainder_next=trial_difference[32:0];
         quotient_next[0]=1'b1;
       end else remainder_next=shifted;
     end
@@ -2407,6 +2414,8 @@ module v2_rename #(
   input wire [1:0] dispatch_valid,
   input wire [9:0] dispatch_rd,
   input wire [2*SLOT_BITS-1:0] dispatch_slot,
+  input wire  source_bypass_valid,
+  input wire [4:0] source_bypass_rd,
   input wire [19:0] source_register,
   output reg [3:0] source_pending,
   output reg [4*SLOT_BITS-1:0] source_slot,
@@ -2507,8 +2516,14 @@ for(lane=0;lane<2;lane=lane+1) begin
       begin: loop_6
 integer s;
 for(s=0;s<2;s=s+1) begin
-        source_pending[lane*2+s]=pending_next[source_register[(lane*2+s)*5+:5]];
-        source_slot[(lane*2+s)*SLOT_BITS+:SLOT_BITS]=tag_next[source_register[(lane*2+s)*5+:5]];
+        source_pending[lane*2+s]=pending_q[source_register[(lane*2+s)*5+:5]];
+        source_slot[(lane*2+s)*SLOT_BITS+:SLOT_BITS]=tag_q[source_register[(lane*2+s)*5+:5]];
+
+        if(lane==1 && source_bypass_valid && source_bypass_rd!=0 &&
+           source_register[(lane*2+s)*5+:5]==source_bypass_rd) begin
+          source_pending[lane*2+s]=1;
+          source_slot[(lane*2+s)*SLOT_BITS+:SLOT_BITS]=dispatch_slot[0+:SLOT_BITS];
+        end
       end
 end
       if (dispatch_valid[lane] && dispatch_rd[lane*5+:5]!=0) begin

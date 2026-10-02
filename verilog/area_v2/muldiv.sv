@@ -1,5 +1,5 @@
 module muldiv #(
-  parameter integer DIV_STEP_BITS=4
+  parameter integer DIV_STEP_BITS=2
 )(
   input logic clk, rst, kill,
   input logic [255:0] kill_mask,
@@ -38,6 +38,7 @@ module muldiv #(
   logic quotient_negative_q,remainder_negative_q,remainder_operation_q;
   logic [31:0] quotient_next;
   logic [32:0] remainder_next,shifted;
+  logic [33:0] trial_difference;
   logic [31:0] div_a_q,div_b_q,completed_quotient,completed_remainder;
   logic div_signed_q;
   logic cache_valid_q,cache_signed_q,cache_hit;
@@ -108,16 +109,19 @@ module muldiv #(
     else shortcut=0;
   end
 
-  // Radix 16 by four restoring steps per cycle. DIV_STEP_BITS=2 selects radix 4.
+  // Two restoring steps per cycle bound the carry-chain depth (radix 4).
+  // The extended subtraction supplies both the trial remainder and borrow;
+  // a separate magnitude comparator would duplicate the carry computation.
   always_comb begin
     quotient_next=quotient_q;
     remainder_next=remainder_q;
-    shifted=0;
+    shifted=0;trial_difference=0;
     if(div_live) for(integer bit_step=0;bit_step<DIV_STEP_BITS;bit_step=bit_step+1) begin
       shifted={remainder_next[31:0],quotient_next[31]};
       quotient_next={quotient_next[30:0],1'b0};
-      if(shifted>={1'b0,divisor_q}) begin
-        remainder_next=shifted-{1'b0,divisor_q};
+      trial_difference={1'b0,shifted}-{2'b0,divisor_q};
+      if(!trial_difference[33]) begin
+        remainder_next=trial_difference[32:0];
         quotient_next[0]=1'b1;
       end else remainder_next=shifted;
     end

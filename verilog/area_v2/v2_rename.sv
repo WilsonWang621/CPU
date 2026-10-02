@@ -9,6 +9,8 @@ module v2_rename #(
   input logic [1:0] dispatch_valid,
   input logic [9:0] dispatch_rd,
   input logic [2*SLOT_BITS-1:0] dispatch_slot,
+  input logic source_bypass_valid,
+  input logic [4:0] source_bypass_rd,
   input logic [19:0] source_register,
   output logic [3:0] source_pending,
   output logic [4*SLOT_BITS-1:0] source_slot,
@@ -35,8 +37,16 @@ module v2_rename #(
     // Lane 1 observes lane 0's destination without an extra clock boundary.
     for (integer lane=0;lane<2;lane=lane+1) begin
       for (integer s=0;s<2;s=s+1) begin
-        source_pending[lane*2+s]=pending_next[source_register[(lane*2+s)*5+:5]];
-        source_slot[(lane*2+s)*SLOT_BITS+:SLOT_BITS]=tag_next[source_register[(lane*2+s)*5+:5]];
+        source_pending[lane*2+s]=pending_q[source_register[(lane*2+s)*5+:5]];
+        source_slot[(lane*2+s)*SLOT_BITS+:SLOT_BITS]=tag_q[source_register[(lane*2+s)*5+:5]];
+        // Lane 1 can only be accepted when lane 0 is accepted. Compute its
+        // intra-bundle bypass from decode, independently of redirect/stall
+        // gating on the actual RAT write enables.
+        if(lane==1 && source_bypass_valid && source_bypass_rd!=0 &&
+           source_register[(lane*2+s)*5+:5]==source_bypass_rd) begin
+          source_pending[lane*2+s]=1;
+          source_slot[(lane*2+s)*SLOT_BITS+:SLOT_BITS]=dispatch_slot[0+:SLOT_BITS];
+        end
       end
       if (dispatch_valid[lane] && dispatch_rd[lane*5+:5]!=0) begin
         pending_next[dispatch_rd[lane*5+:5]]=1;
