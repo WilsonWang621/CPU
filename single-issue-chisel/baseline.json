@@ -1,12 +1,12 @@
 {
-  "stage": 1,
-  "report": "reports/stage1/v66-per-bank-load-preparation",
-  "rtl_sha256": "d371ebc6aaa22360f4c51bdc2e0cc52d99c5aeb3566b03d86cac453e74e25248",
-  "ipc_geomean": 0.8477642032007419,
+  "stage": 3,
+  "report": "reports/stage3/v75-recovery-mask-ras-stage",
+  "rtl_sha256": "08c5861e540e2febc1929ccec9fb3aea09ee625587e3568e81bed12e14398509",
+  "ipc_geomean": 0.8460240058706379,
   "synthesis": {
     "status": "passed",
-    "fmax_mhz": 304.21865715983364,
-    "area_um2": 17605.839319999643
+    "fmax_mhz": 308.7126921917395,
+    "area_um2": 17754.13249999949
   },
   "correctness": "19/19",
   "parameters": {
@@ -33,6 +33,13 @@
     "ram-read-ahead": 0,
     "l0-store-stages": 1,
     "banked-load-payload": 1,
+    "cache-hierarchy": 0,
+    "prefetch-train-stages": 1,
+    "trusted-load-credit": 1,
+    "ras-write-stages": 1,
+    "registered-squash-mask": 1,
     "issue-width": 1
-  }
+  },
+  "target_mhz": 500,
+  "target_reached": false
 }
