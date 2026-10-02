@@ -6,7 +6,7 @@ import chisel3.util._
   * One-cycle load hits, pipelined word refills, buffered write-through stores.
   * Store allocation preserves written sectors without fetching unused words.
   */
-class Cache(bytes: Int, ways: Int, lineBytes: Int, writeEntries: Int = 16, readonly: Boolean = false) extends Module {
+class Cache(bytes: Int, ways: Int, lineBytes: Int, writeEntries: Int = 16, readonly: Boolean = false, readAhead: Boolean = false) extends Module {
   val io = IO(new Bundle { val cpu = Flipped(new MemPort); val mem = new MemPort; val fill = Valid(new MemReq); val loadReady = Output(Bool()) })
   val sets = bytes / ways / lineBytes
   val ob = log2Ceil(lineBytes); val sb = log2Ceil(sets); val wb = ob-2
@@ -32,12 +32,25 @@ class Cache(bytes: Int, ways: Int, lineBytes: Int, writeEntries: Int = 16, reado
   else { val writes = Module(new PreparedQueue(new MemReq,writeEntries)); writes.io.enq <> writeEnq; writeDeq <> writes.io.deq }
   val direction = Module(new Queue(Bool(),16))
   val index = request.addr(ob+sb-1,ob); val tag = request.addr(31,ob+sb); val word = request.addr(ob-1,2)
-  val tagHits = VecInit((0 until ways).map(w => valid(w)(index) && (if(readonly) tagRam(w).io.rdata else tagRam(w).io.rdata(tagRamWidth-1,lineWords)) === tag)).asUInt
-  val hits = if(readonly) tagHits else VecInit((0 until ways).map(w => tagHits(w) && tagRam(w).io.rdata(lineWords-1,0)(word))).asUInt
+  // The course SRAM makes rdata undefined on disabled/write cycles.
+  // Preserve only a completed read, with a direct first-cycle bypass so
+  // pipelined hits retain their original latency.
+  def readResult(ram: Sram): UInt = {
+    if(!readAhead) ram.io.rdata
+    else {
+      val completedRead = RegNext(ram.io.en && !ram.io.we,false.B)
+      val held = RegEnable(ram.io.rdata,completedRead)
+      Mux(completedRead,ram.io.rdata,held)
+    }
+  }
+  val tagRead = tagRam.map(readResult)
+  val dataRead = dataRam.map(readResult)
+  val tagHits = VecInit((0 until ways).map(w => valid(w)(index) && (if(readonly) tagRead(w) else tagRead(w)(tagRamWidth-1,lineWords)) === tag)).asUInt
+  val hits = if(readonly) tagHits else VecInit((0 until ways).map(w => tagHits(w) && tagRead(w)(lineWords-1,0)(word))).asUInt
   val hit = hits.orR
   val earlyResponse = state === refill && !earlyReturned && direction.io.deq.valid && !direction.io.deq.bits && received === 0.U
   io.cpu.rsp.valid := (state === check && !request.write && hit) || (earlyResponse && io.mem.rsp.valid)
-  io.cpu.rsp.bits.data := Mux1H((0 until ways).map(w => hits(w) -> dataRam(w).io.rdata))
+  io.cpu.rsp.bits.data := Mux1H((0 until ways).map(w => hits(w) -> dataRead(w)))
   io.cpu.rsp.bits.error := false.B
   when(earlyResponse) { io.cpu.rsp.bits.data := io.mem.rsp.bits.data }
   io.loadReady := state === idle || (state === check && io.cpu.rsp.fire)
@@ -69,18 +82,22 @@ class Cache(bytes: Int, ways: Int, lineBytes: Int, writeEntries: Int = 16, reado
   for(w <- 0 until ways) {
     val d = dataRam(w).io; val t = tagRam(w).io
     d.clk := clock; t.clk := clock
-    val reading = io.cpu.req.fire || state === retry || (state === check && !request.write && !io.cpu.rsp.fire)
-    val readAddr = Mux(io.loadReady,io.cpu.req.bits.addr,request.addr)
+    // Explicit read-result registers preserve stalled checks. Prepare the
+    // next candidate address independently of admission during idle cycles.
+    val reading = if(readAhead) state === idle || state === retry || (state === check && io.cpu.rsp.fire)
+      else io.cpu.req.fire || state === retry || (state === check && !request.write && !io.cpu.rsp.fire)
+    val readAddr = if(readAhead) Mux(state === retry,request.addr,io.cpu.req.bits.addr)
+      else Mux(io.loadReady,io.cpu.req.bits.addr,request.addr)
     d.en := reading || (filling && victim === w.U) || (storing && canStore && storeWay === w.U)
     d.we := (filling && victim === w.U) || (storing && canStore && storeWay === w.U)
-    d.addr := readAddr(ob+sb-1,2); d.wdata := request.data; d.wmask := request.mask
+    d.addr := Mux(storing,request.addr(ob+sb-1,2),readAddr(ob+sb-1,2)); d.wdata := request.data; d.wmask := request.mask
     when(filling) { d.addr := Cat(index,(word+received)(wb-1,0)); d.wdata := io.mem.rsp.bits.data; d.wmask := 15.U }
     t.en := reading || (lastFill && victim === w.U) || (storing && canStore && storeWay === w.U)
     t.we := (lastFill && victim === w.U) || (storing && canStore && storeWay === w.U)
     t.addr := Mux(t.we,index,readAddr(ob+sb-1,ob)); t.wmask := 1.U
     if(readonly) { t.wdata := tag }
     else {
-      val sectors = Mux(tagHits(w),t.rdata(lineWords-1,0),0.U) | Mux(request.mask.andR,UIntToOH(word,lineWords),0.U)
+      val sectors = Mux(tagHits(w),tagRead(w)(lineWords-1,0),0.U) | Mux(request.mask.andR,UIntToOH(word,lineWords),0.U)
       t.wdata := Cat(tag,Mux(lastFill,Fill(lineWords,1.U(1.W)),sectors))
     }
     for(s <- 0 until sets) {
@@ -122,7 +139,7 @@ class DataCache(p: Config) extends Module {
   prefetch.io.enq.bits := nextLine
   when(io.req.fire && !io.req.bits.mem.write && !seen) { recent(recentTail) := line; recentValid(recentTail) := true.B; recentTail := recentTail+1.U }
   val prefetchBank = if(p.banks == 1) 0.U else prefetch.io.deq.bits(o+b-1,o)
-  val caches = Seq.fill(p.banks)(Module(new Cache(p.dcBytes/p.banks,p.ways,p.lineBytes,2)))
+  val caches = Seq.fill(p.banks)(Module(new Cache(p.dcBytes/p.banks,p.ways,p.lineBytes,2,readAhead=p.ramReadAhead)))
   val ready = Wire(Vec(p.banks,Bool()))
   val storeCredits = Wire(Vec(p.banks,Bool()))
   val prefetchReady = Wire(Vec(p.banks,Bool()))
@@ -191,7 +208,7 @@ class Frontend(p: Config) extends Module {
     val redirect = Flipped(Valid(UInt(32.W))); val train = Flipped(Valid(new Training))
     val commit = Flipped(Valid(new Training))
   })
-  val cache = Module(new Cache(p.icBytes,1,p.lineBytes,readonly=true)); io.mem <> cache.io.mem
+  val cache = Module(new Cache(p.icBytes,1,p.lineBytes,readonly=true,readAhead=p.ramReadAhead)); io.mem <> cache.io.mem
   val pc = RegInit(0.U(32.W)); val epoch = RegInit(0.U(4.W))
   val entries = p.btbEntries; val idxBits = log2Ceil(entries)
   val bvalid = RegInit(VecInit(Seq.fill(entries)(false.B)))
