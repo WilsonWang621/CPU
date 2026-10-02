@@ -38,11 +38,11 @@ class Core(p: Config) extends Module {
   val retiredStoreMask = Util.select(storeHeadSelect,storeMask.toSeq)
   val architecturalWords = (1 until 32).map(i => Module(new LocalArchWord(i)))
   val arch = VecInit(Seq(0.U(32.W)) ++ architecturalWords.map(_.io.value))
-  val mapped = RegInit(VecInit(Seq.fill(32)(false.B))); val mapping = Reg(Vec(32,UInt(p.tagBits.W)))
+  val renameEntries = (1 until 32).map(i => Module(new RenameEntry(p,i)))
+  val mapped = VecInit(Seq(false.B) ++ renameEntries.map(_.io.mapped))
+  val mapping = VecInit(Seq(0.U(p.tagBits.W)) ++ renameEntries.map(_.io.tag))
   val cpValid = RegInit(VecInit(Seq.fill(p.checkpoints)(false.B)))
   val cpOwner = Reg(Vec(p.checkpoints,UInt(p.tagBits.W)))
-  val cpMapped = Reg(Vec(p.checkpoints,Vec(32,Bool())))
-  val cpMapping = Reg(Vec(p.checkpoints,Vec(32,UInt(p.tagBits.W))))
   val branchCheckpoint = Reg(Vec(p.rob,UInt(p.cpBits.W)))
   // Build shared payload reads in the module scope, before conditional writes.
   val retiredValue = atHead(values)
@@ -80,7 +80,7 @@ class Core(p: Config) extends Module {
   when(xv && (xd.branch || xd.jal || xd.jalr)) { recoveryCheckpoint := UIntToOH(branchCheckpoint(xt),p.checkpoints) }
   val loadRequests = Module(new LoadQueue(p))
   loadRequests.io.available := dc.io.loadReady; loadRequests.io.live := live.asUInt
-  loadRequests.io.epochs := generations; loadRequests.io.head := head
+  loadRequests.io.head := head
   loadRequests.io.stores := stores.asUInt; loadRequests.io.wrapped := wrapped
   loadRequests.io.squash := flush; loadRequests.io.boundary := recoveryTag
   val badAddress = (addressWord.io.value >= "h10000000".U && !(xd.store && addressWord.io.value === "h80000000".U)) ||
@@ -90,12 +90,12 @@ class Core(p: Config) extends Module {
   dc.io.store.bits.addr := retiredStoreAddress; dc.io.store.bits.data := retiredStoreData
   dc.io.store.bits.mask := retiredStoreMask; dc.io.store.bits.write := true.B
   val pendingLoad = loadRequests.io.deq.bits.info
-  val staleLoad = !live(pendingLoad.tag) || pendingLoad.epoch =/= generations(pendingLoad.tag) || !survives(pendingLoad.tag)
+  // LoadQueue owns a still-live ROB entry and filters squash on dequeue.
   if(p.storeEntries > 0) {
-    dc.io.req.valid := !headStore && loadRequests.io.deq.valid && !staleLoad
+    dc.io.req.valid := !headStore && loadRequests.io.deq.valid
     dc.io.req.bits.mem := 0.U.asTypeOf(new MemReq); dc.io.req.bits.mem.addr := loadRequests.io.deq.bits.addr
   } else {
-    dc.io.req.valid := headStore || (loadRequests.io.deq.valid && !staleLoad)
+    dc.io.req.valid := headStore || loadRequests.io.deq.valid
     dc.io.req.bits.mem.addr := Mux(headStore,retiredStoreAddress,loadRequests.io.deq.bits.addr)
     dc.io.req.bits.mem.data := retiredStoreData; dc.io.req.bits.mem.mask := retiredStoreMask
     dc.io.req.bits.mem.write := headStore
@@ -104,7 +104,7 @@ class Core(p: Config) extends Module {
   dc.io.rsp.ready := true.B
   val loadAccept = dc.io.req.fire && !headStore
   val loadReturn = dc.io.rsp.fire
-  loadRequests.io.deq.ready := staleLoad || (dc.io.req.ready && !headStore)
+  loadRequests.io.deq.ready := dc.io.req.ready && !headStore
   val returned = dc.io.rsp.bits.info
   val shiftedLoad = dc.io.rsp.bits.rsp.data >> Cat(returned.offset,0.U(3.W))
   val loadValue = MuxLookup(returned.fn,shiftedLoad)(Seq(0.U -> Util.sext(shiftedLoad(7,0)),1.U -> Util.sext(shiftedLoad(15,0)),
@@ -297,30 +297,13 @@ class Core(p: Config) extends Module {
   for(r <- 1 until 32) {
     architecturalWords(r-1).io.commit := retire && atHead(writes)
     architecturalWords(r-1).io.rd := atHead(rd); architecturalWords(r-1).io.data := retiredValue
-    when(retire && atHead(writes) && atHead(rd) === r.U) {
-      when(mapped(r) && mapping(r) === head) { mapped(r) := false.B }
-    }
-    when(dispatch && d.writes && d.rd === r.U) { mapped(r) := true.B; mapping(r) := tail }
-    when(flush) {
-      if(p.earlyRecovery) {
-        val restoredTag = Mux1H(recoveryCheckpoint.asBools,(0 until p.checkpoints).map(c => cpMapping(c)(r)))
-        val restoredMapped = Mux1H(recoveryCheckpoint.asBools,(0 until p.checkpoints).map(c => cpMapped(c)(r)))
-        mapped(r) := restoredMapped && !(retire && atHead(writes) && atHead(rd) === r.U && restoredTag === head)
-        mapping(r) := restoredTag
-      } else { mapped(r) := false.B }
-    }
+    val ren = renameEntries(r-1).io
+    ren.dispatch := dispatch; ren.dispatchWrites := d.writes; ren.dispatchRd := d.rd; ren.dispatchTag := tail
+    ren.retire := retire; ren.retireWrites := atHead(writes); ren.retireRd := atHead(rd); ren.retireTag := head
+    ren.checkpointHeads := VecInit(checkpointHeads.map(_.io.value)); ren.checkpointValid := cpValid.asUInt
+    ren.freeCheckpoint := freeCheckpoint; ren.restore := recoveryCheckpoint; ren.squash := flush
   }
   for(c <- 0 until p.checkpoints) {
-    for(r <- 1 until 32) {
-      when(retire && atHead(writes) && atHead(rd) === r.U && cpMapping(c)(r) === checkpointHeads(c).io.value) { cpMapped(c)(r) := false.B }
-      // Prepare only an unallocated checkpoint; dispatch publishes cpValid.
-      when(!cpValid(c) && freeCheckpoint === c.U) {
-        val newWriter = d.writes && d.rd === r.U
-        val savedTag = Mux(newWriter,tail,mapping(r))
-        cpMapping(c)(r) := savedTag
-        cpMapped(c)(r) := (newWriter || mapped(r)) && !(retire && atHead(writes) && atHead(rd) === r.U && savedTag === checkpointHeads(c).io.value)
-      }
-    }
     when(dispatch && (d.branch || d.jal || d.jalr) && freeCheckpoint === c.U) { cpValid(c) := true.B; cpOwner(c) := tail }
     when(xv && (xd.branch || xd.jal || xd.jalr) && alu.io.next === xnext && branchCheckpoint(xt) === c.U) { cpValid(c) := false.B }
     when(flush && (if(p.earlyRecovery) (younger(cpOwner(c)) || cpOwner(c) === recoveryTag) else true.B)) { cpValid(c) := false.B }
