@@ -1,0 +1,54 @@
+--- a/verilog/area_v2/v2_rename.sv
++++ b/verilog/area_v2/v2_rename.sv
+@@ -23,7 +23,15 @@
+ );
+   logic [31:0] pending_q,pending_next,save_pending;
+   logic [SLOT_BITS-1:0] tag_q [32],tag_next [32],save_tag [32];
+-  logic [31:0] checkpoint_pending [CHECKPOINTS];
++  localparam integer SLOTS=1<<SLOT_BITS;
++  wire [31:0] checkpoint_pending [CHECKPOINTS];
++  logic [31:0] checkpoint_saved_pending [CHECKPOINTS];
++  logic [SLOTS-1:0] checkpoint_live [CHECKPOINTS];
++  wire [SLOTS-1:0] retired_slots;
++  for(genvar slot=0;slot<SLOTS;slot=slot+1) begin: retirement_decode
++    assign retired_slots[slot]=(commit_valid[0] && commit_slot[0+:SLOT_BITS]==SLOT_BITS'(slot)) ||
++                              (commit_valid[1] && commit_slot[SLOT_BITS+:SLOT_BITS]==SLOT_BITS'(slot));
++  end
+   logic [SLOT_BITS-1:0] checkpoint_tag [CHECKPOINTS][32];
+
+   always_comb begin
+@@ -80,19 +88,24 @@
+     else pending_q<=pending_next;
+     for (integer r=0;r<32;r=r+1) tag_q[r]<=tag_next[r];
+   end
++  // Each checkpoint remembers which captured ROB producers have not retired.
++  // A slot remains cleared until the checkpoint is overwritten, so ROB reuse
++  // cannot resurrect a saved mapping. Resolve pending bits on recovery/read.
+   for (genvar cp=0;cp<CHECKPOINTS;cp=cp+1) begin: snapshot
++    always_ff @(posedge clk) begin
++      if(rst) checkpoint_live[cp]<=0;
++      else if(save_valid && save_index==CHECKPOINT_BITS'(cp) && !restore_valid)
++        checkpoint_live[cp]<=~retired_slots;
++      else checkpoint_live[cp]<=checkpoint_live[cp] & ~retired_slots;
++    end
+     for (genvar r=0;r<32;r=r+1) begin: regmap
++      assign checkpoint_pending[cp][r]=checkpoint_saved_pending[cp][r] &&
++        checkpoint_live[cp][checkpoint_tag[cp][r]];
+       always_ff @(posedge clk) begin
+-        if (rst) checkpoint_pending[cp][r]<=0;
+-        else begin
+-          for (integer c=0;c<2;c=c+1)
+-            if (commit_valid[c] && commit_rd[c*5+:5]==5'(r) &&
+-                checkpoint_tag[cp][r]==commit_slot[c*SLOT_BITS+:SLOT_BITS])
+-              checkpoint_pending[cp][r]<=0;
+-          if (save_valid && save_index==CHECKPOINT_BITS'(cp) && !restore_valid) begin
+-            checkpoint_pending[cp][r]<=save_pending[r];
+-            checkpoint_tag[cp][r]<=save_tag[r];
+-          end
++        if(rst) checkpoint_saved_pending[cp][r]<=0;
++        else if(save_valid && save_index==CHECKPOINT_BITS'(cp) && !restore_valid) begin
++          checkpoint_saved_pending[cp][r]<=save_pending[r];
++          checkpoint_tag[cp][r]<=save_tag[r];
+         end
+       end
+     end
