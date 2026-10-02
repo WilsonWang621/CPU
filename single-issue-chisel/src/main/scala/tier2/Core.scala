@@ -60,6 +60,9 @@ class Core(p: Config) extends Module {
   val badAddress = (alu.io.addr >= "h10000000".U && !(xd.store && alu.io.addr === "h80000000".U)) ||
     (xd.fn(1,0) === 2.U && alu.io.addr(1,0) =/= 0.U) || (xd.fn(1,0) === 1.U && alu.io.addr(0))
   val headStore = count =/= 0.U && atHead(done) && atHead(stores) && !halted
+  dc.io.store.valid := headStore
+  dc.io.store.bits.addr := atHead(storeAddr); dc.io.store.bits.data := atHead(storeData)
+  dc.io.store.bits.mask := atHead(storeMask); dc.io.store.bits.write := true.B
   val pendingLoad = loadRequests.io.deq.bits.info
   val staleLoad = !live(pendingLoad.tag) || pendingLoad.epoch =/= generations(pendingLoad.tag) || !survives(pendingLoad.tag)
   dc.io.req.valid := headStore || (loadRequests.io.deq.valid && !staleLoad)

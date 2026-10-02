@@ -7,7 +7,7 @@ import chisel3.util._
   * Store allocation preserves written sectors without fetching unused words.
   */
 class Cache(bytes: Int, ways: Int, lineBytes: Int, writeEntries: Int = 16) extends Module {
-  val io = IO(new Bundle { val cpu = Flipped(new MemPort); val mem = new MemPort; val fill = Valid(new MemReq) })
+  val io = IO(new Bundle { val cpu = Flipped(new MemPort); val mem = new MemPort; val fill = Valid(new MemReq); val loadReady = Output(Bool()) })
   val sets = bytes / ways / lineBytes
   val ob = log2Ceil(lineBytes); val sb = log2Ceil(sets); val wb = ob-2
   val tagWidth = 32-ob-sb; val lineWords = lineBytes/4
@@ -16,11 +16,12 @@ class Cache(bytes: Int, ways: Int, lineBytes: Int, writeEntries: Int = 16) exten
   val dataRam = Seq.fill(ways)(Module(new Sram(bytes/ways/4)))
   val tagRam = Seq.fill(ways)(Module(new Sram(sets,tagWidth+lineWords,tagWidth+lineWords)))
   val idle :: check :: refill :: retry :: Nil = Enum(4)
-  val state = RegInit(idle); val request = Reg(new MemReq)
+  val state = RegInit(idle); val requestWord = Module(new LocalWord((new MemReq).getWidth))
+  val request = requestWord.io.value.asTypeOf(new MemReq)
   val victim = Reg(UInt(math.max(1,log2Ceil(ways)).W))
   val sent = RegInit(0.U((wb+1).W)); val received = RegInit(0.U((wb+1).W))
   val earlyReturned = RegInit(false.B)
-  val writeQueue = Module(new Queue(new MemReq,writeEntries)); val direction = Module(new Queue(Bool(),16))
+  val writeQueue = Module(new PreparedQueue(new MemReq,writeEntries)); val direction = Module(new Queue(Bool(),16))
   val index = request.addr(ob+sb-1,ob); val tag = request.addr(31,ob+sb); val word = request.addr(ob-1,2)
   val tagHits = VecInit((0 until ways).map(w => valid(w)(index) && tagRam(w).io.rdata(tagWidth+lineWords-1,lineWords) === tag)).asUInt
   val hits = VecInit((0 until ways).map(w => tagHits(w) && tagRam(w).io.rdata(lineWords-1,0)(word))).asUInt
@@ -30,7 +31,9 @@ class Cache(bytes: Int, ways: Int, lineBytes: Int, writeEntries: Int = 16) exten
   io.cpu.rsp.bits.data := Mux1H((0 until ways).map(w => hits(w) -> dataRam(w).io.rdata))
   io.cpu.rsp.bits.error := false.B
   when(earlyResponse) { io.cpu.rsp.bits.data := io.mem.rsp.bits.data }
-  io.cpu.req.ready := (state === idle || (state === check && io.cpu.rsp.fire)) && (!io.cpu.req.bits.write || writeQueue.io.enq.ready)
+  io.loadReady := state === idle || (state === check && io.cpu.rsp.fire)
+  requestWord.io.prepare := io.loadReady; requestWord.io.data := io.cpu.req.bits.asUInt
+  io.cpu.req.ready := io.loadReady && (!io.cpu.req.bits.write || writeQueue.io.enq.ready)
   writeQueue.io.enq.valid := io.cpu.req.fire && io.cpu.req.bits.write; writeQueue.io.enq.bits := io.cpu.req.bits
   val fillReq = state === refill && sent < lineWords.U
   io.mem.req.valid := direction.io.enq.ready && (writeQueue.io.deq.valid || fillReq)
@@ -58,7 +61,7 @@ class Cache(bytes: Int, ways: Int, lineBytes: Int, writeEntries: Int = 16) exten
     val d = dataRam(w).io; val t = tagRam(w).io
     d.clk := clock; t.clk := clock
     val reading = io.cpu.req.fire || state === retry || (state === check && !request.write && !io.cpu.rsp.fire)
-    val readAddr = Mux(io.cpu.req.fire,io.cpu.req.bits.addr,request.addr)
+    val readAddr = Mux(io.loadReady,io.cpu.req.bits.addr,request.addr)
     d.en := reading || (filling && victim === w.U) || (storing && canStore && storeWay === w.U)
     d.we := (filling && victim === w.U) || (storing && canStore && storeWay === w.U)
     d.addr := readAddr(ob+sb-1,2); d.wdata := request.data; d.wmask := request.mask
@@ -76,7 +79,7 @@ class Cache(bytes: Int, ways: Int, lineBytes: Int, writeEntries: Int = 16) exten
   }
   when(io.cpu.rsp.fire && state === check) { state := idle }
   when(io.cpu.rsp.fire && earlyResponse) { earlyReturned := true.B }
-  when(io.cpu.req.fire) { request := io.cpu.req.bits; state := check }
+  when(io.cpu.req.fire) { state := check }
   when(storing) { state := idle; if(ways==2) { replace(index) := !storeWay.asBool } }
   when(state === check && !request.write && !hit) { state := refill; sent := 0.U; received := 0.U; earlyReturned := false.B; victim := Mux(tagHits.orR,PriorityEncoder(tagHits),newWay) }
   when(filling) { received := received+1.U; when(lastFill) { state := Mux(earlyReturned || io.cpu.rsp.fire,idle,retry); if(ways==2) { replace(index) := !victim.asBool } } }
@@ -88,10 +91,13 @@ class DataCache(p: Config) extends Module {
   val io = IO(new Bundle {
     val req = Flipped(Decoupled(new BankRequest(p))); val rsp = Decoupled(new BankResponse(p)); val mem = new MemPort
     val fill = Valid(new MemReq)
+    val loadReady = Output(Vec(p.banks,Bool()))
+    val store = Flipped(Valid(new MemReq))
   })
   val b = log2Ceil(p.banks); val o = log2Ceil(p.lineBytes)
   val bank = if(p.banks == 1) 0.U else io.req.bits.mem.addr(o+b-1,o)
-  val prefetch = Module(new Queue(UInt(32.W),4))
+  val storeBank = if(p.banks == 1) 0.U else io.store.bits.addr(o+b-1,o)
+  val prefetch = Module(new PreparedQueue(UInt(32.W),4))
   val recent = Reg(Vec(4,UInt((32-o).W))); val recentValid = RegInit(VecInit(Seq.fill(4)(false.B)))
   val recentTail = RegInit(0.U(2.W)); val line = io.req.bits.mem.addr(31,o)
   val seen = (0 until 4).map(i => recentValid(i) && recent(i) === line).reduce(_ || _)
@@ -109,19 +115,20 @@ class DataCache(p: Config) extends Module {
   val requests = Module(new MemoryArbiter(math.max(2,p.banks)))
   io.mem <> requests.io.out; io.rsp <> responses.io.out
   for(i <- 0 until p.banks) {
-    val c = caches(i); val metadata = Module(new Queue(new LoadInfo(p),8))
+    val c = caches(i); val metadata = Module(new PreparedQueue(new LoadInfo(p),8))
     val real = io.req.valid && bank === i.U && (if(p.storeEntries > 0) !io.req.bits.mem.write else true.B)
     val pendingStore = WireDefault(false.B); val storeReady = WireDefault(false.B)
     val queuedStore = WireDefault(0.U.asTypeOf(new MemReq))
     if(p.storeEntries > 0) {
-      val stores = Module(new Queue(new MemReq,p.storeEntries,flow=true))
-      stores.io.enq.valid := io.req.valid && bank === i.U && io.req.bits.mem.write
-      stores.io.enq.bits := io.req.bits.mem; storeReady := stores.io.enq.ready
+      val stores = Module(new PreparedQueue(new MemReq,p.storeEntries,flow=true))
+      stores.io.enq.valid := io.store.valid && storeBank === i.U
+      stores.io.enq.bits := io.store.bits; storeReady := stores.io.enq.ready
       pendingStore := stores.io.deq.valid; queuedStore := stores.io.deq.bits
       stores.io.deq.ready := c.io.cpu.req.ready
     }
     val proactive = prefetch.io.deq.valid && prefetchBank === i.U && !real && !pendingStore
     val demandReady = c.io.cpu.req.ready && (io.req.bits.mem.write || metadata.io.enq.ready) && !pendingStore
+    io.loadReady(i) := c.io.loadReady && metadata.io.enq.ready && !pendingStore && !(io.store.valid && storeBank === i.U)
     ready(i) := (if(p.storeEntries > 0) Mux(io.req.bits.mem.write,storeReady,demandReady) else demandReady)
     prefetchReady(i) := !real && !pendingStore && c.io.cpu.req.ready && metadata.io.enq.ready
     c.io.cpu.req.valid := pendingStore || (real && (io.req.bits.mem.write || metadata.io.enq.ready)) || (proactive && metadata.io.enq.ready)
@@ -175,19 +182,24 @@ class Frontend(p: Config) extends Module {
   val counters = RegInit(VecInit(Seq.fill(256)(2.U(2.W))))
   val history = RegInit(VecInit(Seq.fill(64)(0.U(2.W))))
   def predictionIndex(address: UInt, h: UInt): UInt = if(p.historyBits == 0) address(9,2) else Cat(address(9-p.historyBits,2),h(p.historyBits-1,0))
-  val ras = Reg(Vec(8,UInt(32.W))); val sp = RegInit(0.U(3.W)); val depth = RegInit(0.U(4.W))
-  val committedRas = Reg(Vec(8,UInt(32.W))); val committedSp = RegInit(0.U(3.W)); val committedDepth = RegInit(0.U(4.W))
+  val sp = RegInit(0.U(3.W)); val depth = RegInit(0.U(4.W))
+  val speculativeRas = Seq.tabulate(8)(i => Module(new LocalIndexedWord(32,3,i)))
+  val committedRas = Seq.tabulate(8)(i => Module(new LocalIndexedWord(32,3,i)))
+  val rasValid = RegInit(VecInit(Seq.fill(8)(false.B)))
+  val committedSp = RegInit(0.U(3.W)); val committedDepth = RegInit(0.U(4.W))
+  // Recovery switches entry ownership instead of copying 8 wide words.
+  val rasTop = Util.choose((sp-1.U)(2,0),(0 until 8).map(i => Mux(rasValid(i),speculativeRas(i).io.value,committedRas(i).io.value)))
   val ix = pc(idxBits+1,2)
   val targetHits = VecInit((0 until entries).map(i => ix === i.U && bvalid(i) && btag(i) === pc(31,idxBits+2)))
   val bpHit = targetHits.asUInt.orR
   val conditionalPrediction = Mux1H(targetHits,bcond); val returnPrediction = Mux1H(targetHits,bret); val callPrediction = Mux1H(targetHits,bcall)
   val fetchHistory = history(pc(7,2)); val counterIndex = predictionIndex(pc,fetchHistory)
   val taken = bpHit && (!conditionalPrediction || counters(counterIndex)(1))
-  val target = Mux(returnPrediction && depth =/= 0.U,ras((sp-1.U)(2,0)),Cat(Mux1H(targetHits,btarget),0.U(2.W)))
+  val target = Mux(returnPrediction && depth =/= 0.U,rasTop,Cat(Mux1H(targetHits,btarget),0.U(2.W)))
   val predicted = Mux(taken,target,pc+4.U)
-  val meta = Module(new Queue(new Bundle { val pc = UInt(32.W); val next = UInt(32.W); val epoch = UInt(4.W); val history = UInt(2.W)
+  val meta = Module(new PreparedQueue(new Bundle { val pc = UInt(32.W); val next = UInt(32.W); val epoch = UInt(4.W); val history = UInt(2.W)
     val callApplied = Bool(); val returnApplied = Bool(); val rasTop = UInt(32.W); val rasValid = Bool() }, 2))
-  val fetched = withReset(reset.asBool || io.redirect.valid) { Module(new Queue(new FetchPacket, 8,flow=true)) }
+  val fetched = withReset(reset.asBool || io.redirect.valid) { Module(new PreparedQueue(new FetchPacket, 8,flow=true)) }
   io.out <> fetched.io.deq
   val repair = Wire(Bool())
   cache.io.cpu.req.valid := meta.io.enq.ready && !io.redirect.valid && !repair
@@ -195,7 +207,7 @@ class Frontend(p: Config) extends Module {
   meta.io.enq.valid := cache.io.cpu.req.fire
   meta.io.enq.bits.pc := pc; meta.io.enq.bits.next := predicted; meta.io.enq.bits.epoch := epoch
   meta.io.enq.bits.history := fetchHistory; meta.io.enq.bits.callApplied := taken && callPrediction
-  meta.io.enq.bits.returnApplied := taken && returnPrediction; meta.io.enq.bits.rasTop := ras((sp-1.U)(2,0)); meta.io.enq.bits.rasValid := depth =/= 0.U
+  meta.io.enq.bits.returnApplied := taken && returnPrediction; meta.io.enq.bits.rasTop := rasTop; meta.io.enq.bits.rasValid := depth =/= 0.U
   val stale = meta.io.deq.bits.epoch =/= epoch || io.redirect.valid
   fetched.io.enq.valid := cache.io.cpu.rsp.valid && meta.io.deq.valid && !stale
   val incoming = cache.io.cpu.rsp.bits.data; val incomingPC = meta.io.deq.bits.pc
@@ -213,13 +225,20 @@ class Frontend(p: Config) extends Module {
   cache.io.cpu.rsp.ready := meta.io.deq.valid && (stale || fetched.io.enq.ready)
   meta.io.deq.ready := cache.io.cpu.rsp.fire
   repair := cache.io.cpu.rsp.fire && !stale && corrected =/= meta.io.deq.bits.next
+  val responseCall = cache.io.cpu.rsp.fire && !stale && call && !meta.io.deq.bits.callApplied
+  val predictionCall = cache.io.cpu.req.fire && taken && callPrediction
+  for(i <- 0 until 8) {
+    speculativeRas(i).io.index := sp; speculativeRas(i).io.write := responseCall || predictionCall
+    speculativeRas(i).io.data := Mux(predictionCall,pc+4.U,incomingPC+4.U)
+    when((responseCall || predictionCall) && sp === i.U) { rasValid(i) := true.B }
+  }
   when(cache.io.cpu.rsp.fire && !stale) {
-    when(call && !meta.io.deq.bits.callApplied) { ras(sp) := incomingPC+4.U; sp := sp+1.U; when(depth < 8.U) { depth := depth+1.U } }
+    when(call && !meta.io.deq.bits.callApplied) { sp := sp+1.U; when(depth < 8.U) { depth := depth+1.U } }
     when(ret && !meta.io.deq.bits.returnApplied && depth =/= 0.U) { sp := sp-1.U; depth := depth-1.U }
   }
   when(cache.io.cpu.req.fire) {
     pc := predicted
-    when(taken && callPrediction) { ras(sp) := pc+4.U; sp := sp+1.U; when(depth < 8.U) { depth := depth+1.U } }
+    when(taken && callPrediction) { sp := sp+1.U; when(depth < 8.U) { depth := depth+1.U } }
     when(taken && returnPrediction && depth =/= 0.U) { sp := sp-1.U; depth := depth-1.U }
   }
   when(repair) { pc := corrected; epoch := epoch+1.U }
@@ -251,11 +270,14 @@ class Frontend(p: Config) extends Module {
     }
   }
   val c = io.commit.bits
-  when(io.commit.valid && c.call) { committedRas(committedSp) := c.pc+4.U; committedSp := committedSp+1.U; when(committedDepth < 8.U) { committedDepth := committedDepth+1.U } }
+  for(i <- 0 until 8) {
+    committedRas(i).io.write := io.commit.valid && c.call; committedRas(i).io.index := committedSp; committedRas(i).io.data := c.pc+4.U
+  }
+  when(io.commit.valid && c.call) { committedSp := committedSp+1.U; when(committedDepth < 8.U) { committedDepth := committedDepth+1.U } }
   when(io.commit.valid && c.ret && committedDepth =/= 0.U) { committedSp := committedSp-1.U; committedDepth := committedDepth-1.U }
   when(io.redirect.valid) {
-    pc := io.redirect.bits; epoch := epoch+1.U; ras := committedRas; sp := committedSp; depth := committedDepth
-    when(io.commit.valid && c.call) { ras(committedSp) := c.pc+4.U; sp := committedSp+1.U; depth := Mux(committedDepth < 8.U,committedDepth+1.U,committedDepth) }
+    pc := io.redirect.bits; epoch := epoch+1.U; rasValid.foreach(_ := false.B); sp := committedSp; depth := committedDepth
+    when(io.commit.valid && c.call) { sp := committedSp+1.U; depth := Mux(committedDepth < 8.U,committedDepth+1.U,committedDepth) }
     when(io.commit.valid && c.ret && committedDepth =/= 0.U) { sp := committedSp-1.U; depth := committedDepth-1.U }
   }
 }
