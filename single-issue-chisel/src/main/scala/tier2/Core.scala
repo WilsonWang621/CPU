@@ -16,7 +16,6 @@ class Core(p: Config) extends Module {
   def atHead[T <: Data](xs: Vec[T]): T = headReads.getOrElseUpdate(xs,Util.select(headSelect.asBools,xs.toSeq)).asInstanceOf[T]
   val count = RegInit(0.U((p.tagBits+1).W))
   val live = RegInit(VecInit(Seq.fill(p.rob)(false.B)))
-  val generations = RegInit(VecInit(Seq.fill(p.rob)(0.U(8.W))))
   val done = RegInit(VecInit(Seq.fill(p.rob)(false.B)))
   val fault = Reg(Vec(p.rob,Bool()))
   val resultWords = Seq.tabulate(p.rob)(i => Module(new LocalResultWord(p.tagBits,i)))
@@ -79,11 +78,12 @@ class Core(p: Config) extends Module {
   recoveryValid := branchMiss
   when(xv) { recoveryTag := xt; recoveryPC := alu.io.next }
   when(xv && (xd.branch || xd.jal || xd.jalr)) { recoveryCheckpoint := UIntToOH(branchCheckpoint(xt),p.checkpoints) }
-  val loadRequests = Module(new LoadQueue(p))
+  val loadRequests = Module(new LoadQueue(p,p.loadEntries))
   loadRequests.io.available := dc.io.loadReady; loadRequests.io.live := live.asUInt
   loadRequests.io.head := head
   loadRequests.io.stores := stores.asUInt; loadRequests.io.wrapped := wrapped
   loadRequests.io.squash := flush; loadRequests.io.boundary := recoveryTag
+  dc.io.squash := flush; dc.io.boundary := recoveryTag; dc.io.wrapped := wrapped
   val badAddress = (addressWord.io.value >= "h10000000".U && !(xd.store && addressWord.io.value === "h80000000".U)) ||
     (xd.fn(1,0) === 2.U && addressWord.io.value(1,0) =/= 0.U) || (xd.fn(1,0) === 1.U && addressWord.io.value(0))
   val headStore = count =/= 0.U && atHead(done) && atHead(stores) && !halted
@@ -127,7 +127,7 @@ class Core(p: Config) extends Module {
   loadRequests.io.enq.valid := xv && xd.load && !badAddress && !fullyForwarded && !l0Hit && survives(xt)
   loadRequests.io.enq.bits.addr := addressWord.io.value
   loadRequests.io.enq.bits.info.tag := xt; loadRequests.io.enq.bits.info.fn := xd.fn
-  loadRequests.io.enq.bits.info.offset := addressWord.io.value(1,0); loadRequests.io.enq.bits.info.epoch := generations(xt)
+  loadRequests.io.enq.bits.info.offset := addressWord.io.value(1,0)
   loadRequests.io.enq.bits.info.prefetch := false.B
   val matchingStores = (0 until p.storeCapacity).map(i => storeLive(i) && done(storeOwner(i)) && before(storeOwner(i),xt) && storeAddr(i)(31,2) === addressWord.io.value(31,2))
   val forwarding = (0 until 4).map(b => {
@@ -147,12 +147,19 @@ class Core(p: Config) extends Module {
   md.io.req.valid := xv && xd.muldiv && survives(xt)
   md.io.req.bits.tag := xt; md.io.req.bits.a := xa; md.io.req.bits.b := xb; md.io.req.bits.fn := xd.fn
   md.io.kill := flush && (if(p.earlyRecovery) younger(md.io.activeTag) else true.B)
-  val xComplete = xv && Mux(xd.load,loadRequests.io.enq.ready || bypassLoad || badAddress,Mux(xd.muldiv,md.io.req.ready,true.B))
-  val xspace = !xv || xComplete
+  // Reserve a credit for the current execution load before issuing the next
+  // one. Execution then always drains, and its wide payload needs no stall
+  // feedback or late load-hit permission.
+  val loadCredit = loadRequests.io.freeCount > Mux(xv && xd.load,1.U,0.U)
+  val xComplete = xv; val xspace = true.B
+  if(p.debug) {
+    when(xv && xd.load && !badAddress && !bypassLoad && survives(xt)) { assert(loadRequests.io.enq.ready,"Execution load lacks its reserved credit") }
+    when(xv && xd.muldiv && survives(xt)) { assert(md.io.req.ready,"Execution MDU lacks its issue reservation") }
+  }
   val cdb = Wire(Vec(3,Valid(new Completion(p))))
   cdb(0).valid := xv && (!xd.load || badAddress || bypassLoad) && !xd.muldiv && !xd.store && survives(xt)
   cdb(0).bits.tag := xt; cdb(0).bits.data := Mux(bypassLoad,forwardValue,alu.io.result)
-  cdb(1).valid := loadReturn && returned.epoch === generations(returned.tag) && live(returned.tag) && survives(returned.tag)
+  cdb(1).valid := loadReturn && survives(returned.tag)
   cdb(1).bits.tag := returned.tag; cdb(1).bits.data := loadValue
   cdb(2).valid := md.io.rsp.valid && survives(md.io.rsp.bits.tag); cdb(2).bits := md.io.rsp.bits
   resultWords.foreach { r =>
@@ -162,7 +169,8 @@ class Core(p: Config) extends Module {
   val preparedCdb = Wire(Vec(3,Valid(new Completion(p))))
   preparedCdb := cdb
   preparedCdb(0).valid := xv && (!xd.load || badAddress || bypassLoad) && !xd.muldiv && !xd.store
-  preparedCdb(1).valid := loadReturn && returned.epoch === generations(returned.tag) && live(returned.tag)
+  preparedCdb(1).valid := loadReturn
+  if(p.debug) { when(loadReturn) { assert(live(returned.tag),"Cache response lost its ROB owner") } }
   preparedCdb(2).valid := md.io.rsp.valid
   // Surviving instructions can depend only on older producers. Recovery
   // blocks issue/dispatch publication and kills younger entries, so operand
@@ -180,7 +188,7 @@ class Core(p: Config) extends Module {
   for(i <- 0 until p.iq) {
     val olderStore = (0 until p.rob).map(j => live(j) && stores(j) && !done(j) && before(j.U(p.tagBits.W),qtag(i))).reduce(_ || _)
     eligible(i) := qvalid(i) && qar(i) && qbr(i) &&
-      (!qd(i).load || (!olderStore && loadRequests.io.enq.ready)) && (!qd(i).muldiv || (md.io.req.ready && !(xv && xd.muldiv)))
+      (!qd(i).load || (!olderStore && loadCredit)) && (!qd(i).muldiv || (md.io.req.ready && !(xv && xd.muldiv)))
   }
   def oldest(xs: Seq[(Bool,UInt,UInt)]): (Bool,UInt,UInt) = {
     if(xs.size == 1) xs.head else {
@@ -226,7 +234,7 @@ class Core(p: Config) extends Module {
   val s1 = source(d.rs1,d.use1); val s2 = source(d.rs2,d.use2)
   val unknownStore = (0 until p.rob).map(i => live(i) && stores(i) && !done(i)).reduce(_ || _)
   val direct = dispatch && !winner._1 && xspace && s1._1 && s2._1 &&
-    (!d.load || (!unknownStore && loadRequests.io.enq.ready)) && (!d.muldiv || (md.io.req.ready && !(xv && xd.muldiv)))
+    (!d.load || (!unknownStore && loadCredit)) && (!d.muldiv || (md.io.req.ready && !(xv && xd.muldiv)))
   when(direct) { xv := true.B }
   // Wide execution payload preparation does not depend on recovery permission.
   Seq(xdWord,xpcWord,xtWord,xaWord,xbWord,xnWord,xhWord).foreach(_.io.prepare := xspace)
@@ -241,7 +249,6 @@ class Core(p: Config) extends Module {
   xnWord.io.data := Mux(winner._1,Util.choose(qi,qnext.toSeq),fetch.io.out.bits.next)
   xhWord.io.data := Mux(winner._1,Util.choose(qi,qhistory.toSeq),fetch.io.out.bits.history)
   when(dispatch) {
-    generations(tail) := generations(tail)+1.U
     live(tail) := true.B; done(tail) := false.B
     tail := tail+1.U
     qvalid(free) := !direct
@@ -358,7 +365,7 @@ object Generate extends App {
   val p = Config(rob=n("--rob",16),iq=n("--iq",8),icBytes=n("--ic-bytes",4096),dcBytes=n("--dc-bytes",4096),
     lineBytes=n("--line-bytes",32),ways=n("--ways",2),debug=n("--debug",0) != 0,banks=n("--banks",4),earlyRecovery=n("--early-recovery",1) != 0,
     prefetch=n("--prefetch",1) != 0,btbEntries=n("--btb-entries",128),historyBits=n("--history-bits",1),l0Entries=n("--l0-entries",0),
-    storeEntries=n("--store-entries",0),checkpoints=n("--checkpoints",4),fastRedirect=n("--fast-redirect",0) != 0,storeSlots=n("--store-slots",16))
+    storeEntries=n("--store-entries",0),checkpoints=n("--checkpoints",4),fastRedirect=n("--fast-redirect",0) != 0,storeSlots=n("--store-slots",16),loadEntries=n("--load-entries",8))
   _root_.circt.stage.ChiselStage.emitSystemVerilogFile(new StudentTop(p), Array("--target-dir", options.getOrElse("--out","rtl")),
     Array("--disable-all-randomization", "--lowering-options=disallowLocalVariables,disallowPackedArrays"))
 }

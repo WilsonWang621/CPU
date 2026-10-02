@@ -7,7 +7,8 @@ case class Config(rob: Int = 16, iq: Int = 8, icBytes: Int = 4096,
                   dcBytes: Int = 4096, lineBytes: Int = 32, ways: Int = 2,
                   issueWidth: Int = 1, debug: Boolean = false, banks: Int = 4, earlyRecovery: Boolean = true,
                   prefetch: Boolean = true, btbEntries: Int = 128, historyBits: Int = 1, l0Entries: Int = 0,
-                  storeEntries: Int = 0, checkpoints: Int = 4, fastRedirect: Boolean = false, storeSlots: Int = 16) {
+                  storeEntries: Int = 0, checkpoints: Int = 4, fastRedirect: Boolean = false, storeSlots: Int = 16,
+                  loadEntries: Int = 8) {
   require(issueWidth == 1, "This architecture has one issue port")
   require(rob >= 8 && isPow2(rob) && iq >= 2 && isPow2(iq))
   require(isPow2(icBytes) && isPow2(dcBytes) && isPow2(lineBytes))
@@ -17,6 +18,7 @@ case class Config(rob: Int = 16, iq: Int = 8, icBytes: Int = 4096,
   require(l0Entries == 0 || isPow2(l0Entries))
   require(storeEntries >= 0)
   require(storeSlots >= 2 && isPow2(storeSlots))
+  require(loadEntries >= 2 && isPow2(loadEntries))
   require(isPow2(checkpoints) && checkpoints >= 2)
   val tagBits = log2Ceil(rob)
   val cpBits = log2Ceil(checkpoints)
@@ -36,7 +38,7 @@ class MemReq extends Bundle {
 }
 class MemRsp extends Bundle { val data = UInt(32.W); val error = Bool() }
 class LoadInfo(p: Config) extends Bundle {
-  val tag = UInt(p.tagBits.W); val fn = UInt(3.W); val offset = UInt(2.W); val epoch = UInt(8.W)
+  val tag = UInt(p.tagBits.W); val fn = UInt(3.W); val offset = UInt(2.W)
   val waitForStores = Bool()
   val prefetch = Bool()
 }

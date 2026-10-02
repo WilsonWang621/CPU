@@ -107,6 +107,7 @@ class DataCache(p: Config) extends Module {
     val loadReady = Output(Vec(p.banks,Bool()))
     val store = Flipped(Valid(new MemReq))
     val storeReady = Output(Bool())
+    val squash = Input(Bool()); val boundary = Input(UInt(p.tagBits.W)); val wrapped = Input(UInt(p.rob.W))
   })
   val b = log2Ceil(p.banks); val o = log2Ceil(p.lineBytes)
   val bank = if(p.banks == 1) 0.U else io.req.bits.mem.addr(o+b-1,o)
@@ -130,9 +131,8 @@ class DataCache(p: Config) extends Module {
   val requests = Module(new MemoryArbiter(math.max(2,p.banks)))
   io.mem <> requests.io.out; io.rsp <> responses.io.out
   for(i <- 0 until p.banks) {
-    // A bank accepts its next load only when the current response drains.
-    // Two metadata slots cover simultaneous drain/refill without eight copies.
-    val c = caches(i); val metadata = Module(new PreparedQueue(new LoadInfo(p),2))
+    val c = caches(i); val metadata = Module(new CacheOwner(p))
+    metadata.io.squash := io.squash; metadata.io.boundary := io.boundary; metadata.io.wrapped := io.wrapped
     val real = io.req.valid && bank === i.U && (if(p.storeEntries > 0) !io.req.bits.mem.write else true.B)
     val pendingStore = WireDefault(false.B); val storeReady = WireDefault(false.B)
     val queuedStore = WireDefault(0.U.asTypeOf(new MemReq))
@@ -144,12 +144,12 @@ class DataCache(p: Config) extends Module {
       stores.io.deq.ready := c.io.cpu.req.ready
     }
     val proactive = prefetch.io.deq.valid && prefetchBank === i.U && !real && !pendingStore
-    val demandReady = c.io.cpu.req.ready && (io.req.bits.mem.write || metadata.io.enq.ready) && !pendingStore
+    val demandReady = c.io.cpu.req.ready && !pendingStore
     storeCredits(i) := (if(p.storeEntries > 0) storeReady else c.io.cpu.req.ready)
-    io.loadReady(i) := c.io.loadReady && metadata.io.enq.ready && !pendingStore && !(io.store.valid && storeBank === i.U)
+    io.loadReady(i) := c.io.loadReady && !pendingStore && !(io.store.valid && storeBank === i.U)
     ready(i) := (if(p.storeEntries > 0) Mux(io.req.bits.mem.write,storeReady,demandReady) else demandReady)
-    prefetchReady(i) := !real && !pendingStore && c.io.cpu.req.ready && metadata.io.enq.ready
-    c.io.cpu.req.valid := pendingStore || (real && (io.req.bits.mem.write || metadata.io.enq.ready)) || (proactive && metadata.io.enq.ready)
+    prefetchReady(i) := !real && !pendingStore && c.io.cpu.req.ready
+    c.io.cpu.req.valid := pendingStore || real || proactive
     c.io.cpu.req.bits := Mux(pendingStore,queuedStore,Mux(real,io.req.bits.mem,0.U.asTypeOf(new MemReq)))
     val selectedAddress = Mux(pendingStore,queuedStore.addr,Mux(real,io.req.bits.mem.addr,prefetch.io.deq.bits))
     c.io.cpu.req.bits.addr := selectedAddress
@@ -159,12 +159,12 @@ class DataCache(p: Config) extends Module {
     fills(i).valid := c.io.fill.valid && !pendingStore && !(io.store.valid && storeBank === i.U)
     fills(i).bits := c.io.fill.bits
     if(p.banks != 1) { fills(i).bits.addr := Cat(c.io.fill.bits.addr(31-b,o),i.U(b.W),c.io.fill.bits.addr(o-1,0)) }
-    metadata.io.enq.valid := c.io.cpu.req.fire && !c.io.cpu.req.bits.write; metadata.io.enq.bits := io.req.bits.info
-    when(!real) { metadata.io.enq.bits := 0.U.asTypeOf(new LoadInfo(p)); metadata.io.enq.bits.prefetch := true.B }
-    c.io.cpu.rsp.ready := (responses.io.in(i).ready || metadata.io.deq.bits.prefetch) && metadata.io.deq.valid
-    responses.io.in(i).valid := c.io.cpu.rsp.valid && metadata.io.deq.valid && !metadata.io.deq.bits.prefetch
-    responses.io.in(i).bits.rsp := c.io.cpu.rsp.bits; responses.io.in(i).bits.info := metadata.io.deq.bits
-    metadata.io.deq.ready := c.io.cpu.rsp.fire
+    metadata.io.offer.valid := c.io.cpu.req.fire && !c.io.cpu.req.bits.write; metadata.io.offer.bits := io.req.bits.info
+    when(!real) { metadata.io.offer.bits := 0.U.asTypeOf(new LoadInfo(p)); metadata.io.offer.bits.prefetch := true.B }
+    c.io.cpu.rsp.ready := (responses.io.in(i).ready || metadata.io.info.prefetch || metadata.io.dead) && metadata.io.valid
+    responses.io.in(i).valid := c.io.cpu.rsp.valid && metadata.io.valid && !metadata.io.info.prefetch && !metadata.io.dead
+    responses.io.in(i).bits.rsp := c.io.cpu.rsp.bits; responses.io.in(i).bits.info := metadata.io.info
+    metadata.io.consume := c.io.cpu.rsp.fire
     requests.io.clients(i) <> c.io.mem
     if(p.banks != 1) { requests.io.clients(i).req.bits.addr := Cat(c.io.mem.req.bits.addr(31-b,o),i.U(b.W),c.io.mem.req.bits.addr(o-1,0)) }
   }

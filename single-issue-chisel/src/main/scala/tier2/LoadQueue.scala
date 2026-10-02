@@ -11,11 +11,13 @@ class LoadQueue(p: Config, entries: Int = 4) extends LocalLogic {
     val available = Input(Vec(p.banks,Bool()))
     val live = Input(UInt(p.rob.W))
     val stores = Input(UInt(p.rob.W)); val wrapped = Input(UInt(p.rob.W))
+    val freeCount = Output(UInt(log2Ceil(entries+1).W))
     val head = Input(UInt(p.tagBits.W)); val squash = Input(Bool()); val boundary = Input(UInt(p.tagBits.W))
   })
   val valid = RegInit(VecInit(Seq.fill(entries)(false.B)))
   val rows = Reg(Vec(entries,new LoadRequest(p)))
   val free = PriorityEncoder(~valid.asUInt); val space = !valid.asUInt.andR
+  io.freeCount := entries.U-PopCount(valid)
   def bank(addr: UInt): UInt = if(p.banks==1) 0.U else addr(log2Ceil(p.lineBytes)+log2Ceil(p.banks)-1,log2Ceil(p.lineBytes))
   def stale(info: LoadInfo): Bool = {
     val newer = Mux((info.tag < io.head) === (io.boundary < io.head),info.tag > io.boundary,info.tag < io.head)
