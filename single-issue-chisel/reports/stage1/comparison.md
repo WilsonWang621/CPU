@@ -1,80 +1,81 @@
 参数、正确性和默认综合对照。未运行项目用 `—` / `not_run` 标记；原始报告在对应实验目录。
 
-| experiment | status | debug | rob | iq | line_bytes | ic_bytes | dc_bytes | banks | btb | history_bits | l0_entries | l0_fill_stages | l0_replacement | l0_store_stages | ram_read_ahead | banked_load_payload | cache_hierarchy | store_entries_per_bank | store_slots | load_entries | checkpoints | fast_redirect | prefetch | ipc | frequency_mhz | area_um2 | correctness | tier2_pass |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| base-v1 | measured | 0 | 16 | 8 | 32 | 4096 | 4096 | 1 | 64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 16 | 4 | 0 | 0 | 0 | 0.55568 | 48.47108 | 13669.66387 | 19 | False |
-| v10-rob64-iq16 | measured | 0 | 64 | 16 | 64 | 4096 | 4096 | 4 | 64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 64 | 4 | 0 | 0 | 1 | 0.79362 | — | — | not_run | False |
-| v11-local-history | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 128 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 32 | 4 | 0 | 0 | 1 | 0.79189 | — | — | not_run | False |
-| v12-registered-ages | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 128 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 32 | 4 | 0 | 0 | 1 | 0.79183 | 99.37888 | 19019.41581 | passed | False |
-| v13-l0-16 | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 128 | 1 | 16 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 32 | 4 | 0 | 0 | 1 | 0.80010 | — | — | passed | False |
-| v14-history2-l0-32 | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 256 | 2 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 32 | 4 | 0 | 0 | 1 | 0.80034 | — | — | not_run | False |
-| v15-retired-store-buffer | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 128 | 1 | 16 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 0 | 0 | 1 | 0.81546 | — | — | not_run | False |
-| v16-checkpoint-onehot | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 16 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 0 | 1 | 0.81520 | 134.41848 | 17293.43541 | not_run | False |
-| v17-local-payload | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 16 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 0 | 1 | 0.81518 | 147.44420 | 17493.00645 | not_run | False |
-| v18-l0-refill-forward | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 0 | 1 | 0.82420 | — | — | not_run | False |
-| v19-execution-training | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 0 | 1 | 0.82438 | — | — | not_run | False |
-| v20-fast-frontend-recovery | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84465 | — | — | not_run | False |
-| v21-l0-64-ic2k | measured | 0 | 32 | 8 | 64 | 2048 | 4096 | 4 | 64 | 1 | 64 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.82749 | — | — | not_run | False |
-| v22-line128-l0-64 | measured | 0 | 32 | 8 | 128 | 2048 | 4096 | 4 | 64 | 1 | 64 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.82077 | — | — | not_run | False |
-| v23-execution-prepare | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84465 | 110.27353 | 18300.70929 | not_run | False |
-| v24-flow-store-buffer | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84634 | 115.14674 | 18258.86469 | passed | False |
-| v25-scoped-read-write | generation_failed | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | — | — | — | not_run | False |
-| v25b-scoped-read-write | generation_failed | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | — | — | — | not_run | False |
-| v25c-scoped-read-write | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84634 | 98.23484 | 18887.84589 | not_run | False |
-| v26-load-bank-selection | generation_failed | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | — | — | — | not_run | False |
-| v27-registered-wrap | generation_failed | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | — | — | — | not_run | False |
-| v27b-registered-wrap | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84962 | 105.83979 | 19386.70059 | passed | False |
-| v28-rob16-bank-selection | measured | 0 | 16 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 16 | 4 | 4 | 1 | 1 | 0.84405 | 158.71048 | 16935.20481 | not_run | False |
-| v29-two-cache-banks | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 2 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.82472 | 128.19229 | 18308.21331 | not_run | False |
-| v3-sram-tags | measured | 0 | 16 | 8 | 32 | 4096 | 4096 | 1 | 64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 16 | 4 | 0 | 0 | 0 | 0.60491 | 107.75545 | 12316.24971 | passed | False |
-| v30-prepared-queues | generation_failed | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | — | — | — | not_run | False |
-| v31-ras-owner-restore | generation_failed | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | — | — | — | not_run | False |
-| v32-execution-branch-metadata | generation_failed | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | — | — | — | not_run | False |
-| v32b-execution-branch-metadata | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84962 | 143.13671 | 19667.35101 | passed | False |
-| v33-local-result-registers | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84962 | 148.34130 | 20161.72965 | not_run | False |
-| v34-registered-issue-credits | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84928 | 187.99339 | 20171.26497 | passed | False |
-| v35-readonly-instruction-cache | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84928 | 158.04908 | 19413.00116 | not_run | False |
-| v36-compact-load-metadata | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84928 | 200.46985 | 18682.39736 | passed | False |
-| v37-prepared-load-address | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84928 | 190.79560 | 18622.21112 | not_run | False |
-| v38-right-sized-cache-queues | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84928 | 182.69402 | 18057.30902 | not_run | False |
-| v39-small-rob-expanded-predictor | measured | 0 | 16 | 8 | 64 | 4096 | 4096 | 4 | 128 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 16 | 4 | 4 | 1 | 1 | 0.84427 | 147.80600 | 18194.62346 | not_run | False |
-| v4-sram-sectors | measured | 0 | 16 | 8 | 32 | 4096 | 4096 | 1 | 64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 16 | 4 | 0 | 0 | 0 | 0.60491 | 121.01158 | 11953.76525 | not_run | False |
-| v40-parallel-issue-selection | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84928 | 60.76070 | 18229.33844 | not_run | False |
-| v41-two-entry-store-buffers | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | 32 | 4 | 4 | 1 | 1 | 0.83952 | 61.01049 | 17908.12646 | not_run | False |
-| v42-prefix-arithmetic | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | 32 | 4 | 4 | 1 | 1 | 0.83952 | 136.88010 | 17987.06258 | passed | False |
-| v42b-prefix-arithmetic | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | 32 | 4 | 4 | 1 | 1 | 0.83952 | 136.88010 | 17987.06258 | passed | False |
-| v43-prefix-stable-scheduler | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84928 | 192.62603 | 18031.64822 | not_run | False |
-| v44-independent-retirement-credits | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84928 | 204.39122 | 18040.55660 | passed | False |
-| v45-store-only-payload-table | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 16 | 4 | 4 | 1 | 1 | 0.84928 | 165.26791 | 17424.01214 | passed | False |
-| v46-local-rename-snapshots | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 16 | 4 | 4 | 1 | 1 | 0.84928 | 171.23746 | 17490.00122 | not_run | False |
-| v47-load-queue-ownership | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 16 | 4 | 4 | 1 | 1 | 0.84839 | 169.59258 | 17362.38248 | passed | False |
-| v48-local-operand-wakeup | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 16 | 4 | 4 | 1 | 1 | 0.84839 | 130.92955 | 17541.48320 | not_run | False |
-| v49-local-dispatch-bypass | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 16 | 4 | 4 | 1 | 1 | 0.84839 | 110.58315 | 17520.88166 | passed | False |
-| v5-banked-cache | generator_compile_failed | 0 | 16 | 8 | 32 | 4096 | 4096 | 4 | 64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 16 | 4 | 0 | 0 | 0 | — | — | — | not_run | False |
-| v50-explicit-cache-response-owners | synthesis_failed | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 16 | 4 | 4 | 1 | 1 | 0.84839 | — | — | passed | False |
-| v51-reserved-execution-credits | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 16 | 8 | 4 | 1 | 1 | 0.84964 | 161.66719 | 17498.60342 | passed | False |
-| v52-local-issue-payload-selection | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 16 | 8 | 4 | 1 | 1 | 0.84964 | 155.24560 | 17464.66118 | not_run | False |
-| v53-debug-credit-ownership-checks | measured | 1 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 16 | 8 | 4 | 1 | 1 | 0.84964 | — | — | passed | False |
-| v53-local-l0-byte-writes | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 16 | 8 | 4 | 1 | 1 | 0.84964 | 158.48940 | 17836.77194 | passed | False |
-| v54-local-predictor-state | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 16 | 8 | 4 | 1 | 1 | 0.84964 | 152.38095 | 17916.34958 | passed | False |
-| v55-eight-store-payload-slots | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 8 | 8 | 4 | 1 | 1 | 0.84964 | 149.48905 | 17341.31438 | not_run | False |
-| v56-four-entry-scheduler | measured | 0 | 32 | 4 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 8 | 8 | 4 | 1 | 1 | 0.84383 | 141.67128 | 16614.96794 | not_run | False |
-| v57-debug-retirement-owner | measured | 1 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 8 | 8 | 4 | 1 | 1 | 0.84964 | — | — | passed | False |
-| v57-prepared-retirement-owner | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 8 | 8 | 4 | 1 | 1 | 0.84964 | 167.73137 | 17341.64972 | passed | False |
-| v58-registered-l0-refills | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 1 | 0 | 0 | 0 | 0 | 0 | 4 | 8 | 8 | 4 | 1 | 1 | 0.84985 | 192.44503 | 17370.06614 | passed | False |
-| v59-clocked-l0-replacement | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 1 | 1 | 0 | 0 | 0 | 0 | 4 | 8 | 8 | 4 | 1 | 1 | 0.84853 | 239.98125 | 17361.44936 | passed | False |
-| v5b-banked-cache | measured | 0 | 16 | 8 | 32 | 4096 | 4096 | 4 | 64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 16 | 4 | 0 | 0 | 0 | 0.62487 | 98.94676 | 12991.20925 | not_run | False |
-| v6-early-recovery | measured | 0 | 16 | 8 | 32 | 4096 | 4096 | 4 | 64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 16 | 4 | 0 | 0 | 0 | 0.67052 | — | — | passed | False |
-| v60-small-rob-two-bit-history | measured | 0 | 16 | 8 | 64 | 4096 | 4096 | 4 | 64 | 2 | 32 | 1 | 1 | 0 | 0 | 0 | 0 | 4 | 8 | 8 | 4 | 1 | 1 | 0.84372 | 184.50450 | 16285.34330 | not_run | False |
-| v61-speculative-sram-read-address | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 1 | 1 | 0 | 1 | 0 | 0 | 4 | 8 | 8 | 4 | 1 | 1 | — | 186.62293 | 17357.29406 | failed | False |
-| v62-sram-read-result-hold | measured | 0 | 32 | 8 | 32 | 4096 | 4096 | 4 | 64 | 2 | 32 | 1 | 1 | 0 | 1 | 0 | 0 | 4 | 8 | 8 | 4 | 1 | 1 | — | 191.08043 | 17792.19738 | failed | False |
-| v63-sram-held-read-line64 | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 1 | 1 | 0 | 1 | 0 | 0 | 4 | 8 | 8 | 4 | 1 | 1 | — | 190.51163 | 17629.60472 | failed | False |
-| v64-l0-committed-store-stage | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 1 | 1 | 1 | 0 | 0 | 0 | 4 | 8 | 8 | 4 | 1 | 1 | 0.84772 | 286.75441 | 17408.65940 | passed | False |
-| v65-held-read-store-address | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 1 | 1 | 1 | 1 | 0 | 0 | 4 | 8 | 8 | 4 | 1 | 1 | 0.84772 | 245.91739 | 17667.51272 | passed | False |
-| v66-per-bank-load-preparation | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 1 | 1 | 1 | 0 | 1 | 0 | 4 | 8 | 8 | 4 | 1 | 1 | 0.84776 | — | — | not_run | False |
-| v67-prepared-bank-sram-read | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 1 | 1 | 1 | 1 | 1 | 0 | 4 | 8 | 8 | 4 | 1 | 1 | 0.84776 | — | — | not_run | False |
-| v7-rob32-line64 | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 32 | 4 | 0 | 0 | 0 | 0.70916 | — | — | not_run | False |
-| v8-load-bypass | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 32 | 4 | 0 | 0 | 0 | 0.75831 | — | — | not_run | False |
-| v9-stream-prefetch | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 32 | 4 | 0 | 0 | 1 | 0.78599 | 118.79350 | 15827.15397 | passed | False |
+| experiment | status | debug | rob | iq | line_bytes | ic_bytes | dc_bytes | banks | btb | history_bits | l0_entries | l0_fill_stages | l0_replacement | l0_store_stages | ram_read_ahead | banked_load_payload | cache_hierarchy | prefetch_train_stages | store_entries_per_bank | store_slots | load_entries | checkpoints | fast_redirect | prefetch | ipc | frequency_mhz | area_um2 | correctness | tier2_pass |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| base-v1 | measured | 0 | 16 | 8 | 32 | 4096 | 4096 | 1 | 64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 16 | 4 | 0 | 0 | 0 | 0.55568 | 48.47108 | 13669.66387 | 19 | False |
+| v10-rob64-iq16 | measured | 0 | 64 | 16 | 64 | 4096 | 4096 | 4 | 64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 64 | 4 | 0 | 0 | 1 | 0.79362 | — | — | not_run | False |
+| v11-local-history | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 128 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 32 | 4 | 0 | 0 | 1 | 0.79189 | — | — | not_run | False |
+| v12-registered-ages | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 128 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 32 | 4 | 0 | 0 | 1 | 0.79183 | 99.37888 | 19019.41581 | passed | False |
+| v13-l0-16 | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 128 | 1 | 16 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 32 | 4 | 0 | 0 | 1 | 0.80010 | — | — | passed | False |
+| v14-history2-l0-32 | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 256 | 2 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 32 | 4 | 0 | 0 | 1 | 0.80034 | — | — | not_run | False |
+| v15-retired-store-buffer | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 128 | 1 | 16 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 0 | 0 | 1 | 0.81546 | — | — | not_run | False |
+| v16-checkpoint-onehot | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 16 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 0 | 1 | 0.81520 | 134.41848 | 17293.43541 | not_run | False |
+| v17-local-payload | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 16 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 0 | 1 | 0.81518 | 147.44420 | 17493.00645 | not_run | False |
+| v18-l0-refill-forward | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 0 | 1 | 0.82420 | — | — | not_run | False |
+| v19-execution-training | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 0 | 1 | 0.82438 | — | — | not_run | False |
+| v20-fast-frontend-recovery | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84465 | — | — | not_run | False |
+| v21-l0-64-ic2k | measured | 0 | 32 | 8 | 64 | 2048 | 4096 | 4 | 64 | 1 | 64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.82749 | — | — | not_run | False |
+| v22-line128-l0-64 | measured | 0 | 32 | 8 | 128 | 2048 | 4096 | 4 | 64 | 1 | 64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.82077 | — | — | not_run | False |
+| v23-execution-prepare | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84465 | 110.27353 | 18300.70929 | not_run | False |
+| v24-flow-store-buffer | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84634 | 115.14674 | 18258.86469 | passed | False |
+| v25-scoped-read-write | generation_failed | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | — | — | — | not_run | False |
+| v25b-scoped-read-write | generation_failed | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | — | — | — | not_run | False |
+| v25c-scoped-read-write | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84634 | 98.23484 | 18887.84589 | not_run | False |
+| v26-load-bank-selection | generation_failed | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | — | — | — | not_run | False |
+| v27-registered-wrap | generation_failed | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | — | — | — | not_run | False |
+| v27b-registered-wrap | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84962 | 105.83979 | 19386.70059 | passed | False |
+| v28-rob16-bank-selection | measured | 0 | 16 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 16 | 4 | 4 | 1 | 1 | 0.84405 | 158.71048 | 16935.20481 | not_run | False |
+| v29-two-cache-banks | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 2 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.82472 | 128.19229 | 18308.21331 | not_run | False |
+| v3-sram-tags | measured | 0 | 16 | 8 | 32 | 4096 | 4096 | 1 | 64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 16 | 4 | 0 | 0 | 0 | 0.60491 | 107.75545 | 12316.24971 | passed | False |
+| v30-prepared-queues | generation_failed | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | — | — | — | not_run | False |
+| v31-ras-owner-restore | generation_failed | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | — | — | — | not_run | False |
+| v32-execution-branch-metadata | generation_failed | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | — | — | — | not_run | False |
+| v32b-execution-branch-metadata | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84962 | 143.13671 | 19667.35101 | passed | False |
+| v33-local-result-registers | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84962 | 148.34130 | 20161.72965 | not_run | False |
+| v34-registered-issue-credits | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84928 | 187.99339 | 20171.26497 | passed | False |
+| v35-readonly-instruction-cache | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84928 | 158.04908 | 19413.00116 | not_run | False |
+| v36-compact-load-metadata | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84928 | 200.46985 | 18682.39736 | passed | False |
+| v37-prepared-load-address | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84928 | 190.79560 | 18622.21112 | not_run | False |
+| v38-right-sized-cache-queues | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84928 | 182.69402 | 18057.30902 | not_run | False |
+| v39-small-rob-expanded-predictor | measured | 0 | 16 | 8 | 64 | 4096 | 4096 | 4 | 128 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 16 | 4 | 4 | 1 | 1 | 0.84427 | 147.80600 | 18194.62346 | not_run | False |
+| v4-sram-sectors | measured | 0 | 16 | 8 | 32 | 4096 | 4096 | 1 | 64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 16 | 4 | 0 | 0 | 0 | 0.60491 | 121.01158 | 11953.76525 | not_run | False |
+| v40-parallel-issue-selection | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84928 | 60.76070 | 18229.33844 | not_run | False |
+| v41-two-entry-store-buffers | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | 32 | 4 | 4 | 1 | 1 | 0.83952 | 61.01049 | 17908.12646 | not_run | False |
+| v42-prefix-arithmetic | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | 32 | 4 | 4 | 1 | 1 | 0.83952 | 136.88010 | 17987.06258 | passed | False |
+| v42b-prefix-arithmetic | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | 32 | 4 | 4 | 1 | 1 | 0.83952 | 136.88010 | 17987.06258 | passed | False |
+| v43-prefix-stable-scheduler | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84928 | 192.62603 | 18031.64822 | not_run | False |
+| v44-independent-retirement-credits | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 32 | 4 | 4 | 1 | 1 | 0.84928 | 204.39122 | 18040.55660 | passed | False |
+| v45-store-only-payload-table | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 16 | 4 | 4 | 1 | 1 | 0.84928 | 165.26791 | 17424.01214 | passed | False |
+| v46-local-rename-snapshots | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 16 | 4 | 4 | 1 | 1 | 0.84928 | 171.23746 | 17490.00122 | not_run | False |
+| v47-load-queue-ownership | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 16 | 4 | 4 | 1 | 1 | 0.84839 | 169.59258 | 17362.38248 | passed | False |
+| v48-local-operand-wakeup | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 16 | 4 | 4 | 1 | 1 | 0.84839 | 130.92955 | 17541.48320 | not_run | False |
+| v49-local-dispatch-bypass | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 16 | 4 | 4 | 1 | 1 | 0.84839 | 110.58315 | 17520.88166 | passed | False |
+| v5-banked-cache | generator_compile_failed | 0 | 16 | 8 | 32 | 4096 | 4096 | 4 | 64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 16 | 4 | 0 | 0 | 0 | — | — | — | not_run | False |
+| v50-explicit-cache-response-owners | synthesis_failed | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 16 | 4 | 4 | 1 | 1 | 0.84839 | — | — | passed | False |
+| v51-reserved-execution-credits | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 16 | 8 | 4 | 1 | 1 | 0.84964 | 161.66719 | 17498.60342 | passed | False |
+| v52-local-issue-payload-selection | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 16 | 8 | 4 | 1 | 1 | 0.84964 | 155.24560 | 17464.66118 | not_run | False |
+| v53-debug-credit-ownership-checks | measured | 1 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 16 | 8 | 4 | 1 | 1 | 0.84964 | — | — | passed | False |
+| v53-local-l0-byte-writes | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 16 | 8 | 4 | 1 | 1 | 0.84964 | 158.48940 | 17836.77194 | passed | False |
+| v54-local-predictor-state | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 16 | 8 | 4 | 1 | 1 | 0.84964 | 152.38095 | 17916.34958 | passed | False |
+| v55-eight-store-payload-slots | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 8 | 8 | 4 | 1 | 1 | 0.84964 | 149.48905 | 17341.31438 | not_run | False |
+| v56-four-entry-scheduler | measured | 0 | 32 | 4 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 8 | 8 | 4 | 1 | 1 | 0.84383 | 141.67128 | 16614.96794 | not_run | False |
+| v57-debug-retirement-owner | measured | 1 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 8 | 8 | 4 | 1 | 1 | 0.84964 | — | — | passed | False |
+| v57-prepared-retirement-owner | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 8 | 8 | 4 | 1 | 1 | 0.84964 | 167.73137 | 17341.64972 | passed | False |
+| v58-registered-l0-refills | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 8 | 8 | 4 | 1 | 1 | 0.84985 | 192.44503 | 17370.06614 | passed | False |
+| v59-clocked-l0-replacement | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 4 | 8 | 8 | 4 | 1 | 1 | 0.84853 | 239.98125 | 17361.44936 | passed | False |
+| v5b-banked-cache | measured | 0 | 16 | 8 | 32 | 4096 | 4096 | 4 | 64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 16 | 4 | 0 | 0 | 0 | 0.62487 | 98.94676 | 12991.20925 | not_run | False |
+| v6-early-recovery | measured | 0 | 16 | 8 | 32 | 4096 | 4096 | 4 | 64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 16 | 4 | 0 | 0 | 0 | 0.67052 | — | — | passed | False |
+| v60-small-rob-two-bit-history | measured | 0 | 16 | 8 | 64 | 4096 | 4096 | 4 | 64 | 2 | 32 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 4 | 8 | 8 | 4 | 1 | 1 | 0.84372 | 184.50450 | 16285.34330 | not_run | False |
+| v61-speculative-sram-read-address | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 1 | 1 | 0 | 1 | 0 | 0 | 0 | 4 | 8 | 8 | 4 | 1 | 1 | — | 186.62293 | 17357.29406 | failed | False |
+| v62-sram-read-result-hold | measured | 0 | 32 | 8 | 32 | 4096 | 4096 | 4 | 64 | 2 | 32 | 1 | 1 | 0 | 1 | 0 | 0 | 0 | 4 | 8 | 8 | 4 | 1 | 1 | — | 191.08043 | 17792.19738 | failed | False |
+| v63-sram-held-read-line64 | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 1 | 1 | 0 | 1 | 0 | 0 | 0 | 4 | 8 | 8 | 4 | 1 | 1 | — | 190.51163 | 17629.60472 | failed | False |
+| v64-l0-committed-store-stage | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 4 | 8 | 8 | 4 | 1 | 1 | 0.84772 | 286.75441 | 17408.65940 | passed | False |
+| v65-held-read-store-address | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 4 | 8 | 8 | 4 | 1 | 1 | 0.84772 | 245.91739 | 17667.51272 | passed | False |
+| v66-per-bank-load-preparation | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 1 | 1 | 1 | 0 | 1 | 0 | 0 | 4 | 8 | 8 | 4 | 1 | 1 | 0.84776 | 304.21866 | 17605.83932 | passed | True |
+| v67-prepared-bank-sram-read | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 1 | 1 | 1 | 1 | 1 | 0 | 0 | 4 | 8 | 8 | 4 | 1 | 1 | 0.84776 | 287.39826 | 17873.57186 | passed | False |
+| v68-local-cache-mapping | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 1 | 32 | 1 | 1 | 1 | 0 | 1 | 1 | 0 | 4 | 8 | 8 | 4 | 1 | 1 | 0.84776 | 272.26801 | 17619.25292 | passed | False |
+| v7-rob32-line64 | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 32 | 4 | 0 | 0 | 0 | 0.70916 | — | — | not_run | False |
+| v8-load-bypass | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 32 | 4 | 0 | 0 | 0 | 0.75831 | — | — | not_run | False |
+| v9-stream-prefetch | measured | 0 | 32 | 8 | 64 | 4096 | 4096 | 4 | 64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 32 | 4 | 0 | 0 | 1 | 0.78599 | 118.79350 | 15827.15397 | passed | False |
 
 六项 IPC 明细见 [comparison.csv](comparison.csv)。
