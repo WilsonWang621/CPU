@@ -6,13 +6,19 @@ import chisel3.util._
 case class Config(rob: Int = 16, iq: Int = 8, icBytes: Int = 4096,
                   dcBytes: Int = 4096, lineBytes: Int = 32, ways: Int = 2,
                   issueWidth: Int = 1, debug: Boolean = false, banks: Int = 4, earlyRecovery: Boolean = true,
-                  prefetch: Boolean = true) {
+                  prefetch: Boolean = true, btbEntries: Int = 128, historyBits: Int = 1, l0Entries: Int = 0,
+                  storeEntries: Int = 0, checkpoints: Int = 4, fastRedirect: Boolean = false) {
   require(issueWidth == 1, "This architecture has one issue port")
   require(rob >= 8 && isPow2(rob) && iq >= 2 && isPow2(iq))
   require(isPow2(icBytes) && isPow2(dcBytes) && isPow2(lineBytes))
   require(ways == 1 || ways == 2)
   require(isPow2(banks) && banks <= 4)
+  require(isPow2(btbEntries) && historyBits >= 0 && historyBits <= 2)
+  require(l0Entries == 0 || isPow2(l0Entries))
+  require(storeEntries >= 0)
+  require(isPow2(checkpoints) && checkpoints >= 2)
   val tagBits = log2Ceil(rob)
+  val cpBits = log2Ceil(checkpoints)
   val prfSize = 32 + rob // architectural words plus ROB value words
 }
 
@@ -107,5 +113,19 @@ object Util {
       val pickA = a._1 && (!b._1 || better)
       (a._1 || b._1,Mux(pickA,a._2,b._2),Mux(pickA,a._3,b._3))
     }
+  }
+  /** Circular ROB order without distributing head through N subtractors. */
+  def orderTree(xs: Seq[(Bool,UInt,UInt)], head: UInt, youngest: Boolean): (Bool,UInt,UInt) = {
+    def tree(items: Seq[(Bool,UInt,UInt,Bool)]): (Bool,UInt,UInt,Bool) = {
+      if(items.size == 1) items.head else {
+        val (left,right) = items.splitAt(items.size/2); val a = tree(left); val b = tree(right)
+        val same = a._4 === b._4
+        val better = if(youngest) Mux(same,a._2 > b._2,a._4) else Mux(same,a._2 < b._2,!a._4)
+        val pickA = a._1 && (!b._1 || better)
+        (a._1 || b._1,Mux(pickA,a._2,b._2),Mux(pickA,a._3,b._3),Mux(pickA,a._4,b._4))
+      }
+    }
+    val r = tree(xs.map(x => (x._1,x._2,x._3,x._2 < head)))
+    (r._1,r._2,r._3)
   }
 }
