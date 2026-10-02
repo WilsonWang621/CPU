@@ -198,8 +198,10 @@ class Frontend(p: Config) extends Module {
   val btag = Reg(Vec(entries,UInt((30-idxBits).W)))
   val btarget = Reg(Vec(entries,UInt(30.W)))
   val bcond = Reg(Vec(entries,Bool())); val bret = Reg(Vec(entries,Bool())); val bcall = Reg(Vec(entries,Bool()))
-  val counters = RegInit(VecInit(Seq.fill(256)(2.U(2.W))))
-  val history = RegInit(VecInit(Seq.fill(64)(0.U(2.W))))
+  val counterEntries = Seq.fill(256)(Module(new PredictorCounter))
+  val historyEntries = Seq.fill(64)(Module(new PredictorHistory))
+  val counters = VecInit(counterEntries.map(_.io.value))
+  val history = VecInit(historyEntries.map(_.io.value))
   def predictionIndex(address: UInt, h: UInt): UInt = if(p.historyBits == 0) address(9,2) else Cat(address(9-p.historyBits,2),h(p.historyBits-1,0))
   val sp = RegInit(0.U(3.W)); val depth = RegInit(0.U(4.W))
   val speculativeRas = Seq.tabulate(8)(i => Module(new LocalIndexedWord(32,3,i)))
@@ -281,12 +283,21 @@ class Frontend(p: Config) extends Module {
       bcond(i) := predictorPayload(i/8).conditional; bret(i) := predictorPayload(i/8).ret; bcall(i) := predictorPayload(i/8).call
     }
   }
-  when(io.train.valid) {
-    when(t.conditional) {
-      history(t.pc(7,2)) := Cat(history(t.pc(7,2))(0),t.taken)
-      when(t.taken && counters(ci) =/= 3.U) { counters(ci) := counters(ci)+1.U }
-      when(!t.taken && counters(ci) =/= 0.U) { counters(ci) := counters(ci)-1.U }
-    }
+  val counterBanks = (0 until 16).map(b => io.train.valid && t.conditional && ci(7,4) === b.U)
+  val counterRows = (0 until 16).map(r => ci(3,0) === r.U)
+  val counterDirections = (0 until 16).map(b => t.taken && ci(7,4) === b.U)
+  for(i <- 0 until 256) {
+    counterEntries(i).io.bank := counterBanks(i/16)
+    counterEntries(i).io.row := counterRows(i%16)
+    counterEntries(i).io.taken := counterDirections(i/16)
+  }
+  val historyBanks = (0 until 8).map(b => io.train.valid && t.conditional && t.pc(7,5) === b.U)
+  val historyRows = (0 until 8).map(r => t.pc(4,2) === r.U)
+  val historyDirections = (0 until 8).map(b => t.taken && t.pc(7,5) === b.U)
+  for(i <- 0 until 64) {
+    historyEntries(i).io.bank := historyBanks(i/8)
+    historyEntries(i).io.row := historyRows(i%8)
+    historyEntries(i).io.taken := historyDirections(i/8)
   }
   val c = io.commit.bits
   for(i <- 0 until 8) {
