@@ -112,7 +112,10 @@ object Util {
     masked.reduce(_ | _).asTypeOf(values.head)
   }
   def choose[T <: Data](index: UInt, values: Seq[T]): T = select(values.indices.map(i => index === i.U),values)
-  def add(a: UInt, b: UInt): UInt = a + b
+  def add(a: UInt, b: UInt): UInt = addCarry(a,b,false.B)
+  def addCarry(a: UInt, b: UInt, cin: Bool): UInt = {
+    val adder = Module(new Adder32); adder.io.a := a; adder.io.b := b; adder.io.cin := cin; adder.io.sum
+  }
   def ageTree(xs: Seq[(Bool,UInt,UInt)], youngest: Boolean): (Bool,UInt,UInt) = {
     if(xs.size == 1) xs.head else {
       val (left,right) = xs.splitAt(xs.size/2); val a = ageTree(left,youngest); val b = ageTree(right,youngest)

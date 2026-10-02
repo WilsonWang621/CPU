@@ -36,7 +36,7 @@ class Execute extends Module {
     val result = Output(UInt(32.W)); val next = Output(UInt(32.W)); val taken = Output(Bool()); val addr = Output(UInt(32.W))
   })
   val d = io.d; val a = Mux(d.pcA,io.pc,io.a); val b = Mux(d.immB,d.imm,io.b)
-  val add = Util.add(a, Mux(d.sub,~b,b)) + d.sub.asUInt
+  val add = Util.addCarry(a,Mux(d.sub,~b,b),d.sub)
   val signedLess = io.a.asSInt < io.b.asSInt
   val unsignedLess = io.a < io.b
   val right = (Cat(d.sub && a(31),a).asSInt >> b(4,0)).asUInt

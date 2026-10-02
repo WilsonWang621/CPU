@@ -27,6 +27,17 @@ class LocalWord(width: Int) extends LocalLogic {
   when(io.prepare) { value := io.data }
   io.value := value
 }
+/** Prepare address alongside operands, before the load lookup stage. */
+class LocalAddress extends LocalLogic {
+  val io = IO(new Bundle {
+    val prepare = Input(Bool()); val base = Input(UInt(32.W)); val immediate = Input(UInt(32.W))
+    val value = Output(UInt(32.W))
+  })
+  val value = Reg(UInt(32.W))
+  val address = Util.add(io.base,io.immediate)
+  when(io.prepare) { value := address }
+  io.value := value
+}
 class LocalCounter(width: Int) extends LocalLogic {
   val io = IO(new Bundle { val step = Input(Bool()); val clear = Input(Bool()); val value = Output(UInt(width.W)) })
   val value = RegInit(0.U(width.W))
