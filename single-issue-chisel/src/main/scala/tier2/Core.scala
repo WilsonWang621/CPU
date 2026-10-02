@@ -51,6 +51,7 @@ class Core(p: Config) extends Module {
   val xdWord = Module(new LocalWord((new Decoded).getWidth)); val xpcWord = Module(new LocalWord(32))
   val xtWord = Module(new LocalWord(p.tagBits)); val xaWord = Module(new LocalWord(32)); val xbWord = Module(new LocalWord(32))
   val xnWord = Module(new LocalWord(32)); val xhWord = Module(new LocalWord(2))
+  val addressWord = Module(new LocalAddress)
   val xd = xdWord.io.value.asTypeOf(new Decoded); val xpc = xpcWord.io.value
   val xt = xtWord.io.value; val xa = xaWord.io.value; val xb = xbWord.io.value
   val xnext = xnWord.io.value; val xhistory = xhWord.io.value
@@ -73,18 +74,24 @@ class Core(p: Config) extends Module {
   loadRequests.io.epochs := generations; loadRequests.io.head := head
   loadRequests.io.stores := stores.asUInt; loadRequests.io.wrapped := wrapped
   loadRequests.io.squash := flush; loadRequests.io.boundary := recoveryTag
-  val badAddress = (alu.io.addr >= "h10000000".U && !(xd.store && alu.io.addr === "h80000000".U)) ||
-    (xd.fn(1,0) === 2.U && alu.io.addr(1,0) =/= 0.U) || (xd.fn(1,0) === 1.U && alu.io.addr(0))
+  val badAddress = (addressWord.io.value >= "h10000000".U && !(xd.store && addressWord.io.value === "h80000000".U)) ||
+    (xd.fn(1,0) === 2.U && addressWord.io.value(1,0) =/= 0.U) || (xd.fn(1,0) === 1.U && addressWord.io.value(0))
   val headStore = count =/= 0.U && atHead(done) && atHead(stores) && !halted
   dc.io.store.valid := headStore
   dc.io.store.bits.addr := atHead(storeAddr); dc.io.store.bits.data := atHead(storeData)
   dc.io.store.bits.mask := atHead(storeMask); dc.io.store.bits.write := true.B
   val pendingLoad = loadRequests.io.deq.bits.info
   val staleLoad = !live(pendingLoad.tag) || pendingLoad.epoch =/= generations(pendingLoad.tag) || !survives(pendingLoad.tag)
-  dc.io.req.valid := headStore || (loadRequests.io.deq.valid && !staleLoad)
-  dc.io.req.bits.mem.addr := Mux(headStore,atHead(storeAddr),loadRequests.io.deq.bits.addr)
-  dc.io.req.bits.mem.data := atHead(storeData); dc.io.req.bits.mem.mask := atHead(storeMask)
-  dc.io.req.bits.mem.write := headStore; dc.io.req.bits.info := loadRequests.io.deq.bits.info
+  if(p.storeEntries > 0) {
+    dc.io.req.valid := !headStore && loadRequests.io.deq.valid && !staleLoad
+    dc.io.req.bits.mem := 0.U.asTypeOf(new MemReq); dc.io.req.bits.mem.addr := loadRequests.io.deq.bits.addr
+  } else {
+    dc.io.req.valid := headStore || (loadRequests.io.deq.valid && !staleLoad)
+    dc.io.req.bits.mem.addr := Mux(headStore,atHead(storeAddr),loadRequests.io.deq.bits.addr)
+    dc.io.req.bits.mem.data := atHead(storeData); dc.io.req.bits.mem.mask := atHead(storeMask)
+    dc.io.req.bits.mem.write := headStore
+  }
+  dc.io.req.bits.info := loadRequests.io.deq.bits.info
   dc.io.rsp.ready := true.B
   val loadAccept = dc.io.req.fire && !headStore
   val loadReturn = dc.io.rsp.fire
@@ -94,25 +101,25 @@ class Core(p: Config) extends Module {
   val loadValue = MuxLookup(returned.fn,shiftedLoad)(Seq(0.U -> Util.sext(shiftedLoad(7,0)),1.U -> Util.sext(shiftedLoad(15,0)),
     4.U -> Cat(0.U(24.W),shiftedLoad(7,0)),5.U -> Cat(0.U(16.W),shiftedLoad(15,0))))
   val forwardingMask = Wire(UInt(4.W)); val forwardingData = Wire(UInt(32.W))
-  val readMask = (MuxLookup(xd.fn(1,0),15.U(4.W))(Seq(0.U -> 1.U(4.W),1.U -> 3.U(4.W))) << alu.io.addr(1,0))(3,0)
+  val readMask = (MuxLookup(xd.fn(1,0),15.U(4.W))(Seq(0.U -> 1.U(4.W),1.U -> 3.U(4.W))) << addressWord.io.value(1,0))(3,0)
   val fullyForwarded = (forwardingMask & readMask) === readMask
   val l0Hit = WireDefault(false.B); val l0Word = WireDefault(0.U(32.W))
   if(p.l0Entries > 0) {
     val l0 = Module(new WordCache(p.l0Entries))
-    l0.io.address := alu.io.addr; l0Hit := l0.io.hit; l0Word := l0.io.data
+    l0.io.address := addressWord.io.value; l0Hit := l0.io.hit; l0Word := l0.io.data
     l0.io.fill.valid := dc.io.fill.valid
     l0.io.fill.bits.address := dc.io.fill.bits.addr
     l0.io.fill.bits.data := dc.io.fill.bits.data
     l0.io.store.valid := retire && atHead(stores)
-    l0.io.store.bits := dc.io.req.bits.mem
+    l0.io.store.bits := dc.io.store.bits
   }
   val bypassLoad = xv && xd.load && !badAddress && (fullyForwarded || l0Hit)
   loadRequests.io.enq.valid := xv && xd.load && !badAddress && !fullyForwarded && !l0Hit && survives(xt)
-  loadRequests.io.enq.bits.addr := alu.io.addr
+  loadRequests.io.enq.bits.addr := addressWord.io.value
   loadRequests.io.enq.bits.info.tag := xt; loadRequests.io.enq.bits.info.fn := xd.fn
-  loadRequests.io.enq.bits.info.offset := alu.io.addr(1,0); loadRequests.io.enq.bits.info.epoch := generations(xt)
+  loadRequests.io.enq.bits.info.offset := addressWord.io.value(1,0); loadRequests.io.enq.bits.info.epoch := generations(xt)
   loadRequests.io.enq.bits.info.prefetch := false.B
-  val matchingStores = (0 until p.rob).map(i => live(i) && stores(i) && done(i) && before(i.U(p.tagBits.W),xt) && storeAddr(i)(31,2) === alu.io.addr(31,2))
+  val matchingStores = (0 until p.rob).map(i => live(i) && stores(i) && done(i) && before(i.U(p.tagBits.W),xt) && storeAddr(i)(31,2) === addressWord.io.value(31,2))
   val forwarding = (0 until 4).map(b => {
     val picked = Util.orderTreeWrapped((0 until p.rob).map(i => (matchingStores(i) && storeMask(i)(b),i.U(p.tagBits.W),storeData(i)(8*b+7,8*b))),wrapped.asBools,true)
     (picked._1,picked._3)
@@ -124,7 +131,7 @@ class Core(p: Config) extends Module {
   // No 32-bit speculative store snapshot travels through every cache MSHR.
   loadRequests.io.enq.bits.info.waitForStores := (forwardingMask & readMask).orR
   val bypassWord = Cat((0 until 4).reverse.map(b => Mux(forwardingMask(b),forwardingData(8*b+7,8*b),l0Word(8*b+7,8*b))))
-  val forwardShifted = bypassWord >> Cat(alu.io.addr(1,0),0.U(3.W))
+  val forwardShifted = bypassWord >> Cat(addressWord.io.value(1,0),0.U(3.W))
   val forwardValue = MuxLookup(xd.fn,forwardShifted)(Seq(0.U -> Util.sext(forwardShifted(7,0)),1.U -> Util.sext(forwardShifted(15,0)),
     4.U -> Cat(0.U(24.W),forwardShifted(7,0)),5.U -> Cat(0.U(16.W),forwardShifted(15,0))))
   md.io.req.valid := xv && xd.muldiv && survives(xt)
@@ -156,12 +163,12 @@ class Core(p: Config) extends Module {
     when(resultWords(i).io.completed) { done(i) := true.B }
     when(xv && xt === i.U && !xd.load && !xd.muldiv) {
       done(i) := true.B; actual(i) := alu.io.next; taken(i) := alu.io.taken
-      storeAddr(i) := Mux(xd.branch || xd.jal,xpc+xd.imm,alu.io.addr)
-      storeData(i) := (xb << Cat(alu.io.addr(1,0),0.U(3.W)))(31,0)
-      storeMask(i) := (MuxLookup(xd.fn,15.U(4.W))(Seq(0.U -> 1.U(4.W),1.U -> 3.U(4.W))) << alu.io.addr(1,0))(3,0)
+      storeAddr(i) := Mux(xd.branch || xd.jal,xpc+xd.imm,addressWord.io.value)
+      storeData(i) := (xb << Cat(addressWord.io.value(1,0),0.U(3.W)))(31,0)
+      storeMask(i) := (MuxLookup(xd.fn,15.U(4.W))(Seq(0.U -> 1.U(4.W),1.U -> 3.U(4.W))) << addressWord.io.value(1,0))(3,0)
     }
     when(xv && xt === i.U && (xd.load || xd.store) && badAddress) { fault(i) := true.B }
-    when(xv && xt === i.U && xd.load) { storeAddr(i) := alu.io.addr }
+    when(xv && xt === i.U && xd.load) { storeAddr(i) := addressWord.io.value }
   }
   val eligible = Wire(Vec(p.iq,Bool()))
   for(i <- 0 until p.iq) {
@@ -205,10 +212,13 @@ class Core(p: Config) extends Module {
   when(direct) { xv := true.B }
   // Wide execution payload preparation does not depend on recovery permission.
   Seq(xdWord,xpcWord,xtWord,xaWord,xbWord,xnWord,xhWord).foreach(_.io.prepare := xspace)
-  xdWord.io.data := Mux(winner._1,Util.choose(qi,qd.toSeq),d).asUInt
+  val preparedDecoded = Mux(winner._1,Util.choose(qi,qd.toSeq),d)
+  xdWord.io.data := preparedDecoded.asUInt
   xpcWord.io.data := Mux(winner._1,Util.choose(qi,qpc.toSeq),fetch.io.out.bits.pc)
   xtWord.io.data := Mux(winner._1,Util.choose(qi,qtag.toSeq),tail)
-  xaWord.io.data := Mux(winner._1,Mux(qar(qi),Util.choose(qi,qa.toSeq),bypass(qat(qi),qa(qi))),s1._2)
+  val preparedA = Mux(winner._1,Mux(qar(qi),Util.choose(qi,qa.toSeq),bypass(qat(qi),qa(qi))),s1._2)
+  xaWord.io.data := preparedA
+  addressWord.io.prepare := xspace; addressWord.io.base := preparedA; addressWord.io.immediate := preparedDecoded.imm
   xbWord.io.data := Mux(winner._1,Mux(qbr(qi),Util.choose(qi,qb.toSeq),bypass(qbt(qi),qb(qi))),s2._2)
   xnWord.io.data := Mux(winner._1,Util.choose(qi,qnext.toSeq),fetch.io.out.bits.next)
   xhWord.io.data := Mux(winner._1,Util.choose(qi,qhistory.toSeq),fetch.io.out.bits.history)
@@ -237,7 +247,7 @@ class Core(p: Config) extends Module {
       qb(i) := s2._2; qbr(i) := s2._1; qbt(i) := s2._3
     }
   }
-  retire := count =/= 0.U && atHead(done) && !halted && (!atHead(stores) || dc.io.req.ready)
+  retire := count =/= 0.U && atHead(done) && !halted && (!atHead(stores) || (if(p.storeEntries > 0) dc.io.storeReady else dc.io.req.ready))
   flush := (if(p.earlyRecovery) recoveryValid else retire && atHead(control) && atHead(actual) =/= atHead(predicted))
   fetch.io.redirect.valid := (if(p.fastRedirect && p.earlyRecovery) branchMiss else flush)
   fetch.io.redirect.bits := (if(p.fastRedirect && p.earlyRecovery) alu.io.next else if(p.earlyRecovery) recoveryPC else atHead(actual))
@@ -252,7 +262,7 @@ class Core(p: Config) extends Module {
   fetch.io.commit.bits := RegEnable(committedTraining,trainNow)
   val executedTraining = Wire(new Training)
   executedTraining.pc := xpc
-  executedTraining.target := Mux(xd.branch || xd.jal,alu.io.pc+xd.imm,alu.io.addr)
+  executedTraining.target := Mux(xd.branch || xd.jal,alu.io.pc+xd.imm,addressWord.io.value)
   executedTraining.taken := alu.io.taken; executedTraining.conditional := xd.branch
   executedTraining.call := (xd.jal || xd.jalr) && (xd.rd === 1.U || xd.rd === 5.U)
   executedTraining.ret := xd.jalr && (xd.rs1 === 1.U || xd.rs1 === 5.U) && xd.rd =/= xd.rs1

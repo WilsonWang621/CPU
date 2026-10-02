@@ -106,6 +106,7 @@ class DataCache(p: Config) extends Module {
     val fill = Valid(new MemReq)
     val loadReady = Output(Vec(p.banks,Bool()))
     val store = Flipped(Valid(new MemReq))
+    val storeReady = Output(Bool())
   })
   val b = log2Ceil(p.banks); val o = log2Ceil(p.lineBytes)
   val bank = if(p.banks == 1) 0.U else io.req.bits.mem.addr(o+b-1,o)
@@ -120,15 +121,18 @@ class DataCache(p: Config) extends Module {
   prefetch.io.enq.bits := nextLine
   when(io.req.fire && !io.req.bits.mem.write && !seen) { recent(recentTail) := line; recentValid(recentTail) := true.B; recentTail := recentTail+1.U }
   val prefetchBank = if(p.banks == 1) 0.U else prefetch.io.deq.bits(o+b-1,o)
-  val caches = Seq.fill(p.banks)(Module(new Cache(p.dcBytes/p.banks,p.ways,p.lineBytes,math.max(2,16/p.banks))))
+  val caches = Seq.fill(p.banks)(Module(new Cache(p.dcBytes/p.banks,p.ways,p.lineBytes,2)))
   val ready = Wire(Vec(p.banks,Bool()))
+  val storeCredits = Wire(Vec(p.banks,Bool()))
   val prefetchReady = Wire(Vec(p.banks,Bool()))
   val fills = Wire(Vec(p.banks,Valid(new MemReq)))
   val responses = Module(new RRArbiter(new BankResponse(p),p.banks))
   val requests = Module(new MemoryArbiter(math.max(2,p.banks)))
   io.mem <> requests.io.out; io.rsp <> responses.io.out
   for(i <- 0 until p.banks) {
-    val c = caches(i); val metadata = Module(new PreparedQueue(new LoadInfo(p),8))
+    // A bank accepts its next load only when the current response drains.
+    // Two metadata slots cover simultaneous drain/refill without eight copies.
+    val c = caches(i); val metadata = Module(new PreparedQueue(new LoadInfo(p),2))
     val real = io.req.valid && bank === i.U && (if(p.storeEntries > 0) !io.req.bits.mem.write else true.B)
     val pendingStore = WireDefault(false.B); val storeReady = WireDefault(false.B)
     val queuedStore = WireDefault(0.U.asTypeOf(new MemReq))
@@ -141,6 +145,7 @@ class DataCache(p: Config) extends Module {
     }
     val proactive = prefetch.io.deq.valid && prefetchBank === i.U && !real && !pendingStore
     val demandReady = c.io.cpu.req.ready && (io.req.bits.mem.write || metadata.io.enq.ready) && !pendingStore
+    storeCredits(i) := (if(p.storeEntries > 0) storeReady else c.io.cpu.req.ready)
     io.loadReady(i) := c.io.loadReady && metadata.io.enq.ready && !pendingStore && !(io.store.valid && storeBank === i.U)
     ready(i) := (if(p.storeEntries > 0) Mux(io.req.bits.mem.write,storeReady,demandReady) else demandReady)
     prefetchReady(i) := !real && !pendingStore && c.io.cpu.req.ready && metadata.io.enq.ready
@@ -151,7 +156,7 @@ class DataCache(p: Config) extends Module {
     if(p.banks != 1) { c.io.cpu.req.bits.addr := Cat(0.U(b.W),selectedAddress(31,o+b),selectedAddress(o-1,0)) }
     // A retired store awaiting this bank can make an older raw refill stale.
     // Keep it out of L0; retirement itself has already updated L0's bytes.
-    fills(i).valid := c.io.fill.valid && !pendingStore && !(io.req.valid && io.req.bits.mem.write && bank === i.U)
+    fills(i).valid := c.io.fill.valid && !pendingStore && !(io.store.valid && storeBank === i.U)
     fills(i).bits := c.io.fill.bits
     if(p.banks != 1) { fills(i).bits.addr := Cat(c.io.fill.bits.addr(31-b,o),i.U(b.W),c.io.fill.bits.addr(o-1,0)) }
     metadata.io.enq.valid := c.io.cpu.req.fire && !c.io.cpu.req.bits.write; metadata.io.enq.bits := io.req.bits.info
@@ -168,6 +173,7 @@ class DataCache(p: Config) extends Module {
     requests.io.clients(1).rsp.ready := true.B
   }
   io.req.ready := Mux1H((0 until p.banks).map(i => (bank === i.U) -> ready(i)))
+  io.storeReady := Mux1H((0 until p.banks).map(i => (storeBank === i.U) -> storeCredits(i)))
   io.fill.valid := fills.map(_.valid).reduce(_ || _)
   io.fill.bits := MuxCase(0.U.asTypeOf(new MemReq),fills.map(f => f.valid -> f.bits).toSeq)
   prefetch.io.deq.ready := Mux1H((0 until p.banks).map(i => (prefetchBank === i.U) -> prefetchReady(i)))
