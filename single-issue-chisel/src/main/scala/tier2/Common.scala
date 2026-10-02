@@ -8,7 +8,7 @@ case class Config(rob: Int = 16, iq: Int = 8, icBytes: Int = 4096,
                   issueWidth: Int = 1, debug: Boolean = false, banks: Int = 4, earlyRecovery: Boolean = true,
                   prefetch: Boolean = true, btbEntries: Int = 128, historyBits: Int = 1, l0Entries: Int = 0,
                   storeEntries: Int = 0, checkpoints: Int = 4, fastRedirect: Boolean = false, storeSlots: Int = 16,
-                  loadEntries: Int = 8, l0FillStages: Int = 0, l0Replacement: Int = 0) {
+                  loadEntries: Int = 8, l0FillStages: Int = 0, l0Replacement: Int = 0, ramReadAhead: Boolean = false, l0StoreStages: Int = 0) {
   require(issueWidth == 1, "This architecture has one issue port")
   require(rob >= 8 && isPow2(rob) && iq >= 2 && isPow2(iq))
   require(isPow2(icBytes) && isPow2(dcBytes) && isPow2(lineBytes))
@@ -20,6 +20,7 @@ case class Config(rob: Int = 16, iq: Int = 8, icBytes: Int = 4096,
   require(storeSlots >= 2 && isPow2(storeSlots))
   require(loadEntries >= 2 && isPow2(loadEntries))
   require(l0FillStages >= 0 && l0FillStages <= 2)
+  require(l0StoreStages == 0 || l0StoreStages == 1)
   require(l0Replacement == 0 || l0Replacement == 1)
   require(l0Replacement == 0 || l0Entries <= 64)
   require(isPow2(checkpoints) && checkpoints >= 2)

@@ -114,6 +114,18 @@ class Core(p: Config) extends Module {
   val readMask = (MuxLookup(xd.fn(1,0),15.U(4.W))(Seq(0.U -> 1.U(4.W),1.U -> 3.U(4.W))) << addressWord.io.value(1,0))(3,0)
   val fullyForwarded = (forwardingMask & readMask) === readMask
   val l0Hit = WireDefault(false.B); val l0Word = WireDefault(0.U(32.W))
+  // Keep the late retirement handshake out of L0 word update logic.
+  // Loads forward from this committed-store stage until L0 catches up.
+  val l0Store = Wire(Valid(new MemReq))
+  val committedStore = retire && atHead(stores)
+  if(p.l0StoreStages == 1) {
+    l0Store.valid := RegNext(committedStore,false.B)
+    l0Store.bits := RegNext(dc.io.store.bits)
+  } else {
+    l0Store.valid := committedStore; l0Store.bits := dc.io.store.bits
+  }
+  val pendingMask = if(p.l0StoreStages == 1) Mux(l0Store.valid &&
+    l0Store.bits.addr(31,2) === addressWord.io.value(31,2),l0Store.bits.mask,0.U(4.W)) else 0.U(4.W)
   if(p.l0Entries > 0) {
     val l0 = Module(new WordCache(p.l0Entries,p.l0Replacement))
     l0.io.address := addressWord.io.value; l0Hit := l0.io.hit; l0Word := l0.io.data
@@ -125,8 +137,7 @@ class Core(p: Config) extends Module {
     l0.io.fill.valid := fill.valid
     l0.io.fill.bits.address := fill.bits.addr
     l0.io.fill.bits.data := fill.bits.data
-    l0.io.store.valid := retire && atHead(stores)
-    l0.io.store.bits := dc.io.store.bits
+    l0.io.store := l0Store
   }
   val bypassLoad = xv && xd.load && !badAddress && (fullyForwarded || l0Hit)
   loadRequests.io.enq.valid := xv && xd.load && !badAddress && !fullyForwarded && !l0Hit && survives(xt)
@@ -139,8 +150,9 @@ class Core(p: Config) extends Module {
     val picked = Util.orderTreeWrapped((0 until p.storeCapacity).map(i => (matchingStores(i) && storeMask(i)(b),storeOwner(i),storeData(i)(8*b+7,8*b))),(0 until p.storeCapacity).map(i => wrapped(storeOwner(i))),true)
     (picked._1,picked._3)
   })
-  forwardingMask := VecInit(forwarding.map(_._1)).asUInt
-  forwardingData := Cat(forwarding.reverse.map(_._2))
+  forwardingMask := VecInit(forwarding.map(_._1)).asUInt | pendingMask
+  forwardingData := Cat((0 until 4).reverse.map(b =>
+    Mux(forwarding(b)._1,forwarding(b)._2,l0Store.bits.data(8*b+7,8*b))))
   // Fully forwarded/L0 loads complete here. A partial overlap on a cache
   // miss waits for older stores in the load queue, then reads coherent bytes.
   // No 32-bit speculative store snapshot travels through every cache MSHR.
@@ -386,7 +398,7 @@ object Generate extends App {
   val p = Config(rob=n("--rob",16),iq=n("--iq",8),icBytes=n("--ic-bytes",4096),dcBytes=n("--dc-bytes",4096),
     lineBytes=n("--line-bytes",32),ways=n("--ways",2),debug=n("--debug",0) != 0,banks=n("--banks",4),earlyRecovery=n("--early-recovery",1) != 0,
     prefetch=n("--prefetch",1) != 0,btbEntries=n("--btb-entries",128),historyBits=n("--history-bits",1),l0Entries=n("--l0-entries",0),
-    storeEntries=n("--store-entries",0),checkpoints=n("--checkpoints",4),fastRedirect=n("--fast-redirect",0) != 0,storeSlots=n("--store-slots",16),loadEntries=n("--load-entries",8),l0FillStages=n("--l0-fill-stages",0),l0Replacement=n("--l0-replacement",0))
+    storeEntries=n("--store-entries",0),checkpoints=n("--checkpoints",4),fastRedirect=n("--fast-redirect",0) != 0,storeSlots=n("--store-slots",16),loadEntries=n("--load-entries",8),l0FillStages=n("--l0-fill-stages",0),l0Replacement=n("--l0-replacement",0),ramReadAhead=n("--ram-read-ahead",0) != 0,l0StoreStages=n("--l0-store-stages",0))
   _root_.circt.stage.ChiselStage.emitSystemVerilogFile(new StudentTop(p), Array("--target-dir", options.getOrElse("--out","rtl")),
     Array("--disable-all-randomization", "--lowering-options=disallowLocalVariables,disallowPackedArrays"))
 }
