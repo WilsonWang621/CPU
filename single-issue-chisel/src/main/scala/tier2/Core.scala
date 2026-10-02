@@ -11,52 +11,67 @@ class Core(p: Config) extends Module {
   arb.io.clients(0) <> fetch.io.mem; arb.io.clients(1) <> dc.io.mem
   val head = RegInit(0.U(p.tagBits.W)); val tail = RegInit(0.U(p.tagBits.W))
   val headSelect = RegInit(1.U(p.rob.W))
-  def atHead[T <: Data](xs: Vec[T]): T = Mux1H(headSelect.asBools,xs)
+  val wrapped = RegInit(0.U(p.rob.W))
+  private val headReads = scala.collection.mutable.AnyRefMap.empty[Data,Data]
+  def atHead[T <: Data](xs: Vec[T]): T = headReads.getOrElseUpdate(xs,Util.select(headSelect.asBools,xs.toSeq)).asInstanceOf[T]
   val count = RegInit(0.U((p.tagBits+1).W))
   val live = RegInit(VecInit(Seq.fill(p.rob)(false.B)))
   val generations = RegInit(VecInit(Seq.fill(p.rob)(0.U(8.W))))
   val done = RegInit(VecInit(Seq.fill(p.rob)(false.B)))
   val fault = Reg(Vec(p.rob,Bool()))
-  val values = Reg(Vec(p.rob,UInt(32.W)))
+  val resultWords = Seq.tabulate(p.rob)(i => Module(new LocalResultWord(p.tagBits,i)))
+  val values = VecInit(resultWords.map(_.io.value))
   val rd = Reg(Vec(p.rob,UInt(5.W))); val writes = Reg(Vec(p.rob,Bool()))
-  val pc = Reg(Vec(p.rob,UInt(32.W))); val inst = Reg(Vec(p.rob,UInt(32.W)))
   val predicted = Reg(Vec(p.rob,UInt(32.W))); val actual = Reg(Vec(p.rob,UInt(32.W)))
-  val history = Reg(Vec(p.rob,UInt(2.W)))
   val control = Reg(Vec(p.rob,Bool())); val conditional = Reg(Vec(p.rob,Bool()))
   val taken = Reg(Vec(p.rob,Bool())); val calls = Reg(Vec(p.rob,Bool())); val returns = Reg(Vec(p.rob,Bool()))
   val stores = Reg(Vec(p.rob,Bool())); val storeAddr = Reg(Vec(p.rob,UInt(32.W)))
   val storeData = Reg(Vec(p.rob,UInt(32.W))); val storeMask = Reg(Vec(p.rob,UInt(4.W)))
-  val arch = RegInit(VecInit(Seq.fill(32)(0.U(32.W))))
+  val architecturalWords = (1 until 32).map(i => Module(new LocalArchWord(i)))
+  val arch = VecInit(Seq(0.U(32.W)) ++ architecturalWords.map(_.io.value))
   val mapped = RegInit(VecInit(Seq.fill(32)(false.B))); val mapping = Reg(Vec(32,UInt(p.tagBits.W)))
   val cpValid = RegInit(VecInit(Seq.fill(p.checkpoints)(false.B)))
   val cpOwner = Reg(Vec(p.checkpoints,UInt(p.tagBits.W)))
   val cpMapped = Reg(Vec(p.checkpoints,Vec(32,Bool())))
   val cpMapping = Reg(Vec(p.checkpoints,Vec(32,UInt(p.tagBits.W))))
   val branchCheckpoint = Reg(Vec(p.rob,UInt(p.cpBits.W)))
+  // Build shared payload reads in the module scope, before conditional writes.
+  val retiredValue = atHead(values)
   val freeCheckpoint = PriorityEncoder(~cpValid.asUInt)
   val checkpointAvailable = !cpValid.asUInt.andR
   val halted = RegInit(false.B)
   val qvalid = RegInit(VecInit(Seq.fill(p.iq)(false.B)))
   val qd = Reg(Vec(p.iq,new Decoded)); val qpc = Reg(Vec(p.iq,UInt(32.W)))
+  val qnext = Reg(Vec(p.iq,UInt(32.W))); val qhistory = Reg(Vec(p.iq,UInt(2.W)))
   val qtag = Reg(Vec(p.iq,UInt(p.tagBits.W)))
   val qa = Reg(Vec(p.iq,UInt(32.W))); val qb = Reg(Vec(p.iq,UInt(32.W)))
   val qat = Reg(Vec(p.iq,UInt(p.tagBits.W))); val qbt = Reg(Vec(p.iq,UInt(p.tagBits.W)))
   val qar = Reg(Vec(p.iq,Bool())); val qbr = Reg(Vec(p.iq,Bool()))
-  val xv = RegInit(false.B); val xd = Reg(new Decoded); val xpc = Reg(UInt(32.W))
-  val xt = Reg(UInt(p.tagBits.W)); val xa = Reg(UInt(32.W)); val xb = Reg(UInt(32.W))
+  val xv = RegInit(false.B)
+  val xdWord = Module(new LocalWord((new Decoded).getWidth)); val xpcWord = Module(new LocalWord(32))
+  val xtWord = Module(new LocalWord(p.tagBits)); val xaWord = Module(new LocalWord(32)); val xbWord = Module(new LocalWord(32))
+  val xnWord = Module(new LocalWord(32)); val xhWord = Module(new LocalWord(2))
+  val xd = xdWord.io.value.asTypeOf(new Decoded); val xpc = xpcWord.io.value
+  val xt = xtWord.io.value; val xa = xaWord.io.value; val xb = xbWord.io.value
+  val xnext = xnWord.io.value; val xhistory = xhWord.io.value
   alu.io.d := xd; alu.io.pc := xpc; alu.io.a := xa; alu.io.b := xb
   val retire = Wire(Bool()); val flush = Wire(Bool())
+  val checkpointHeads = Seq.fill(p.checkpoints)(Module(new LocalCounter(p.tagBits)))
+  checkpointHeads.foreach { c => c.io.step := retire; c.io.clear := flush && !p.earlyRecovery.B }
   val recoveryTag = Reg(UInt(p.tagBits.W)); val recoveryPC = Reg(UInt(32.W))
   val recoveryValid = RegInit(false.B)
   val recoveryCheckpoint = Reg(UInt(p.checkpoints.W))
-  def before(a: UInt,b: UInt): Bool = Mux((a < head) === (b < head),a < b,!(a < head))
+  def before(a: UInt,b: UInt): Bool = Mux(wrapped(a) === wrapped(b),a < b,!wrapped(a))
   def younger(tag: UInt): Bool = before(recoveryTag,tag)
   def survives(tag: UInt): Bool = !flush || (if(p.earlyRecovery) !younger(tag) else false.B)
-  val branchMiss = xv && (xd.branch || xd.jal || xd.jalr) && alu.io.next =/= predicted(xt) && survives(xt)
+  val branchMiss = xv && (xd.branch || xd.jal || xd.jalr) && alu.io.next =/= xnext && survives(xt)
   recoveryValid := branchMiss
   when(xv) { recoveryTag := xt; recoveryPC := alu.io.next }
   when(xv && (xd.branch || xd.jal || xd.jalr)) { recoveryCheckpoint := UIntToOH(branchCheckpoint(xt),p.checkpoints) }
-  val loadRequests = Module(new Queue(new LoadRequest(p),4,flow=true))
+  val loadRequests = Module(new LoadQueue(p))
+  loadRequests.io.available := dc.io.loadReady; loadRequests.io.live := live.asUInt
+  loadRequests.io.epochs := generations; loadRequests.io.head := head
+  loadRequests.io.squash := flush; loadRequests.io.boundary := recoveryTag
   val badAddress = (alu.io.addr >= "h10000000".U && !(xd.store && alu.io.addr === "h80000000".U)) ||
     (xd.fn(1,0) === 2.U && alu.io.addr(1,0) =/= 0.U) || (xd.fn(1,0) === 1.U && alu.io.addr(0))
   val headStore = count =/= 0.U && atHead(done) && atHead(stores) && !halted
@@ -99,7 +114,7 @@ class Core(p: Config) extends Module {
   loadRequests.io.enq.bits.info.prefetch := false.B
   val matchingStores = (0 until p.rob).map(i => live(i) && stores(i) && done(i) && before(i.U(p.tagBits.W),xt) && storeAddr(i)(31,2) === alu.io.addr(31,2))
   val forwarding = (0 until 4).map(b => {
-    val picked = Util.orderTree((0 until p.rob).map(i => (matchingStores(i) && storeMask(i)(b),i.U(p.tagBits.W),storeData(i)(8*b+7,8*b))),head,true)
+    val picked = Util.orderTreeWrapped((0 until p.rob).map(i => (matchingStores(i) && storeMask(i)(b),i.U(p.tagBits.W),storeData(i)(8*b+7,8*b))),wrapped.asBools,true)
     (picked._1,picked._3)
   })
   forwardingMask := VecInit(forwarding.map(_._1)).asUInt
@@ -113,7 +128,7 @@ class Core(p: Config) extends Module {
   md.io.req.valid := xv && xd.muldiv && survives(xt)
   md.io.req.bits.tag := xt; md.io.req.bits.a := xa; md.io.req.bits.b := xb; md.io.req.bits.fn := xd.fn
   md.io.kill := flush && (if(p.earlyRecovery) younger(md.io.activeTag) else true.B)
-  val xComplete = xv && Mux(xd.load,loadRequests.io.enq.fire || bypassLoad || badAddress,Mux(xd.muldiv,md.io.req.fire,true.B))
+  val xComplete = xv && Mux(xd.load,loadRequests.io.enq.ready || bypassLoad || badAddress,Mux(xd.muldiv,md.io.req.ready,true.B))
   val xspace = !xv || xComplete
   val cdb = Wire(Vec(3,Valid(new Completion(p))))
   cdb(0).valid := xv && (!xd.load || badAddress || bypassLoad) && !xd.muldiv && !xd.store && survives(xt)
@@ -121,12 +136,22 @@ class Core(p: Config) extends Module {
   cdb(1).valid := loadReturn && returned.epoch === generations(returned.tag) && live(returned.tag) && survives(returned.tag)
   cdb(1).bits.tag := returned.tag; cdb(1).bits.data := loadValue
   cdb(2).valid := md.io.rsp.valid && survives(md.io.rsp.bits.tag); cdb(2).bits := md.io.rsp.bits
-  def bypass(tag: UInt, value: UInt): UInt = MuxCase(value,(0 until 3).map(k => (cdb(k).valid && cdb(k).bits.tag === tag) -> cdb(k).bits.data))
-  def wake(tag: UInt): Bool = cdb.map(c => c.valid && c.bits.tag === tag).reduce(_ || _)
+  resultWords.foreach { r =>
+    r.io.valid := VecInit(cdb.map(_.valid)).asUInt
+    r.io.tags := VecInit(cdb.map(_.bits.tag)); r.io.data := VecInit(cdb.map(_.bits.data))
+  }
+  val preparedCdb = Wire(Vec(3,Valid(new Completion(p))))
+  preparedCdb := cdb
+  preparedCdb(0).valid := xv && (!xd.load || badAddress || bypassLoad) && !xd.muldiv && !xd.store
+  preparedCdb(1).valid := loadReturn && returned.epoch === generations(returned.tag) && live(returned.tag)
+  preparedCdb(2).valid := md.io.rsp.valid
+  // Surviving instructions can depend only on older producers. Recovery
+  // blocks issue/dispatch publication and kills younger entries, so operand
+  // preparation need not wait for the squash boundary comparison.
+  def bypass(tag: UInt, value: UInt): UInt = MuxCase(value,(0 until 3).map(k => (preparedCdb(k).valid && preparedCdb(k).bits.tag === tag) -> preparedCdb(k).bits.data))
+  def wake(tag: UInt): Bool = preparedCdb.map(c => c.valid && c.bits.tag === tag).reduce(_ || _)
   for(i <- 0 until p.rob) {
-    for(k <- 0 until 3) {
-      when(cdb(k).valid && cdb(k).bits.tag === i.U) { done(i) := true.B; values(i) := cdb(k).bits.data }
-    }
+    when(resultWords(i).io.completed) { done(i) := true.B }
     when(xv && xt === i.U && !xd.load && !xd.muldiv) {
       done(i) := true.B; actual(i) := alu.io.next; taken(i) := alu.io.taken
       storeAddr(i) := Mux(xd.branch || xd.jal,xpc+xd.imm,alu.io.addr)
@@ -151,7 +176,7 @@ class Core(p: Config) extends Module {
       (a._1 || b._1,Mux(pickA,a._2,b._2),Mux(pickA,a._3,b._3))
     }
   }
-  val winner = Util.orderTree((0 until p.iq).map(i => (eligible(i),qtag(i),i.U(log2Ceil(p.iq).W))),head,false)
+  val winner = Util.orderTreeWrapped((0 until p.iq).map(i => (eligible(i),qtag(i),i.U(log2Ceil(p.iq).W))),(0 until p.iq).map(i => wrapped(qtag(i))),false)
   val issue = winner._1 && xspace && !flush && !halted
   val qi = winner._3
   when(xComplete) { xv := false.B }
@@ -168,7 +193,7 @@ class Core(p: Config) extends Module {
   def source(rs: UInt, used: Bool): (Bool,UInt,UInt) = {
     val tag = mapping(rs); val waiting = used && rs =/= 0.U && mapped(rs)
     val ready = !waiting || done(tag) || wake(tag)
-    val data = Mux(!used || rs === 0.U,0.U,Mux(waiting,bypass(tag,values(tag)),arch(rs)))
+    val data = Mux(!used || rs === 0.U,0.U,Mux(waiting,bypass(tag,Util.choose(tag,values.toSeq)),Util.choose(rs,arch.toSeq)))
     (ready,data,tag)
   }
   val s1 = source(d.rs1,d.use1); val s2 = source(d.rs2,d.use2)
@@ -177,13 +202,14 @@ class Core(p: Config) extends Module {
     (!d.load || (!unknownStore && loadRequests.io.enq.ready)) && (!d.muldiv || (md.io.req.ready && !(xv && xd.muldiv)))
   when(direct) { xv := true.B }
   // Wide execution payload preparation does not depend on recovery permission.
-  when(xspace) {
-    xd := Mux(winner._1,Util.choose(qi,qd.toSeq),d)
-    xpc := Mux(winner._1,Util.choose(qi,qpc.toSeq),fetch.io.out.bits.pc)
-    xt := Mux(winner._1,Util.choose(qi,qtag.toSeq),tail)
-    xa := Mux(winner._1,Mux(qar(qi),Util.choose(qi,qa.toSeq),bypass(qat(qi),qa(qi))),s1._2)
-    xb := Mux(winner._1,Mux(qbr(qi),Util.choose(qi,qb.toSeq),bypass(qbt(qi),qb(qi))),s2._2)
-  }
+  Seq(xdWord,xpcWord,xtWord,xaWord,xbWord,xnWord,xhWord).foreach(_.io.prepare := xspace)
+  xdWord.io.data := Mux(winner._1,Util.choose(qi,qd.toSeq),d).asUInt
+  xpcWord.io.data := Mux(winner._1,Util.choose(qi,qpc.toSeq),fetch.io.out.bits.pc)
+  xtWord.io.data := Mux(winner._1,Util.choose(qi,qtag.toSeq),tail)
+  xaWord.io.data := Mux(winner._1,Mux(qar(qi),Util.choose(qi,qa.toSeq),bypass(qat(qi),qa(qi))),s1._2)
+  xbWord.io.data := Mux(winner._1,Mux(qbr(qi),Util.choose(qi,qb.toSeq),bypass(qbt(qi),qb(qi))),s2._2)
+  xnWord.io.data := Mux(winner._1,Util.choose(qi,qnext.toSeq),fetch.io.out.bits.next)
+  xhWord.io.data := Mux(winner._1,Util.choose(qi,qhistory.toSeq),fetch.io.out.bits.history)
   when(dispatch) {
     generations(tail) := generations(tail)+1.U
     live(tail) := true.B; done(tail) := false.B
@@ -194,8 +220,7 @@ class Core(p: Config) extends Module {
   for(i <- 0 until p.rob) {
     when(!live(i) && tail === i.U) {
       fault(i) := d.illegal; rd(i) := d.rd; writes(i) := d.writes && d.rd =/= 0.U
-      pc(i) := fetch.io.out.bits.pc; inst(i) := fetch.io.out.bits.inst; predicted(i) := fetch.io.out.bits.next
-      history(i) := fetch.io.out.bits.history
+      if(!p.earlyRecovery) { predicted(i) := fetch.io.out.bits.next }
       control(i) := d.branch || d.jal || d.jalr; conditional(i) := d.branch; stores(i) := d.store
       calls(i) := (d.jal || d.jalr) && (d.rd === 1.U || d.rd === 5.U)
       returns(i) := d.jalr && (d.rs1 === 1.U || d.rs1 === 5.U) && d.rd =/= d.rs1
@@ -205,6 +230,7 @@ class Core(p: Config) extends Module {
   for(i <- 0 until p.iq) {
     when(!qvalid(i) && free === i.U) {
       qd(i) := d; qpc(i) := fetch.io.out.bits.pc; qtag(i) := tail
+      qnext(i) := fetch.io.out.bits.next; qhistory(i) := fetch.io.out.bits.history
       qa(i) := s1._2; qar(i) := s1._1; qat(i) := s1._3
       qb(i) := s2._2; qbr(i) := s2._1; qbt(i) := s2._3
     }
@@ -214,10 +240,11 @@ class Core(p: Config) extends Module {
   fetch.io.redirect.valid := (if(p.fastRedirect && p.earlyRecovery) branchMiss else flush)
   fetch.io.redirect.bits := (if(p.fastRedirect && p.earlyRecovery) alu.io.next else if(p.earlyRecovery) recoveryPC else atHead(actual))
   val committedTraining = Wire(new Training)
-  committedTraining.pc := atHead(pc); committedTraining.target := atHead(storeAddr)
+  // Calls already produce their return PC in the value array.
+  committedTraining.pc := retiredValue-4.U; committedTraining.target := atHead(storeAddr)
   committedTraining.taken := atHead(taken); committedTraining.conditional := atHead(conditional)
   committedTraining.call := atHead(calls); committedTraining.ret := atHead(returns)
-  committedTraining.history := atHead(history)
+  committedTraining.history := 0.U
   val trainNow = retire && atHead(control)
   fetch.io.commit.valid := RegNext(trainNow,false.B)
   fetch.io.commit.bits := RegEnable(committedTraining,trainNow)
@@ -227,7 +254,7 @@ class Core(p: Config) extends Module {
   executedTraining.taken := alu.io.taken; executedTraining.conditional := xd.branch
   executedTraining.call := (xd.jal || xd.jalr) && (xd.rd === 1.U || xd.rd === 5.U)
   executedTraining.ret := xd.jalr && (xd.rs1 === 1.U || xd.rs1 === 5.U) && xd.rd =/= xd.rs1
-  executedTraining.history := history(xt)
+  executedTraining.history := xhistory
   val trainExecution = xv && (xd.branch || xd.jal || xd.jalr) && survives(xt)
   fetch.io.train.valid := RegNext(trainExecution,false.B)
   fetch.io.train.bits := RegEnable(executedTraining,trainExecution)
@@ -235,11 +262,13 @@ class Core(p: Config) extends Module {
     assert(!atHead(fault),"Retiring faulting instruction")
     live(head) := false.B; head := head+1.U
     headSelect := Cat(headSelect(p.rob-2,0),headSelect(p.rob-1))
+    wrapped := Mux(headSelect(p.rob-1),0.U,wrapped | headSelect)
     when(atHead(stores) && atHead(storeAddr) === "h80000000".U) { halted := true.B }
   }
   for(r <- 1 until 32) {
+    architecturalWords(r-1).io.commit := retire && atHead(writes)
+    architecturalWords(r-1).io.rd := atHead(rd); architecturalWords(r-1).io.data := retiredValue
     when(retire && atHead(writes) && atHead(rd) === r.U) {
-      arch(r) := atHead(values)
       when(mapped(r) && mapping(r) === head) { mapped(r) := false.B }
     }
     when(dispatch && d.writes && d.rd === r.U) { mapped(r) := true.B; mapping(r) := tail }
@@ -254,17 +283,17 @@ class Core(p: Config) extends Module {
   }
   for(c <- 0 until p.checkpoints) {
     for(r <- 1 until 32) {
-      when(retire && atHead(writes) && atHead(rd) === r.U && cpMapping(c)(r) === head) { cpMapped(c)(r) := false.B }
+      when(retire && atHead(writes) && atHead(rd) === r.U && cpMapping(c)(r) === checkpointHeads(c).io.value) { cpMapped(c)(r) := false.B }
       // Prepare only an unallocated checkpoint; dispatch publishes cpValid.
       when(!cpValid(c) && freeCheckpoint === c.U) {
         val newWriter = d.writes && d.rd === r.U
         val savedTag = Mux(newWriter,tail,mapping(r))
         cpMapping(c)(r) := savedTag
-        cpMapped(c)(r) := (newWriter || mapped(r)) && !(retire && atHead(writes) && atHead(rd) === r.U && savedTag === head)
+        cpMapped(c)(r) := (newWriter || mapped(r)) && !(retire && atHead(writes) && atHead(rd) === r.U && savedTag === checkpointHeads(c).io.value)
       }
     }
     when(dispatch && (d.branch || d.jal || d.jalr) && freeCheckpoint === c.U) { cpValid(c) := true.B; cpOwner(c) := tail }
-    when(xv && (xd.branch || xd.jal || xd.jalr) && alu.io.next === predicted(xt) && branchCheckpoint(xt) === c.U) { cpValid(c) := false.B }
+    when(xv && (xd.branch || xd.jal || xd.jalr) && alu.io.next === xnext && branchCheckpoint(xt) === c.U) { cpValid(c) := false.B }
     when(flush && (if(p.earlyRecovery) (younger(cpOwner(c)) || cpOwner(c) === recoveryTag) else true.B)) { cpValid(c) := false.B }
   }
   when(dispatch =/= retire) { count := Mux(dispatch,count+1.U,count-1.U) }
@@ -275,7 +304,7 @@ class Core(p: Config) extends Module {
       for(i <- 0 until p.rob) { when(younger(i.U(p.tagBits.W))) { live(i) := false.B; done(i) := false.B } }
       for(i <- 0 until p.iq) { when(younger(qtag(i))) { qvalid(i) := false.B } }
     } else {
-      head := 0.U; headSelect := 1.U; tail := 0.U; count := 0.U; xv := false.B
+      head := 0.U; headSelect := 1.U; wrapped := 0.U; tail := 0.U; count := 0.U; xv := false.B
       for(i <- 0 until p.rob) { live(i) := false.B; done(i) := false.B }
       for(i <- 0 until p.iq) { qvalid(i) := false.B }
     }
