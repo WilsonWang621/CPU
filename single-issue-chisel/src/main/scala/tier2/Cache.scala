@@ -133,7 +133,7 @@ class DataCache(p: Config) extends Module {
     val loadReady = Output(Vec(p.banks,Bool()))
     val store = Flipped(Valid(new MemReq))
     val storeReady = Output(Bool())
-    val squash = Input(Bool()); val boundary = Input(UInt(p.tagBits.W)); val wrapped = Input(UInt(p.rob.W))
+    val squash = Input(Bool()); val boundary = Input(UInt(p.tagBits.W)); val wrapped = Input(UInt(p.rob.W)); val squashMask = Input(UInt(p.rob.W))
   })
   val b = log2Ceil(p.banks); val o = log2Ceil(p.lineBytes)
   val bank = if(p.banks == 1) 0.U else io.req.bits.mem.addr(o+b-1,o)
@@ -174,7 +174,7 @@ class DataCache(p: Config) extends Module {
   io.mem <> requests.io.out; io.rsp <> responses.io.out
   for(i <- 0 until p.banks) {
     val c = caches(i); val metadata = Module(new CacheOwner(p))
-    metadata.io.squash := io.squash; metadata.io.boundary := io.boundary; metadata.io.wrapped := io.wrapped
+    metadata.io.squash := io.squash; metadata.io.boundary := io.boundary; metadata.io.wrapped := io.wrapped; metadata.io.squashMask := io.squashMask
     val real = io.req.valid && bank === i.U && (if(p.storeEntries > 0) !io.req.bits.mem.write else true.B)
     val pendingStore = WireDefault(false.B); val storeReady = WireDefault(false.B)
     val queuedStore = WireDefault(0.U.asTypeOf(new MemReq))

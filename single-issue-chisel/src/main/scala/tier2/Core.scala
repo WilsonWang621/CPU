@@ -72,7 +72,20 @@ class Core(p: Config) extends Module {
   val recoveryValid = RegInit(false.B)
   val recoveryCheckpoint = Reg(UInt(p.checkpoints.W))
   def before(a: UInt,b: UInt): Bool = Mux(wrapped(a) === wrapped(b),a < b,!wrapped(a))
-  def younger(tag: UInt): Bool = before(recoveryTag,tag)
+  val recoveryMask = RegInit(0.U(p.rob.W))
+  // Prepare for the boundary that recoveryTag will contain next cycle.
+  // Circular distance handles free tags allocated at this same edge.
+  val boundaryDistance = (xt-head)(p.tagBits-1,0)
+  recoveryMask := VecInit((0 until p.rob).map(i =>
+    (i.U(p.tagBits.W)-head)(p.tagBits-1,0) > boundaryDistance)).asUInt
+  def younger(tag: UInt): Bool = if(p.registeredSquashMask) recoveryMask(tag) else before(recoveryTag,tag)
+  if(p.debug && p.registeredSquashMask) {
+    for(i <- 0 until p.rob) {
+      when(flush && live(i)) {
+        assert(recoveryMask(i) === before(recoveryTag,i.U(p.tagBits.W)),"Registered recovery mask disagrees with live-tag age")
+      }
+    }
+  }
   def survives(tag: UInt): Bool = !flush || (if(p.earlyRecovery) !younger(tag) else false.B)
   val branchMiss = xv && (xd.branch || xd.jal || xd.jalr) && alu.io.next =/= xnext && survives(xt)
   recoveryValid := branchMiss
@@ -83,8 +96,8 @@ class Core(p: Config) extends Module {
   loadRequests.io.available := dc.io.loadReady; loadRequests.io.live := live.asUInt
   loadRequests.io.head := head
   loadRequests.io.stores := stores.asUInt; loadRequests.io.wrapped := wrapped
-  loadRequests.io.squash := flush; loadRequests.io.boundary := recoveryTag
-  dc.io.squash := flush; dc.io.boundary := recoveryTag; dc.io.wrapped := wrapped
+  loadRequests.io.squash := flush; loadRequests.io.boundary := recoveryTag; loadRequests.io.squashMask := recoveryMask
+  dc.io.squash := flush; dc.io.boundary := recoveryTag; dc.io.wrapped := wrapped; dc.io.squashMask := recoveryMask
   val badAddress = (addressWord.io.value >= "h10000000".U && !(xd.store && addressWord.io.value === "h80000000".U)) ||
     (xd.fn(1,0) === 2.U && addressWord.io.value(1,0) =/= 0.U) || (xd.fn(1,0) === 1.U && addressWord.io.value(0))
   val headStore = count =/= 0.U && atHead(done) && atHead(stores) && !halted
@@ -404,7 +417,7 @@ object Generate extends App {
   val p = Config(rob=n("--rob",16),iq=n("--iq",8),icBytes=n("--ic-bytes",4096),dcBytes=n("--dc-bytes",4096),
     lineBytes=n("--line-bytes",32),ways=n("--ways",2),debug=n("--debug",0) != 0,banks=n("--banks",4),earlyRecovery=n("--early-recovery",1) != 0,
     prefetch=n("--prefetch",1) != 0,btbEntries=n("--btb-entries",128),historyBits=n("--history-bits",1),l0Entries=n("--l0-entries",0),
-    storeEntries=n("--store-entries",0),checkpoints=n("--checkpoints",4),fastRedirect=n("--fast-redirect",0) != 0,storeSlots=n("--store-slots",16),loadEntries=n("--load-entries",8),l0FillStages=n("--l0-fill-stages",0),l0Replacement=n("--l0-replacement",0),ramReadAhead=n("--ram-read-ahead",0) != 0,l0StoreStages=n("--l0-store-stages",0),bankedLoadPayload=n("--banked-load-payload",0) != 0,cacheHierarchy=n("--cache-hierarchy",0) != 0,prefetchTrainStages=n("--prefetch-train-stages",0),trustedLoadCredit=n("--trusted-load-credit",0) != 0,rasWriteStages=n("--ras-write-stages",0))
+    storeEntries=n("--store-entries",0),checkpoints=n("--checkpoints",4),fastRedirect=n("--fast-redirect",0) != 0,storeSlots=n("--store-slots",16),loadEntries=n("--load-entries",8),l0FillStages=n("--l0-fill-stages",0),l0Replacement=n("--l0-replacement",0),ramReadAhead=n("--ram-read-ahead",0) != 0,l0StoreStages=n("--l0-store-stages",0),bankedLoadPayload=n("--banked-load-payload",0) != 0,cacheHierarchy=n("--cache-hierarchy",0) != 0,prefetchTrainStages=n("--prefetch-train-stages",0),trustedLoadCredit=n("--trusted-load-credit",0) != 0,rasWriteStages=n("--ras-write-stages",0),registeredSquashMask=n("--registered-squash-mask",0) != 0)
   _root_.circt.stage.ChiselStage.emitSystemVerilogFile(new StudentTop(p), Array("--target-dir", options.getOrElse("--out","rtl")),
     Array("--disable-all-randomization", "--lowering-options=disallowLocalVariables,disallowPackedArrays"))
 }

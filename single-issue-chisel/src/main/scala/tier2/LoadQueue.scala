@@ -10,7 +10,7 @@ class LoadQueue(p: Config, entries: Int = 4) extends LocalLogic {
     val enq = Flipped(Decoupled(new LoadRequest(p))); val deq = Decoupled(new LoadRequest(p))
     val available = Input(Vec(p.banks,Bool()))
     val candidates = Output(Vec(p.banks,Valid(new LoadRequest(p))))
-    val live = Input(UInt(p.rob.W))
+    val live = Input(UInt(p.rob.W)); val squashMask = Input(UInt(p.rob.W))
     val stores = Input(UInt(p.rob.W)); val wrapped = Input(UInt(p.rob.W))
     val freeCount = Output(UInt(log2Ceil(entries+1).W))
     val head = Input(UInt(p.tagBits.W)); val squash = Input(Bool()); val boundary = Input(UInt(p.tagBits.W))
@@ -21,7 +21,7 @@ class LoadQueue(p: Config, entries: Int = 4) extends LocalLogic {
   io.freeCount := entries.U-PopCount(valid)
   def bank(addr: UInt): UInt = if(p.banks==1) 0.U else addr(log2Ceil(p.lineBytes)+log2Ceil(p.banks)-1,log2Ceil(p.lineBytes))
   def stale(info: LoadInfo): Bool = {
-    val newer = Mux((info.tag < io.head) === (io.boundary < io.head),info.tag > io.boundary,info.tag < io.head)
+    val newer = if(p.registeredSquashMask) io.squashMask(info.tag) else Mux((info.tag < io.head) === (io.boundary < io.head),info.tag > io.boundary,info.tag < io.head)
     // A queued load cannot retire until this queue has issued it. Its tag
     // stays allocated, and squash clears younger rows before tag reuse.
     io.squash && (if(p.earlyRecovery) newer else true.B)
