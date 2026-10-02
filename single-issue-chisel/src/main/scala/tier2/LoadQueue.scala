@@ -37,6 +37,7 @@ class LoadQueue(p: Config, entries: Int = 4) extends LocalLogic {
   // only; it does not feed the scheduler through a full-queue flow bypass.
   io.enq.ready := space
   val flowed = io.enq.fire && !choice._1 && io.deq.fire
+  when(io.deq.fire && !choice._1) { assert(io.enq.fire,"Uncredited flow-through load") }
   for(i <- 0 until entries) {
     when(valid(i) && stale(rows(i).info)) { valid(i) := false.B }
     when(!valid(i) && free === i.U) { rows(i) := io.enq.bits }

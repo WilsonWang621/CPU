@@ -53,9 +53,10 @@ class Core(p: Config) extends Module {
   val qd = Reg(Vec(p.iq,new Decoded)); val qpc = Reg(Vec(p.iq,UInt(32.W)))
   val qnext = Reg(Vec(p.iq,UInt(32.W))); val qhistory = Reg(Vec(p.iq,UInt(2.W)))
   val qtag = Reg(Vec(p.iq,UInt(p.tagBits.W)))
-  val qa = Reg(Vec(p.iq,UInt(32.W))); val qb = Reg(Vec(p.iq,UInt(32.W)))
-  val qat = Reg(Vec(p.iq,UInt(p.tagBits.W))); val qbt = Reg(Vec(p.iq,UInt(p.tagBits.W)))
-  val qar = Reg(Vec(p.iq,Bool())); val qbr = Reg(Vec(p.iq,Bool()))
+  val operandsA = Seq.fill(p.iq)(Module(new OperandEntry(p)))
+  val operandsB = Seq.fill(p.iq)(Module(new OperandEntry(p)))
+  val qa = VecInit(operandsA.map(_.io.data)); val qb = VecInit(operandsB.map(_.io.data))
+  val qar = VecInit(operandsA.map(_.io.ready)); val qbr = VecInit(operandsB.map(_.io.ready))
   val xv = RegInit(false.B)
   val xdWord = Module(new LocalWord((new Decoded).getWidth)); val xpcWord = Module(new LocalWord(32))
   val xtWord = Module(new LocalWord(p.tagBits)); val xaWord = Module(new LocalWord(32)); val xbWord = Module(new LocalWord(32))
@@ -178,10 +179,8 @@ class Core(p: Config) extends Module {
   val eligible = Wire(Vec(p.iq,Bool()))
   for(i <- 0 until p.iq) {
     val olderStore = (0 until p.rob).map(j => live(j) && stores(j) && !done(j) && before(j.U(p.tagBits.W),qtag(i))).reduce(_ || _)
-    eligible(i) := qvalid(i) && (qar(i) || wake(qat(i))) && (qbr(i) || wake(qbt(i))) &&
+    eligible(i) := qvalid(i) && qar(i) && qbr(i) &&
       (!qd(i).load || (!olderStore && loadRequests.io.enq.ready)) && (!qd(i).muldiv || (md.io.req.ready && !(xv && xd.muldiv)))
-    when(!qar(i) && wake(qat(i))) { qar(i) := true.B; qa(i) := bypass(qat(i),qa(i)) }
-    when(!qbr(i) && wake(qbt(i))) { qbr(i) := true.B; qb(i) := bypass(qbt(i),qb(i)) }
   }
   def oldest(xs: Seq[(Bool,UInt,UInt)]): (Bool,UInt,UInt) = {
     if(xs.size == 1) xs.head else {
@@ -206,9 +205,11 @@ class Core(p: Config) extends Module {
     (!(d.branch || d.jal || d.jalr) || checkpointAvailable) && (!d.store || storeSpace)
   def source(rs: UInt, used: Bool): (Bool,UInt,UInt) = {
     val tag = mapping(rs); val waiting = used && rs =/= 0.U && mapped(rs)
-    val ready = !waiting || done(tag) || wake(tag)
-    val data = Mux(!used || rs === 0.U,0.U,Mux(waiting,bypass(tag,Util.choose(tag,values.toSeq)),Util.choose(rs,arch.toSeq)))
-    (ready,data,tag)
+    val operand = Module(new SourceOperand(p))
+    operand.io.used := used && rs =/= 0.U; operand.io.waiting := waiting; operand.io.completed := done(tag)
+    operand.io.tag := tag; operand.io.architectural := Util.choose(rs,arch.toSeq); operand.io.producer := Util.choose(tag,values.toSeq)
+    operand.io.completions := preparedCdb
+    (operand.io.ready,operand.io.data,tag)
   }
   // Only stores reserve address/data slots; unrelated ROB instructions do
   // not carry 68 unused payload bits. Squash releases only younger owners.
@@ -233,10 +234,10 @@ class Core(p: Config) extends Module {
   xdWord.io.data := preparedDecoded.asUInt
   xpcWord.io.data := Mux(winner._1,Util.choose(qi,qpc.toSeq),fetch.io.out.bits.pc)
   xtWord.io.data := Mux(winner._1,Util.choose(qi,qtag.toSeq),tail)
-  val preparedA = Mux(winner._1,Mux(qar(qi),Util.choose(qi,qa.toSeq),bypass(qat(qi),qa(qi))),s1._2)
+  val preparedA = Mux(winner._1,Util.choose(qi,qa.toSeq),s1._2)
   xaWord.io.data := preparedA
   addressWord.io.prepare := xspace; addressWord.io.base := preparedA; addressWord.io.immediate := preparedDecoded.imm
-  xbWord.io.data := Mux(winner._1,Mux(qbr(qi),Util.choose(qi,qb.toSeq),bypass(qbt(qi),qb(qi))),s2._2)
+  xbWord.io.data := Mux(winner._1,Util.choose(qi,qb.toSeq),s2._2)
   xnWord.io.data := Mux(winner._1,Util.choose(qi,qnext.toSeq),fetch.io.out.bits.next)
   xhWord.io.data := Mux(winner._1,Util.choose(qi,qhistory.toSeq),fetch.io.out.bits.history)
   when(dispatch) {
@@ -257,11 +258,14 @@ class Core(p: Config) extends Module {
     }
   }
   for(i <- 0 until p.iq) {
+    for((op,source) <- Seq((operandsA(i),s1),(operandsB(i),s2))) {
+      op.io.prepare := !qvalid(i) && free === i.U
+      op.io.initialData := source._2; op.io.initialTag := source._3; op.io.initialReady := source._1
+      op.io.completions := preparedCdb
+    }
     when(!qvalid(i) && free === i.U) {
       qd(i) := d; qpc(i) := fetch.io.out.bits.pc; qtag(i) := tail
       qnext(i) := fetch.io.out.bits.next; qhistory(i) := fetch.io.out.bits.history
-      qa(i) := s1._2; qar(i) := s1._1; qat(i) := s1._3
-      qb(i) := s2._2; qbr(i) := s2._1; qbt(i) := s2._3
     }
   }
   retire := count =/= 0.U && atHead(done) && !halted && (!atHead(stores) || (if(p.storeEntries > 0) dc.io.storeReady else dc.io.req.ready))
