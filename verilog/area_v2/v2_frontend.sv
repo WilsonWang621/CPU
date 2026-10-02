@@ -153,7 +153,7 @@ module v2_frontend #(
       incoming[p].history=fetch_history[p];
       incoming[p].inst=fetch_inst[p];incoming[p].iv=1;
     end
-    if(!stop && !redirect && !blocked && int'(count)-int'(pop_count)<QUEUE_ENTRIES) begin
+    if(!stop && !redirect && !blocked && int'(count)<QUEUE_ENTRIES) begin
       if(pc[1:0]!=0 || pc>=RAM_BYTES) begin
         incoming[0].fault=pc[1:0]!=0 ? FAULT_FETCH_ALIGN:FAULT_FETCH_RANGE;
         incoming[0].iv=0;incoming[0].inst=0;push=1;next_blocked=1;
@@ -162,7 +162,7 @@ module v2_frontend #(
         if(word_error[0]) begin
           incoming[0].fault=FAULT_FETCH_BUS;incoming[0].iv=0;incoming[0].inst=0;next_blocked=1;
         end else if(prediction[0]==sequential_pc[0] && pc[4:2]!=7 && word_ready[1] &&
-                    int'(count)-int'(pop_count)<QUEUE_ENTRIES-1) begin
+                    int'(count)<QUEUE_ENTRIES-1) begin
           push=2;next_pc=prediction[1];
           if(word_error[1]) begin
             incoming[1].fault=FAULT_FETCH_BUS;incoming[1].iv=0;incoming[1].inst=0;next_blocked=1;
@@ -231,9 +231,9 @@ module v2_frontend #(
   for(genvar row=0;row<QUEUE_ENTRIES;row=row+1) begin: queue_write
     always_ff @(posedge clk)
       for(integer p=0;p<2;p=p+1)
-        // Only start-of-cycle free slots are prepared. A full queue can still
-        // push on a pop edge; such a reused slot requires the actual push.
-        if((int'(count)+p<QUEUE_ENTRIES || (!rst && !redirect && int'(push)>p)) &&
+        // Only start-of-cycle free slots are prepared and published. This
+        // keeps backend pop decisions off the wide FIFO payload write path.
+        if(int'(count)+p<QUEUE_ENTRIES &&
            QW'(tail+QW'(p))==QW'(row)) fifo[row]<=incoming[p];
   end
   for(genvar row=0;row<LINES;row=row+1) begin: tag_write

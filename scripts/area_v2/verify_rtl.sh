@@ -15,6 +15,8 @@ iverilog -g2012 -s v2_frontend_target_tb -o "$out/frontend_target" tests/rtl/v2_
 vvp "$out/frontend_target"
 iverilog -g2012 -s v2_frontend_sequential_tb -o "$out/frontend_sequential" tests/rtl/v2_frontend_sequential_tb.sv verilog/area_v2_core.v
 vvp "$out/frontend_sequential"
+iverilog -g2012 -s v2_predictor_read_tb -o "$out/predictor" tests/rtl/v2_predictor_read_tb.sv verilog/area_v2_core.v
+vvp "$out/predictor"
 iverilog -g2012 -s v2_select_wrap_tb -o "$out/select" tests/rtl/v2_select_wrap_tb.sv verilog/area_v2_core.v
 vvp "$out/select"
 iverilog -g2012 -s v2_dcache_write_tb -o "$out/dcache" tests/rtl/v2_dcache_write_tb.sv verilog/area_v2_core.v
