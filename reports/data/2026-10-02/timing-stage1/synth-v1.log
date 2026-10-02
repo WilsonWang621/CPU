@@ -1,0 +1,25 @@
+"python3" "/home/wangwenxuan/ACM/ParaRisc/scripts/synth.py" --filelist "verilog/filelist.f" --out "build/timing-stage1/synth-v1" \
+	--mode "opt" --clock-period "2.0" \
+	--appimage "/home/wangwenxuan/ACM/ParaRisc/cpu2026-tools-x86_64.AppImage"  \
+	  \
+	
+Warning: Replacing memory \words with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_l0.sv:68
+Warning: Replacing memory \counters with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_frontend.sv:36
+Warning: Replacing memory \dest with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_backend.sv:337, /home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_backend.sv:322
+Synthesis mode: opt (flattened and optimized)
+
+Total area:           25,742.817 um^2
+  Combinational:      6,729.953 um^2
+  Sequential:         4,221.493 um^2
+  SRAM:               14,791.370 um^2
+
+Estimated frequency:  77.99 MHz
+Minimum period:       12.8223 ns
+Clock target:         2.000 ns
+Worst setup slack:    -10.8214 ns
+
+Critical path:
+  _181172_/QN
+    -> _195257_/D
+
+Reports: /home/wangwenxuan/ACM/ParaRisc/build/timing-stage1/synth-v1/opt/report.txt, report.json, timing.rpt

@@ -1,0 +1,172 @@
+{
+  "scope": "Small complete CPU generic check, source-root snapshot, output path contains spaces; direct ABC default without dc2 or bit opt_merge; not PPA acceptance",
+  "metadata": {
+    "rtl_commit": "69b5bb32a3bcbdbd0f8a023c72e45da7fb9745ac",
+    "source_root": "/home/pxy/cpu/build/core-fast-age",
+    "commit_scope": "workspace Git context; exact synthesis inputs are identified by sources_sha256",
+    "sources_sha256": {
+      "rtl/cpu_pkg.sv": "091cff8f3e304844564d9524e9702f2228119a792cb7e235a61887c973c21aac",
+      "rtl/alu.sv": "7f65cbac4545a79461a116ff09d75ebc86e3c858e0ca7e0265fc8d1c8def9b1a",
+      "rtl/branch_predictor.sv": "a7cb35108743f8ca47b1fe76e4a6b78343e51c62d3aa536687956c6b393c65bc",
+      "rtl/branch_unit.sv": "24f48d8a96a17af442d46e5977ece5be4664bdf42a5527de5dc4021a3acc8bd5",
+      "rtl/cache.sv": "f0f82e4c0905aa2bbf220f418a520705bc0d76e307b614cfd0e66ffb813ecf3e",
+      "rtl/core.sv": "9bd4ad70ad4dbbf7a5b5c5aaefeccbec46560cc86702e27a9a07f8721ce25bb8",
+      "rtl/cpu_top.sv": "725ee97d9c1daf053b7444f0f692eb963cd5167cd0b244c769d7be3adbbebdb8",
+      "rtl/decoder.sv": "ded522812f105f78d7e4c38a7f38d1484f54149547dc1e853bba92ca51ea5158",
+      "rtl/frontend.sv": "72064d5a363f8b85cf41b1add3ff3be258ccee3471d18691a5905758affcbb6d",
+      "rtl/memory_controller.sv": "eed1ac5d2adab83e127c5514b939120305e0d936b65c1d8e0806a9c05b254a87",
+      "rtl/muldiv.sv": "43ffbbe324a7797f84fbb0ab04ff4b83959287730c6a7e84d805d8e5290071d8"
+    },
+    "frontend": "read_slang --best-effort-hierarchy --no-implicit-memories",
+    "input_language": "verilog-2005",
+    "bit_optimization": "ABC topological structural hashing; optional explicit rewriting; no global bit opt_merge",
+    "export": {
+      "sv2v": "sv2v v0.0.13",
+      "command": [
+        "/home/pxy/cpu/build/tools/sv2v-Linux/sv2v",
+        "-DSYNTHESIS",
+        "-E",
+        "Always",
+        "/home/pxy/cpu/build/synthesis direct smoke/source/cpu_pkg.sv",
+        "/home/pxy/cpu/build/synthesis direct smoke/source/alu.sv",
+        "/home/pxy/cpu/build/synthesis direct smoke/source/branch_predictor.sv",
+        "/home/pxy/cpu/build/synthesis direct smoke/source/branch_unit.sv",
+        "/home/pxy/cpu/build/synthesis direct smoke/source/cache.sv",
+        "/home/pxy/cpu/build/synthesis direct smoke/source/core.sv",
+        "/home/pxy/cpu/build/synthesis direct smoke/source/cpu_top.sv",
+        "/home/pxy/cpu/build/synthesis direct smoke/source/decoder.sv",
+        "/home/pxy/cpu/build/synthesis direct smoke/source/frontend.sv",
+        "/home/pxy/cpu/build/synthesis direct smoke/source/memory_controller.sv",
+        "/home/pxy/cpu/build/synthesis direct smoke/source/muldiv.sv"
+      ],
+      "sha256": "ac73a928f177b5f3c0ef878ddaa74a474d10337a26dba27ceda78c357fed591a"
+    },
+    "toolchain_lock": {
+      "release": "2026-09-20",
+      "archive": "oss-cad-suite-linux-x64-20260920.tgz",
+      "url": "https://github.com/YosysHQ/oss-cad-suite-build/releases/download/2026-09-20/oss-cad-suite-linux-x64-20260920.tgz",
+      "sha256": "ca71456ac66e2d346377c06575f5ee5cfb15d83ede70fe7c7fd9c365ff6d29d4",
+      "size_bytes": 741958273,
+      "publisher_digest_source": "https://github.com/YosysHQ/oss-cad-suite-build/releases/expanded_assets/2026-09-20",
+      "documentation": "https://github.com/YosysHQ/oss-cad-suite-build/blob/main/README.md",
+      "yosys_version": "Yosys 0.69+75 (git sha1 f0b945f63-dirty, Release, Clang /usr/bin/clang++ 21.1.8)",
+      "sv_elab_revision": "b4fd362f4c53dc8ffab6946b9f866a6ea89e366d",
+      "slang_revision": "e222e7dc0250231312f14c37d47404a49df00fe2"
+    },
+    "mode": "check",
+    "parameters": {
+      "FETCH_WIDTH": 1,
+      "RENAME_WIDTH": 1,
+      "ISSUE_WIDTH": 1,
+      "WB_WIDTH": 1,
+      "COMMIT_WIDTH": 1,
+      "PHYS_REGS": 36,
+      "ROB_ENTRIES": 4,
+      "IQ_ENTRIES": 4,
+      "LQ_ENTRIES": 4,
+      "SQ_ENTRIES": 4,
+      "CSB_ENTRIES": 4,
+      "FETCH_QUEUE_ENTRIES": 4,
+      "FETCH_REQUESTS": 2,
+      "ICACHE_BYTES": 128,
+      "ICACHE_WAYS": 1,
+      "DCACHE_BYTES": 128,
+      "DCACHE_WAYS": 1,
+      "I_MSHRS": 1,
+      "D_MSHRS": 1,
+      "MAX_MEM_OUTSTANDING": 4,
+      "BHT_ENTRIES": 16,
+      "BTB_ENTRIES": 16,
+      "RAS_DEPTH": 0,
+      "PREDICTOR_MODE": 0
+    },
+    "yosys": "Yosys 0.69+75 (git sha1 f0b945f63-dirty, Release, Clang /usr/bin/clang++ 21.1.8)",
+    "abc_delay_target_ps": null,
+    "abc_effort": "direct",
+    "library_lock": {
+      "repository": "https://github.com/The-OpenROAD-Project/asap7sc7p5t_28",
+      "commit": "472f7b3f6680ffb1109d6792219e6ea5570c26a0",
+      "corner": "RVT TT 0.7 V 25 C, NLDM",
+      "files": [
+        {
+          "file": "asap7sc7p5t_AO_RVT_TT_nldm_211120.lib.7z",
+          "sha256": "d8ec2c98f0709817cf9bf08ac6bd3363ba086789bdbeb9d1036b3e5b2ea56041"
+        },
+        {
+          "file": "asap7sc7p5t_INVBUF_RVT_TT_nldm_220122.lib.7z",
+          "sha256": "3803bb90380bc39445db17d2f60a2c53bd4baf63ddffbc742ab7ae651dc649e0"
+        },
+        {
+          "file": "asap7sc7p5t_OA_RVT_TT_nldm_211120.lib.7z",
+          "sha256": "6a5204f97ffc242e999bafedf5de95dc06a49624928f98dbb7b415c9e492e689"
+        },
+        {
+          "file": "asap7sc7p5t_SEQ_RVT_TT_nldm_220123.lib.7z",
+          "sha256": "e2895b3b0b32e4d0aa10e04c465b6297eec5a8eb3615058edc8595faeb094138"
+        },
+        {
+          "file": "asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib.7z",
+          "sha256": "78c5e55ec239efe080458532f9f55dff5457c3ce4144d8c9f2bac1a484b634c4"
+        }
+      ]
+    },
+    "debug_outputs_connected": false,
+    "external_ram_included": false,
+    "physical_timing_verified": false,
+    "timeout_seconds": 240,
+    "status": "pass",
+    "wall_seconds": 161.7762819579948,
+    "yosys_status": "pass"
+  },
+  "script": "read_slang --best-effort-hierarchy --top cpu_synth --no-implicit-memories -D SYNTHESIS -f sources.f\ntee -o \"/home/pxy/cpu/build/synthesis direct smoke/elaborated-stat.json\" stat -json\nwrite_rtlil \"/home/pxy/cpu/build/synthesis direct smoke/elaborated.il\"\nhierarchy -check -top cpu_synth\nopt_clean\nopt -fast\nwreduce\nflatten -noscopeinfo\nopt -fast\nwreduce\npeepopt\nopt_clean\nalumacc\nopt -fast\nmemory_share -nosat -nowiden\nmemory_collect\nopt_clean\ntee -o \"/home/pxy/cpu/build/synthesis direct smoke/coarse-stat.json\" stat -json\nwrite_rtlil \"/home/pxy/cpu/build/synthesis direct smoke/coarse.il\"\nmemory_map\nopt -fast\ntechmap\nopt_clean\ntee -o \"/home/pxy/cpu/build/synthesis direct smoke/techmapped-stat.json\" stat -json\nwrite_rtlil \"/home/pxy/cpu/build/synthesis direct smoke/techmapped.il\"\ndffunmap\nabc -exe \"/home/pxy/cpu/build/tools/oss-cad-suite/bin/yosys-abc\" -g simple -script \"+strash;map\"\nopt_clean\nopt_dff -nodffe -nosdff\nopt_clean\ntee -o \"/home/pxy/cpu/build/synthesis direct smoke/generic-stat.json\" stat -json\nwrite_rtlil \"/home/pxy/cpu/build/synthesis direct smoke/generic.il\"\ncheck -assert -nolatches\nwrite_verilog -noattr -simple-lhs \"/home/pxy/cpu/build/synthesis direct smoke/cpu.v\"\ntee -o \"/home/pxy/cpu/build/synthesis direct smoke/stat.json\" stat -json\n",
+  "script_sha256": "bec8a6ea5bcaa2847c9d02dafe8948172f4b055cb6c01a934eb601a86624b194",
+  "log_sha256": "39ff9ef03b65a080a88be1f3b3ce2b16a53dd023154a337c62fcad08974e3ec7",
+  "stat": {
+    "creator": "Yosys 0.69+75 (git sha1 f0b945f63-dirty, Release, Clang /usr/bin/clang++ 21.1.8)",
+    "invocation": "stat -json ",
+    "modules": {
+      "\\cpu_synth": {
+        "num_wires": 310490,
+        "num_wire_bits": 363819,
+        "num_pub_wires": 671,
+        "num_pub_wire_bits": 54000,
+        "num_ports": 14,
+        "num_port_bits": 110,
+        "num_memories": 0,
+        "num_memory_bits": 0,
+        "num_processes": 0,
+        "num_cells": 324909,
+        "num_submodules": 0,
+        "num_cells_by_type": {
+          "$_AND_": 155901,
+          "$_DFF_P_": 15017,
+          "$_MUX_": 97651,
+          "$_NOT_": 10647,
+          "$_OR_": 37646,
+          "$_XOR_": 8047
+        }
+      }
+    },
+    "design": {
+      "num_wires": 310490,
+      "num_wire_bits": 363819,
+      "num_pub_wires": 671,
+      "num_pub_wire_bits": 54000,
+      "num_ports": 14,
+      "num_port_bits": 110,
+      "num_memories": 0,
+      "num_memory_bits": 0,
+      "num_processes": 0,
+      "num_cells": 324909,
+      "num_submodules": 0,
+      "num_cells_by_type": {
+        "$_AND_": 155901,
+        "$_DFF_P_": 15017,
+        "$_MUX_": 97651,
+        "$_NOT_": 10647,
+        "$_OR_": 37646,
+        "$_XOR_": 8047
+      }
+    }
+  }
+}

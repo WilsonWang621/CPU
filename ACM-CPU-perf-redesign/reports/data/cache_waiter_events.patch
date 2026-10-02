@@ -1,0 +1,210 @@
+--- a/cache.sv
++++ b/cache.sv
+@@ -114,28 +114,24 @@
+     wire  w_q_col_done [WAITERS];
+     wire  w_q_col_write [WAITERS];
+     wire  w_q_col_error [WAITERS];
+-    wire [MB-1:0] w_q_col_slot [WAITERS];
+     wire [QB-1:0] w_q_col_next_waiter [WAITERS];
+     wire [WB-1:0] w_q_col_word_index [WAITERS];
+     wire [2:0] w_q_col_count [WAITERS];
+     wire [3:0] w_q_col_wstrb [WAITERS];
+     wire [3:0] w_q_col_error_mask [WAITERS];
+     wire [TAG_BITS-1:0] w_q_col_tag [WAITERS];
+-    wire [LINE_BYTES-1:0] w_q_col_failed_bytes [WAITERS];
+     wire [CPU_BITS-1:0] w_q_col_result [WAITERS];
+     for(genvar q=0;q<WAITERS;q=q+1) begin: waiter_columns
+         assign w_q_col_valid[q]=w_q[q].valid;
+         assign w_q_col_done[q]=w_q[q].done;
+         assign w_q_col_write[q]=w_q[q].write;
+         assign w_q_col_error[q]=w_q[q].error;
+-        assign w_q_col_slot[q]=w_q[q].slot;
+         assign w_q_col_next_waiter[q]=w_q[q].next_waiter;
+         assign w_q_col_word_index[q]=w_q[q].word_index;
+         assign w_q_col_count[q]=w_q[q].count;
+         assign w_q_col_wstrb[q]=w_q[q].wstrb;
+         assign w_q_col_error_mask[q]=w_q[q].error_mask;
+         assign w_q_col_tag[q]=w_q[q].tag;
+-        assign w_q_col_failed_bytes[q]=w_q[q].failed_bytes;
+         assign w_q_col_result[q]=w_q[q].result;
+     end
+     metadata_t response_meta[MAX_MEM_OUTSTANDING];
+@@ -167,13 +163,26 @@
+     logic [QB-1:0] service_waiter,pos;
+     logic [YB-1:0] chosen_way;
+     logic [31:0] req_line;
+-    logic [LINE_BYTES-1:0] req_mask,service_mask,failed_mask;
++    logic [LINE_BYTES-1:0] req_mask,service_mask;
+     logic [WORDS-1:0] needed_words,dirty_words,remaining_words;
+     logic req_bad,victim_busy,hit,rsp_space,any_miss,any_waiter,direct_response;
+     logic service_error,service_write,hit_write;
+     logic [MSHRS-1:0] install_line;
+     logic [CPU_BITS-1:0] hit_result,service_result;
+     logic [LINE_BYTES-1:0] service_failed_bytes;
++    logic waiter_remove,waiter_complete,waiter_allocate,waiter_link;
++    logic [QB-1:0] waiter_remove_index,waiter_complete_index,waiter_allocate_index,waiter_link_index;
++    waiter_t waiter_allocated;
++    wire read_failure=response_fire && !returning.flush && !returning.write && mem_rsp_error;
++    wire [LINE_BYTES-1:0] failed_mask=read_failure ?
++        word_mask(int'(returning.word_index),1) &
++        ~valid_line[line_index(int'(returning.set_index),int'(returning.way))] : '0;
++    wire [LINE_BYTES-1:0] waiter_observed_failures [WAITERS];
++    for(genvar w=0;w<WAITERS;w=w+1) begin: waiter_error_forwarding
++        assign waiter_observed_failures[w]=w_q[w].failed_bytes |
++            ((read_failure && w_q[w].valid && !w_q[w].done && !w_q[w].write && w_q[w].slot==returning.slot)
++                ? failed_mask : {LINE_BYTES{1'b0}});
++    end
+ 
+     function automatic integer line_index(input integer set_index,way_index);
+         line_index=set_index*WAYS+way_index;
+@@ -213,7 +222,9 @@
+ 
+     always_comb begin
+         for(integer m=0;m<MSHRS;m=m+1) m_d[m]=m_q[m];
+-        for(integer w=0;w<WAITERS;w=w+1) w_d[w]=w_q[w];
++        waiter_remove=0;waiter_complete=0;waiter_allocate=0;waiter_link=0;
++        waiter_remove_index='0;waiter_complete_index='0;waiter_allocate_index='0;waiter_link_index='0;
++        waiter_allocated='0;
+         out_d=out_q;
+         if(request_fire) out_d.valid=0;
+         issue_next_d=issue_next_q;service_next_d=service_next_q;result_next_d=result_next_q;
+@@ -236,7 +247,7 @@
+         req_bad=cpu_req_addr[1:0]!=0 || cpu_req_count==0 || cpu_req_count>3'(MAX_CPU_WORDS) ||
+             req_word+int'(cpu_req_count)>WORDS || (cpu_req_write && (READ_ONLY!=0 || cpu_req_count!=1));
+         any_miss=0;any_waiter=0;victim_busy=0;hit=0;direct_response=0;
+-        service_mask='0;failed_mask='0;needed_words='0;dirty_words='0;remaining_words='0;
++        service_mask='0;needed_words='0;dirty_words='0;remaining_words='0;
+         hit_result='0;service_result='0;service_failed_bytes='0;instruction_hit_line='0;instruction_service_line='0;
+         for(integer s=0;s<SETS;s=s+1)
+             for(integer y=0;y<WAYS;y=y+1) locked[s][y]=0;
+@@ -285,7 +296,7 @@
+             rsp_valid_d=1;rsp_data_d=128'(w_q_col_result[done_waiter]);
+             rsp_tag_d=w_q_col_tag[done_waiter];rsp_error_d=w_q_col_error[done_waiter];
+             rsp_error_mask_d=w_q_col_error_mask[done_waiter];
+-            w_d[done_waiter].valid=0;
++            waiter_remove=1;waiter_remove_index=QB'(done_waiter);
+             result_next_d=QB'((done_waiter+1)%WAITERS);
+         end
+ 
+@@ -301,12 +312,6 @@
+                 if(mem_rsp_error && returning.write) begin
+                     m_d[returning.slot].error=1;
+                     flush_error_d=1;
+-                end else if(mem_rsp_error) begin
+-                    failed_mask=word_mask(int'(returning.word_index),1) &
+-                        ~valid_line[line_index(int'(returning.set_index),int'(returning.way))];
+-                    for(integer w=0;w<WAITERS;w=w+1)
+-                        if(w_q_col_valid[w] && !w_q_col_done[w] && !w_q_col_write[w] && w_q_col_slot[w]==returning.slot)
+-                            w_d[w].failed_bytes=w_q_col_failed_bytes[w] | failed_mask;
+                 end
+             end
+         end
+@@ -336,14 +341,14 @@
+             if(service_slot<0 && m_q[idx].count!=0 &&
+                (m_q[idx].phase==M_ERROR || (m_q[idx].phase==M_READ &&
+                 (w_q_col_write[pos] ||
+-                 ((valid_line[line_index(int'(m_q[idx].set_index),int'(m_q[idx].way))] | w_d[pos].failed_bytes)&service_mask)==service_mask)))) begin
++                 ((valid_line[line_index(int'(m_q[idx].set_index),int'(m_q[idx].way))] | waiter_observed_failures[pos])&service_mask)==service_mask)))) begin
+                 service_slot=idx;service_waiter=QB'(pos);
+             end
+         end
+         if(service_slot>=0) begin
+             if(READ_ONLY!=0)
+                 instruction_service_line=LINE_BITS'(data_array[line_index(int'(m_q[service_slot].set_index),int'(m_q[service_slot].way))]);
+-            service_failed_bytes=w_d[service_waiter].failed_bytes;
++            service_failed_bytes=waiter_observed_failures[service_waiter];
+             service_mask=word_mask(int'(w_q_col_word_index[service_waiter]),int'(w_q_col_count[service_waiter]));
+             if(m_q[service_slot].phase==M_ERROR)
+                 service_error_mask=requested_error_mask(int'(w_q_col_count[service_waiter]));
+@@ -361,9 +366,7 @@
+                         if(READ_ONLY!=0)
+                             service_result[32*n+:32]=instruction_service_line[32*(int'(w_q_col_word_index[service_waiter])+n)+:32];
+                         else service_result[32*n+:32]=32'(data_array[data_index(int'(m_q[service_slot].set_index),int'(m_q[service_slot].way),int'(int'(w_q_col_word_index[service_waiter])+n))]);
+-            w_d[service_waiter].done=1;w_d[service_waiter].error=service_error;
+-            w_d[service_waiter].error_mask=service_error_mask;
+-            w_d[service_waiter].result=service_result;
++            waiter_complete=1;waiter_complete_index=service_waiter;
+             m_d[service_slot].head=w_q_col_next_waiter[service_waiter];
+             m_d[service_slot].count=m_d[service_slot].count-1'b1;
+             service_next_d=MB'((service_slot+1)%MSHRS);
+@@ -385,10 +388,10 @@
+                     rsp_error_mask_d=req_bad ? requested_error_mask(int'(cpu_req_count)):4'b0;
+                     rsp_data_d=req_bad ? 128'b0:128'(hit_result);
+                 end else begin
+-                    w_d[free_waiter]='0;w_d[free_waiter].valid=1;w_d[free_waiter].done=1;
+-                    w_d[free_waiter].tag=cpu_req_tag;w_d[free_waiter].error=req_bad;
+-                    w_d[free_waiter].error_mask=req_bad ? requested_error_mask(int'(cpu_req_count)):4'b0;
+-                    w_d[free_waiter].result=req_bad ? {CPU_BITS{1'b0}}:hit_result;
++                    waiter_allocate=1;waiter_allocate_index=QB'(free_waiter);waiter_allocated.valid=1;waiter_allocated.done=1;
++                    waiter_allocated.tag=cpu_req_tag;waiter_allocated.error=req_bad;
++                    waiter_allocated.error_mask=req_bad ? requested_error_mask(int'(cpu_req_count)):4'b0;
++                    waiter_allocated.result=req_bad ? {CPU_BITS{1'b0}}:hit_result;
+                 end
+                 hit_write=!req_bad && cpu_req_write;
+             end else begin
+@@ -408,15 +411,15 @@
+                     end
+                     miss_count_d=miss_count+64'd1;
+                 end
+-                w_d[free_waiter]='0;w_d[free_waiter].valid=1;
+-                w_d[free_waiter].slot=MB'(chosen_slot);w_d[free_waiter].word_index=WB'(req_word);
+-                w_d[free_waiter].count=cpu_req_count;w_d[free_waiter].tag=cpu_req_tag;
+-                w_d[free_waiter].write=cpu_req_write;w_d[free_waiter].wdata=cpu_req_wdata;
+-                w_d[free_waiter].wstrb=cpu_req_wstrb;
++                waiter_allocate=1;waiter_allocate_index=QB'(free_waiter);waiter_allocated.valid=1;
++                waiter_allocated.slot=MB'(chosen_slot);waiter_allocated.word_index=WB'(req_word);
++                waiter_allocated.count=cpu_req_count;waiter_allocated.tag=cpu_req_tag;
++                waiter_allocated.write=cpu_req_write;waiter_allocated.wdata=cpu_req_wdata;
++                waiter_allocated.wstrb=cpu_req_wstrb;
+                 if(response_fire && !returning.flush && !returning.write && mem_rsp_error &&
+-                    int'(returning.slot)==chosen_slot) w_d[free_waiter].failed_bytes=failed_mask;
++                    int'(returning.slot)==chosen_slot) waiter_allocated.failed_bytes=failed_mask;
+                 if(m_d[chosen_slot].count==0) m_d[chosen_slot].head=QB'(free_waiter);
+-                else w_d[m_d[chosen_slot].tail].next_waiter=QB'(free_waiter);
++                else begin waiter_link=1;waiter_link_index=m_d[chosen_slot].tail;end
+                 m_d[chosen_slot].tail=QB'(free_waiter);
+                 m_d[chosen_slot].count=m_d[chosen_slot].count+1'b1;
+                 if(!cpu_req_write) begin
+@@ -520,7 +523,6 @@
+     always_ff @(posedge clk) begin
+         if(rst) begin
+             for(integer m=0;m<MSHRS;m=m+1) m_q[m]<='0;
+-            for(integer w=0;w<WAITERS;w=w+1) w_q[w]<='0;
+             for(integer f=0;f<MAX_MEM_OUTSTANDING;f=f+1) response_meta[f]<='0;
+             out_q<='0;response_head<='0;response_tail<='0;response_count<='0;
+             issue_next_q<='0;service_next_q<='0;result_next_q<='0;
+@@ -529,7 +531,6 @@
+             flush_cursor_q<='0;flush_set_q<='0;flush_way_q<='0;flush_words_q<='0;
+         end else begin
+             for(integer m=0;m<MSHRS;m=m+1) m_q[m]<=m_d[m];
+-            for(integer w=0;w<WAITERS;w=w+1) w_q[w]<=w_d[w];
+             out_q<=out_d;issue_next_q<=issue_next_d;service_next_q<=service_next_d;result_next_q<=result_next_d;
+             cpu_rsp_valid<=rsp_valid_d;cpu_rsp_data<=rsp_data_d;cpu_rsp_tag<=rsp_tag_d;cpu_rsp_error<=rsp_error_d;
+             cpu_rsp_error_mask<=rsp_error_mask_d;
+@@ -547,6 +548,26 @@
+             if(response_fire)
+                 response_head<=int'(response_head)==MAX_MEM_OUTSTANDING-1 ? '0:response_head+1'b1;
+ 
++        end
++    end
++
++    // Each waiter has a fixed row write path. Preserve the original priority:
++    // response dequeue, read-error forwarding, service, allocation, tail link.
++    for(genvar w=0;w<WAITERS;w=w+1) begin: waiter_updates
++        always_comb begin
++            w_d[w]=w_q[w];
++            if(waiter_remove && waiter_remove_index==QB'(w)) w_d[w].valid=0;
++            w_d[w].failed_bytes=waiter_observed_failures[w];
++            if(waiter_complete && waiter_complete_index==QB'(w)) begin
++                w_d[w].done=1;w_d[w].error=service_error;
++                w_d[w].error_mask=service_error_mask;w_d[w].result=service_result;
++            end
++            if(waiter_allocate && waiter_allocate_index==QB'(w)) w_d[w]=waiter_allocated;
++            if(waiter_link && waiter_link_index==QB'(w)) w_d[w].next_waiter=waiter_allocate_index;
++        end
++        always_ff @(posedge clk) begin
++            if(rst) w_q[w]<='0;
++            else w_q[w]<=w_d[w];
+         end
+     end
+ 

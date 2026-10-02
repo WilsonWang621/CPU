@@ -1,0 +1,240 @@
+{
+  "purpose": "Functional validation of the frozen free-select prototype with production f0 cache, before later forwarding/cache integration.",
+  "source_origin": "build/core-free-select/rtl",
+  "snapshot": "build/validation-free-select/source",
+  "rtl_sha256": {
+    "rtl/alu.sv": "7f65cbac4545a79461a116ff09d75ebc86e3c858e0ca7e0265fc8d1c8def9b1a",
+    "rtl/branch_predictor.sv": "a7cb35108743f8ca47b1fe76e4a6b78343e51c62d3aa536687956c6b393c65bc",
+    "rtl/branch_unit.sv": "24f48d8a96a17af442d46e5977ece5be4664bdf42a5527de5dc4021a3acc8bd5",
+    "rtl/cache.sv": "f0f82e4c0905aa2bbf220f418a520705bc0d76e307b614cfd0e66ffb813ecf3e",
+    "rtl/core.sv": "7b926959f9a280a7d768da84698185d2277d42e79f9fb7bd11385e0bfe506888",
+    "rtl/cpu_pkg.sv": "091cff8f3e304844564d9524e9702f2228119a792cb7e235a61887c973c21aac",
+    "rtl/cpu_top.sv": "725ee97d9c1daf053b7444f0f692eb963cd5167cd0b244c769d7be3adbbebdb8",
+    "rtl/decoder.sv": "ded522812f105f78d7e4c38a7f38d1484f54149547dc1e853bba92ca51ea5158",
+    "rtl/frontend.sv": "72064d5a363f8b85cf41b1add3ff3be258ccee3471d18691a5905758affcbb6d",
+    "rtl/memory_controller.sv": "eed1ac5d2adab83e127c5514b939120305e0d936b65c1d8e0806a9c05b254a87",
+    "rtl/muldiv.sv": "43ffbbe324a7797f84fbb0ab04ff4b83959287730c6a7e84d805d8e5290071d8"
+  },
+  "harness_sha256": {
+    "Makefile": "98dbcc3c003203613cb4df5c327e97c2fbf27c494a5017af0f87376abac9f246",
+    "sim/main.cpp": "48f1c53d41e189a1662753046770c0f88d536b2db4ab1283770caf34d805dc36",
+    "sim/memory_model.h": "f295310f728db3f6c8ddd8cbab5760e096f47d68fd23b22353fba566a87f1a87"
+  },
+  "parameters": {
+    "PHYS_REGS": 64,
+    "ROB_ENTRIES": 32,
+    "IQ_ENTRIES": 24,
+    "LQ_ENTRIES": 16,
+    "SQ_ENTRIES": 16,
+    "CSB_ENTRIES": 16,
+    "FETCH_QUEUE_ENTRIES": 16,
+    "FETCH_REQUESTS": 8,
+    "ICACHE_BYTES": 1024,
+    "DCACHE_BYTES": 4096,
+    "BHT_ENTRIES": 256,
+    "BTB_ENTRIES": 64,
+    "RAS_DEPTH": 4,
+    "PREDICTOR_MODE": 0,
+    "FETCH_WIDTH": 4,
+    "RENAME_WIDTH": 4,
+    "ISSUE_WIDTH": 4,
+    "WB_WIDTH": 4,
+    "COMMIT_WIDTH": 4
+  },
+  "verilator": "Verilator 5.053 devel rev v5.052-141-gc8b8c79ee (mod)",
+  "build_command": [
+    "make",
+    "-C",
+    "/home/pxy/cpu/build/validation-free-select/source",
+    "build",
+    "BUILD_DIR=/home/pxy/cpu/build/validation-free-select",
+    "VERILATOR=/home/pxy/cpu/build/tools/oss-cad-suite/bin/verilator",
+    "JOBS=4",
+    "SIM_FLAGS=--output-groups 0",
+    "PARAMS=-GPHYS_REGS=64 -GROB_ENTRIES=32 -GIQ_ENTRIES=24 -GLQ_ENTRIES=16 -GSQ_ENTRIES=16 -GCSB_ENTRIES=16 -GFETCH_QUEUE_ENTRIES=16 -GFETCH_REQUESTS=8 -GICACHE_BYTES=1024 -GDCACHE_BYTES=4096 -GBHT_ENTRIES=256 -GBTB_ENTRIES=64 -GRAS_DEPTH=4 -GPREDICTOR_MODE=0 -GFETCH_WIDTH=4 -GRENAME_WIDTH=4 -GISSUE_WIDTH=4 -GWB_WIDTH=4 -GCOMMIT_WIDTH=4"
+  ],
+  "build_seconds": 93.92367547100002,
+  "build_returncode": 0,
+  "binary_sha256": "7c403167cfa3779cd6af664e171db7d791722c7637a2a368eb70d2922decd5aa",
+  "assertions": true,
+  "hot_optimization": "O3",
+  "cold_optimization": "O1",
+  "sim_flags": "--output-groups 0",
+  "validation_scripts_sha256": {
+    "scripts/run_tests.py": "552a3b3c558e2d55818e76931e4a82a2ec1d23c853f8b958296d4c0c30d5da1a",
+    "scripts/differential.py": "024f1500b3c112b6e245bc44e092cb6d66a792479739626a31f3b9a72b48f9d1",
+    "scripts/reference.py": "4a9573685dba1b2ce2966f5fbb497b1cc0c76110745786540cc4352b8855eff4",
+    "tests/core/generate.py": "2aa982f811a86de6539b45629ee1bd55a417fc1fbcba1ccbbdd1dd86c35654ee",
+    "tests/lsu/run.py": "a6dae98db75ff84bc8bcb9d0c1b44d9cd5335623605c726ef8e6271a55a2d81f",
+    "tests/lsu/generate.py": "354561ceef502bc4ebfbbbda32a26e219d9d18633cd669662d0a2b165e314c1b",
+    "tests/lsu/forward_owner_replay.py": "aee4bf5b0fdb8f773a2222b7639bd508e752c10437b636db268f8802f72cc49e",
+    "tests/system/generate.py": "e56946789138b53f5d2d8e60a6f2577aca574c93f6c306012b44f85101be9356"
+  },
+  "validation_commands": [
+    {
+      "suite": "performance",
+      "command": [
+        "python3",
+        "scripts/run_tests.py",
+        "perf_median",
+        "perf_multiply",
+        "perf_qsort",
+        "perf_rsort",
+        "perf_towers",
+        "perf_vvadd",
+        "--binary",
+        "/home/pxy/cpu/build/validation-free-select/cpu_sim",
+        "--latency",
+        "20",
+        "--differential",
+        "--jobs",
+        "2",
+        "--output",
+        "/home/pxy/cpu/build/validation-free-select/performance"
+      ],
+      "returncode": 0,
+      "seconds": 6.468203586999152
+    },
+    {
+      "suite": "core",
+      "command": [
+        "python3",
+        "scripts/run_tests.py",
+        "--root",
+        "/home/pxy/cpu/build/validation-free-select/core-cases",
+        "--binary",
+        "/home/pxy/cpu/build/validation-free-select/cpu_sim",
+        "--latency",
+        "3",
+        "--differential",
+        "--jobs",
+        "2",
+        "--output",
+        "/home/pxy/cpu/build/validation-free-select/core"
+      ],
+      "returncode": 0,
+      "seconds": 0.2501229539993801
+    },
+    {
+      "suite": "lsu",
+      "command": [
+        "python3",
+        "tests/lsu/run.py",
+        "--binary",
+        "/home/pxy/cpu/build/validation-free-select/cpu_sim",
+        "--build-dir",
+        "/home/pxy/cpu/build/validation-free-select/lsu",
+        "--skip-build",
+        "--no-coverage"
+      ],
+      "returncode": 0,
+      "seconds": 3.2653487130010035
+    },
+    {
+      "suite": "owner",
+      "command": [
+        "python3",
+        "tests/lsu/forward_owner_replay.py",
+        "--binary",
+        "/home/pxy/cpu/build/validation-free-select/cpu_sim",
+        "--output",
+        "/home/pxy/cpu/build/validation-free-select/owner"
+      ],
+      "returncode": 0,
+      "seconds": 0.21340228999906685
+    }
+  ],
+  "performance": {
+    "passed": 6,
+    "failed": 0,
+    "latency": 20,
+    "reference": "build/core-parallel-select/performance/summary.json",
+    "reference_snapshot": "build/validation-free-select/reference-summary.json",
+    "reference_sha256": "11fa73d127ca21623ee2ce77740d1eb4a4dcc47e227520e610b082e473bcd633",
+    "excluded_comparison_fields": [
+      "peak_rss_kib",
+      "wall_seconds"
+    ],
+    "nonruntime_metric_differences": [],
+    "total_instructions": 374104,
+    "total_cycles": 342543,
+    "aggregate_ipc": 1.092137337502153,
+    "cases": [
+      {
+        "case": "perf_median",
+        "instructions": 6961,
+        "cycles": 8950,
+        "ipc": 0.7777653631,
+        "load_replay_count": 0,
+        "differential": "pass"
+      },
+      {
+        "case": "perf_multiply",
+        "instructions": 21722,
+        "cycles": 14640,
+        "ipc": 1.483743169,
+        "load_replay_count": 0,
+        "differential": "pass"
+      },
+      {
+        "case": "perf_qsort",
+        "instructions": 139900,
+        "cycles": 146821,
+        "ipc": 0.9528609668,
+        "load_replay_count": 0,
+        "differential": "pass"
+      },
+      {
+        "case": "perf_rsort",
+        "instructions": 195719,
+        "cycles": 165072,
+        "ipc": 1.185658379,
+        "load_replay_count": 0,
+        "differential": "pass"
+      },
+      {
+        "case": "perf_towers",
+        "instructions": 5278,
+        "cycles": 3583,
+        "ipc": 1.473067262,
+        "load_replay_count": 0,
+        "differential": "pass"
+      },
+      {
+        "case": "perf_vvadd",
+        "instructions": 4524,
+        "cycles": 3477,
+        "ipc": 1.301121657,
+        "load_replay_count": 0,
+        "differential": "pass"
+      }
+    ]
+  },
+  "core": {
+    "passed": 16,
+    "latency": 3,
+    "bound_event_coverage_checked": false
+  },
+  "lsu": {
+    "passed": 76,
+    "latencies": [
+      3,
+      20
+    ],
+    "fixed_and_random_waits": true,
+    "bound_event_coverage_checked": false,
+    "per_case_replay_bounds_checked": true
+  },
+  "forward_owner": {
+    "passed": 8,
+    "latencies": [
+      3,
+      20
+    ],
+    "fixed_and_random_waits": true,
+    "bound_event_coverage_checked": false
+  },
+  "checks": "Every run compares retirement against the independent interpreter, exact instruction count/exit value and complete 256 KiB final RAM. All production assertions enabled. Source, harness, binary and validation-script hashes rechecked after runs.",
+  "limitations": "No bound coverage monitor was added and no full 25-program or pi/runtime rerun was requested. These results do not cover later forwarding or cache RTL changes.",
+  "artifacts": "build/validation-free-select"
+}

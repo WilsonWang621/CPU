@@ -1,0 +1,673 @@
+{
+  "snapshot_label": "Integrated LEAN MUL1 before later cache planes/RAS-mask/execute-column refactors",
+  "build_directory": "build/validation-lean-mul1",
+  "binary_sha256": "84d0a9b6441d36b4c061f1bea3cc9a5efe631417fe1a00e076053bf9dbe985bd",
+  "git_head_at_snapshot": "e5204650eb2424e488eac0e99cdae811e1899185",
+  "rtl_sha256": {
+    "rtl/alu.sv": "7f65cbac4545a79461a116ff09d75ebc86e3c858e0ca7e0265fc8d1c8def9b1a",
+    "rtl/branch_predictor.sv": "a943e0cc01f9ed8984fd47c4980716aaf1fe172fd1890e5138d00c2ef3f902e1",
+    "rtl/branch_unit.sv": "24f48d8a96a17af442d46e5977ece5be4664bdf42a5527de5dc4021a3acc8bd5",
+    "rtl/cache.sv": "d1683dcd9831659ddffb79bb61dc828ced6a5d033717e87b97e66d9c3ba9f5bd",
+    "rtl/core.sv": "49b22c7bcf1a4efb0023fbcae939a04787fa4d21dc12982be1e0421094d823d8",
+    "rtl/cpu_pkg.sv": "091cff8f3e304844564d9524e9702f2228119a792cb7e235a61887c973c21aac",
+    "rtl/cpu_top.sv": "cc5e4ccadb6ea17b2acf943f495a90b8eda737a7cfa3dafa50d0bf5bb9a3263d",
+    "rtl/decoder.sv": "ded522812f105f78d7e4c38a7f38d1484f54149547dc1e853bba92ca51ea5158",
+    "rtl/frontend.sv": "fa150eda38cdaab642f05f203a9fb595bdee2b3a5ec0f24013d13fe1c32a4fbd",
+    "rtl/memory_controller.sv": "eed1ac5d2adab83e127c5514b939120305e0d936b65c1d8e0806a9c05b254a87",
+    "rtl/muldiv.sv": "43ffbbe324a7797f84fbb0ab04ff4b83959287730c6a7e84d805d8e5290071d8"
+  },
+  "harness_sha256": {
+    "sim/main.cpp": "48f1c53d41e189a1662753046770c0f88d536b2db4ab1283770caf34d805dc36",
+    "sim/memory_model.h": "f295310f728db3f6c8ddd8cbab5760e096f47d68fd23b22353fba566a87f1a87",
+    "Makefile": "98dbcc3c003203613cb4df5c327e97c2fbf27c494a5017af0f87376abac9f246"
+  },
+  "parameters": {
+    "PHYS_REGS": 64,
+    "ROB_ENTRIES": 32,
+    "IQ_ENTRIES": 24,
+    "LQ_ENTRIES": 16,
+    "SQ_ENTRIES": 16,
+    "CSB_ENTRIES": 16,
+    "FETCH_QUEUE_ENTRIES": 16,
+    "FETCH_REQUESTS": 8,
+    "ICACHE_BYTES": 1024,
+    "DCACHE_BYTES": 4096,
+    "BHT_ENTRIES": 256,
+    "BTB_ENTRIES": 64,
+    "RAS_DEPTH": 4,
+    "PREDICTOR_MODE": 0,
+    "FETCH_WIDTH": 4,
+    "RENAME_WIDTH": 4,
+    "ISSUE_WIDTH": 4,
+    "WB_WIDTH": 4,
+    "COMMIT_WIDTH": 4
+  },
+  "toolchain": {
+    "verilator": "Verilator 5.053 devel rev v5.052-141-gc8b8c79ee (mod)",
+    "hot": "O3",
+    "global": "O3",
+    "cold": "O1",
+    "sim_flags": [
+      "--output-groups",
+      "0"
+    ],
+    "build_seconds": 103.64519525299693
+  },
+  "supplied_programs": {
+    "latency3": {
+      "passed": 25,
+      "failed": 0
+    },
+    "latency20": {
+      "passed": 25,
+      "failed": 0
+    },
+    "checks": [
+      "every retired instruction compared against independent interpreter",
+      "exact instruction count and exit value",
+      "all 256 KiB final RAM",
+      "retirement-prefix and external bus protocol assertions",
+      "post-halt stability",
+      "retirement histogram and fixed-latency transaction accounting"
+    ],
+    "input_manifest_sha256": "5fd9b963c9c532c6cb6fc39f3c1c2903a333da090950cde2353623cfe2d8a7f8"
+  },
+  "system_random": {
+    "passed": 29,
+    "failed": 0,
+    "latency": 20,
+    "random_wait": 7,
+    "request_wait": 2,
+    "seed": 19,
+    "max_outstanding": 64
+  },
+  "performance": {
+    "3": {
+      "instructions": 374104,
+      "cycles": 254383,
+      "aggregate_ipc": 1.4706328646175255,
+      "arithmetic_mean_ipc": 1.5050918949499998,
+      "geometric_mean_ipc": 1.4525000968447876,
+      "cases": [
+        {
+          "case": "perf_median",
+          "instructions": 6961,
+          "cycles": 7236,
+          "ipc": 0.9619955777,
+          "branch_misses": 546,
+          "load_replay_count": 0,
+          "icache_misses": 13,
+          "dcache_misses": 152,
+          "memory_requests": 1315,
+          "memory_writes": 402,
+          "memory_pending_cycles": 1570,
+          "memory_transaction_cycles": 3942,
+          "memory_peak_outstanding": 3,
+          "retire_cycles_0": 3859,
+          "retire_cycles_1": 1508,
+          "retire_cycles_2": 901,
+          "retire_cycles_3": 221,
+          "retire_cycles_4": 747
+        },
+        {
+          "case": "perf_multiply",
+          "instructions": 21722,
+          "cycles": 14184,
+          "ipc": 1.53144388,
+          "branch_misses": 666,
+          "load_replay_count": 0,
+          "icache_misses": 15,
+          "dcache_misses": 53,
+          "memory_requests": 540,
+          "memory_writes": 107,
+          "memory_pending_cycles": 632,
+          "memory_transaction_cycles": 1617,
+          "memory_peak_outstanding": 3,
+          "retire_cycles_0": 4010,
+          "retire_cycles_1": 3292,
+          "retire_cycles_2": 3130,
+          "retire_cycles_3": 2838,
+          "retire_cycles_4": 914
+        },
+        {
+          "case": "perf_qsort",
+          "instructions": 139900,
+          "cycles": 129957,
+          "ipc": 1.076509923,
+          "branch_misses": 10304,
+          "load_replay_count": 0,
+          "icache_misses": 21,
+          "dcache_misses": 1149,
+          "memory_requests": 12359,
+          "memory_writes": 3081,
+          "memory_pending_cycles": 14878,
+          "memory_transaction_cycles": 37074,
+          "memory_peak_outstanding": 3,
+          "retire_cycles_0": 68389,
+          "retire_cycles_1": 22803,
+          "retire_cycles_2": 14756,
+          "retire_cycles_3": 8451,
+          "retire_cycles_4": 15558
+        },
+        {
+          "case": "perf_rsort",
+          "instructions": 195719,
+          "cycles": 97217,
+          "ipc": 2.013217853,
+          "branch_misses": 37,
+          "load_replay_count": 0,
+          "icache_misses": 33,
+          "dcache_misses": 8557,
+          "memory_requests": 37579,
+          "memory_writes": 13320,
+          "memory_pending_cycles": 48054,
+          "memory_transaction_cycles": 112734,
+          "memory_peak_outstanding": 3,
+          "retire_cycles_0": 35163,
+          "retire_cycles_1": 9961,
+          "retire_cycles_2": 6410,
+          "retire_cycles_3": 9794,
+          "retire_cycles_4": 35889
+        },
+        {
+          "case": "perf_towers",
+          "instructions": 5278,
+          "cycles": 3404,
+          "ipc": 1.55052879,
+          "branch_misses": 131,
+          "load_replay_count": 0,
+          "icache_misses": 46,
+          "dcache_misses": 12,
+          "memory_requests": 450,
+          "memory_writes": 81,
+          "memory_pending_cycles": 484,
+          "memory_transaction_cycles": 1347,
+          "memory_peak_outstanding": 3,
+          "retire_cycles_0": 1343,
+          "retire_cycles_1": 639,
+          "retire_cycles_2": 373,
+          "retire_cycles_3": 303,
+          "retire_cycles_4": 746
+        },
+        {
+          "case": "perf_vvadd",
+          "instructions": 4524,
+          "cycles": 2385,
+          "ipc": 1.896855346,
+          "branch_misses": 8,
+          "load_replay_count": 0,
+          "icache_misses": 11,
+          "dcache_misses": 151,
+          "memory_requests": 1293,
+          "memory_writes": 300,
+          "memory_pending_cycles": 1487,
+          "memory_transaction_cycles": 3876,
+          "memory_peak_outstanding": 3,
+          "retire_cycles_0": 1049,
+          "retire_cycles_1": 166,
+          "retire_cycles_2": 42,
+          "retire_cycles_3": 238,
+          "retire_cycles_4": 890
+        }
+      ]
+    },
+    "20": {
+      "instructions": 374104,
+      "cycles": 342543,
+      "aggregate_ipc": 1.092137337502153,
+      "arithmetic_mean_ipc": 1.1957027994833334,
+      "geometric_mean_ipc": 1.1649022595228098,
+      "cases": [
+        {
+          "case": "perf_median",
+          "instructions": 6961,
+          "cycles": 8950,
+          "ipc": 0.7777653631,
+          "branch_misses": 547,
+          "load_replay_count": 0,
+          "icache_misses": 13,
+          "dcache_misses": 152,
+          "memory_requests": 1315,
+          "memory_writes": 402,
+          "memory_pending_cycles": 3349,
+          "memory_transaction_cycles": 26280,
+          "memory_peak_outstanding": 20,
+          "retire_cycles_0": 5591,
+          "retire_cycles_1": 1495,
+          "retire_cycles_2": 888,
+          "retire_cycles_3": 214,
+          "retire_cycles_4": 762
+        },
+        {
+          "case": "perf_multiply",
+          "instructions": 21722,
+          "cycles": 14640,
+          "ipc": 1.483743169,
+          "branch_misses": 668,
+          "load_replay_count": 0,
+          "icache_misses": 14,
+          "dcache_misses": 53,
+          "memory_requests": 532,
+          "memory_writes": 107,
+          "memory_pending_cycles": 1326,
+          "memory_transaction_cycles": 10620,
+          "memory_peak_outstanding": 20,
+          "retire_cycles_0": 4540,
+          "retire_cycles_1": 3247,
+          "retire_cycles_2": 3075,
+          "retire_cycles_3": 2787,
+          "retire_cycles_4": 991
+        },
+        {
+          "case": "perf_qsort",
+          "instructions": 139900,
+          "cycles": 146821,
+          "ipc": 0.9528609668,
+          "branch_misses": 10358,
+          "load_replay_count": 0,
+          "icache_misses": 23,
+          "dcache_misses": 1148,
+          "memory_requests": 12375,
+          "memory_writes": 3081,
+          "memory_pending_cycles": 35422,
+          "memory_transaction_cycles": 247480,
+          "memory_peak_outstanding": 20,
+          "retire_cycles_0": 85344,
+          "retire_cycles_1": 22721,
+          "retire_cycles_2": 14699,
+          "retire_cycles_3": 8447,
+          "retire_cycles_4": 15610
+        },
+        {
+          "case": "perf_rsort",
+          "instructions": 195719,
+          "cycles": 165072,
+          "ipc": 1.185658379,
+          "branch_misses": 39,
+          "load_replay_count": 0,
+          "icache_misses": 35,
+          "dcache_misses": 8588,
+          "memory_requests": 37826,
+          "memory_writes": 13394,
+          "memory_pending_cycles": 123255,
+          "memory_transaction_cycles": 756500,
+          "memory_peak_outstanding": 20,
+          "retire_cycles_0": 104997,
+          "retire_cycles_1": 7808,
+          "retire_cycles_2": 6303,
+          "retire_cycles_3": 8551,
+          "retire_cycles_4": 37413
+        },
+        {
+          "case": "perf_towers",
+          "instructions": 5278,
+          "cycles": 3583,
+          "ipc": 1.473067262,
+          "branch_misses": 131,
+          "load_replay_count": 0,
+          "icache_misses": 46,
+          "dcache_misses": 12,
+          "memory_requests": 450,
+          "memory_writes": 81,
+          "memory_pending_cycles": 730,
+          "memory_transaction_cycles": 8980,
+          "memory_peak_outstanding": 20,
+          "retire_cycles_0": 1518,
+          "retire_cycles_1": 639,
+          "retire_cycles_2": 382,
+          "retire_cycles_3": 301,
+          "retire_cycles_4": 743
+        },
+        {
+          "case": "perf_vvadd",
+          "instructions": 4524,
+          "cycles": 3477,
+          "ipc": 1.301121657,
+          "branch_misses": 12,
+          "load_replay_count": 0,
+          "icache_misses": 11,
+          "dcache_misses": 151,
+          "memory_requests": 1293,
+          "memory_writes": 300,
+          "memory_pending_cycles": 2817,
+          "memory_transaction_cycles": 25840,
+          "memory_peak_outstanding": 20,
+          "retire_cycles_0": 2185,
+          "retire_cycles_1": 159,
+          "retire_cycles_2": 5,
+          "retire_cycles_3": 157,
+          "retire_cycles_4": 971
+        }
+      ]
+    }
+  },
+  "comparison_to_previous_integrated_lean": {
+    "reference_binary_sha256": "33c3d55f7db452de9f3438bb10dda17f22a873e6963512de8cb199f27e0c0a2a",
+    "changed_rtl": [
+      "rtl/muldiv.sv"
+    ],
+    "six_performance_non_runtime_differences": []
+  },
+  "pi_no_trace": {
+    "correctness": "pass",
+    "checks": [
+      "exact exit112",
+      "exact3117658 instructions",
+      "full256KiB RAM"
+    ],
+    "rtl_metrics": {
+      "status": "pass",
+      "cycles": 4527665,
+      "instructions": 3117658,
+      "ipc": 0.6885796542,
+      "exit_value": 112,
+      "latency": 20,
+      "seed": 1,
+      "memory_requests": 475549,
+      "memory_writes": 239980,
+      "memory_pending_cycles": 1597883,
+      "memory_transaction_cycles": 9510960,
+      "memory_peak_outstanding": 20,
+      "max_outstanding": 64,
+      "retire_cycles_0": 2832037,
+      "retire_cycles_1": 1126220,
+      "retire_cycles_2": 408,
+      "retire_cycles_3": 285378,
+      "retire_cycles_4": 283622,
+      "wall_seconds": 115.5868643,
+      "peak_rss_kib": 7148,
+      "branch_misses": 216,
+      "icache_misses": 20,
+      "dcache_misses": 30128,
+      "load_replay_count": 0,
+      "fault_pc": 0,
+      "fault_cause": 0
+    },
+    "external_resources": {
+      "user_seconds": 116.93,
+      "system_seconds": 0.47,
+      "wall_seconds": 118.19,
+      "peak_rss_kib": 7148,
+      "exit_status": 0
+    },
+    "monotonic_process_elapsed_seconds": 115.65077881400066,
+    "limit_seconds": 30,
+    "limit_met": false,
+    "unprofiled": true,
+    "concurrency_log_sha256": "9230b138b973013d11a5bc7fb98f5faeabc146c91bd9f9777797ff7b47d4bd6e"
+  },
+  "lsu": {
+    "lean_architectural": {
+      "binary_sha256": "84d0a9b6441d36b4c061f1bea3cc9a5efe631417fe1a00e076053bf9dbe985bd",
+      "parameters": {
+        "PHYS_REGS": 64,
+        "ROB_ENTRIES": 32,
+        "IQ_ENTRIES": 24,
+        "LQ_ENTRIES": 16,
+        "SQ_ENTRIES": 16,
+        "CSB_ENTRIES": 16,
+        "FETCH_QUEUE_ENTRIES": 16,
+        "FETCH_REQUESTS": 8,
+        "ICACHE_BYTES": 1024,
+        "DCACHE_BYTES": 4096,
+        "BHT_ENTRIES": 256,
+        "BTB_ENTRIES": 64,
+        "RAS_DEPTH": 4,
+        "PREDICTOR_MODE": 0,
+        "FETCH_WIDTH": 4,
+        "RENAME_WIDTH": 4,
+        "ISSUE_WIDTH": 4,
+        "WB_WIDTH": 4,
+        "COMMIT_WIDTH": 4
+      },
+      "passed": 76,
+      "coverage_checked": false,
+      "checks": "All retirement/exit/instruction/RAM checks; per-case replay bounds remain enabled"
+    },
+    "default_observed": {
+      "binary_sha256": "4f29ac696b19afc0a89f2facf8d403d619ae4609a2d46782a3d3189ed9047351",
+      "rtl_sha256": {
+        "rtl/alu.sv": "7f65cbac4545a79461a116ff09d75ebc86e3c858e0ca7e0265fc8d1c8def9b1a",
+        "rtl/branch_predictor.sv": "a943e0cc01f9ed8984fd47c4980716aaf1fe172fd1890e5138d00c2ef3f902e1",
+        "rtl/branch_unit.sv": "24f48d8a96a17af442d46e5977ece5be4664bdf42a5527de5dc4021a3acc8bd5",
+        "rtl/cache.sv": "d1683dcd9831659ddffb79bb61dc828ced6a5d033717e87b97e66d9c3ba9f5bd",
+        "rtl/core.sv": "49b22c7bcf1a4efb0023fbcae939a04787fa4d21dc12982be1e0421094d823d8",
+        "rtl/cpu_pkg.sv": "091cff8f3e304844564d9524e9702f2228119a792cb7e235a61887c973c21aac",
+        "rtl/cpu_top.sv": "cc5e4ccadb6ea17b2acf943f495a90b8eda737a7cfa3dafa50d0bf5bb9a3263d",
+        "rtl/decoder.sv": "ded522812f105f78d7e4c38a7f38d1484f54149547dc1e853bba92ca51ea5158",
+        "rtl/frontend.sv": "fa150eda38cdaab642f05f203a9fb595bdee2b3a5ec0f24013d13fe1c32a4fbd",
+        "rtl/memory_controller.sv": "eed1ac5d2adab83e127c5514b939120305e0d936b65c1d8e0806a9c05b254a87",
+        "rtl/muldiv.sv": "43ffbbe324a7797f84fbb0ab04ff4b83959287730c6a7e84d805d8e5290071d8"
+      },
+      "parameters": {
+        "FETCH_WIDTH": 4,
+        "RENAME_WIDTH": 4,
+        "ISSUE_WIDTH": 4,
+        "WB_WIDTH": 4,
+        "COMMIT_WIDTH": 4,
+        "PHYS_REGS": 128,
+        "ROB_ENTRIES": 64,
+        "IQ_ENTRIES": 32,
+        "LQ_ENTRIES": 32,
+        "SQ_ENTRIES": 32,
+        "CSB_ENTRIES": 32,
+        "FETCH_QUEUE_ENTRIES": 32,
+        "ICACHE_BYTES": 4096,
+        "ICACHE_WAYS": 2,
+        "DCACHE_BYTES": 16384,
+        "DCACHE_WAYS": 4,
+        "LINE_BYTES": 32,
+        "I_MSHRS": 4,
+        "D_MSHRS": 8,
+        "BHT_ENTRIES": 2048,
+        "BTB_ENTRIES": 256,
+        "RAS_DEPTH": 16,
+        "RAM_BYTES": 262144,
+        "FETCH_REQUESTS": 16,
+        "MAX_MEM_OUTSTANDING": 64,
+        "PREDICTOR_MODE": 2,
+        "HISTORY_BITS": 8,
+        "PREDICTOR": 0
+      },
+      "passed": 76,
+      "coverage_checked": true,
+      "coverage": {
+        "partial_forwarded": 97,
+        "canceled_responses": 72,
+        "canceled_errors": 27,
+        "canceled_preaccept": 4,
+        "physical_reuse": 39,
+        "rob_reuse": 52,
+        "pending_cancellations": 72,
+        "speculative_bypasses": 346,
+        "replays": 90,
+        "nested_recovery_with_load": 11,
+        "shadow_forwarded": 12,
+        "shadow_replay_avoided": 12,
+        "deferred_wait_release": 4,
+        "wait_owner_reuse": 4
+      },
+      "observer_sha256": "72fbfb62e61e2ce631fe50cfbd2047f362e2caef0fac37245bb4997a040c984e",
+      "purpose": "Larger default queues retain the intended 20-Store pressure/wait-owner-reuse event coverage"
+    }
+  },
+  "profile": {
+    "diagnostic": {
+      "diagnostic_only": true,
+      "cycles_cap": 300000,
+      "sampling_seconds": 5,
+      "frequency": 99,
+      "binary_sha256": "84d0a9b6441d36b4c061f1bea3cc9a5efe631417fe1a00e076053bf9dbe985bd",
+      "command": [
+        "/home/pxy/cpu/build/validation-lean-mul1/cpu_sim",
+        "--image",
+        "/home/pxy/cpu/RISC-V-CPU-2026-Testcases/correctness_pi/program.data",
+        "--expected",
+        "/home/pxy/cpu/RISC-V-CPU-2026-Testcases/correctness_pi/expected.txt",
+        "--memory",
+        "/home/pxy/cpu/RISC-V-CPU-2026-Testcases/correctness_pi/expected.memory",
+        "--instructions",
+        "3117658",
+        "--latency",
+        "20",
+        "--max-outstanding",
+        "64",
+        "--max-cycles",
+        "300000"
+      ],
+      "perf_record_returncode": 0,
+      "sim_returncode": 1,
+      "elapsed_seconds": 7.83460207600001
+    },
+    "sample_count": 497,
+    "lost_samples": 0,
+    "sample_window_seconds": 5,
+    "source_scope": "Separate first-300000-cycle diagnostic; same binary, not part of full timing",
+    "nba_percent": 94.37,
+    "ico_percent": 2.6,
+    "symbols": [
+      {
+        "percent": 16.9,
+        "symbol": "[.] Vcpu_top___024root___nba_sequent__TOP__1(Vcpu_top___024root*)"
+      },
+      {
+        "percent": 11.07,
+        "symbol": "[.] Vcpu_top___024root___nba_sequent__TOP__0(Vcpu_top___024root*)"
+      },
+      {
+        "percent": 9.66,
+        "symbol": "[.] Vcpu_top___024root___nba_sequent__TOP__3(Vcpu_top___024root*)"
+      },
+      {
+        "percent": 8.05,
+        "symbol": "[.] Vcpu_top___024root___nba_sequent__TOP__2(Vcpu_top___024root*)"
+      },
+      {
+        "percent": 7.44,
+        "symbol": "[.] Vcpu_top___024root___nba_sequent__TOP__18(Vcpu_top___024root*)"
+      },
+      {
+        "percent": 6.64,
+        "symbol": "[.] Vcpu_top___024root___nba_sequent__TOP__13(Vcpu_top___024root*)"
+      },
+      {
+        "percent": 6.44,
+        "symbol": "[.] Vcpu_top___024root___nba_sequent__TOP__15(Vcpu_top___024root*)"
+      },
+      {
+        "percent": 5.43,
+        "symbol": "[.] Vcpu_top___024root___nba_sequent__TOP__6(Vcpu_top___024root*)"
+      },
+      {
+        "percent": 5.03,
+        "symbol": "[.] Vcpu_top___024root___nba_sequent__TOP__12(Vcpu_top___024root*)"
+      },
+      {
+        "percent": 4.63,
+        "symbol": "[.] Vcpu_top___024root___nba_sequent__TOP__16(Vcpu_top___024root*)"
+      },
+      {
+        "percent": 4.23,
+        "symbol": "[.] Vcpu_top___024root___nba_sequent__TOP__14(Vcpu_top___024root*)"
+      },
+      {
+        "percent": 3.42,
+        "symbol": "[.] Vcpu_top___024root___nba_sequent__TOP__5(Vcpu_top___024root*)"
+      },
+      {
+        "percent": 2.62,
+        "symbol": "[.] Vcpu_top___024root___nba_sequent__TOP__17(Vcpu_top___024root*)"
+      },
+      {
+        "percent": 1.21,
+        "symbol": "[.] Vcpu_top___024root___nba_sequent__TOP__7(Vcpu_top___024root*)"
+      },
+      {
+        "percent": 0.8,
+        "symbol": "[.] Vcpu_top___024root___ico_comb__TOP__5(Vcpu_top___024root*)"
+      },
+      {
+        "percent": 0.8,
+        "symbol": "[.] Vcpu_top___024root___nba_sequent__TOP__4(Vcpu_top___024root*)"
+      },
+      {
+        "percent": 0.8,
+        "symbol": "[.] pthread_mutex_trylock@@GLIBC_2.34"
+      },
+      {
+        "percent": 0.6,
+        "symbol": "[.] Vcpu_top___024root___ico_comb__TOP__10(Vcpu_top___024root*)"
+      },
+      {
+        "percent": 0.4,
+        "symbol": "[.] Vcpu_top___024root___ico_comb__TOP__4(Vcpu_top___024root*)"
+      },
+      {
+        "percent": 0.4,
+        "symbol": "[.] Vcpu_top___024root___nba_sequent__TOP__10(Vcpu_top___024root*)"
+      },
+      {
+        "percent": 0.4,
+        "symbol": "[.] Vcpu_top___024root___nba_sequent__TOP__9(Vcpu_top___024root*)"
+      },
+      {
+        "percent": 0.4,
+        "symbol": "[.] Vcpu_top___024root___trigger_clear__act(VlUnpacked<unsigned long, 1ul>&)"
+      },
+      {
+        "percent": 0.4,
+        "symbol": "[.] main"
+      },
+      {
+        "percent": 0.2,
+        "symbol": "[.] Vcpu_top::evalAct()"
+      },
+      {
+        "percent": 0.2,
+        "symbol": "[.] Vcpu_top::evalIco(bool)"
+      },
+      {
+        "percent": 0.2,
+        "symbol": "[.] Vcpu_top::evalNba()"
+      },
+      {
+        "percent": 0.2,
+        "symbol": "[.] Vcpu_top___024root___eval_body__ico(Vcpu_top___024root*)"
+      },
+      {
+        "percent": 0.2,
+        "symbol": "[.] Vcpu_top___024root___ico_comb__TOP__6(Vcpu_top___024root*)"
+      },
+      {
+        "percent": 0.2,
+        "symbol": "[.] Vcpu_top___024root___ico_comb__TOP__7(Vcpu_top___024root*)"
+      },
+      {
+        "percent": 0.2,
+        "symbol": "[.] Vcpu_top___024root___ico_comb__TOP__8(Vcpu_top___024root*)"
+      },
+      {
+        "percent": 0.2,
+        "symbol": "[.] Vcpu_top___024root___ico_comb__TOP__9(Vcpu_top___024root*)"
+      },
+      {
+        "percent": 0.2,
+        "symbol": "[.] VlDeleter::deleteAll()"
+      },
+      {
+        "percent": 0.2,
+        "symbol": "[.] malloc"
+      },
+      {
+        "percent": 0.2,
+        "symbol": "[.] std::__basic_file<char>::is_open() const"
+      }
+    ],
+    "finding": "TOP1 hot byte offsets mapped by compiled offsetof to dcache.g_set[21..31].g_way[*].installing; many sampled tests/branches scan the per-line MSHR installation mask. valid_bytes reads in generated C++ use one/two indexed32-bit words, so the synthesis-wide shift does not directly imply a4096-bit software shift.",
+    "evidence_paths": [
+      "build/validation-lean-mul1/pi-profile/perf.data",
+      "build/validation-lean-mul1/pi-profile/top1-annotate.txt",
+      "build/validation-lean-mul1/pi-profile/offsets.txt"
+    ]
+  }
+}

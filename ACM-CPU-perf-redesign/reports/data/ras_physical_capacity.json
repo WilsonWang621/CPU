@@ -1,0 +1,186 @@
+{
+  "scope": "RAS_DEPTH controls stored snapshot payload bits at predictor, frontend request/FQ and core register inputs, preserving fixed public512-bit snapshots and all fetch/recovery cycles.",
+  "sources_sha256": {
+    "rtl/cpu_pkg.sv": "091cff8f3e304844564d9524e9702f2228119a792cb7e235a61887c973c21aac",
+    "rtl/branch_predictor.sv": "a7cb35108743f8ca47b1fe76e4a6b78343e51c62d3aa536687956c6b393c65bc",
+    "rtl/frontend.sv": "72064d5a363f8b85cf41b1add3ff3be258ccee3471d18691a5905758affcbb6d",
+    "rtl/core.sv": "352a51ee91d8afd99fcb926b81c12f3e19e7d182ddbc3488304559275ccd02b3"
+  },
+  "baseline_sources_sha256": {
+    "rtl/cpu_pkg.sv": "091cff8f3e304844564d9524e9702f2228119a792cb7e235a61887c973c21aac",
+    "rtl/branch_predictor.sv": "a943e0cc01f9ed8984fd47c4980716aaf1fe172fd1890e5138d00c2ef3f902e1",
+    "rtl/frontend.sv": "fa150eda38cdaab642f05f203a9fb595bdee2b3a5ec0f24013d13fe1c32a4fbd",
+    "rtl/core.sv": "0a0407e64293b8e03d1d4bbadc124c89344eb21422f6c4b8b1b3736e4642c7f9"
+  },
+  "formal_proofs": {
+    "sources_sha256": {
+      "rtl/branch_predictor.sv": "a7cb35108743f8ca47b1fe76e4a6b78343e51c62d3aa536687956c6b393c65bc",
+      "rtl/frontend.sv": "72064d5a363f8b85cf41b1add3ff3be258ccee3471d18691a5905758affcbb6d",
+      "rtl/core.sv": "352a51ee91d8afd99fcb926b81c12f3e19e7d182ddbc3488304559275ccd02b3"
+    },
+    "runner_sha256": "f1b80458431e32130525967f4a28e0d2a7c7cff6f85d92215f052df60cc5de24",
+    "proof_source_sha256": "1335aded836e216676fdb0452fb0587e3ed5b64c90e31a1a77d1b236ecf53c95",
+    "fq_proof_source_sha256": "b504316a855caf2e8ecccb3e7dd99e210322c4e48e1986a8145475087d4fb6fd",
+    "yosys_version": "Yosys 0.69+75 (git sha1 f0b945f63-dirty, Release, Clang /usr/bin/clang++ 21.1.8)",
+    "proof_method": "Reset base case and one-step inductive preservation of zero unused RAS bits across predictor, request, valid FQ and core snapshots; prove each added mask leaves next state unchanged. Independent source/destination payloads quantify arbitrary storage indices and reuse.",
+    "protocol_assumption": "Core checkpoint writes read a currently valid FQ entry, as enforced by fetch_valid in rename. Invalid unreset FQ payloads are unconstrained. All other enables, invalidations, stack updates, counts and redirect payloads are arbitrary.",
+    "implementation_binding": "update_ras extracted verbatim; check the four register/data mask sites and mask constant. Typed helpers preserve non-RAS fields. FQ selector proof allows arbitrary simultaneous lane writes and arbitrary full-word mask.",
+    "scope_limit": "Projection onto RAS payloads and FQ write selection; complete pipeline behavior is separately checked by cycle-equivalence simulation and CPU regressions.",
+    "runs": [
+      {
+        "case": "depth0",
+        "status": "proven",
+        "returncode": 0,
+        "elapsed_seconds": 0.9172248180002498,
+        "log_sha256": "f4c9b6c05155465a0de4b34c201ba25daffa48135c30d8ac905da110ff3eda02"
+      },
+      {
+        "case": "depth1",
+        "status": "proven",
+        "returncode": 0,
+        "elapsed_seconds": 1.5192959040032292,
+        "log_sha256": "0f62c926a1f44ec028109a91b55d1c7a5f0ff82baed35c7dca7e8094f59d8fff"
+      },
+      {
+        "case": "depth4",
+        "status": "proven",
+        "returncode": 0,
+        "elapsed_seconds": 2.270922840001731,
+        "log_sha256": "d325ea0a9ad3111d9a3458538d09932b4f3d17cce7279c1f345f02e0f179f07c"
+      },
+      {
+        "case": "depth8",
+        "status": "proven",
+        "returncode": 0,
+        "elapsed_seconds": 3.1750439040006313,
+        "log_sha256": "02e9007d295283cab63067ef1dcc993a1da43714530f3f082294f45298ef15f2"
+      },
+      {
+        "case": "depth16",
+        "status": "proven",
+        "returncode": 0,
+        "elapsed_seconds": 0.2653369690015097,
+        "log_sha256": "36c6e1c039e6dfcec9e73f66e2d202d43a23278c015a4eff8c42f54a324cfaa9"
+      },
+      {
+        "case": "fq-write",
+        "status": "proven",
+        "returncode": 0,
+        "elapsed_seconds": 5.381006339001033,
+        "log_sha256": "766784720ea2654ac5d27affde141e2f253fcf02496aeb7aa80e0932b87c3f70"
+      }
+    ]
+  },
+  "simulation_equivalence": {
+    "method": "Original and modified modules in one clock-edge assertion miter, alongside existing independent C++ references. Compare every control/request and every valid complete fetch packet, including all512RAS bits.",
+    "RAS_DEPTH": 4,
+    "original_three_mask_variant": {
+      "configurations": 17,
+      "checks": 971038,
+      "log_sha256": "a4e67090f4a88fe9ad880eba0c771b8b7a178ec1b9c50fed084bb9a04e895a34"
+    },
+    "final_FQ_single_write_variant": {
+      "frontend_configurations": 10,
+      "checks": 565104,
+      "log_sha256": "837e5694a90997afc44fa106d42d2df153582def327e6f8989015859d16c8b57"
+    },
+    "unchanged_predictor_configurations_reused": 7,
+    "unchanged_predictor_checks": 405934,
+    "final_distinct_configurations": 17,
+    "final_reference_checks": 971038,
+    "all_cycle_assertions": "pass",
+    "tested_modes": [
+      0,
+      1,
+      2
+    ],
+    "tested_fetch_widths": [
+      1,
+      2,
+      4
+    ],
+    "includes_minimum_queue_and_table_sizes": true,
+    "sources_sha256": {
+      "predictor_reference": "46df0792725c02b207f05a3a536e39e6bebe26f15d0650f703af34ffd741d067",
+      "frontend_reference": "fbe8cc94559d61bdc32301f3b28badda9efa12380b766271f9adf190cd37cac7",
+      "predictor_miter": "e5efa59cf19bc5dc83d61454cf86c0c4b884a311b1b662fc0ad9e49e6692fa9a",
+      "frontend_miter": "22bc382759a113aae98a0a479830b37d0a8d33f703f4100a9276377652764367",
+      "predictor_cpp_reference": "24076f46b4a5bf1b05849e373952f9a649974df295a63fafa8565a2aea3c9f06",
+      "frontend_cpp_reference": "556d347a0a09a7e6c86a98d4ed7af3e36b1429b217294a291074674a95e3e543"
+    }
+  },
+  "storage_audit": {
+    "parameters": {
+      "FETCH_WIDTH": 4,
+      "FETCH_QUEUE_ENTRIES": 16,
+      "FETCH_REQUESTS": 16,
+      "RAS_DEPTH": 4,
+      "BHT_ENTRIES": 64,
+      "BTB_ENTRIES": 64
+    },
+    "results": [
+      {
+        "variant": "baseline",
+        "stage": "coarse",
+        "sequential_bits": 25381,
+        "predictor_ras_bits": 512,
+        "fq_bits": 10192,
+        "request_bits": 14336,
+        "cells": 2105,
+        "wire_bits": 141992
+      },
+      {
+        "variant": "all-boundaries",
+        "stage": "coarse",
+        "sequential_bits": 18853,
+        "predictor_ras_bits": 128,
+        "fq_bits": 10192,
+        "request_bits": 8192,
+        "cells": 2153,
+        "wire_bits": 147336
+      },
+      {
+        "variant": "single-FQ-write",
+        "stage": "coarse",
+        "sequential_bits": 12709,
+        "predictor_ras_bits": 128,
+        "fq_bits": 4048,
+        "request_bits": 8192,
+        "cells": 2152,
+        "wire_bits": 147351
+      },
+      {
+        "variant": "single-FQ-write",
+        "stage": "generic",
+        "sequential_bits": 17621,
+        "predictor_ras_bits": 128,
+        "fq_bits": 4048,
+        "request_bits": 8176,
+        "cells": 115631,
+        "wire_bits": 214589
+      }
+    ],
+    "total_frontend_coarse_FF_bits_removed": 12672,
+    "fq_bits_per_entry_after": 253,
+    "explanation": "669-bit public fetch_t loses384unusedRAS bits and32duplicatePC/fault-address storage bits. Each remaining entry has253FFbits, including exactly128RAS bits. Final memory_map/techmap/opt plus strict check preserves the same FQ and predictor counts.",
+    "generic_strict_check": "pass",
+    "generic_log_sha256": "e5da046a571bfbc153269e5639381f7318a1384e8ad936c0cc84f9963a89e42f",
+    "generic_stat_sha256": "8d8bb409b1f2be3dc1d92597e0a4d10f0f6045397e4378a4483cd8e20501ba48"
+  },
+  "core_storage_observation": {
+    "artifact": "build/synth-narrow-planes/coarse.il",
+    "RAS_DEPTH": 4,
+    "ROB_ENTRIES": 32,
+    "ras_cells": 32,
+    "bits_per_cell": 128,
+    "stored_ras_bits": 4096,
+    "all_cells_128_bits": true,
+    "note": "Observed from root integrated coarse netlist; core RTL mask changes are committed by root with its other core changes."
+  },
+  "limitations": [
+    "Projected RAS induction assumes checkpoint reads a currently validFQ entry; other enables, invalidations,counts and redirect contents are arbitrary.",
+    "Snapshot masks alone did not shrink the old multi-writeFQ at coarse stage; final single-write selection is required and included.",
+    "Coarse and generic FF counts are storage measurements, not mapped area, physical timing, or fullCPU signoff."
+  ],
+  "reproduction_artifacts": "build/ras-boundary contains original/prototype snapshots, both miter runners/logs, all synthesis commands/RTLIL and proof logs."
+}

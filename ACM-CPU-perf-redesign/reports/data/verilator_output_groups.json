@@ -1,0 +1,119 @@
+{
+  "verilator_version": "Verilator 5.053 devel rev v5.052-141-gc8b8c79ee (mod)",
+  "source_sha256": {
+    "rtl/cpu_pkg.sv": "091cff8f3e304844564d9524e9702f2228119a792cb7e235a61887c973c21aac",
+    "rtl/alu.sv": "7f65cbac4545a79461a116ff09d75ebc86e3c858e0ca7e0265fc8d1c8def9b1a"
+  },
+  "purpose": "ALU-only code generation verifies --output-groups behavior; no CPU build or runtime claim.",
+  "common_options": [
+    "--cc",
+    "-j",
+    "4",
+    "--output-split",
+    "1",
+    "--output-split-cfuncs",
+    "1"
+  ],
+  "results": [
+    {
+      "mode": "default",
+      "returncode": 0,
+      "elapsed_seconds": 0.09813970200048061,
+      "grouped_cpp_count": 8,
+      "grouped_cpp_files": [
+        "Valu_vm_classes_0.cpp",
+        "Valu_vm_classes_1.cpp",
+        "Valu_vm_classes_2.cpp",
+        "Valu_vm_classes_3.cpp",
+        "Valu_vm_classes_Slow_0.cpp",
+        "Valu_vm_classes_Slow_1.cpp",
+        "Valu_vm_classes_Slow_2.cpp",
+        "Valu_vm_classes_Slow_3.cpp"
+      ],
+      "classes_mk_sha256": "a54b1c619397be57052c6102da82306ca56d3e23ac8985253204138ff78d5898",
+      "individual_cpp_compilation": false,
+      "command": [
+        "/home/pxy/cpu/build/tools/oss-cad-suite/bin/verilator",
+        "--cc",
+        "--top-module",
+        "alu",
+        "--Mdir",
+        "/home/pxy/cpu/build/runtime-synth/groups-probe/default",
+        "-j",
+        "4",
+        "--output-split",
+        "1",
+        "--output-split-cfuncs",
+        "1",
+        "-Wno-UNUSEDSIGNAL",
+        "-Wno-UNUSEDPARAM",
+        "/home/pxy/cpu/rtl/cpu_pkg.sv",
+        "/home/pxy/cpu/rtl/alu.sv"
+      ]
+    },
+    {
+      "mode": "disabled",
+      "returncode": 0,
+      "elapsed_seconds": 0.08178161800242378,
+      "grouped_cpp_count": 0,
+      "grouped_cpp_files": [],
+      "classes_mk_sha256": "458a8c428cfc0ccca5bccdea0d0487214fe90d6dd2df7bb2f69a05b28daf0a66",
+      "individual_cpp_compilation": true,
+      "command": [
+        "/home/pxy/cpu/build/tools/oss-cad-suite/bin/verilator",
+        "--cc",
+        "--top-module",
+        "alu",
+        "--Mdir",
+        "/home/pxy/cpu/build/runtime-synth/groups-probe/disabled",
+        "-j",
+        "4",
+        "--output-split",
+        "1",
+        "--output-split-cfuncs",
+        "1",
+        "-Wno-UNUSEDSIGNAL",
+        "-Wno-UNUSEDPARAM",
+        "--output-groups",
+        "0",
+        "/home/pxy/cpu/rtl/cpu_pkg.sv",
+        "/home/pxy/cpu/rtl/alu.sv"
+      ]
+    },
+    {
+      "mode": "explicit2",
+      "returncode": 0,
+      "elapsed_seconds": 0.08305739099887433,
+      "grouped_cpp_count": 4,
+      "grouped_cpp_files": [
+        "Valu_vm_classes_0.cpp",
+        "Valu_vm_classes_1.cpp",
+        "Valu_vm_classes_Slow_0.cpp",
+        "Valu_vm_classes_Slow_1.cpp"
+      ],
+      "classes_mk_sha256": "539d0673c68d6a4bb55ce8148f16c779014f6bad1a9579fb2fcdffec3fc9a512",
+      "individual_cpp_compilation": false,
+      "command": [
+        "/home/pxy/cpu/build/tools/oss-cad-suite/bin/verilator",
+        "--cc",
+        "--top-module",
+        "alu",
+        "--Mdir",
+        "/home/pxy/cpu/build/runtime-synth/groups-probe/explicit2",
+        "-j",
+        "4",
+        "--output-split",
+        "1",
+        "--output-split-cfuncs",
+        "1",
+        "-Wno-UNUSEDSIGNAL",
+        "-Wno-UNUSEDPARAM",
+        "--output-groups",
+        "2",
+        "/home/pxy/cpu/rtl/cpu_pkg.sv",
+        "/home/pxy/cpu/rtl/alu.sv"
+      ]
+    }
+  ],
+  "conclusion": "--output-groups 0 emits no *_vm_classes_N.cpp wrappers and lists individual generated units in VM_CLASSES_FAST/SLOW."
+}

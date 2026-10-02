@@ -1,0 +1,51 @@
+--- a/rtl/core.sv
++++ b/rtl/core.sv
+@@ -848,6 +848,22 @@
+     end
+   end
+ 
++  // PRF data depends only on registered words and the completed WB ports.
++  // Decode writes per physical row so a word update never muxes the full bank.
++  // Preserve the original later-WB-lane priority for coincident destinations.
++  for(genvar row=0;row<PHYS_REGS;row=row+1) begin: physical_register_word_next
++    always_comb begin
++      if(row==0) prf_d[row]=32'b0;
++      else begin
++        prf_d[row]=prf_q[row];
++        for(integer lane=0;lane<WB_WIDTH;lane=lane+1)
++          if(wb_valid[lane] && rob_col_dec_writes_rd[wb_result[lane].rid] &&
++             wb_result[lane].fault==0 && rob_col_pdst[wb_result[lane].rid]==preg_t'(row))
++            prf_d[row]=wb_result[lane].value;
++      end
++    end
++  end
++
+   always_comb begin : next_state
+     integer index,slot,best,iqslot,pdst,lqid,commit_index,mdu_issued,train_lane;
+     logic [2:0] issue_port_rank;
+@@ -911,7 +927,6 @@
+     end
+     for(integer k=0;k<4;k=k+1) ex_d[k]=execute_ex[k];
+     for(integer k=0;k<32;k=k+1) begin rat_d[k]=rat_q[k];rrat_d[k]=rrat_q[k];end
+-    for(integer k=0;k<PHYS_REGS;k=k+1) prf_d[k]=prf_q[k];
+     free_d=free_q;ready_d=ready_q;state_d=state_q;head_d=head_q;tail_d=tail_q;count_d=count_q;
+     sq_count_d=sq_count_q;csb_head_d=csb_head_q;csb_tail_d=csb_tail_q;csb_count_d=csb_count_q;
+     skid_d=skid_q;last_store_d=last_store_q;mdu_pending_d=mdu_pending_q;
+@@ -963,8 +978,6 @@
+       index=int'(wb_result[lane].rid);wb_pdst=rob_col_pdst[index];
+       if(rob_col_dec_writes_rd[index] && wb_result[lane].fault==0) begin
+         ready_d[wb_pdst]=1;
+-        for(integer row=1;row<PHYS_REGS;row=row+1)
+-          if(preg_t'(row)==wb_pdst) prf_d[row]=wb_result[lane].value;
+       end
+       if(wb_source[lane]<4) ex_d[wb_source[lane]].valid=0;
+       else if(wb_source[lane]<CANDIDATES-1) begin
+@@ -1243,7 +1256,7 @@
+         if(rid_t'(row)==head_q) retire_live[row]=0;
+       count_d=0;sq_count_d=0;
+     end
+-    free_d[0]=0;ready_d[0]=1;prf_d[0]=0;rat_d[0]=0;rrat_d[0]=0;
++    free_d[0]=0;ready_d[0]=1;rat_d[0]=0;rrat_d[0]=0;
+   end
+ 
+   for(genvar row=0;row<IQ_ENTRIES;row=row+1) begin: queue_iq_state

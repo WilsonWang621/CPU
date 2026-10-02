@@ -1,0 +1,441 @@
+{
+  "scope": "Pre-optimization generic bit expansion, not final gate count or mapped area",
+  "snapshot": "build/synth-integrated-lean",
+  "metadata": {
+    "rtl_commit": "8835f009c4f8fc71382c52fd7c7393746b7c2ff9",
+    "sources_sha256": {
+      "rtl/cpu_pkg.sv": "091cff8f3e304844564d9524e9702f2228119a792cb7e235a61887c973c21aac",
+      "rtl/alu.sv": "7f65cbac4545a79461a116ff09d75ebc86e3c858e0ca7e0265fc8d1c8def9b1a",
+      "rtl/branch_predictor.sv": "a943e0cc01f9ed8984fd47c4980716aaf1fe172fd1890e5138d00c2ef3f902e1",
+      "rtl/branch_unit.sv": "24f48d8a96a17af442d46e5977ece5be4664bdf42a5527de5dc4021a3acc8bd5",
+      "rtl/cache.sv": "d1683dcd9831659ddffb79bb61dc828ced6a5d033717e87b97e66d9c3ba9f5bd",
+      "rtl/core.sv": "49b22c7bcf1a4efb0023fbcae939a04787fa4d21dc12982be1e0421094d823d8",
+      "rtl/cpu_top.sv": "cc5e4ccadb6ea17b2acf943f495a90b8eda737a7cfa3dafa50d0bf5bb9a3263d",
+      "rtl/decoder.sv": "ded522812f105f78d7e4c38a7f38d1484f54149547dc1e853bba92ca51ea5158",
+      "rtl/frontend.sv": "fa150eda38cdaab642f05f203a9fb595bdee2b3a5ec0f24013d13fe1c32a4fbd",
+      "rtl/memory_controller.sv": "eed1ac5d2adab83e127c5514b939120305e0d936b65c1d8e0806a9c05b254a87",
+      "rtl/muldiv.sv": "43ffbbe324a7797f84fbb0ab04ff4b83959287730c6a7e84d805d8e5290071d8"
+    },
+    "input_language": "verilog-2005",
+    "parameters": {
+      "PHYS_REGS": 64,
+      "ROB_ENTRIES": 32,
+      "IQ_ENTRIES": 24,
+      "LQ_ENTRIES": 16,
+      "SQ_ENTRIES": 16,
+      "CSB_ENTRIES": 16,
+      "FETCH_QUEUE_ENTRIES": 16,
+      "FETCH_REQUESTS": 8,
+      "ICACHE_BYTES": 1024,
+      "DCACHE_BYTES": 4096,
+      "BHT_ENTRIES": 256,
+      "BTB_ENTRIES": 64,
+      "RAS_DEPTH": 4,
+      "PREDICTOR_MODE": 0
+    }
+  },
+  "coarse": {
+    "cells": 106589,
+    "wires": 110971,
+    "wire_bits_by_group": {
+      "<generated>": 187250,
+      "memory_controller": 1231,
+      "dcache": 785570,
+      "branch_predictor": 30180,
+      "core": 1241090,
+      "icache": 578499,
+      "frontend": 188234
+    },
+    "cell_types": {
+      "$mux": 67523,
+      "$scopeinfo": 20,
+      "$reduce_bool": 655,
+      "$logic_and": 10992,
+      "$and": 903,
+      "$shiftx": 84,
+      "$alu": 3524,
+      "$shift": 42,
+      "$eq": 4022,
+      "$demux": 249,
+      "$not": 4704,
+      "$reduce_or": 1302,
+      "$bmux": 992,
+      "$logic_or": 1090,
+      "$pmux": 77,
+      "$logic_not": 1720,
+      "$reduce_and": 2018,
+      "$or": 3830,
+      "$bwmux": 107,
+      "$sdffe": 768,
+      "$sdff": 714,
+      "$xor": 821,
+      "$ne": 353,
+      "$shl": 29,
+      "$mem_v2": 11,
+      "$macc_v2": 10,
+      "$shr": 9,
+      "$sshr": 4,
+      "$dffe": 16
+    }
+  },
+  "bitexpanded": {
+    "cells": 8806205,
+    "wires": 707405,
+    "wire_bits_by_group": {
+      "<generated>": 5526237,
+      "memory_controller": 19544,
+      "dcache": 4351175,
+      "branch_predictor": 333227,
+      "core": 2792273,
+      "icache": 2145866,
+      "frontend": 221243,
+      "cache": 407146,
+      "muldiv": 17188,
+      "alu": 9872,
+      "branch_unit": 9872
+    },
+    "cell_types": {
+      "$_MUX_": 7826753,
+      "$scopeinfo": 20,
+      "$_OR_": 217691,
+      "$_AND_": 380449,
+      "$_NOT_": 103012,
+      "$_XOR_": 139098,
+      "$_SDFFE_PP0P_": 39634,
+      "$_SDFF_PP0_": 42092,
+      "$_SDFFE_PP1P_": 1,
+      "$_SDFF_PP1_": 223,
+      "$_DFFE_PP_": 10704,
+      "$_DFF_P_": 46528
+    },
+    "cells_by_group": {
+      "core": {
+        "$_MUX_": 1737284,
+        "$_NOT_": 35283,
+        "$_AND_": 101704,
+        "$_OR_": 75985,
+        "$scopeinfo": 14,
+        "$_SDFFE_PP0P_": 24687,
+        "$_XOR_": 85897,
+        "$_SDFF_PP0_": 13811,
+        "$_SDFF_PP1_": 223
+      },
+      "<generated>": {
+        "$scopeinfo": 5,
+        "$_OR_": 6472,
+        "$_XOR_": 5851,
+        "$_NOT_": 1458,
+        "$_AND_": 11652,
+        "$_MUX_": 377
+      },
+      "memory_controller": {
+        "$_OR_": 270,
+        "$_AND_": 518,
+        "$_MUX_": 7228,
+        "$_NOT_": 107,
+        "$_XOR_": 294,
+        "$_SDFFE_PP0P_": 155
+      },
+      "muldiv": {
+        "$_AND_": 2209,
+        "$_MUX_": 8207,
+        "$_SDFFE_PP0P_": 272,
+        "$_SDFF_PP0_": 232,
+        "$_NOT_": 663,
+        "$_OR_": 1703,
+        "$_SDFFE_PP1P_": 1,
+        "$_XOR_": 1537
+      },
+      "icache": {
+        "$_MUX_": 1613335,
+        "$_NOT_": 27720,
+        "$_OR_": 29482,
+        "$_AND_": 40507,
+        "$_XOR_": 2178,
+        "$_SDFFE_PP0P_": 2215,
+        "$_SDFF_PP0_": 9845,
+        "$_DFF_P_": 8192
+      },
+      "dcache": {
+        "$_MUX_": 4017069,
+        "$_OR_": 57180,
+        "$_AND_": 138228,
+        "$_SDFF_PP0_": 16486,
+        "$_XOR_": 4282,
+        "$_NOT_": 24557,
+        "$_SDFFE_PP0P_": 5625,
+        "$_DFF_P_": 32768
+      },
+      "cache": {
+        "$_NOT_": 10435,
+        "$_OR_": 33089,
+        "$_MUX_": 40076,
+        "$_AND_": 46512,
+        "$_XOR_": 30525
+      },
+      "cpu_top": {
+        "$_SDFFE_PP0P_": 37,
+        "$_MUX_": 479,
+        "$_AND_": 39,
+        "$_OR_": 63,
+        "$_NOT_": 10,
+        "$_XOR_": 36
+      },
+      "frontend": {
+        "$_NOT_": 1185,
+        "$_AND_": 3994,
+        "$_MUX_": 227467,
+        "$_OR_": 3042,
+        "$_SDFF_PP0_": 1142,
+        "$scopeinfo": 1,
+        "$_SDFFE_PP0P_": 6110,
+        "$_DFFE_PP_": 10704,
+        "$_XOR_": 3180
+      },
+      "decoder": {
+        "$_NOT_": 84,
+        "$_MUX_": 772,
+        "$_OR_": 2300,
+        "$_AND_": 2020,
+        "$_XOR_": 420
+      },
+      "alu": {
+        "$_NOT_": 316,
+        "$_XOR_": 1144,
+        "$_OR_": 2520,
+        "$_AND_": 2972,
+        "$_MUX_": 384
+      },
+      "branch_unit": {
+        "$_NOT_": 280,
+        "$_MUX_": 516,
+        "$_OR_": 900,
+        "$_AND_": 1220,
+        "$_XOR_": 920
+      },
+      "branch_predictor": {
+        "$_MUX_": 173559,
+        "$_NOT_": 914,
+        "$_XOR_": 2834,
+        "$_AND_": 28874,
+        "$_OR_": 4685,
+        "$_SDFFE_PP0P_": 533,
+        "$_SDFF_PP0_": 576,
+        "$_DFF_P_": 5568
+      }
+    }
+  },
+  "hotspots": [
+    {
+      "module": "cache",
+      "export_line": "1133",
+      "type": "$_MUX_",
+      "count": 1534316
+    },
+    {
+      "module": "<generated>",
+      "export_line": "<generated>",
+      "type": "$_MUX_",
+      "count": 757975
+    },
+    {
+      "module": "cache",
+      "export_line": "856",
+      "type": "$_MUX_",
+      "count": 478304
+    },
+    {
+      "module": "cache",
+      "export_line": "970",
+      "type": "$_MUX_",
+      "count": 371395
+    },
+    {
+      "module": "cache",
+      "export_line": "1071",
+      "type": "$_MUX_",
+      "count": 321893
+    },
+    {
+      "module": "cache",
+      "export_line": "1160",
+      "type": "$_MUX_",
+      "count": 208982
+    },
+    {
+      "module": "cache",
+      "export_line": "1115",
+      "type": "$_MUX_",
+      "count": 208960
+    },
+    {
+      "module": "<generated>",
+      "export_line": "<generated>",
+      "type": "$_AND_",
+      "count": 192641
+    },
+    {
+      "module": "cache",
+      "export_line": "954",
+      "type": "$_MUX_",
+      "count": 188448
+    },
+    {
+      "module": "cache",
+      "export_line": "1004",
+      "type": "$_MUX_",
+      "count": 159822
+    },
+    {
+      "module": "cache",
+      "export_line": "882",
+      "type": "$_MUX_",
+      "count": 132150
+    },
+    {
+      "module": "cache",
+      "export_line": "1094",
+      "type": "$_MUX_",
+      "count": 132150
+    },
+    {
+      "module": "core",
+      "export_line": "2911",
+      "type": "$_MUX_",
+      "count": 121775
+    },
+    {
+      "module": "core",
+      "export_line": "3102",
+      "type": "$_MUX_",
+      "count": 108380
+    },
+    {
+      "module": "core",
+      "export_line": "2872",
+      "type": "$_MUX_",
+      "count": 102400
+    },
+    {
+      "module": "core",
+      "export_line": "3254",
+      "type": "$_MUX_",
+      "count": 102400
+    },
+    {
+      "module": "core",
+      "export_line": "3005",
+      "type": "$_MUX_",
+      "count": 87912
+    },
+    {
+      "module": "core",
+      "export_line": "2295",
+      "type": "$_MUX_",
+      "count": 86516
+    },
+    {
+      "module": "core",
+      "export_line": "3134",
+      "type": "$_MUX_",
+      "count": 73757
+    },
+    {
+      "module": "core",
+      "export_line": "3309",
+      "type": "$_MUX_",
+      "count": 66176
+    },
+    {
+      "module": "cache",
+      "export_line": "1286",
+      "type": "$_MUX_",
+      "count": 65690
+    },
+    {
+      "module": "<generated>",
+      "export_line": "<generated>",
+      "type": "$_OR_",
+      "count": 63351
+    },
+    {
+      "module": "core",
+      "export_line": "3149",
+      "type": "$_MUX_",
+      "count": 52364
+    },
+    {
+      "module": "<generated>",
+      "export_line": "<generated>",
+      "type": "$_NOT_",
+      "count": 51105
+    },
+    {
+      "module": "core",
+      "export_line": "3308",
+      "type": "$_MUX_",
+      "count": 50432
+    },
+    {
+      "module": "core",
+      "export_line": "2405",
+      "type": "$_MUX_",
+      "count": 49184
+    },
+    {
+      "module": "cache",
+      "export_line": "659",
+      "type": "$_MUX_",
+      "count": 47183
+    },
+    {
+      "module": "<generated>",
+      "export_line": "<generated>",
+      "type": "$_DFF_P_",
+      "count": 46528
+    },
+    {
+      "module": "frontend",
+      "export_line": "4234",
+      "type": "$_MUX_",
+      "count": 45632
+    },
+    {
+      "module": "cache",
+      "export_line": "1054",
+      "type": "$_MUX_",
+      "count": 45344
+    },
+    {
+      "module": "core",
+      "export_line": "2920",
+      "type": "$_MUX_",
+      "count": 43384
+    },
+    {
+      "module": "frontend",
+      "export_line": "4526",
+      "type": "$_MUX_",
+      "count": 42816
+    },
+    {
+      "module": "frontend",
+      "export_line": "4572",
+      "type": "$_MUX_",
+      "count": 42816
+    },
+    {
+      "module": "branch_predictor",
+      "export_line": "387",
+      "type": "$_MUX_",
+      "count": 40960
+    },
+    {
+      "module": "branch_predictor",
+      "export_line": "388",
+      "type": "$_MUX_",
+      "count": 40960
+    }
+  ],
+  "attribution": "Module attribution uses original cpu_source.v source ranges; cache I/D split and generated cells use hierarchy in cell names or connected signals. Cache-common bucket remains explicit."
+}

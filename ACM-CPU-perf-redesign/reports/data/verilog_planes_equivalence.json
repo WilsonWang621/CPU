@@ -1,0 +1,548 @@
+{
+  "scope": "Verilog-2005/SYNTHESIS export versus frozen SystemVerilog reference, identical parameters and harness; not netlist equivalence",
+  "source_directory": "build/validate-verilog-planes",
+  "sources_sha256": {
+    "rtl/cpu_pkg.sv": "091cff8f3e304844564d9524e9702f2228119a792cb7e235a61887c973c21aac",
+    "rtl/alu.sv": "7f65cbac4545a79461a116ff09d75ebc86e3c858e0ca7e0265fc8d1c8def9b1a",
+    "rtl/branch_predictor.sv": "a7cb35108743f8ca47b1fe76e4a6b78343e51c62d3aa536687956c6b393c65bc",
+    "rtl/branch_unit.sv": "24f48d8a96a17af442d46e5977ece5be4664bdf42a5527de5dc4021a3acc8bd5",
+    "rtl/cache.sv": "f0f82e4c0905aa2bbf220f418a520705bc0d76e307b614cfd0e66ffb813ecf3e",
+    "rtl/core.sv": "352a51ee91d8afd99fcb926b81c12f3e19e7d182ddbc3488304559275ccd02b3",
+    "rtl/cpu_top.sv": "725ee97d9c1daf053b7444f0f692eb963cd5167cd0b244c769d7be3adbbebdb8",
+    "rtl/decoder.sv": "ded522812f105f78d7e4c38a7f38d1484f54149547dc1e853bba92ca51ea5158",
+    "rtl/frontend.sv": "72064d5a363f8b85cf41b1add3ff3be258ccee3471d18691a5905758affcbb6d",
+    "rtl/memory_controller.sv": "eed1ac5d2adab83e127c5514b939120305e0d936b65c1d8e0806a9c05b254a87",
+    "rtl/muldiv.sv": "43ffbbe324a7797f84fbb0ab04ff4b83959287730c6a7e84d805d8e5290071d8"
+  },
+  "export_sha256": "e27a157a47b8692a1150043062df9f88b16c697a4543f32b7f0d2686093b9db5",
+  "verilog_binary_sha256": "2e030edc09376873311179c0c116bcdc0e0b808d510f7b1f70a349dd703fc436",
+  "reference_binary_sha256": "9477b4040596cdc6593000244ed6e259c96c2349129c4414213d6ad61a1c4bb2",
+  "parameters": {
+    "PHYS_REGS": 64,
+    "ROB_ENTRIES": 32,
+    "IQ_ENTRIES": 24,
+    "LQ_ENTRIES": 16,
+    "SQ_ENTRIES": 16,
+    "CSB_ENTRIES": 16,
+    "FETCH_QUEUE_ENTRIES": 16,
+    "FETCH_REQUESTS": 8,
+    "ICACHE_BYTES": 1024,
+    "DCACHE_BYTES": 4096,
+    "BHT_ENTRIES": 256,
+    "BTB_ENTRIES": 64,
+    "RAS_DEPTH": 4,
+    "PREDICTOR_MODE": 0,
+    "FETCH_WIDTH": 4,
+    "RENAME_WIDTH": 4,
+    "ISSUE_WIDTH": 4,
+    "WB_WIDTH": 4,
+    "COMMIT_WIDTH": 4
+  },
+  "passed": 51,
+  "failed": 0,
+  "build_command": [
+    "/home/pxy/cpu/RISC-V-CPU-2026-Toolchain/bin/verilator",
+    "--cc",
+    "--exe",
+    "--build",
+    "--assert",
+    "-j",
+    "4",
+    "--top-module",
+    "cpu_top",
+    "--Mdir",
+    "/home/pxy/cpu/build/validate-verilog-planes/obj",
+    "-o",
+    "/home/pxy/cpu/build/validate-verilog-planes/cpu_sim",
+    "--unroll-count",
+    "1024",
+    "--unroll-stmts",
+    "100000",
+    "-Wall",
+    "-Wno-UNUSEDSIGNAL",
+    "-Wno-UNUSEDPARAM",
+    "-Wno-PINCONNECTEMPTY",
+    "-Wno-WIDTH",
+    "-Wno-DECLFILENAME",
+    "-Wno-ASCRANGE",
+    "-CFLAGS",
+    "-std=c++17",
+    "-MAKEFLAGS",
+    "OPT_FAST=-O3 OPT_GLOBAL=-O3 OPT_SLOW=-O1",
+    "-GPHYS_REGS=64",
+    "-GROB_ENTRIES=32",
+    "-GIQ_ENTRIES=24",
+    "-GLQ_ENTRIES=16",
+    "-GSQ_ENTRIES=16",
+    "-GCSB_ENTRIES=16",
+    "-GFETCH_QUEUE_ENTRIES=16",
+    "-GFETCH_REQUESTS=8",
+    "-GICACHE_BYTES=1024",
+    "-GDCACHE_BYTES=4096",
+    "-GBHT_ENTRIES=256",
+    "-GBTB_ENTRIES=64",
+    "-GRAS_DEPTH=4",
+    "-GPREDICTOR_MODE=0",
+    "-GFETCH_WIDTH=4",
+    "-GRENAME_WIDTH=4",
+    "-GISSUE_WIDTH=4",
+    "-GWB_WIDTH=4",
+    "-GCOMMIT_WIDTH=4",
+    "/home/pxy/cpu/build/validate-verilog-planes/cpu.v",
+    "/home/pxy/cpu/build/validate-verilog-planes/source/sim/main.cpp"
+  ],
+  "generated_only_warning_exceptions": {
+    "WIDTH": "sv2v emits explicit width-adapter functions",
+    "DECLFILENAME": "single Verilog artifact contains multiple modules",
+    "ASCRANGE": "sv2v emits ascending [0:1] function jump helpers"
+  },
+  "runs": [
+    {
+      "group": "core",
+      "case": "four_independent_dependency_streams",
+      "status": "pass",
+      "exact_cycles": 2120,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "df5b482df49b18c49d358ed43584ebd18ec4d25ac2d14e5e3138fb7b74eac4d6"
+    },
+    {
+      "group": "core",
+      "case": "load_replay_pre_map_waw",
+      "status": "pass",
+      "exact_cycles": 542,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "695623e57080ea7eb8fe3ea2ca917d5d67ee2ea5a0767fbd213a622dd4cf2a52"
+    },
+    {
+      "group": "core",
+      "case": "mdu_cancel_waw_chain5",
+      "status": "pass",
+      "exact_cycles": 754,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "4c861018c77f0352fbd224795f2a542dfd39f67d30d8e34020ddac8ef9333183"
+    },
+    {
+      "group": "core",
+      "case": "mdu_cancel_waw_chain7",
+      "status": "pass",
+      "exact_cycles": 754,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "420c620c69094c32d3ba7be392644c429c0e1cfc8206d7dd9baadbff1bd3549b"
+    },
+    {
+      "group": "core",
+      "case": "mdu_cancel_waw_chain9",
+      "status": "pass",
+      "exact_cycles": 771,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "14befc6e3b88a9641f5e3207bd2521be9e12c20f42ddf8cb12a208774275a498"
+    },
+    {
+      "group": "core",
+      "case": "older_recovery_chain10",
+      "status": "pass",
+      "exact_cycles": 700,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "bce13f85023e480813bcbbbe83f62136e1ecc40bcd3a3cc51e3c947671e634ed"
+    },
+    {
+      "group": "core",
+      "case": "older_recovery_chain3",
+      "status": "pass",
+      "exact_cycles": 787,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "3e2cd66ddbe7f194e6cd803a5665dc03267c00cd3a7bc7cdff89885fdbd866fc"
+    },
+    {
+      "group": "core",
+      "case": "older_recovery_chain4",
+      "status": "pass",
+      "exact_cycles": 700,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "13905e662a51e57026b43088f8541fc131633ed0f43a5ce0cc5d8fc5e17e82bd"
+    },
+    {
+      "group": "core",
+      "case": "older_recovery_chain5",
+      "status": "pass",
+      "exact_cycles": 700,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "37884baf5ce65edb7157343c6b4c7bda4df338b423cb81d3ca4519c22fd43b79"
+    },
+    {
+      "group": "core",
+      "case": "older_recovery_chain6",
+      "status": "pass",
+      "exact_cycles": 700,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "58ad6fc3fc25999d2a5595ba64e066502a9999a25093e4eabac22f7317312b00"
+    },
+    {
+      "group": "core",
+      "case": "older_recovery_chain7",
+      "status": "pass",
+      "exact_cycles": 700,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "97c01ca82d4e312a9c826dbe9fc2cf08bcfd2b0449b22e3492682bec9599aa23"
+    },
+    {
+      "group": "core",
+      "case": "older_recovery_chain8",
+      "status": "pass",
+      "exact_cycles": 700,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "82728925e5d40aa7f1f5c32eb4adf06056df462ce96791946ca41440210a5f3c"
+    },
+    {
+      "group": "core",
+      "case": "older_recovery_chain9",
+      "status": "pass",
+      "exact_cycles": 700,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "20b0f27450046db9813fbd7ae94c46320381352dfa608c02166ebb0d8014c06f"
+    },
+    {
+      "group": "core",
+      "case": "older_recovery_overlap",
+      "status": "pass",
+      "exact_cycles": 700,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "d12a28e2eb55ea160501dd8b4b4ad980c73f9e32213362e55e854a69627909ea"
+    },
+    {
+      "group": "core",
+      "case": "rename_delayed_old_source",
+      "status": "pass",
+      "exact_cycles": 2062,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "7e74ac7e048e752a19cfecbd774cb31bcf815878ca47e4ffd7090fcba72484f5"
+    },
+    {
+      "group": "core",
+      "case": "rename_waw_wraparound",
+      "status": "pass",
+      "exact_cycles": 6221,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "7ce081a668d82b3336869bb75473b8df9851bf7261da4a5fead9645290933fee"
+    },
+    {
+      "group": "performance",
+      "case": "perf_median",
+      "status": "pass",
+      "exact_cycles": 8950,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "d059a501614e9c3aa495cb36768399651b9dda4b38778695e7425ca5d07f5346"
+    },
+    {
+      "group": "performance",
+      "case": "perf_multiply",
+      "status": "pass",
+      "exact_cycles": 14640,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "a6f5c1fe2f782e149bc1b31eecc56a7a899b8cdb2cf389d3ccb36e7be76b3f37"
+    },
+    {
+      "group": "performance",
+      "case": "perf_qsort",
+      "status": "pass",
+      "exact_cycles": 146821,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "7a3b4d84452d77636aca116e156461a65372814ec0f38c817be5da49ef00b9a4"
+    },
+    {
+      "group": "performance",
+      "case": "perf_rsort",
+      "status": "pass",
+      "exact_cycles": 165072,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "8baacd12781a690cde33f47cf54343f3344a08f2f003455a9709f7425eadd531"
+    },
+    {
+      "group": "performance",
+      "case": "perf_towers",
+      "status": "pass",
+      "exact_cycles": 3583,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "1e76279c9557eee4ce9f6038241736e5c7ccf6fec73d98360a492d3a6e4e1f9c"
+    },
+    {
+      "group": "performance",
+      "case": "perf_vvadd",
+      "status": "pass",
+      "exact_cycles": 3477,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "d93284d709c683bd1eebf85c1328cec678d2b207f6497eacf6bdead369e9c798"
+    },
+    {
+      "group": "system",
+      "case": "directed_dirty_eviction_exit",
+      "status": "pass",
+      "exact_cycles": 1615,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "c668a981b77071871f4ea9d73758b057b070202b07ea91a2f398f0d9c874319f"
+    },
+    {
+      "group": "system",
+      "case": "directed_fetch_last_word",
+      "status": "pass",
+      "exact_cycles": 355,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "f3a7f2dd65827b16bb72e8fa14a33c15387f9b2b1751c41945e78f6fb9b836f1"
+    },
+    {
+      "group": "system",
+      "case": "directed_m_extension",
+      "status": "pass",
+      "exact_cycles": 1988,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "185de2189eda19b4f889dbd82742b45a8043d2339bed5a6b08e276f30f113128"
+    },
+    {
+      "group": "system",
+      "case": "directed_narrow_forward",
+      "status": "pass",
+      "exact_cycles": 518,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "7a2352ae4812f28559374ddfb1193396462ce5d9ea74bbb9c3e70a8b4091b8bb"
+    },
+    {
+      "group": "system",
+      "case": "directed_untaken_misaligned",
+      "status": "pass",
+      "exact_cycles": 355,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "571cd8b103ecd77de02fc72ddebcae13a30e5c2e231ae461e9300ff699e5a6f3"
+    },
+    {
+      "group": "system",
+      "case": "directed_wrongpath_exit",
+      "status": "pass",
+      "exact_cycles": 355,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "e309993a86a6426cf2bf02515eae164d4a916053a709f955f3ebc98c2ac52f27"
+    },
+    {
+      "group": "system",
+      "case": "directed_wrongpath_fetch_bus",
+      "status": "pass",
+      "exact_cycles": 358,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "ca923c3235e2f18c5e8239c4a15edf4000148aa8c6448df700f68f9c5b6d1ed9"
+    },
+    {
+      "group": "system",
+      "case": "directed_wrongpath_illegal",
+      "status": "pass",
+      "exact_cycles": 355,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "e309993a86a6426cf2bf02515eae164d4a916053a709f955f3ebc98c2ac52f27"
+    },
+    {
+      "group": "system",
+      "case": "directed_wrongpath_load_fault",
+      "status": "pass",
+      "exact_cycles": 355,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "e309993a86a6426cf2bf02515eae164d4a916053a709f955f3ebc98c2ac52f27"
+    },
+    {
+      "group": "system",
+      "case": "directed_wrongpath_store",
+      "status": "pass",
+      "exact_cycles": 355,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "e309993a86a6426cf2bf02515eae164d4a916053a709f955f3ebc98c2ac52f27"
+    },
+    {
+      "group": "system",
+      "case": "fault_exit_flush_bus",
+      "status": "pass",
+      "exact_cycles": 382,
+      "exact_simulated_metrics": true,
+      "trace_sha256": null
+    },
+    {
+      "group": "system",
+      "case": "fault_fetch_bus",
+      "status": "pass",
+      "exact_cycles": 91,
+      "exact_simulated_metrics": true,
+      "trace_sha256": null
+    },
+    {
+      "group": "system",
+      "case": "fault_fetch_range",
+      "status": "pass",
+      "exact_cycles": 201,
+      "exact_simulated_metrics": true,
+      "trace_sha256": null
+    },
+    {
+      "group": "system",
+      "case": "fault_illegal",
+      "status": "pass",
+      "exact_cycles": 91,
+      "exact_simulated_metrics": true,
+      "trace_sha256": null
+    },
+    {
+      "group": "system",
+      "case": "fault_load_align",
+      "status": "pass",
+      "exact_cycles": 92,
+      "exact_simulated_metrics": true,
+      "trace_sha256": null
+    },
+    {
+      "group": "system",
+      "case": "fault_load_bus",
+      "status": "pass",
+      "exact_cycles": 135,
+      "exact_simulated_metrics": true,
+      "trace_sha256": null
+    },
+    {
+      "group": "system",
+      "case": "fault_load_range",
+      "status": "pass",
+      "exact_cycles": 92,
+      "exact_simulated_metrics": true,
+      "trace_sha256": null
+    },
+    {
+      "group": "system",
+      "case": "fault_partial_exit",
+      "status": "pass",
+      "exact_cycles": 94,
+      "exact_simulated_metrics": true,
+      "trace_sha256": null
+    },
+    {
+      "group": "system",
+      "case": "fault_store_align",
+      "status": "pass",
+      "exact_cycles": 92,
+      "exact_simulated_metrics": true,
+      "trace_sha256": null
+    },
+    {
+      "group": "system",
+      "case": "fault_store_range",
+      "status": "pass",
+      "exact_cycles": 92,
+      "exact_simulated_metrics": true,
+      "trace_sha256": null
+    },
+    {
+      "group": "system",
+      "case": "fault_target_align",
+      "status": "pass",
+      "exact_cycles": 92,
+      "exact_simulated_metrics": true,
+      "trace_sha256": null
+    },
+    {
+      "group": "system",
+      "case": "random_dependencies_0",
+      "status": "pass",
+      "exact_cycles": 4495,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "42b95d8a71ffffbeb92adb7a85057f6cbc5df9b48713c1dd17237bf1e2cd88bf"
+    },
+    {
+      "group": "system",
+      "case": "random_dependencies_1",
+      "status": "pass",
+      "exact_cycles": 4660,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "19fd7443c16bc55b328b33993ee6f228e721de00d83f54b1a9a17feef39d0cc7"
+    },
+    {
+      "group": "system",
+      "case": "random_dependencies_2",
+      "status": "pass",
+      "exact_cycles": 4453,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "ec3c3e319994758647340e264b18cec4eb0297bb1c1755222e7c7573704600e2"
+    },
+    {
+      "group": "system",
+      "case": "random_dependencies_3",
+      "status": "pass",
+      "exact_cycles": 4527,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "8d0009d0310eba3128fcd92487f866381cbe427be77f914a1145dc98c3c86adb"
+    },
+    {
+      "group": "system",
+      "case": "random_dependencies_4",
+      "status": "pass",
+      "exact_cycles": 4552,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "8e03fffbae12c84e7ef1827ee07be7061721c8b41fdb300fcacace43305f3444"
+    },
+    {
+      "group": "system",
+      "case": "random_dependencies_5",
+      "status": "pass",
+      "exact_cycles": 4629,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "c3c98b4d875941e63ac9de256ae4452ac1c6f6c38c5b0fa1801d32cefa7f2d00"
+    },
+    {
+      "group": "system",
+      "case": "random_dependencies_6",
+      "status": "pass",
+      "exact_cycles": 4631,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "db4fefc7155e93e4a661cad854503dacad2b737140d5a0eedbfd26880101c8d1"
+    },
+    {
+      "group": "system",
+      "case": "random_dependencies_7",
+      "status": "pass",
+      "exact_cycles": 4619,
+      "exact_simulated_metrics": true,
+      "trace_sha256": "85ec544869e64d76c6cb1b17fc0832c38f234c9a35f81e77c716f5e7ac03ed71"
+    }
+  ],
+  "pi_no_trace": {
+    "resources": {
+      "wall": 278.75,
+      "user": 279.21,
+      "system": 0.02,
+      "rss_kib": 7296,
+      "exit": 0
+    },
+    "result": {
+      "status": "pass",
+      "cycles": 4527665,
+      "instructions": 3117658,
+      "ipc": 0.6885796542,
+      "exit_value": 112,
+      "latency": 20,
+      "seed": 1,
+      "memory_requests": 475549,
+      "memory_writes": 239980,
+      "memory_pending_cycles": 1597883,
+      "memory_transaction_cycles": 9510960,
+      "memory_peak_outstanding": 20,
+      "max_outstanding": 64,
+      "retire_cycles_0": 2832037,
+      "retire_cycles_1": 1126220,
+      "retire_cycles_2": 408,
+      "retire_cycles_3": 285378,
+      "retire_cycles_4": 283622,
+      "wall_seconds": 272.6654978,
+      "peak_rss_kib": 7296,
+      "branch_misses": 216,
+      "icache_misses": 20,
+      "dcache_misses": 30128,
+      "load_replay_count": 0,
+      "fault_pc": 0,
+      "fault_cause": 0
+    },
+    "meets_30_seconds": false,
+    "concurrency_note": "Other synthesis/build experiments were running; CPU user time also exceeds30s"
+  }
+}

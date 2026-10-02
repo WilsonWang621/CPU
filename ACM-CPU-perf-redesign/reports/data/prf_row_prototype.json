@@ -1,0 +1,248 @@
+{
+  "candidate": "build/core-prf-row/rtl/core.sv",
+  "candidate_sha256": "c942cb44f5269bce44cfc50de1727f695d8a06c1fc1e018065925c46e6e8b203",
+  "base_sha256": "7b926959f9a280a7d768da84698185d2277d42e79f9fb7bd11385e0bfe506888",
+  "production_modified": false,
+  "patch": "reports/patches/core_prf_row.patch",
+  "patch_sha256": "3d76e3f77aa51a1e0bee93cbea81d4e9d31020e95a1511af14e32d8af261548f",
+  "scope": "Only move PRF word next-value generation out of the monolithic next_state block into independent fixed-row always_comb blocks. No added register or clock boundary; same WB ports and prf_d issue bypass.",
+  "preserved_semantics": [
+    "Every nonzero row defaults to its previous prf_q word.",
+    "Apply WB lanes in the original increasing order, under wb_valid && ROB.writes_rd && fault==0 && destination==row. The last matching lane retains priority.",
+    "Row0 is always zero; its old end-of-next_state override moves into the fixed row0 block.",
+    "ready_d/free_d updates, rename/commit ordering, and prf_d bypass reads remain in the original next_state locations."
+  ],
+  "dependency_review": [
+    "wb_valid and wb_result are produced by writeback_arbitration from candidate and execute_error.",
+    "candidate/execute_error are produced from registered EX/ROB/LQ state, registered MDU responses and cache responses. They do not depend on ready_d/free_d/prf_d or newly selected ex_d.",
+    "Recovery eligibility uses registered EX/ROB/LQ state. MDU request selection uses registered ex_q.",
+    "The new direction is completed-WB -> fixed-row prf_d -> next_state issue operands -> registered ex_q next clock. It does not feed the current-cycle completed-WB producers.",
+    "Strict default Verilator lint and the assertion-enabled simulator build completed without UNOPTFLAT, latch or multiple-driver warnings. This is dependency review plus lint/regression evidence, not a full sequential equivalence proof."
+  ],
+  "build": {
+    "source": "build/core-prf-row/rtl",
+    "parameters": {
+      "PHYS_REGS": 64,
+      "ROB_ENTRIES": 32,
+      "IQ_ENTRIES": 24,
+      "LQ_ENTRIES": 16,
+      "SQ_ENTRIES": 16,
+      "CSB_ENTRIES": 16,
+      "FETCH_QUEUE_ENTRIES": 16,
+      "FETCH_REQUESTS": 8,
+      "ICACHE_BYTES": 1024,
+      "DCACHE_BYTES": 4096,
+      "BHT_ENTRIES": 256,
+      "BTB_ENTRIES": 64,
+      "RAS_DEPTH": 4,
+      "PREDICTOR_MODE": 0,
+      "FETCH_WIDTH": 4,
+      "RENAME_WIDTH": 4,
+      "ISSUE_WIDTH": 4,
+      "WB_WIDTH": 4,
+      "COMMIT_WIDTH": 4
+    },
+    "rtl_sha256": {
+      "rtl/alu.sv": "7f65cbac4545a79461a116ff09d75ebc86e3c858e0ca7e0265fc8d1c8def9b1a",
+      "rtl/branch_predictor.sv": "a7cb35108743f8ca47b1fe76e4a6b78343e51c62d3aa536687956c6b393c65bc",
+      "rtl/branch_unit.sv": "24f48d8a96a17af442d46e5977ece5be4664bdf42a5527de5dc4021a3acc8bd5",
+      "rtl/cache.sv": "f0f82e4c0905aa2bbf220f418a520705bc0d76e307b614cfd0e66ffb813ecf3e",
+      "rtl/core.sv": "c942cb44f5269bce44cfc50de1727f695d8a06c1fc1e018065925c46e6e8b203",
+      "rtl/cpu_pkg.sv": "091cff8f3e304844564d9524e9702f2228119a792cb7e235a61887c973c21aac",
+      "rtl/cpu_top.sv": "725ee97d9c1daf053b7444f0f692eb963cd5167cd0b244c769d7be3adbbebdb8",
+      "rtl/decoder.sv": "ded522812f105f78d7e4c38a7f38d1484f54149547dc1e853bba92ca51ea5158",
+      "rtl/frontend.sv": "72064d5a363f8b85cf41b1add3ff3be258ccee3471d18691a5905758affcbb6d",
+      "rtl/memory_controller.sv": "eed1ac5d2adab83e127c5514b939120305e0d936b65c1d8e0806a9c05b254a87",
+      "rtl/muldiv.sv": "43ffbbe324a7797f84fbb0ab04ff4b83959287730c6a7e84d805d8e5290071d8"
+    },
+    "harness_sha256": {
+      "Makefile": "98dbcc3c003203613cb4df5c327e97c2fbf27c494a5017af0f87376abac9f246",
+      "sim/main.cpp": "48f1c53d41e189a1662753046770c0f88d536b2db4ab1283770caf34d805dc36",
+      "sim/memory_model.h": "f295310f728db3f6c8ddd8cbab5760e096f47d68fd23b22353fba566a87f1a87"
+    },
+    "build_command": [
+      "make",
+      "-C",
+      "/home/pxy/cpu/build/validation-prf-row/source",
+      "build",
+      "BUILD_DIR=/home/pxy/cpu/build/validation-prf-row",
+      "VERILATOR=/home/pxy/cpu/build/tools/oss-cad-suite/bin/verilator",
+      "JOBS=4",
+      "SIM_FLAGS=--output-groups 0",
+      "PARAMS=-GPHYS_REGS=64 -GROB_ENTRIES=32 -GIQ_ENTRIES=24 -GLQ_ENTRIES=16 -GSQ_ENTRIES=16 -GCSB_ENTRIES=16 -GFETCH_QUEUE_ENTRIES=16 -GFETCH_REQUESTS=8 -GICACHE_BYTES=1024 -GDCACHE_BYTES=4096 -GBHT_ENTRIES=256 -GBTB_ENTRIES=64 -GRAS_DEPTH=4 -GPREDICTOR_MODE=0 -GFETCH_WIDTH=4 -GRENAME_WIDTH=4 -GISSUE_WIDTH=4 -GWB_WIDTH=4 -GCOMMIT_WIDTH=4"
+    ],
+    "verilator": "Verilator 5.053 devel rev v5.052-141-gc8b8c79ee (mod)",
+    "hot_optimization": "O3",
+    "cold_optimization": "O1",
+    "sim_flags": "--output-groups 0",
+    "build_returncode": 0,
+    "build_seconds": 117.1088168080023,
+    "binary_sha256": "b25d5d85cee16b50dda0a5d7ee314138e60e59eb3dddd90e0f7618a1a6074f0d",
+    "validation_runs": [
+      {
+        "suite": "performance",
+        "command": [
+          "python3",
+          "scripts/run_tests.py",
+          "perf_median",
+          "perf_multiply",
+          "perf_qsort",
+          "perf_rsort",
+          "perf_towers",
+          "perf_vvadd",
+          "--binary",
+          "/home/pxy/cpu/build/validation-prf-row/cpu_sim",
+          "--latency",
+          "20",
+          "--differential",
+          "--jobs",
+          "2",
+          "--output",
+          "/home/pxy/cpu/build/validation-prf-row/performance"
+        ],
+        "returncode": 0,
+        "seconds": 6.182206931996916
+      },
+      {
+        "suite": "core",
+        "command": [
+          "python3",
+          "scripts/run_tests.py",
+          "--root",
+          "/home/pxy/cpu/build/validation-prf-row/core-cases",
+          "--binary",
+          "/home/pxy/cpu/build/validation-prf-row/cpu_sim",
+          "--latency",
+          "3",
+          "--differential",
+          "--jobs",
+          "2",
+          "--output",
+          "/home/pxy/cpu/build/validation-prf-row/core"
+        ],
+        "returncode": 0,
+        "seconds": 0.25221401999442605
+      },
+      {
+        "suite": "lsu",
+        "command": [
+          "python3",
+          "tests/lsu/run.py",
+          "--binary",
+          "/home/pxy/cpu/build/validation-prf-row/cpu_sim",
+          "--build-dir",
+          "/home/pxy/cpu/build/validation-prf-row/lsu",
+          "--skip-build",
+          "--no-coverage"
+        ],
+        "returncode": 0,
+        "seconds": 3.167253518004145
+      },
+      {
+        "suite": "owner",
+        "command": [
+          "python3",
+          "tests/lsu/forward_owner_replay.py",
+          "--binary",
+          "/home/pxy/cpu/build/validation-prf-row/cpu_sim",
+          "--output",
+          "/home/pxy/cpu/build/validation-prf-row/owner"
+        ],
+        "returncode": 0,
+        "seconds": 0.2338453699994716
+      }
+    ]
+  },
+  "default_lint": {
+    "type": "default_lint",
+    "command": [
+      "/home/pxy/cpu/build/tools/oss-cad-suite/bin/verilator",
+      "--lint-only",
+      "--top-module",
+      "cpu_top",
+      "--assert",
+      "--unroll-count",
+      "1024",
+      "--unroll-stmts",
+      "100000",
+      "-Wall",
+      "-Wno-UNUSEDSIGNAL",
+      "-Wno-UNUSEDPARAM",
+      "-Wno-PINCONNECTEMPTY",
+      "/home/pxy/cpu/build/core-prf-row/rtl/cpu_pkg.sv",
+      "/home/pxy/cpu/build/core-prf-row/rtl/alu.sv",
+      "/home/pxy/cpu/build/core-prf-row/rtl/branch_predictor.sv",
+      "/home/pxy/cpu/build/core-prf-row/rtl/branch_unit.sv",
+      "/home/pxy/cpu/build/core-prf-row/rtl/cache.sv",
+      "/home/pxy/cpu/build/core-prf-row/rtl/core.sv",
+      "/home/pxy/cpu/build/core-prf-row/rtl/cpu_top.sv",
+      "/home/pxy/cpu/build/core-prf-row/rtl/decoder.sv",
+      "/home/pxy/cpu/build/core-prf-row/rtl/frontend.sv",
+      "/home/pxy/cpu/build/core-prf-row/rtl/memory_controller.sv",
+      "/home/pxy/cpu/build/core-prf-row/rtl/muldiv.sv"
+    ],
+    "returncode": 0,
+    "seconds": 63.02169816699461
+  },
+  "validation": {
+    "suites": {
+      "performance": {
+        "passed": 6,
+        "bound_observer_coverage": false
+      },
+      "core": {
+        "passed": 16,
+        "bound_observer_coverage": false
+      },
+      "lsu": {
+        "passed": 76,
+        "bound_observer_coverage": false
+      },
+      "owner": {
+        "passed": 8,
+        "bound_observer_coverage": false
+      }
+    },
+    "checks": "Every run checks independent retirement differential, exact instruction count/exit and complete256KiB final RAM. All production assertions enabled.",
+    "reference": "build/validation-free-select",
+    "compared_suites": [
+      "performance",
+      "core",
+      "lsu"
+    ],
+    "excluded_comparison_fields": [
+      "peak_rss_kib",
+      "wall_seconds"
+    ],
+    "nonruntime_metric_differences": [],
+    "performance_instructions": 374104,
+    "performance_cycles": 342543,
+    "aggregate_ipc": 1.092137337502153
+  },
+  "coarse": {
+    "base": {
+      "core_cells": 74417,
+      "core_wire_bits": 859922,
+      "core_mux_cells": 51031,
+      "design_cells": 78146,
+      "design_wire_bits": 1100133
+    },
+    "candidate": {
+      "core_cells": 74192,
+      "core_wire_bits": 819974,
+      "core_mux_cells": 50531,
+      "design_cells": 77921,
+      "design_wire_bits": 1060185
+    },
+    "flow": "LEAN read_slang core --no-implicit-memories, hierarchy-check, opt-clean, opt-fast, wreduce, opt-clean; no mapping."
+  },
+  "limitations": [
+    "Coarse cell/wire counts are not mapped standard-cell area or timing. No full-core mapping or STA was performed.",
+    "Only one new simulator binary was built. No full25-program/pi runtime rerun or bound core/LSU coverage claim.",
+    "Prototype is based on7b with f0 cache and original four Load-forwarding networks; it does not include the independent two-AGU/forward-tree/cache prototypes."
+  ],
+  "artifacts": [
+    "build/core-prf-row",
+    "build/validation-prf-row"
+  ]
+}

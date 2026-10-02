@@ -1,0 +1,469 @@
+{
+  "candidate_source": "build/core-parallel-select/rtl/core.sv",
+  "candidate_sha256": "4dc0506b4035719a9cd926388da7bd10c980a23a2bbcf4fb703133fc6a374d9d",
+  "actual_macros_sha256": "bf940fb900e196bb358f9e8c87f3ebb81462a7322b5d1e54281046f4f3b7c41d",
+  "integration_predicates": {
+    "memory_predicate": "issue_mem_rank[k*IQRW+:IQRW]<=IQRW'(1)",
+    "lane_predicate": "int'(issue_final_rank[k*IQRW+:IQRW])==int'(issue_port_rank)"
+  },
+  "yosys": "Yosys 0.69+75 (git sha1 f0b945f63-dirty, Release, Clang /usr/bin/clang++ 21.1.8)",
+  "proof_runner": "tests/synthesis/prove_parallel_selection.py",
+  "proof_runner_sha256": "c157b9fb325604c633a638c4b33b1239ccfdf429c63c7f61ad1aab6225f06244",
+  "explanation": "tests/synthesis/parallel_selection.md",
+  "candidate_or_production_modified": false,
+  "conclusion": "The selector is equivalent to the serial greedy selector under the reviewed static eligibility contract, by a strict-total-order decomposition at N21 and N24. Two large direct composed miters timed out and remain unknown.",
+  "scope": [
+    "Actual CPU_ORDER_FUNCTION copied verbatim: arbitrary unsigned ages including ties and out-of-range values; stable order is (age,original slot).",
+    "Actual CPU_RANK_FUNCTION copied verbatim: every output row checked against serial integer counting for an unconstrained older matrix and arbitrary valid mask. Rank correctness is proved, not assumed.",
+    "Canonical strict-order actual-rank selector versus serial greedy at N21/N24, WB and IQ widths1/2/4; arbitrary ready/class/enable, all free-lane holes, MDU occupied/mul-ready/div-ready/div-accepted controls. Memory cap2 and MDU cap1.",
+    "Strict total orders are reduced by relabeling candidates in priority order. Permuting rows/columns preserves proven counts and selected identities. The same one-hot winners imply the same masked-OR data/index outputs.",
+    "Direct unsorted compositions at N5 widths1/2/4, N21 WB1, IQ1/IQ2 width4, and minimal ROB4 IQ1/IQ2/WB6 width4. All ages are unconstrained; strict sentinel is ROB_ENTRIES+1."
+  ],
+  "source_review": [
+    "Operand ready bits, iq_live, address_ready, wait readiness and ages do not change between selection lanes. Existing MDU occupancy/accepted-DIV gating is identical.",
+    "The old selection changes only selected-entry availability and the MEM/MDU issue counters. A selected load gains address_sent; a data-ready store becomes invalid; a data-unready store gains address_sent and remains data-unready, so it cannot be selected twice. Other instructions become invalid.",
+    "Class-prefix filtering is independent of which free lane consumes a winner. Port rank increments only for a free lane within ISSUE_WIDTH."
+  ],
+  "limits": [
+    "Combinational selection equivalence, not whole-core sequential equivalence. Eligibility mutation invariants are established by source review, not a full pipeline SAT model.",
+    "The full N21 WB4 and N24 IQ4 unsorted miters each reached the 60-second process limit. These are unknown, not direct passes.",
+    "Age-width cases imply ROB32 for six-bit ages and ROB4 for three-bit ages. No non-power-of-two ROB sentinel was separately instantiated."
+  ],
+  "summary": {
+    "proven": 31,
+    "unknown": 2,
+    "failed": 0,
+    "timeout_seconds_per_case": 60,
+    "negative_controls_detected": 2
+  },
+  "runs": [
+    {
+      "kind": "iq_full",
+      "candidates": 1,
+      "age_width": 3,
+      "lanes": 4,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 0.36907985900325,
+      "wrapper_sha256": "1fc65622fecce632e6cd960613d5473effccf711a8b876a8c849509b68e38022",
+      "log_sha256": "1436518ad2d3ec27d9c7594303825099b7297d20369b596341db943646f42021",
+      "artifacts": "build/parallel-selection-minimal/iq_full-n1-a3-k4"
+    },
+    {
+      "kind": "iq_full",
+      "candidates": 1,
+      "age_width": 6,
+      "lanes": 4,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 0.16488360200310126,
+      "wrapper_sha256": "2b9d254c123f199ffc20800e0190959d94d7532c9a2c928120e0bf932905c86c",
+      "log_sha256": "645872951aa356bb19fc72d6f4f4d98639bc10c8a4e74a822dcd1ee76abe95bf",
+      "artifacts": "build/parallel-selection-proof/iq_full-n1-a6-k4"
+    },
+    {
+      "kind": "iq_ordered",
+      "candidates": 1,
+      "age_width": 6,
+      "lanes": 4,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 0.21526831200026209,
+      "wrapper_sha256": "d9467dc094b28d52e252850635369828c70fd7041a30ff17916579dfdb90286e",
+      "log_sha256": "bbad7b1a75854be2ff369ab209afa0c8359ab8802b2c54a47553fe5ead46ddea",
+      "artifacts": "build/parallel-selection-proof/iq_ordered-n1-a6-k4"
+    },
+    {
+      "kind": "order",
+      "candidates": 1,
+      "age_width": 6,
+      "lanes": 1,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 0.03241192400309956,
+      "wrapper_sha256": "243fb58e483126b7486ce563265ff029de237755211770fc996cf209a563e0db",
+      "log_sha256": "ab773556fd205c9e37d8c751ec9b0d6c65f983aa5f0adb2ed5f1d6e465c53574",
+      "artifacts": "build/parallel-selection-proof/order-n1-a6-k1"
+    },
+    {
+      "kind": "rank",
+      "candidates": 1,
+      "age_width": 6,
+      "lanes": 1,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 0.032489679993886966,
+      "wrapper_sha256": "b91eabf6d0d2b6471c79bf2243355956702a847f470ae1c58ccb5f3542a5233a",
+      "log_sha256": "22340f2f979b2034ed47d472f45c706d906112552b710f92def7abcd28fc3667",
+      "artifacts": "build/parallel-selection-proof/rank-n1-a6-k1"
+    },
+    {
+      "kind": "iq_full",
+      "candidates": 2,
+      "age_width": 3,
+      "lanes": 4,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 0.4169856250009616,
+      "wrapper_sha256": "186dab290f2dbab256c1effbdb58aeaead490cdd7063dd29bdb3d8cd3e327f82",
+      "log_sha256": "512d0f395c1a2acbdd3c012382dda4415293db80d964dffd925d07e7bf72f7cc",
+      "artifacts": "build/parallel-selection-minimal/iq_full-n2-a3-k4"
+    },
+    {
+      "kind": "iq_full",
+      "candidates": 2,
+      "age_width": 6,
+      "lanes": 4,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 0.2649469149982906,
+      "wrapper_sha256": "903488f724c298460fe06d55b52b992611ecb9c85226be2b38953dae623df9fa",
+      "log_sha256": "0b51fd14b97cf77c34bb0b087490f60c3e61527a5a977faaa4723a0e4b05fbbc",
+      "artifacts": "build/parallel-selection-proof/iq_full-n2-a6-k4"
+    },
+    {
+      "kind": "iq_full",
+      "candidates": 5,
+      "age_width": 6,
+      "lanes": 1,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 0.3658201590005774,
+      "wrapper_sha256": "590d08bd50c9ae4fd8ea7bb4de09ed1c184b89b434d3a8fa88ba57b87327572b",
+      "log_sha256": "1f312cbacf50381d85bc4a164f9b38906b8ef9bd9925d3fe459e6b963a81b4c6",
+      "artifacts": "build/parallel-selection-proof/iq_full-n5-a6-k1"
+    },
+    {
+      "kind": "iq_full",
+      "candidates": 5,
+      "age_width": 6,
+      "lanes": 2,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 1.2691243549998035,
+      "wrapper_sha256": "87bff4b3e3fb87b634b6aa7a9a64356a61ccc1d1d915227123f0ca7eecf5a231",
+      "log_sha256": "9877d65e638fa1e74b14231284fd53e661fc8887c3781663153bc717ac8b7722",
+      "artifacts": "build/parallel-selection-proof/iq_full-n5-a6-k2"
+    },
+    {
+      "kind": "iq_full",
+      "candidates": 5,
+      "age_width": 6,
+      "lanes": 4,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 4.029333910002606,
+      "wrapper_sha256": "75e37e7d03257cc99efda473663f378c512593a90e28fd7cbd2a132398aaffb5",
+      "log_sha256": "df1114cdd868a9f49406f422fe0f8de8cd9dc47f204a9c8f31ae5bff3581b3fc",
+      "artifacts": "build/parallel-selection-proof/iq_full-n5-a6-k4"
+    },
+    {
+      "kind": "wb_full",
+      "candidates": 5,
+      "age_width": 6,
+      "lanes": 1,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 0.3155595399948652,
+      "wrapper_sha256": "1c6413df0c7f12d10d1bf3540450fc41f3cb308655b8551a442d386c7dee3e45",
+      "log_sha256": "a7fa437c355a159e3e5945b1adae072c4b9fd0a8fac867ce0c561a8b329d0bf9",
+      "artifacts": "build/parallel-selection-proof/wb_full-n5-a6-k1"
+    },
+    {
+      "kind": "wb_full",
+      "candidates": 5,
+      "age_width": 6,
+      "lanes": 2,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 0.5160202629995183,
+      "wrapper_sha256": "baee5e6905f6ab1c900497430f5052b93d98df4a008ae654a62a14c5dc143ac5",
+      "log_sha256": "91aa6854c0928180e8b6899725073094f87b7766d42eece5c08a9888a67790e0",
+      "artifacts": "build/parallel-selection-proof/wb_full-n5-a6-k2"
+    },
+    {
+      "kind": "wb_full",
+      "candidates": 5,
+      "age_width": 6,
+      "lanes": 4,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 1.7202556699994602,
+      "wrapper_sha256": "6fd76b5c3175fa7957963c58cbb4df33c77ad9127a7a99e24c837f17b14fb7a8",
+      "log_sha256": "7169d2a7fe10202033e15d6553224ce5bc3e5c81e3393dfdf783d3f71d71312e",
+      "artifacts": "build/parallel-selection-proof/wb_full-n5-a6-k4"
+    },
+    {
+      "kind": "wb_full",
+      "candidates": 6,
+      "age_width": 3,
+      "lanes": 4,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 3.928281063999748,
+      "wrapper_sha256": "b648e35c38a4e2f7c51db8c027b56456410b4626fb48865bbdce627deb91fea3",
+      "log_sha256": "a93228102fc264c58c3b397c0cf97d401ea1eb938c48cd8841d3c6e02e4f8581",
+      "artifacts": "build/parallel-selection-minimal/wb_full-n6-a3-k4"
+    },
+    {
+      "kind": "iq_ordered",
+      "candidates": 21,
+      "age_width": 6,
+      "lanes": 1,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 8.147079843998654,
+      "wrapper_sha256": "dfb01cdd0e6eb9150f2d0680d9cff8a7e1c9d4d3f5dcc2e0e2ce280df900c45e",
+      "log_sha256": "777e3a8ccecb467cf991009e375414331d9b8cdb64821fe598fa474e04383034",
+      "artifacts": "build/parallel-selection-proof/iq_ordered-n21-a6-k1"
+    },
+    {
+      "kind": "iq_ordered",
+      "candidates": 21,
+      "age_width": 6,
+      "lanes": 2,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 8.800565246994665,
+      "wrapper_sha256": "d3a55e0f838c2c1642095cbcd17d032d42322161a046b35b4c712e91ef62c3e7",
+      "log_sha256": "e5ee79855621484c72a0c1ce57cb354c51df5054521d2e578d345c8c43319f1a",
+      "artifacts": "build/parallel-selection-proof/iq_ordered-n21-a6-k2"
+    },
+    {
+      "kind": "iq_ordered",
+      "candidates": 21,
+      "age_width": 6,
+      "lanes": 4,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 19.74178043899883,
+      "wrapper_sha256": "2af778778bee1a6add27fb46c066951327ee90dcbdd99ba653fa1bdfcac75752",
+      "log_sha256": "2951a57fa9da22c62a4addcd8cbd042f110eba00cbdc76da69a9d783010905ad",
+      "artifacts": "build/parallel-selection-proof/iq_ordered-n21-a6-k4"
+    },
+    {
+      "kind": "order",
+      "candidates": 21,
+      "age_width": 6,
+      "lanes": 1,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 14.12210079900251,
+      "wrapper_sha256": "24ce10a800729bb9b0aeaffc6c4209450b123033db475fd46bafa372908ed216",
+      "log_sha256": "ab93c06176723fa28c0617e96282c7087ae0d67014c4a97fb010be693db880b7",
+      "artifacts": "build/parallel-selection-proof/order-n21-a6-k1"
+    },
+    {
+      "kind": "rank",
+      "candidates": 21,
+      "age_width": 6,
+      "lanes": 1,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 8.300218980002683,
+      "wrapper_sha256": "1f56f57bbbaf6e518d80c8a83a9790b10245bb5946de1019e59b579f63f60231",
+      "log_sha256": "15226b71e0637aeb6488b7384a5f4123ca956657378bc6d475dc4ce6864db097",
+      "artifacts": "build/parallel-selection-proof/rank-n21-a6-k1"
+    },
+    {
+      "kind": "wb_full",
+      "candidates": 21,
+      "age_width": 6,
+      "lanes": 1,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 24.297343024001748,
+      "wrapper_sha256": "4847fa2a3c0b30a11a4ef9ca7aa34027551a2a07f324d588588ef77470fe570d",
+      "log_sha256": "2171b3889b8b9a9d1496348a69db002dd8282c8a02bbef2b460c5a8d6d11d0e4",
+      "artifacts": "build/parallel-selection-proof/wb_full-n21-a6-k1"
+    },
+    {
+      "kind": "wb_full",
+      "candidates": 21,
+      "age_width": 6,
+      "lanes": 4,
+      "status": "unknown",
+      "returncode": null,
+      "seconds": 60.012145423999755,
+      "wrapper_sha256": "faedc432c6baf37de8ca59c1f7512855e352c97212060f8e5340a10acf725f6e",
+      "log_sha256": "d1b43a04f8bb46130c52fc7bc421d6cd99c4062ddb71178c926c65a0c11c4697",
+      "artifacts": "build/parallel-selection-proof/wb_full-n21-a6-k4"
+    },
+    {
+      "kind": "wb_ordered",
+      "candidates": 21,
+      "age_width": 6,
+      "lanes": 1,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 8.094604809004522,
+      "wrapper_sha256": "b9367e62e1a00b05916bc64a1781ee3a6320d53642201e089b005c287e0b188e",
+      "log_sha256": "e6fff407c435e5866d674a943731e8804be8b0e1d4c43a12336e1bb77bb7871e",
+      "artifacts": "build/parallel-selection-proof/wb_ordered-n21-a6-k1"
+    },
+    {
+      "kind": "wb_ordered",
+      "candidates": 21,
+      "age_width": 6,
+      "lanes": 2,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 8.74635812699853,
+      "wrapper_sha256": "eebce3b970b00ee0c633b8015d1d462613860f4846c6099c8da28073b703b095",
+      "log_sha256": "db0d70e189d8ee28cfbeeb9cd1dfd3954c863868f856fc28a56908392addef03",
+      "artifacts": "build/parallel-selection-proof/wb_ordered-n21-a6-k2"
+    },
+    {
+      "kind": "wb_ordered",
+      "candidates": 21,
+      "age_width": 6,
+      "lanes": 4,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 10.252490482002031,
+      "wrapper_sha256": "e7a85eb4e6c152bb1f52af6a31606941e2d486e5b759dcf8aaec6a34917ae114",
+      "log_sha256": "094f4930ecef16d674c6f49b5784f839b32664f8ebb1d55ae68b88a853c8ac93",
+      "artifacts": "build/parallel-selection-proof/wb_ordered-n21-a6-k4"
+    },
+    {
+      "kind": "iq_full",
+      "candidates": 24,
+      "age_width": 6,
+      "lanes": 4,
+      "status": "unknown",
+      "returncode": null,
+      "seconds": 60.01193254200189,
+      "wrapper_sha256": "6ca4190c43e203a7521bb601e9e034108b99cd3e0924453e4843049017b34aaf",
+      "log_sha256": "ce249ef50d90483afb053f81bf9ddf0fb737f930274abfcfa6f0d316089bf2d8",
+      "artifacts": "build/parallel-selection-proof/iq_full-n24-a6-k4"
+    },
+    {
+      "kind": "iq_ordered",
+      "candidates": 24,
+      "age_width": 6,
+      "lanes": 1,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 8.917522784999164,
+      "wrapper_sha256": "15c5c5bbaf5f2706b989b84bdd16326b72ce6f108614ed14e2bec4a9eeef6c25",
+      "log_sha256": "2cc58f6660eb2d02ff26de608e1f0fdff3c5a3bf614b5132012c2d3153a55ea8",
+      "artifacts": "build/parallel-selection-proof/iq_ordered-n24-a6-k1"
+    },
+    {
+      "kind": "iq_ordered",
+      "candidates": 24,
+      "age_width": 6,
+      "lanes": 2,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 9.718606897004065,
+      "wrapper_sha256": "c4d29f0debf5b20b1231eed5de88327f7a13beb922f45f91bda113890045e417",
+      "log_sha256": "2f47868252078375075cfc033d71e3d7e8e3b09797800cc0e95c43bfea82e6b7",
+      "artifacts": "build/parallel-selection-proof/iq_ordered-n24-a6-k2"
+    },
+    {
+      "kind": "iq_ordered",
+      "candidates": 24,
+      "age_width": 6,
+      "lanes": 4,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 20.096123515002546,
+      "wrapper_sha256": "243e38fc3619333c735397ff3abeeb18068a55940f5866cb17dce15382195371",
+      "log_sha256": "2d9d5a4ae9b1ccfd0bc5facee27d9527dd917ecc443e02a66b7b5d8ba3ce9f91",
+      "artifacts": "build/parallel-selection-proof/iq_ordered-n24-a6-k4"
+    },
+    {
+      "kind": "order",
+      "candidates": 24,
+      "age_width": 6,
+      "lanes": 1,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 26.414105519004806,
+      "wrapper_sha256": "044ddbf8537089052610dd822b9e6c03020d60a8b0c9cf12d9262cee3564744e",
+      "log_sha256": "6dfab65e1bc513a9d6d8d1303a0ca105277d25dcfc63aad709ad20f0d2973446",
+      "artifacts": "build/parallel-selection-proof/order-n24-a6-k1"
+    },
+    {
+      "kind": "rank",
+      "candidates": 24,
+      "age_width": 6,
+      "lanes": 1,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 14.06986061600037,
+      "wrapper_sha256": "984611a865d65346532fedb5b2271746b7d70f8b86af19f2f88dbb4c7cfc5ca1",
+      "log_sha256": "c5790f592e14fdc289a3dce0e30924514d2a222ae35649f74117bf2b7f4015c2",
+      "artifacts": "build/parallel-selection-proof/rank-n24-a6-k1"
+    },
+    {
+      "kind": "wb_ordered",
+      "candidates": 24,
+      "age_width": 6,
+      "lanes": 1,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 7.441341527999612,
+      "wrapper_sha256": "56a422247e7f833d648986bf95d6756a06b4a6301170d8a3ebb2b753d0be5ad1",
+      "log_sha256": "dcbdfb4c13922774ed3f5e6b0f068fe7b3be9cdc465326d90cb850dd67fab004",
+      "artifacts": "build/parallel-selection-proof/wb_ordered-n24-a6-k1"
+    },
+    {
+      "kind": "wb_ordered",
+      "candidates": 24,
+      "age_width": 6,
+      "lanes": 2,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 7.540971313996124,
+      "wrapper_sha256": "f17fb18cfc179a9b8d4d3c9c806c428b894d645e1fd9331d0400d20128121636",
+      "log_sha256": "d33271e79cedc77d37daceddfec08d96bf9262cf6e37462df68d5698aa6e6459",
+      "artifacts": "build/parallel-selection-proof/wb_ordered-n24-a6-k2"
+    },
+    {
+      "kind": "wb_ordered",
+      "candidates": 24,
+      "age_width": 6,
+      "lanes": 4,
+      "status": "proven",
+      "returncode": 0,
+      "seconds": 10.008429973997409,
+      "wrapper_sha256": "d4408495545bf1f1545bdb0802bd878e6c1db307b4d0d50dafef458118456dd9",
+      "log_sha256": "d8f561e9d0d9964aca2b037f38234052ddc1d9a859593e1ecc75a576aa681a14",
+      "artifacts": "build/parallel-selection-proof/wb_ordered-n24-a6-k4"
+    }
+  ],
+  "negative_controls": [
+    {
+      "mutation": "restore truncated memory limit < CW'(2)",
+      "expected_result": "counterexample",
+      "observed_result": "counterexample",
+      "source_sha256": "aaaf4e272e7de1372152abe548c0a4a45f235d04cc464d20b6cf4432c31de736",
+      "integration_predicates": {
+        "memory_predicate": "issue_mem_rank[k*IQRW+:IQRW]<IQRW'(2)",
+        "lane_predicate": "int'(issue_final_rank[k*IQRW+:IQRW])==int'(issue_port_rank)"
+      },
+      "log_sha256": "ba9c344206b56837cad7c9b25693d3670371f590bbcb012dde77c82806ae08c1",
+      "artifacts": "build/parallel-selection-negative/memory/iq_full-n1-a6-k4"
+    },
+    {
+      "mutation": "restore narrowed lane-index cast",
+      "expected_result": "counterexample",
+      "observed_result": "counterexample",
+      "source_sha256": "35568da3aae62ca1ca3c07115015709003ecf9f4f2a0cc3856edcf54c0c86ebf",
+      "integration_predicates": {
+        "memory_predicate": "issue_mem_rank[k*IQRW+:IQRW]<=IQRW'(1)",
+        "lane_predicate": "issue_final_rank[k*IQRW+:IQRW]==IQRW'(issue_port_rank)"
+      },
+      "log_sha256": "db7e8bf27321fae14db913dabeef8554437043bfe7c4ddfe1ad89bd7fede0fb0",
+      "artifacts": "build/parallel-selection-negative/lane/iq_full-n1-a6-k4"
+    }
+  ],
+  "reproduce": "python3 tests/synthesis/prove_parallel_selection.py --source build/core-parallel-select/rtl/core.sv --output build/parallel-selection-proof-repeat",
+  "artifacts": [
+    "build/parallel-selection-proof",
+    "build/parallel-selection-minimal",
+    "build/parallel-selection-negative"
+  ]
+}

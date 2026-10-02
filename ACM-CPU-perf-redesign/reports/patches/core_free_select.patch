@@ -1,0 +1,83 @@
+--- a/rtl/core.sv
++++ b/rtl/core.sv
+@@ -433,6 +433,34 @@
+ `undef CPU_ORDER_FUNCTION
+ `undef CPU_RANK_FUNCTION
+ 
++
++  // Balanced lowest-physical-index selection. Padded leaves are unavailable;
++  // an empty mask returns the original signed -1 sentinel.
++`define CPU_LOWEST_FUNCTION(NAME, N) \
++  function automatic integer NAME(input logic [(N)-1:0] available); \
++    localparam integer LEAVES=1<<$clog2(N), IW=((N)>1 ? $clog2(N):1); \
++    logic [2*LEAVES-1:1] tree_valid; \
++    logic [IW-1:0] tree_index [2*LEAVES-1:1]; \
++    begin \
++      NAME=-1; \
++      for(integer n=0;n<LEAVES;n=n+1) begin \
++        tree_valid[LEAVES+n]=0;tree_index[LEAVES+n]=0; \
++        if(n<(N)) begin \
++          tree_valid[LEAVES+n]=available[n];tree_index[LEAVES+n]=IW'(n); \
++        end \
++      end \
++      for(integer n=LEAVES-1;n>0;n=n-1) begin \
++        tree_valid[n]=tree_valid[2*n] || tree_valid[2*n+1]; \
++        tree_index[n]=tree_valid[2*n] ? tree_index[2*n]:tree_index[2*n+1]; \
++      end \
++      if(tree_valid[1]) NAME=int'(tree_index[1]); \
++    end \
++  endfunction
++  `CPU_LOWEST_FUNCTION(lowest_iq_slot,IQ_ENTRIES)
++  `CPU_LOWEST_FUNCTION(lowest_physical_register,PHYS_REGS)
++  `CPU_LOWEST_FUNCTION(lowest_load_slot,LQ_ENTRIES)
++`undef CPU_LOWEST_FUNCTION
++
+   frontend #(.FETCH_WIDTH(FETCH_WIDTH),.FETCH_QUEUE_ENTRIES(FETCH_QUEUE_ENTRIES),
+     .RAM_BYTES(RAM_BYTES),.BHT_ENTRIES(BHT_ENTRIES),.BTB_ENTRIES(BTB_ENTRIES),
+     .RAS_DEPTH(RAS_DEPTH),.PREDICTOR(PREDICTOR),.LINE_BYTES(LINE_BYTES),
+@@ -827,6 +855,9 @@
+     logic [IQ_ENTRIES*IQ_ENTRIES-1:0] issue_older;
+     logic [IQ_ENTRIES*IQRW-1:0] issue_mem_rank,issue_final_rank;
+     logic [IQ_ENTRIES*(RW+1)-1:0] issue_ages;
++    logic [IQ_ENTRIES-1:0] rename_iq_free;
++    logic [PHYS_REGS-1:0] rename_prf_free;
++    logic [LQ_ENTRIES-1:0] rename_lq_free;
+     logic prefix,resources,src1_ready,src2_ready,trigger_exit,div_accepted;
+     rob_t renamed;
+     iq_t renamed_iq;
+@@ -896,6 +927,7 @@
+     mdu_issued=0;train_lane=0;issue_port_rank=0;
+     issue_memory=0;issue_mdu=0;issue_filtered=0;issue_older=0;issue_mem_rank=0;issue_final_rank=0;
+     prefix=0;resources=0;src1_ready=0;src2_ready=0;trigger_exit=0;div_accepted=0;
++    rename_iq_free=0;rename_prf_free=0;rename_lq_free=0;
+ 
+     if(execute_error) begin
+       state_d=FAULT;fault_cause_d=FAULT_STORE_BUS;fault_pc_d=execute_error_pc;
+@@ -1068,7 +1100,7 @@
+     issue_mem_rank=issue_rank(issue_memory,issue_older);
+     for(integer k=0;k<IQ_ENTRIES;k=k+1)
+       issue_filtered[k]=issue_eligible[k] &&
+-        (!issue_memory[k] || issue_mem_rank[k*IQRW+:IQRW]<=IQRW'(1)) &&
++        (!issue_memory[k] || !(|(issue_mem_rank[k*IQRW+:IQRW] >> 1))) &&
+         (!issue_mdu[k] || !(|(issue_mdu & issue_older[k*IQ_ENTRIES+:IQ_ENTRIES])));
+     issue_final_rank=issue_rank(issue_filtered,issue_older);
+     issue_port_rank=0;
+@@ -1106,10 +1138,14 @@
+     prefix=1;
+     for(integer lane=0;lane<RENAME_WIDTH;lane=lane+1) begin
+       if(state_q==RUN && state_d==RUN && !redirect && prefix && fetch_valid[lane] && int'(count_d)<ROB_ENTRIES) begin
+-        iqslot=-1;pdst=-1;lqid=-1;
+-        for(integer k=IQ_ENTRIES-1;k>=0;k=k-1) if(!iq_work[k].valid) iqslot=k;
+-        for(integer k=PHYS_REGS-1;k>=1;k=k-1) if(free_d[k]) pdst=k;
+-        for(integer k=LQ_ENTRIES-1;k>=0;k=k-1) if(!load_work[k].valid) lqid=k;
++        // Read the current work masks again for each rename lane, after any
++        // earlier-lane allocation and this cycle's commit/issue/recovery frees.
++        for(integer k=0;k<IQ_ENTRIES;k=k+1) rename_iq_free[k]=!iq_work[k].valid;
++        for(integer k=0;k<LQ_ENTRIES;k=k+1) rename_lq_free[k]=!load_work[k].valid;
++        rename_prf_free=free_d;rename_prf_free[0]=0;
++        iqslot=lowest_iq_slot(rename_iq_free);
++        pdst=lowest_physical_register(rename_prf_free);
++        lqid=lowest_load_slot(rename_lq_free);
+         resources=1;
+         if(fetch_packet[lane].fault==0 && !decoded[lane].illegal) begin
+           resources=iqslot>=0;

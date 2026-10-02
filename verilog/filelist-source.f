@@ -1,0 +1,13 @@
+area_v2/cpu_pkg.sv
+area_v2/alu.sv
+area_v2/branch_unit.sv
+area_v2/cpu_top.sv
+area_v2/decoder.sv
+area_v2/memory_controller.sv
+area_v2/muldiv.sv
+area_v2/v2_dcache.sv
+area_v2/v2_frontend.sv
+area_v2/v2_rename.sv
+area_v2/v2_select.sv
+pararisc_axi_adapter.sv
+student_top.sv

@@ -1,0 +1,31 @@
+{
+  "stage": "port/resource count after fast optimization and memory collection; not mapped area",
+  "before": {
+    "storage_width": 32,
+    "storage_rows": 256,
+    "read_ports": 8,
+    "write_ports": 1,
+    "word_read_muxes": 2040,
+    "read_mux_bits": 65280,
+    "num_cells": 5330,
+    "num_wire_bits": 484438
+  },
+  "after": {
+    "storage_width": 256,
+    "storage_rows": 32,
+    "read_ports": 2,
+    "write_ports": 1,
+    "word_read_muxes": 62,
+    "read_mux_bits": 15872,
+    "num_cells": 6784,
+    "num_wire_bits": 489097
+  },
+  "tests": {
+    "i16": "pass",
+    "i32": "pass",
+    "i64": "pass",
+    "d32_after_scope_move": "pass"
+  },
+  "storage_bits_before_and_after": 8192,
+  "source_sha256": "d1683dcd9831659ddffb79bb61dc828ced6a5d033717e87b97e66d9c3ba9f5bd"
+}
