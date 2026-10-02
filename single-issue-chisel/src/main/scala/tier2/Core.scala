@@ -31,10 +31,10 @@ class Core(p: Config) extends Module {
   val storeData = Reg(Vec(p.storeCapacity,UInt(32.W))); val storeMask = Reg(Vec(p.storeCapacity,UInt(4.W)))
   val storeFree = PriorityEncoder(~storeLive.asUInt)
   val storeSpace = !storeLive.asUInt.andR
-  val storeHeadSelect = (0 until p.storeCapacity).map(i => storeLive(i) && storeOwner(i) === head)
-  val retiredStoreAddress = Util.select(storeHeadSelect,storeAddr.toSeq)
-  val retiredStoreData = Util.select(storeHeadSelect,storeData.toSeq)
-  val retiredStoreMask = Util.select(storeHeadSelect,storeMask.toSeq)
+  val storeHeadSelect = RegInit(0.U(p.storeCapacity.W))
+  val retiredStoreAddress = Util.select(storeHeadSelect.asBools,storeAddr.toSeq)
+  val retiredStoreData = Util.select(storeHeadSelect.asBools,storeData.toSeq)
+  val retiredStoreMask = Util.select(storeHeadSelect.asBools,storeMask.toSeq)
   val architecturalWords = (1 until 32).map(i => Module(new LocalArchWord(i)))
   val arch = VecInit(Seq(0.U(32.W)) ++ architecturalWords.map(_.io.value))
   val renameEntries = (1 until 32).map(i => Module(new RenameEntry(p,i)))
@@ -287,6 +287,11 @@ class Core(p: Config) extends Module {
     }
   }
   retire := count =/= 0.U && atHead(done) && !halted && (!atHead(stores) || (if(p.storeEntries > 0) dc.io.storeReady else dc.io.req.ready))
+  // Refresh the owner selection for the head that will exist after this
+  // edge. A newly dispatched store cannot be done before this catches up.
+  val nextRetirementTag = Mux(retire,head+1.U,head)
+  storeHeadSelect := VecInit((0 until p.storeCapacity).map(i => storeLive(i) && storeOwner(i) === nextRetirementTag)).asUInt
+  if(p.debug) { when(headStore) { assert(PopCount(storeHeadSelect) === 1.U,"Retiring store lacks its prepared owner selection") } }
   flush := (if(p.earlyRecovery) recoveryValid else retire && atHead(control) && atHead(actual) =/= atHead(predicted))
   fetch.io.redirect.valid := (if(p.fastRedirect && p.earlyRecovery) branchMiss else flush)
   fetch.io.redirect.bits := (if(p.fastRedirect && p.earlyRecovery) alu.io.next else if(p.earlyRecovery) recoveryPC else atHead(actual))
@@ -298,7 +303,7 @@ class Core(p: Config) extends Module {
   committedTraining.history := 0.U
   val trainNow = retire && atHead(control)
   fetch.io.commit.valid := RegNext(trainNow,false.B)
-  fetch.io.commit.bits := RegEnable(committedTraining,trainNow)
+  fetch.io.commit.bits := RegNext(committedTraining)
   val executedTraining = Wire(new Training)
   executedTraining.pc := xpc
   executedTraining.target := Mux(xd.branch || xd.jal,alu.io.pc+xd.imm,addressWord.io.value)
@@ -308,7 +313,7 @@ class Core(p: Config) extends Module {
   executedTraining.history := xhistory
   val trainExecution = xv && (xd.branch || xd.jal || xd.jalr) && survives(xt)
   fetch.io.train.valid := RegNext(trainExecution,false.B)
-  fetch.io.train.bits := RegEnable(executedTraining,trainExecution)
+  fetch.io.train.bits := RegNext(executedTraining)
   when(retire) {
     assert(!atHead(fault),"Retiring faulting instruction")
     live(head) := false.B; head := head+1.U
@@ -345,7 +350,7 @@ class Core(p: Config) extends Module {
   }
   if(p.debug) {
   val events = Seq(retire,issue,dispatch,flush,!fetch.io.out.valid,count === p.rob.U,qvalid.asUInt.andR,
-    xv && !xComplete,loadAccept,loadReturn,headStore && !dc.io.req.ready,
+    xv && !xComplete,loadAccept,loadReturn,headStore && !dc.io.storeReady,
     direct,count =/= 0.U && !atHead(done),xspace && !winner._1 && !direct,
     loadRequests.io.deq.valid && !dc.io.req.ready,bypassLoad,
     qvalid.asUInt.orR && !eligible.asUInt.orR,retire && atHead(conditional))
