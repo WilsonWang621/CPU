@@ -198,6 +198,17 @@ class Core(p: Config) extends Module {
     }
   }
   val winner = Util.orderTreeWrapped((0 until p.iq).map(i => (eligible(i),qtag(i),i.U(log2Ceil(p.iq).W))),(0 until p.iq).map(i => wrapped(qtag(i))),false)
+  val olderMasks = (0 until p.iq).map(i => VecInit((0 until p.iq).map(j => if(i==j) false.B else before(qtag(j),qtag(i)))).asUInt)
+  def scheduled(xs: Seq[UInt], fallback: UInt): UInt = {
+    val width = fallback.getWidth
+    Cat((0 until width by 32).reverse.map(low => {
+      val high = math.min(width-1,low+31)
+      val choice = Module(new IssueChoice(high-low+1,p.iq))
+      choice.io.eligible := eligible.asUInt; choice.io.older := VecInit(olderMasks)
+      choice.io.words := VecInit(xs.map(_(high,low))); choice.io.fallback := fallback(high,low)
+      choice.io.value
+    }))
+  }
   val issue = winner._1 && xspace && !flush && !halted
   val qi = winner._3
   when(xComplete) { xv := false.B }
@@ -238,16 +249,16 @@ class Core(p: Config) extends Module {
   when(direct) { xv := true.B }
   // Wide execution payload preparation does not depend on recovery permission.
   Seq(xdWord,xpcWord,xtWord,xaWord,xbWord,xnWord,xhWord).foreach(_.io.prepare := xspace)
-  val preparedDecoded = Mux(winner._1,Util.choose(qi,qd.toSeq),d)
+  val preparedDecoded = scheduled(qd.toSeq.map(_.asUInt),d.asUInt).asTypeOf(new Decoded)
   xdWord.io.data := preparedDecoded.asUInt
-  xpcWord.io.data := Mux(winner._1,Util.choose(qi,qpc.toSeq),fetch.io.out.bits.pc)
-  xtWord.io.data := Mux(winner._1,Util.choose(qi,qtag.toSeq),tail)
-  val preparedA = Mux(winner._1,Util.choose(qi,qa.toSeq),s1._2)
+  xpcWord.io.data := scheduled(qpc.toSeq,fetch.io.out.bits.pc)
+  xtWord.io.data := scheduled(qtag.toSeq,tail)
+  val preparedA = scheduled(qa.toSeq,s1._2)
   xaWord.io.data := preparedA
   addressWord.io.prepare := xspace; addressWord.io.base := preparedA; addressWord.io.immediate := preparedDecoded.imm
-  xbWord.io.data := Mux(winner._1,Util.choose(qi,qb.toSeq),s2._2)
-  xnWord.io.data := Mux(winner._1,Util.choose(qi,qnext.toSeq),fetch.io.out.bits.next)
-  xhWord.io.data := Mux(winner._1,Util.choose(qi,qhistory.toSeq),fetch.io.out.bits.history)
+  xbWord.io.data := scheduled(qb.toSeq,s2._2)
+  xnWord.io.data := scheduled(qnext.toSeq,fetch.io.out.bits.next)
+  xhWord.io.data := scheduled(qhistory.toSeq,fetch.io.out.bits.history)
   when(dispatch) {
     live(tail) := true.B; done(tail) := false.B
     tail := tail+1.U
