@@ -1,0 +1,176 @@
+{
+  "stage": 1,
+  "experiment": "v36-compact-load-metadata",
+  "parameters": {
+    "rob": 32,
+    "iq": 8,
+    "ic-bytes": 4096,
+    "dc-bytes": 4096,
+    "line-bytes": 64,
+    "ways": 2,
+    "banks": 4,
+    "early-recovery": 1,
+    "prefetch": 1,
+    "btb-entries": 64,
+    "history-bits": 1,
+    "l0-entries": 32,
+    "store-entries": 4,
+    "checkpoints": 4,
+    "fast-redirect": 1,
+    "issue-width": 1
+  },
+  "rtl_sha256": "24606a8da66cc41799453ca2912bd466091d1c5e5bcb7d8d5c95c77e1694bcb7",
+  "performance": [
+    {
+      "case": "perf_median",
+      "passed": true,
+      "cycles": 8498,
+      "instructions": 6961,
+      "ipc": 0.8191339138620852
+    },
+    {
+      "case": "perf_multiply",
+      "passed": true,
+      "cycles": 23414,
+      "instructions": 21722,
+      "ipc": 0.9277355428376185
+    },
+    {
+      "case": "perf_qsort",
+      "passed": true,
+      "cycles": 170494,
+      "instructions": 139900,
+      "ipc": 0.8205567351343742
+    },
+    {
+      "case": "perf_rsort",
+      "passed": true,
+      "cycles": 234432,
+      "instructions": 195719,
+      "ipc": 0.8348646942396942
+    },
+    {
+      "case": "perf_towers",
+      "passed": true,
+      "cycles": 6255,
+      "instructions": 5278,
+      "ipc": 0.8438049560351719
+    },
+    {
+      "case": "perf_vvadd",
+      "passed": true,
+      "cycles": 5296,
+      "instructions": 4524,
+      "ipc": 0.8542296072507553
+    }
+  ],
+  "correctness": {
+    "status": "passed",
+    "records": [
+      {
+        "case": "correctness_add_to_100",
+        "passed": true,
+        "cycles": 546
+      },
+      {
+        "case": "correctness_array_test1",
+        "passed": true,
+        "cycles": 432
+      },
+      {
+        "case": "correctness_array_test2",
+        "passed": true,
+        "cycles": 458
+      },
+      {
+        "case": "correctness_basicopt1",
+        "passed": true,
+        "cycles": 540035
+      },
+      {
+        "case": "correctness_bulgarian",
+        "passed": true,
+        "cycles": 277405
+      },
+      {
+        "case": "correctness_expr",
+        "passed": true,
+        "cycles": 578
+      },
+      {
+        "case": "correctness_gcd",
+        "passed": true,
+        "cycles": 488
+      },
+      {
+        "case": "correctness_hanoi",
+        "passed": true,
+        "cycles": 4946
+      },
+      {
+        "case": "correctness_lvalue2",
+        "passed": true,
+        "cycles": 247
+      },
+      {
+        "case": "correctness_magic",
+        "passed": true,
+        "cycles": 484259
+      },
+      {
+        "case": "correctness_manyarguments",
+        "passed": true,
+        "cycles": 232
+      },
+      {
+        "case": "correctness_multiarray",
+        "passed": true,
+        "cycles": 1997
+      },
+      {
+        "case": "correctness_naive",
+        "passed": true,
+        "cycles": 231
+      },
+      {
+        "case": "correctness_pi",
+        "passed": true,
+        "cycles": 21982916
+      },
+      {
+        "case": "correctness_qsort",
+        "passed": true,
+        "cycles": 1187840
+      },
+      {
+        "case": "correctness_queens",
+        "passed": true,
+        "cycles": 302130
+      },
+      {
+        "case": "correctness_statement_test",
+        "passed": true,
+        "cycles": 1111
+      },
+      {
+        "case": "correctness_superloop",
+        "passed": true,
+        "cycles": 414382
+      },
+      {
+        "case": "correctness_tak",
+        "passed": true,
+        "cycles": 1250707
+      }
+    ]
+  },
+  "synthesis": {
+    "status": "passed",
+    "fmax_mhz": 200.4698512137823,
+    "area_um2": 18682.39736000819
+  },
+  "tier2_pass": false,
+  "simulator_sha256": "83de29d9af70b1d6cab416583c5f5ad26213ac82d48668f3660766ed18d9dafb",
+  "ipc_geomean": 0.8492849289297307,
+  "stage_frequency_pass": false
+}

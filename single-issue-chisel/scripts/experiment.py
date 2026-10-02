@@ -5,6 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
 import re
 import shutil
@@ -23,11 +24,16 @@ def run(command, path, cwd=FRAMEWORK):
     with path.open("w") as log:
         subprocess.run([str(x) for x in command], cwd=cwd, stdout=log, stderr=subprocess.STDOUT, check=True)
 
+def save_summary(out, result):
+    temporary = out/("summary.json.tmp."+str(os.getpid()))
+    temporary.write_text(json.dumps(result,indent=2)+"\n")
+    temporary.replace(out/"summary.json")
+
 def main():
     a = argparse.ArgumentParser(description=__doc__)
     a.add_argument("name")
     a.add_argument("--stage", type=int, choices=(1,2,3), default=1)
-    for key, default in (("rob",16),("iq",8),("ic-bytes",4096),("dc-bytes",4096),("line-bytes",32),("ways",2),("banks",4),("early-recovery",1),("prefetch",1),("btb-entries",128),("history-bits",1),("l0-entries",0),("store-entries",0),("checkpoints",4),("fast-redirect",0)):
+    for key, default in (("rob",16),("iq",8),("ic-bytes",4096),("dc-bytes",4096),("line-bytes",32),("ways",2),("banks",4),("early-recovery",1),("prefetch",1),("btb-entries",128),("history-bits",1),("l0-entries",0),("store-entries",0),("checkpoints",4),("fast-redirect",0),("store-slots",16),("load-entries",8),("debug",0)):
         a.add_argument("--"+key,type=int,default=default)
     a.add_argument("--jobs",type=int,default=8)
     a.add_argument("--skip-correctness",action="store_true")
@@ -42,7 +48,7 @@ def main():
     if out.exists() and not args.reuse_build:
         a.error("experiment already exists; choose a new name")
     out.mkdir(parents=True,exist_ok=True); build.mkdir(parents=True,exist_ok=True)
-    config = {k:getattr(args,k.replace("-","_")) for k in ("rob","iq","ic-bytes","dc-bytes","line-bytes","ways","banks","early-recovery","prefetch","btb-entries","history-bits","l0-entries","store-entries","checkpoints","fast-redirect")}
+    config = {k:getattr(args,k.replace("-","_")) for k in ("rob","iq","ic-bytes","dc-bytes","line-bytes","ways","banks","early-recovery","prefetch","btb-entries","history-bits","l0-entries","store-entries","checkpoints","fast-redirect","store-slots","load-entries","debug")}
     config["issue-width"] = 1
     if args.stage > 1:
         prior = PROJECT/"reports"/("stage"+str(args.stage-1))
@@ -77,9 +83,19 @@ def main():
         (generator/"project").mkdir(exist_ok=True)
         shutil.copy2(sources/"build.properties",generator/"project/build.properties")
         command = "run --out "+str(rtl)+" "+" ".join("--"+k+" "+str(v) for k,v in config.items() if k != "issue-width")
-        run([Path.home()/".local/bin/sbt","-batch",command],out/"generate.log",generator)
+        try:
+            run([Path.home()/".local/bin/sbt","-batch",command],out/"generate.log",generator)
+        except subprocess.CalledProcessError:
+            save_summary(out,{"stage":args.stage,"experiment":args.name,"parameters":config,
+                "status":"generation_failed","failure":"See generate.log","correctness":{"status":"not_run"},"synthesis":{"status":"not_run"},"tier2_pass":False})
+            raise
         (rtl/"filelist.f").write_text("student_top.sv\n")
-        run([sys.executable,FRAMEWORK/"scripts/build.py","--filelist",rtl/"filelist.f","--out",build/"sim","--jobs",args.jobs],out/"build.log")
+        try:
+            run([sys.executable,FRAMEWORK/"scripts/build.py","--filelist",rtl/"filelist.f","--out",build/"sim","--jobs",args.jobs],out/"build.log")
+        except subprocess.CalledProcessError:
+            save_summary(out,{"stage":args.stage,"experiment":args.name,"parameters":config,
+                "status":"build_failed","failure":"See build.log","correctness":{"status":"not_run"},"synthesis":{"status":"not_run"},"tier2_pass":False})
+            raise
     simulator = build/"sim/sim"
     result = {"stage":args.stage,"experiment":args.name,"parameters":config,"rtl_sha256":sha(rtl/"student_top.sv"),"performance":[],"correctness":{"status":"not_run"},"synthesis":{"status":"not_run"},"tier2_pass":False}
     if args.reuse_build and (out/"summary.json").exists():
@@ -102,7 +118,10 @@ def main():
                 if not case.is_dir(): continue
                 data,answer = prepare_case(case,30000000,20)
                 proc = subprocess.run([str(simulator)],input=data,text=True,capture_output=True)
-                failure = compare_output(proc.stdout,answer) if not proc.returncode else "simulator exit "+str(proc.returncode)
+                program_output = proc.stdout
+                if config.get("debug",0):
+                    program_output = "\n".join(line for line in proc.stdout.splitlines() if not line.startswith(("Tier2 retired=","Details direct=")))+"\n"
+                failure = compare_output(program_output,answer) if not proc.returncode else "simulator exit "+str(proc.returncode)
                 match = re.search(r"^CPU2026 cycles=(\d+)$",proc.stderr,re.M)
                 row = {"case":case.name,"passed":failure is None,"cycles":int(match.group(1)) if match else None}
                 if kind == "perf" and row["passed"] and match:
@@ -117,19 +136,26 @@ def main():
                 result["ipc_geomean"] = math.exp(sum(math.log(r["ipc"]) for r in records)/6)
         else:
             result["correctness"] = {"status":"passed" if len(records)==19 and all(r["passed"] for r in records) else "failed","records":records}
-        (out/"summary.json").write_text(json.dumps(result,indent=2)+"\n")
+        save_summary(out,result)
     if not args.skip_synth:
-        synthesis_job.result()
+        try:
+            synthesis_job.result()
+        except subprocess.CalledProcessError:
+            result["status"] = "synthesis_failed"
+            result["synthesis"] = {"status":"failed","failure":"See synth.log"}
+            save_summary(out,result)
+            synthesis_pool.shutdown()
+            raise
         synthesis_pool.shutdown()
         for filename in ("report.json","report.txt","timing.rpt","constraints.sdc"):
             shutil.copy2(build/"synth/opt"/filename,out/filename)
         report = json.loads((out/"report.json").read_text())
         result["synthesis"] = {"status":"passed","fmax_mhz":report["timing"]["estimated_fmax_mhz"],"area_um2":report["area"]["area_um2"]}
     t = result["synthesis"]
-    result["tier2_pass"] = (result["correctness"]["status"]=="passed" and result.get("ipc_geomean",0)>=0.845 and
+    result["tier2_pass"] = (not config.get("debug",0) and result["correctness"]["status"]=="passed" and result.get("ipc_geomean",0)>=0.845 and
         t.get("status")=="passed" and t["area_um2"]<=18000 and t["fmax_mhz"]>300)
     result["stage_frequency_pass"] = result["tier2_pass"] and t["fmax_mhz"] >= {1:300,2:400,3:500}[args.stage]
-    (out/"summary.json").write_text(json.dumps(result,indent=2)+"\n")
+    save_summary(out,result)
     print(json.dumps({k:v for k,v in result.items() if k not in ("performance","correctness")},indent=2),flush=True)
 
 if __name__ == "__main__": main()

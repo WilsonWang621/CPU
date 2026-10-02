@@ -1,0 +1,31 @@
+{
+  "stage": 1,
+  "experiment": "v30-prepared-queues",
+  "parameters": {
+    "rob": 32,
+    "iq": 8,
+    "ic-bytes": 4096,
+    "dc-bytes": 4096,
+    "line-bytes": 64,
+    "ways": 2,
+    "banks": 4,
+    "early-recovery": 1,
+    "prefetch": 1,
+    "btb-entries": 64,
+    "history-bits": 1,
+    "l0-entries": 32,
+    "store-entries": 4,
+    "checkpoints": 4,
+    "fast-redirect": 1,
+    "issue-width": 1
+  },
+  "status": "generation_failed",
+  "failure": "PreparedQueue false flow branch retained an enqueue dependency during FIRRTL cycle detection; replaced with Scala conditional elaboration",
+  "correctness": {
+    "status": "not_run"
+  },
+  "synthesis": {
+    "status": "not_run"
+  },
+  "tier2_pass": false
+}

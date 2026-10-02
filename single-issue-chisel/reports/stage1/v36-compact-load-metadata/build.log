@@ -1,0 +1,555 @@
+[build] Using AppImage Verilator
+%Warning-DECLFILENAME: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:23:8: Filename 'student_top' does not match MODULE name: 'ram_32x1'
+   23 | module ram_32x1(  
+      |        ^~~~~~~~
+                       ... For warning description see https://verilator.org/warn/DECLFILENAME?v=5.020
+                       ... Use "/* verilator lint_off DECLFILENAME */" and lint_on around source to disable this message.
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:14240:15: Bits of signal are not used: '_xdWord_io_value'[53:46,0]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+14240 |   wire [63:0] _xdWord_io_value;  
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:15476:15: Bits of signal are not used: '_trainExecution_T_10'[31:1]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+15476 |   wire [31:0] _trainExecution_T_10 = wrapped >> recoveryTag;  
+      |               ^~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:15477:15: Bits of signal are not used: '_trainExecution_T_6'[31:1]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+15477 |   wire [31:0] _trainExecution_T_6 = wrapped >> _xtWord_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:15830:15: Bits of signal are not used: '_staleLoad_T_6'[31:1]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+15830 |   wire [31:0] _staleLoad_T_6 = wrapped >> _loadRequests_io_deq_bits_info_tag;  
+      |               ^~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:15852:15: Bits of signal are not used: '_readMask_T_6'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+15852 |   wire [6:0]  _readMask_T_6 =
+      |               ^~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:17889:15: Bits of signal are not used: '_md_io_kill_T_2'[31:1]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+17889 |   wire [31:0] _md_io_kill_T_2 = wrapped >> _md_io_activeTag;  
+      |               ^~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:18054:15: Bits of signal are not used: '_cdb_1_valid_T_6'[31:1]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+18054 |   wire [31:0] _cdb_1_valid_T_6 = wrapped >> _dc_io_rsp_bits_info_tag;  
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:18061:15: Bits of signal are not used: '_cdb_2_valid_T_3'[31:1]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+18061 |   wire [31:0] _cdb_2_valid_T_3 = wrapped >> _md_io_rsp_bits_tag;  
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:18073:15: Bits of signal are not used: '_winner_T'[31:1]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+18073 |   wire [31:0] _winner_T = wrapped >> qtag_0;  
+      |               ^~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:18136:15: Bits of signal are not used: '_winner_T_2'[31:1]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+18136 |   wire [31:0] _winner_T_2 = wrapped >> qtag_1;  
+      |               ^~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:18209:15: Bits of signal are not used: '_winner_T_4'[31:1]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+18209 |   wire [31:0] _winner_T_4 = wrapped >> qtag_2;  
+      |               ^~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:18282:15: Bits of signal are not used: '_winner_T_6'[31:1]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+18282 |   wire [31:0] _winner_T_6 = wrapped >> qtag_3;  
+      |               ^~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:18355:15: Bits of signal are not used: '_winner_T_8'[31:1]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+18355 |   wire [31:0] _winner_T_8 = wrapped >> qtag_4;  
+      |               ^~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:18428:15: Bits of signal are not used: '_winner_T_10'[31:1]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+18428 |   wire [31:0] _winner_T_10 = wrapped >> qtag_5;  
+      |               ^~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:18501:15: Bits of signal are not used: '_winner_T_12'[31:1]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+18501 |   wire [31:0] _winner_T_12 = wrapped >> qtag_6;  
+      |               ^~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:18574:15: Bits of signal are not used: '_winner_T_14'[31:1]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+18574 |   wire [31:0] _winner_T_14 = wrapped >> qtag_7;  
+      |               ^~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19726:15: Bits of signal are not used: '_GEN_80'[31:1]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19726 |   wire [31:0] _GEN_80 = wrapped >> cpOwner_0;  
+      |               ^~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19727:15: Bits of signal are not used: '_GEN_81'[31:1]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19727 |   wire [31:0] _GEN_81 = wrapped >> cpOwner_1;  
+      |               ^~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19728:15: Bits of signal are not used: '_GEN_82'[31:1]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19728 |   wire [31:0] _GEN_82 = wrapped >> cpOwner_2;  
+      |               ^~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19729:15: Bits of signal are not used: '_GEN_83'[31:1]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19729 |   wire [31:0] _GEN_83 = wrapped >> cpOwner_3;  
+      |               ^~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19730:15: Bits of signal are not used: '_storeMask_0_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19730 |   wire [6:0]  _storeMask_0_T_5 =
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19732:15: Bits of signal are not used: '_storeMask_1_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19732 |   wire [6:0]  _storeMask_1_T_5 =
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19734:15: Bits of signal are not used: '_storeMask_2_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19734 |   wire [6:0]  _storeMask_2_T_5 =
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19736:15: Bits of signal are not used: '_storeMask_3_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19736 |   wire [6:0]  _storeMask_3_T_5 =
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19738:15: Bits of signal are not used: '_storeMask_4_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19738 |   wire [6:0]  _storeMask_4_T_5 =
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19740:15: Bits of signal are not used: '_storeMask_5_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19740 |   wire [6:0]  _storeMask_5_T_5 =
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19742:15: Bits of signal are not used: '_storeMask_6_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19742 |   wire [6:0]  _storeMask_6_T_5 =
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19744:15: Bits of signal are not used: '_storeMask_7_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19744 |   wire [6:0]  _storeMask_7_T_5 =
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19746:15: Bits of signal are not used: '_storeMask_8_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19746 |   wire [6:0]  _storeMask_8_T_5 =
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19748:15: Bits of signal are not used: '_storeMask_9_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19748 |   wire [6:0]  _storeMask_9_T_5 =
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19750:15: Bits of signal are not used: '_storeMask_10_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19750 |   wire [6:0]  _storeMask_10_T_5 =
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19752:15: Bits of signal are not used: '_storeMask_11_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19752 |   wire [6:0]  _storeMask_11_T_5 =
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19754:15: Bits of signal are not used: '_storeMask_12_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19754 |   wire [6:0]  _storeMask_12_T_5 =
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19756:15: Bits of signal are not used: '_storeMask_13_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19756 |   wire [6:0]  _storeMask_13_T_5 =
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19758:15: Bits of signal are not used: '_storeMask_14_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19758 |   wire [6:0]  _storeMask_14_T_5 =
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19760:15: Bits of signal are not used: '_storeMask_15_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19760 |   wire [6:0]  _storeMask_15_T_5 =
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19762:15: Bits of signal are not used: '_storeMask_16_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19762 |   wire [6:0]  _storeMask_16_T_5 =
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19764:15: Bits of signal are not used: '_storeMask_17_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19764 |   wire [6:0]  _storeMask_17_T_5 =
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19766:15: Bits of signal are not used: '_storeMask_18_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19766 |   wire [6:0]  _storeMask_18_T_5 =
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19768:15: Bits of signal are not used: '_storeMask_19_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19768 |   wire [6:0]  _storeMask_19_T_5 =
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19770:15: Bits of signal are not used: '_storeMask_20_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19770 |   wire [6:0]  _storeMask_20_T_5 =
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19772:15: Bits of signal are not used: '_storeMask_21_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19772 |   wire [6:0]  _storeMask_21_T_5 =
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19774:15: Bits of signal are not used: '_storeMask_22_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19774 |   wire [6:0]  _storeMask_22_T_5 =
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19776:15: Bits of signal are not used: '_storeMask_23_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19776 |   wire [6:0]  _storeMask_23_T_5 =
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19778:15: Bits of signal are not used: '_storeMask_24_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19778 |   wire [6:0]  _storeMask_24_T_5 =
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19780:15: Bits of signal are not used: '_storeMask_25_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19780 |   wire [6:0]  _storeMask_25_T_5 =
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19782:15: Bits of signal are not used: '_storeMask_26_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19782 |   wire [6:0]  _storeMask_26_T_5 =
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19784:15: Bits of signal are not used: '_storeMask_27_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19784 |   wire [6:0]  _storeMask_27_T_5 =
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19786:15: Bits of signal are not used: '_storeMask_28_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19786 |   wire [6:0]  _storeMask_28_T_5 =
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19788:15: Bits of signal are not used: '_storeMask_29_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19788 |   wire [6:0]  _storeMask_29_T_5 =
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19790:15: Bits of signal are not used: '_storeMask_30_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19790 |   wire [6:0]  _storeMask_30_T_5 =
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:19792:15: Bits of signal are not used: '_storeMask_31_T_5'[6:4]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+19792 |   wire [6:0]  _storeMask_31_T_5 =
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20423:15: Bits of signal are not used: '_storeData_0_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20423 |   wire [62:0] _storeData_0_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20424:15: Bits of signal are not used: '_storeData_1_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20424 |   wire [62:0] _storeData_1_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20425:15: Bits of signal are not used: '_storeData_2_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20425 |   wire [62:0] _storeData_2_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20426:15: Bits of signal are not used: '_storeData_3_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20426 |   wire [62:0] _storeData_3_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20427:15: Bits of signal are not used: '_storeData_4_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20427 |   wire [62:0] _storeData_4_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20428:15: Bits of signal are not used: '_storeData_5_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20428 |   wire [62:0] _storeData_5_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20429:15: Bits of signal are not used: '_storeData_6_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20429 |   wire [62:0] _storeData_6_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20430:15: Bits of signal are not used: '_storeData_7_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20430 |   wire [62:0] _storeData_7_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20431:15: Bits of signal are not used: '_storeData_8_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20431 |   wire [62:0] _storeData_8_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20432:15: Bits of signal are not used: '_storeData_9_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20432 |   wire [62:0] _storeData_9_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20433:15: Bits of signal are not used: '_storeData_10_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20433 |   wire [62:0] _storeData_10_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20434:15: Bits of signal are not used: '_storeData_11_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20434 |   wire [62:0] _storeData_11_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20435:15: Bits of signal are not used: '_storeData_12_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20435 |   wire [62:0] _storeData_12_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20436:15: Bits of signal are not used: '_storeData_13_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20436 |   wire [62:0] _storeData_13_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20437:15: Bits of signal are not used: '_storeData_14_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20437 |   wire [62:0] _storeData_14_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20438:15: Bits of signal are not used: '_storeData_15_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20438 |   wire [62:0] _storeData_15_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20439:15: Bits of signal are not used: '_storeData_16_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20439 |   wire [62:0] _storeData_16_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20440:15: Bits of signal are not used: '_storeData_17_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20440 |   wire [62:0] _storeData_17_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20441:15: Bits of signal are not used: '_storeData_18_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20441 |   wire [62:0] _storeData_18_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20442:15: Bits of signal are not used: '_storeData_19_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20442 |   wire [62:0] _storeData_19_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20443:15: Bits of signal are not used: '_storeData_20_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20443 |   wire [62:0] _storeData_20_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20444:15: Bits of signal are not used: '_storeData_21_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20444 |   wire [62:0] _storeData_21_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20445:15: Bits of signal are not used: '_storeData_22_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20445 |   wire [62:0] _storeData_22_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20446:15: Bits of signal are not used: '_storeData_23_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20446 |   wire [62:0] _storeData_23_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20447:15: Bits of signal are not used: '_storeData_24_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20447 |   wire [62:0] _storeData_24_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20448:15: Bits of signal are not used: '_storeData_25_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20448 |   wire [62:0] _storeData_25_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20449:15: Bits of signal are not used: '_storeData_26_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20449 |   wire [62:0] _storeData_26_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20450:15: Bits of signal are not used: '_storeData_27_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20450 |   wire [62:0] _storeData_27_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20451:15: Bits of signal are not used: '_storeData_28_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20451 |   wire [62:0] _storeData_28_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20452:15: Bits of signal are not used: '_storeData_29_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20452 |   wire [62:0] _storeData_29_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20453:15: Bits of signal are not used: '_storeData_30_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20453 |   wire [62:0] _storeData_30_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:20454:15: Bits of signal are not used: '_storeData_31_T_2'[62:32]
+                                                                                                                                              : ... note: In instance 'student_top.c'
+20454 |   wire [62:0] _storeData_31_T_2 = _GEN_103 << _GEN_104;  
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:126:15: Bits of signal are not used: 'req_addr'[1:0]
+                                                                                                                                            : ... note: In instance 'student_top.c.bus'
+  126 |   reg  [31:0] req_addr;  
+      |               ^~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:1412:17: Bits of signal are not used: 'io_train_bits_pc'[1:0]
+                                                                                                                                             : ... note: In instance 'student_top.c.fetch'
+ 1412 |   input  [31:0] io_train_bits_pc,  
+      |                 ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:1413:17: Bits of signal are not used: 'io_train_bits_target'[1:0]
+                                                                                                                                             : ... note: In instance 'student_top.c.fetch'
+ 1413 |                 io_train_bits_target,  
+      |                 ^~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:1418:17: Bits of signal are not used: 'io_train_bits_history'[1]
+                                                                                                                                             : ... note: In instance 'student_top.c.fetch'
+ 1418 |   input  [1:0]  io_train_bits_history,  
+      |                 ^~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:2430:15: Bits of signal are not used: 'casez_tmp_0'[0]
+                                                                                                                                             : ... note: In instance 'student_top.c.fetch'
+ 2430 |   reg  [1:0]  casez_tmp_0;  
+      |               ^~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:3087:15: Bits of signal are not used: 'casez_tmp_1'[0]
+                                                                                                                                             : ... note: In instance 'student_top.c.fetch'
+ 3087 |   reg  [1:0]  casez_tmp_1;  
+      |               ^~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:3674:15: Bits of signal are not used: 'casez_tmp_2'[1]
+                                                                                                                                             : ... note: In instance 'student_top.c.fetch'
+ 3674 |   reg  [1:0]  casez_tmp_2;  
+      |               ^~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:8666:15: Bits of signal are not used: '_caches_3_io_mem_req_bits_addr'[31:30]
+                                                                                                                                             : ... note: In instance 'student_top.c.dc'
+ 8666 |   wire [31:0] _caches_3_io_mem_req_bits_addr;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:8672:15: Bits of signal are not used: '_caches_3_io_fill_bits_addr'[31:30]
+                                                                                                                                             : ... note: In instance 'student_top.c.dc'
+ 8672 |   wire [31:0] _caches_3_io_fill_bits_addr;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:8679:15: Bits of signal are not used: '_caches_2_io_mem_req_bits_addr'[31:30]
+                                                                                                                                             : ... note: In instance 'student_top.c.dc'
+ 8679 |   wire [31:0] _caches_2_io_mem_req_bits_addr;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:8685:15: Bits of signal are not used: '_caches_2_io_fill_bits_addr'[31:30]
+                                                                                                                                             : ... note: In instance 'student_top.c.dc'
+ 8685 |   wire [31:0] _caches_2_io_fill_bits_addr;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:8692:15: Bits of signal are not used: '_caches_1_io_mem_req_bits_addr'[31:30]
+                                                                                                                                             : ... note: In instance 'student_top.c.dc'
+ 8692 |   wire [31:0] _caches_1_io_mem_req_bits_addr;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:8698:15: Bits of signal are not used: '_caches_1_io_fill_bits_addr'[31:30]
+                                                                                                                                             : ... note: In instance 'student_top.c.dc'
+ 8698 |   wire [31:0] _caches_1_io_fill_bits_addr;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:8705:15: Bits of signal are not used: '_caches_0_io_mem_req_bits_addr'[31:30]
+                                                                                                                                             : ... note: In instance 'student_top.c.dc'
+ 8705 |   wire [31:0] _caches_0_io_mem_req_bits_addr;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:8711:15: Bits of signal are not used: '_caches_0_io_fill_bits_addr'[31:30]
+                                                                                                                                             : ... note: In instance 'student_top.c.dc'
+ 8711 |   wire [31:0] _caches_0_io_fill_bits_addr;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:8743:15: Bits of signal are not used: 'selectedAddress'[7:6]
+                                                                                                                                             : ... note: In instance 'student_top.c.dc'
+ 8743 |   wire [31:0] selectedAddress =
+      |               ^~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:8765:15: Bits of signal are not used: 'selectedAddress_1'[7:6]
+                                                                                                                                             : ... note: In instance 'student_top.c.dc'
+ 8765 |   wire [31:0] selectedAddress_1 =
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:8787:15: Bits of signal are not used: 'selectedAddress_2'[7:6]
+                                                                                                                                             : ... note: In instance 'student_top.c.dc'
+ 8787 |   wire [31:0] selectedAddress_2 =
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:8807:15: Bits of signal are not used: 'selectedAddress_3'[7:6]
+                                                                                                                                             : ... note: In instance 'student_top.c.dc'
+ 8807 |   wire [31:0] selectedAddress_3 =
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:9334:15: Bits of signal are not used: 'rem'[32]
+                                                                                                                                             : ... note: In instance 'student_top.c.md'
+ 9334 |   reg  [32:0] rem;  
+      |               ^~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:9434:15: Bits of signal are not used: '_alu_T_1'[62:32]
+                                                                                                                                             : ... note: In instance 'student_top.c.alu'
+ 9434 |   wire [62:0] _alu_T_1 = {31'h0, a} << b[4:0];  
+      |               ^~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:9435:15: Bits of signal are not used: '_right_T_5'[32]
+                                                                                                                                             : ... note: In instance 'student_top.c.alu'
+ 9435 |   wire [32:0] _right_T_5 = $signed($signed({io_d_sub & a[31], a}) >>> b[4:0]);  
+      |               ^~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:11337:15: Bits of signal are not used: '_eligible_T'[31:1]
+                                                                                                                                              : ... note: In instance 'student_top.c.loadRequests'
+11337 |   wire [31:0] _eligible_T = io_live >> _GEN;  
+      |               ^~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:11408:15: Bits of signal are not used: '_eligible_olderStore_T_376'[31:1]
+                                                                                                                                              : ... note: In instance 'student_top.c.loadRequests'
+11408 |   wire [31:0] _eligible_olderStore_T_376 = io_wrapped >> _GEN;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:11527:15: Bits of signal are not used: '_eligible_T_14'[31:1]
+                                                                                                                                              : ... note: In instance 'student_top.c.loadRequests'
+11527 |   wire [31:0] _eligible_T_14 = io_live >> _GEN_1;  
+      |               ^~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:11598:15: Bits of signal are not used: '_eligible_olderStore_T_790'[31:1]
+                                                                                                                                              : ... note: In instance 'student_top.c.loadRequests'
+11598 |   wire [31:0] _eligible_olderStore_T_790 = io_wrapped >> _GEN_1;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:11717:15: Bits of signal are not used: '_eligible_T_28'[31:1]
+                                                                                                                                              : ... note: In instance 'student_top.c.loadRequests'
+11717 |   wire [31:0] _eligible_T_28 = io_live >> _GEN_3;  
+      |               ^~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:11788:15: Bits of signal are not used: '_eligible_olderStore_T_1204'[31:1]
+                                                                                                                                              : ... note: In instance 'student_top.c.loadRequests'
+11788 |   wire [31:0] _eligible_olderStore_T_1204 = io_wrapped >> _GEN_3;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:11907:15: Bits of signal are not used: '_eligible_T_42'[31:1]
+                                                                                                                                              : ... note: In instance 'student_top.c.loadRequests'
+11907 |   wire [31:0] _eligible_T_42 = io_live >> _GEN_5;  
+      |               ^~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:11978:15: Bits of signal are not used: '_eligible_olderStore_T_1618'[31:1]
+                                                                                                                                              : ... note: In instance 'student_top.c.loadRequests'
+11978 |   wire [31:0] _eligible_olderStore_T_1618 = io_wrapped >> _GEN_5;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:12120:15: Bits of signal are not used: '_flowReady_T_1'[31:1]
+                                                                                                                                              : ... note: In instance 'student_top.c.loadRequests'
+12120 |   wire [31:0] _flowReady_T_1 = io_live >> _GEN_7;  
+      |               ^~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:12203:15: Bits of signal are not used: '_flowReady_olderStore_T_376'[31:1]
+                                                                                                                                              : ... note: In instance 'student_top.c.loadRequests'
+12203 |   wire [31:0] _flowReady_olderStore_T_376 = io_wrapped >> _GEN_7;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:12468:17: Bits of signal are not used: 'io_address'[1:0]
+                                                                                                                                              : ... note: In instance 'student_top.c.l0'
+12468 |   input  [31:0] io_address,  
+      |                 ^~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:12472:17: Bits of signal are not used: 'io_fill_bits_address'[1:0]
+                                                                                                                                              : ... note: In instance 'student_top.c.l0'
+12472 |   input  [31:0] io_fill_bits_address,  
+      |                 ^~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:12475:17: Bits of signal are not used: 'io_store_bits_addr'[1:0]
+                                                                                                                                              : ... note: In instance 'student_top.c.l0'
+12475 |   input  [31:0] io_store_bits_addr,  
+      |                 ^~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:471:15: Bits of signal are not used: '_requestWord_io_value'[1:0]
+                                                                                                                                            : ... note: In instance 'student_top.c.fetch.cache'
+  471 |   wire [31:0] _requestWord_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:7385:15: Bits of signal are not used: '_hits_T_2'[15:1]
+                                                                                                                                             : ... note: In instance 'student_top.c.dc.caches_3'
+ 7385 |   wire [15:0] _hits_T_2 = _tagRam_0_rdata[15:0] >> _GEN;  
+      |               ^~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:7387:15: Bits of signal are not used: '_hits_T_7'[15:1]
+                                                                                                                                             : ... note: In instance 'student_top.c.dc.caches_3'
+ 7387 |   wire [15:0] _hits_T_7 = _tagRam_1_rdata[15:0] >> _GEN;  
+      |               ^~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:8269:15: Bits of signal are not used: '_stored_T_14'[1]
+                                                                                                                                             : ... note: In instance 'student_top.c.dc.metadata_3'
+ 8269 |   wire [19:0] _stored_T_14 =
+      |               ^~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:26:16: Signal is not used: 'R0_clk'
+                                                                                                                                           : ... note: In instance 'student_top.c.arb.owners.ram_ext'
+   26 |                R0_clk,
+      |                ^~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:386:16: Signal is not used: 'R0_clk'
+                                                                                                                                            : ... note: In instance 'student_top.c.dc.caches_3.direction.ram_ext'
+  386 |                R0_clk,
+      |                ^~~~~~
+%Warning-UNUSEDSIGNAL: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v36-compact-load-metadata/rtl/student_top.sv:7867:16: Signal is not used: 'R0_clk'
+                                                                                                                                             : ... note: In instance 'student_top.c.dc.requests.owners.ram_ext'
+ 7867 |                R0_clk,
+      |                ^~~~~~
+%Warning-BLKSEQ: /home/wangwenxuan/ACM/ParaRisc/scripts/ram/sram_fakeram.sv:43:35: Blocking assignment '=' in sequential logic process
+                                                                                 : ... Suggest using delayed assignment '<='
+   43 |                         next_word = words[addr];
+      |                                   ^
+%Warning-BLKSEQ: /home/wangwenxuan/ACM/ParaRisc/scripts/ram/sram_fakeram.sv:47:37: Blocking assignment '=' in sequential logic process
+                                                                                 : ... Suggest using delayed assignment '<='
+   47 |                                     = wdata[lane*WRITE_GRANULARITY +: WRITE_GRANULARITY];
+      |                                     ^
+%Warning-BLKSEQ: /home/wangwenxuan/ACM/ParaRisc/scripts/ram/sram_fakeram.sv:46:42: Blocking assignment '=' in sequential logic process
+                                                                                 : ... Suggest using delayed assignment '<='
+   46 |                                 next_word[lane*WRITE_GRANULARITY +: WRITE_GRANULARITY]
+      |                                          ^
+make: Entering directory '/home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/build/stage1/v36-compact-load-metadata/sim/obj'
+/usr/bin/g++  -I.  -MMD -I/tmp/.mount_cpu202KkOElE/verilator/include -I/tmp/.mount_cpu202KkOElE/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -Os -c -o sim.o /home/wangwenxuan/ACM/ParaRisc/scripts/sim.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/.mount_cpu202KkOElE/verilator/include -I/tmp/.mount_cpu202KkOElE/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -c -o verilated.o /tmp/.mount_cpu202KkOElE/verilator/include/verilated.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/.mount_cpu202KkOElE/verilator/include -I/tmp/.mount_cpu202KkOElE/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -c -o verilated_vcd_c.o /tmp/.mount_cpu202KkOElE/verilator/include/verilated_vcd_c.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/.mount_cpu202KkOElE/verilator/include -I/tmp/.mount_cpu202KkOElE/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -c -o verilated_threads.o /tmp/.mount_cpu202KkOElE/verilator/include/verilated_threads.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/.mount_cpu202KkOElE/verilator/include -I/tmp/.mount_cpu202KkOElE/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -x c++-header Vstudent_top__pch.h -o Vstudent_top__pch.h.fast.gch
+/usr/bin/g++   -I.  -MMD -I/tmp/.mount_cpu202KkOElE/verilator/include -I/tmp/.mount_cpu202KkOElE/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -x c++-header Vstudent_top__pch.h -o Vstudent_top__pch.h.slow.gch
+echo "" > Vstudent_top__ALL.verilator_deplist.tmp
+/usr/bin/g++   -I.  -MMD -I/tmp/.mount_cpu202KkOElE/verilator/include -I/tmp/.mount_cpu202KkOElE/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top__ConstPool_0.o Vstudent_top__ConstPool_0.cpp
+/usr/bin/g++   -I.  -MMD -I/tmp/.mount_cpu202KkOElE/verilator/include -I/tmp/.mount_cpu202KkOElE/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top___024root__Slow.o Vstudent_top___024root__Slow.cpp
+/usr/bin/g++   -I.  -MMD -I/tmp/.mount_cpu202KkOElE/verilator/include -I/tmp/.mount_cpu202KkOElE/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top___024root__DepSet_h3ec42a3f__0__Slow.o Vstudent_top___024root__DepSet_h3ec42a3f__0__Slow.cpp
+/usr/bin/g++   -I.  -MMD -I/tmp/.mount_cpu202KkOElE/verilator/include -I/tmp/.mount_cpu202KkOElE/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top___024root__DepSet_h383d3863__0__Slow.o Vstudent_top___024root__DepSet_h383d3863__0__Slow.cpp
+/usr/bin/g++   -I.  -MMD -I/tmp/.mount_cpu202KkOElE/verilator/include -I/tmp/.mount_cpu202KkOElE/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top___024root__DepSet_h383d3863__1__Slow.o Vstudent_top___024root__DepSet_h383d3863__1__Slow.cpp
+/usr/bin/g++   -I.  -MMD -I/tmp/.mount_cpu202KkOElE/verilator/include -I/tmp/.mount_cpu202KkOElE/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top_Cache_1__Slow.o Vstudent_top_Cache_1__Slow.cpp
+/usr/bin/g++   -I.  -MMD -I/tmp/.mount_cpu202KkOElE/verilator/include -I/tmp/.mount_cpu202KkOElE/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top_Cache_1__DepSet_he2e31ee8__0__Slow.o Vstudent_top_Cache_1__DepSet_he2e31ee8__0__Slow.cpp
+/usr/bin/g++   -I.  -MMD -I/tmp/.mount_cpu202KkOElE/verilator/include -I/tmp/.mount_cpu202KkOElE/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top_Cache_1__DepSet_hc64716ec__0__Slow.o Vstudent_top_Cache_1__DepSet_hc64716ec__0__Slow.cpp
+/usr/bin/g++   -I.  -MMD -I/tmp/.mount_cpu202KkOElE/verilator/include -I/tmp/.mount_cpu202KkOElE/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top__Syms.o Vstudent_top__Syms.cpp
+/usr/bin/g++   -I.  -MMD -I/tmp/.mount_cpu202KkOElE/verilator/include -I/tmp/.mount_cpu202KkOElE/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top__Trace__0__Slow.o Vstudent_top__Trace__0__Slow.cpp
+/usr/bin/g++   -I.  -MMD -I/tmp/.mount_cpu202KkOElE/verilator/include -I/tmp/.mount_cpu202KkOElE/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top__TraceDecls__0__Slow.o Vstudent_top__TraceDecls__0__Slow.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/.mount_cpu202KkOElE/verilator/include -I/tmp/.mount_cpu202KkOElE/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.fast -c -o Vstudent_top.o Vstudent_top.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/.mount_cpu202KkOElE/verilator/include -I/tmp/.mount_cpu202KkOElE/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.fast -c -o Vstudent_top___024root__DepSet_h3ec42a3f__0.o Vstudent_top___024root__DepSet_h3ec42a3f__0.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/.mount_cpu202KkOElE/verilator/include -I/tmp/.mount_cpu202KkOElE/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.fast -c -o Vstudent_top___024root__DepSet_h3ec42a3f__1.o Vstudent_top___024root__DepSet_h3ec42a3f__1.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/.mount_cpu202KkOElE/verilator/include -I/tmp/.mount_cpu202KkOElE/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.fast -c -o Vstudent_top___024root__DepSet_h383d3863__0.o Vstudent_top___024root__DepSet_h383d3863__0.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/.mount_cpu202KkOElE/verilator/include -I/tmp/.mount_cpu202KkOElE/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.fast -c -o Vstudent_top___024root__DepSet_h383d3863__1.o Vstudent_top___024root__DepSet_h383d3863__1.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/.mount_cpu202KkOElE/verilator/include -I/tmp/.mount_cpu202KkOElE/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.fast -c -o Vstudent_top___024root__DepSet_h383d3863__2.o Vstudent_top___024root__DepSet_h383d3863__2.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/.mount_cpu202KkOElE/verilator/include -I/tmp/.mount_cpu202KkOElE/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.fast -c -o Vstudent_top_Cache_1__DepSet_hc64716ec__0.o Vstudent_top_Cache_1__DepSet_hc64716ec__0.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/.mount_cpu202KkOElE/verilator/include -I/tmp/.mount_cpu202KkOElE/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.fast -c -o Vstudent_top__Trace__0.o Vstudent_top__Trace__0.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/.mount_cpu202KkOElE/verilator/include -I/tmp/.mount_cpu202KkOElE/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.fast -c -o Vstudent_top__Trace__1.o Vstudent_top__Trace__1.cpp
+Archive /usr/bin/ar -rcs Vstudent_top__ALL.a Vstudent_top.o Vstudent_top___024root__DepSet_h3ec42a3f__0.o Vstudent_top___024root__DepSet_h3ec42a3f__1.o Vstudent_top___024root__DepSet_h383d3863__0.o Vstudent_top___024root__DepSet_h383d3863__1.o Vstudent_top___024root__DepSet_h383d3863__2.o Vstudent_top_Cache_1__DepSet_hc64716ec__0.o Vstudent_top__Trace__0.o Vstudent_top__Trace__1.o Vstudent_top__ConstPool_0.o Vstudent_top___024root__Slow.o Vstudent_top___024root__DepSet_h3ec42a3f__0__Slow.o Vstudent_top___024root__DepSet_h383d3863__0__Slow.o Vstudent_top___024root__DepSet_h383d3863__1__Slow.o Vstudent_top_Cache_1__Slow.o Vstudent_top_Cache_1__DepSet_he2e31ee8__0__Slow.o Vstudent_top_Cache_1__DepSet_hc64716ec__0__Slow.o Vstudent_top__Syms.o Vstudent_top__Trace__0__Slow.o Vstudent_top__TraceDecls__0__Slow.o
+/usr/bin/g++     sim.o verilated.o verilated_vcd_c.o verilated_threads.o Vstudent_top__ALL.a    -pthread -lpthread -latomic   -o /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/build/stage1/v36-compact-load-metadata/sim/sim
+rm Vstudent_top__ALL.verilator_deplist.tmp
+make: Leaving directory '/home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/build/stage1/v36-compact-load-metadata/sim/obj'
+/home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/build/stage1/v36-compact-load-metadata/sim/sim
