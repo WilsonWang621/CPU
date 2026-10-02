@@ -20,7 +20,9 @@
 最终证据见 [阶段 6 报告](reports/frequency-stage6.md) 和
 [固定基准](reports/data/2026-10-02/timing-stage6/final-baseline.json)。
 
-后续单发射 Chisel 实现在独立目录 [single-issue-chisel](single-issue-chisel/)，目标为 Tier2：
+单发射 Chisel 实现位于独立目录 [single-issue-chisel](single-issue-chisel/README.md)。最终默认 v75：原样综合 **308.71 MHz**、总面积 **17,754.13 μm²（含 SRAM）**、延迟 20 的几何平均 IPC **0.84602**，正确性 **19/19**，满足 Tier2。三阶段依次固定 v66 304.22 MHz、v71 307.69 MHz、v75 308.71 MHz；400/500 MHz 尝试未达到目标。模块提交及参数/性能对照见该目录的 `reports/stage1`、`stage2`、`stage3`。
+
+Tier2 门槛：
 面积 ≤18,000 μm²、IPC ≥0.845、原样综合频率 >300 MHz。新核达标状态以该目录的实际验收记录为准。
 
 ## 编译与验证

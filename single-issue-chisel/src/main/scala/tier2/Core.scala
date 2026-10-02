@@ -118,22 +118,15 @@ class Core(p: Config) extends Module {
   dc.io.req.bits.info := loadRequests.io.deq.bits.info
   dc.io.rsp.ready := true.B
   val loadAccept = dc.io.req.fire && !headStore
-  val cacheCompletion = Wire(Valid(new BankResponse(p)))
-  if(p.cacheReturnStages == 1) {
-    cacheCompletion.valid := RegNext(dc.io.rsp.fire && survives(dc.io.rsp.bits.info.tag),false.B)
-    cacheCompletion.bits := RegNext(dc.io.rsp.bits)
-  } else {
-    cacheCompletion.valid := dc.io.rsp.fire; cacheCompletion.bits := dc.io.rsp.bits
-  }
-  val loadReturn = cacheCompletion.valid
+  val loadReturn = dc.io.rsp.fire
   // A valid dequeue already requires this bank's current admission credit.
   loadRequests.io.deq.ready := (if(p.trustedLoadCredit) true.B else dc.io.req.ready) && !headStore
   if(p.debug && p.trustedLoadCredit) {
     when(dc.io.req.valid) { assert(dc.io.req.ready,"Qualified load offered without cache credit") }
     assert(loadRequests.io.deq.fire === dc.io.req.fire,"Load queue and cache acceptance differ")
   }
-  val returned = cacheCompletion.bits.info
-  val shiftedLoad = cacheCompletion.bits.rsp.data >> Cat(returned.offset,0.U(3.W))
+  val returned = dc.io.rsp.bits.info
+  val shiftedLoad = dc.io.rsp.bits.rsp.data >> Cat(returned.offset,0.U(3.W))
   val loadValue = MuxLookup(returned.fn,shiftedLoad)(Seq(0.U -> Util.sext(shiftedLoad(7,0)),1.U -> Util.sext(shiftedLoad(15,0)),
     4.U -> Cat(0.U(24.W),shiftedLoad(7,0)),5.U -> Cat(0.U(16.W),shiftedLoad(15,0))))
   val forwardingMask = Wire(UInt(4.W)); val forwardingData = Wire(UInt(32.W))
@@ -421,10 +414,14 @@ class StudentTop(p: Config) extends Module {
 object Generate extends App {
   val options = args.grouped(2).map { case Array(k,v) => k -> v }.toMap
   def n(key: String, default: Int): Int = options.get(key).map(_.toInt).getOrElse(default)
-  val p = Config(rob=n("--rob",16),iq=n("--iq",8),icBytes=n("--ic-bytes",4096),dcBytes=n("--dc-bytes",4096),
-    lineBytes=n("--line-bytes",32),ways=n("--ways",2),debug=n("--debug",0) != 0,banks=n("--banks",4),earlyRecovery=n("--early-recovery",1) != 0,
-    prefetch=n("--prefetch",1) != 0,btbEntries=n("--btb-entries",128),historyBits=n("--history-bits",1),l0Entries=n("--l0-entries",0),
-    storeEntries=n("--store-entries",0),checkpoints=n("--checkpoints",4),fastRedirect=n("--fast-redirect",0) != 0,storeSlots=n("--store-slots",16),loadEntries=n("--load-entries",8),l0FillStages=n("--l0-fill-stages",0),l0Replacement=n("--l0-replacement",0),ramReadAhead=n("--ram-read-ahead",0) != 0,l0StoreStages=n("--l0-store-stages",0),bankedLoadPayload=n("--banked-load-payload",0) != 0,cacheHierarchy=n("--cache-hierarchy",0) != 0,prefetchTrainStages=n("--prefetch-train-stages",0),trustedLoadCredit=n("--trusted-load-credit",0) != 0,rasWriteStages=n("--ras-write-stages",0),registeredSquashMask=n("--registered-squash-mask",0) != 0,cacheReturnStages=n("--cache-return-stages",0))
+  val supported = Set("--banked-load-payload","--banks","--btb-entries","--cache-hierarchy","--checkpoints","--dc-bytes","--debug","--early-recovery","--fast-redirect","--history-bits","--ic-bytes","--iq","--issue-width","--l0-entries","--l0-fill-stages","--l0-replacement","--l0-store-stages","--line-bytes","--load-entries","--prefetch","--prefetch-train-stages","--ram-read-ahead","--ras-write-stages","--registered-squash-mask","--rob","--store-entries","--store-slots","--trusted-load-credit","--ways","--out")
+  require(options.keySet.subsetOf(supported),"Unknown CPU parameter: " + (options.keySet -- supported).mkString(", "))
+  require(n("--issue-width",1) == 1,"Only single issue is supported")
+  val defaults = Config()
+  val p = Config(rob=n("--rob",defaults.rob),iq=n("--iq",defaults.iq),icBytes=n("--ic-bytes",defaults.icBytes),dcBytes=n("--dc-bytes",defaults.dcBytes),
+    lineBytes=n("--line-bytes",defaults.lineBytes),ways=n("--ways",defaults.ways),debug=n("--debug",if(defaults.debug) 1 else 0) != 0,banks=n("--banks",defaults.banks),earlyRecovery=n("--early-recovery",if(defaults.earlyRecovery) 1 else 0) != 0,
+    prefetch=n("--prefetch",if(defaults.prefetch) 1 else 0) != 0,btbEntries=n("--btb-entries",defaults.btbEntries),historyBits=n("--history-bits",defaults.historyBits),l0Entries=n("--l0-entries",defaults.l0Entries),
+    storeEntries=n("--store-entries",defaults.storeEntries),checkpoints=n("--checkpoints",defaults.checkpoints),fastRedirect=n("--fast-redirect",if(defaults.fastRedirect) 1 else 0) != 0,storeSlots=n("--store-slots",defaults.storeSlots),loadEntries=n("--load-entries",defaults.loadEntries),l0FillStages=n("--l0-fill-stages",defaults.l0FillStages),l0Replacement=n("--l0-replacement",defaults.l0Replacement),ramReadAhead=n("--ram-read-ahead",if(defaults.ramReadAhead) 1 else 0) != 0,l0StoreStages=n("--l0-store-stages",defaults.l0StoreStages),bankedLoadPayload=n("--banked-load-payload",if(defaults.bankedLoadPayload) 1 else 0) != 0,cacheHierarchy=n("--cache-hierarchy",if(defaults.cacheHierarchy) 1 else 0) != 0,prefetchTrainStages=n("--prefetch-train-stages",defaults.prefetchTrainStages),trustedLoadCredit=n("--trusted-load-credit",if(defaults.trustedLoadCredit) 1 else 0) != 0,rasWriteStages=n("--ras-write-stages",defaults.rasWriteStages),registeredSquashMask=n("--registered-squash-mask",if(defaults.registeredSquashMask) 1 else 0) != 0)
   _root_.circt.stage.ChiselStage.emitSystemVerilogFile(new StudentTop(p), Array("--target-dir", options.getOrElse("--out","rtl")),
     Array("--disable-all-randomization", "--lowering-options=disallowLocalVariables,disallowPackedArrays"))
 }

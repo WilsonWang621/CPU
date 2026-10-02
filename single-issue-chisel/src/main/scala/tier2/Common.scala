@@ -3,12 +3,12 @@ package tier2
 import chisel3._
 import chisel3.util._
 
-case class Config(rob: Int = 16, iq: Int = 8, icBytes: Int = 4096,
-                  dcBytes: Int = 4096, lineBytes: Int = 32, ways: Int = 2,
+case class Config(rob: Int = 32, iq: Int = 8, icBytes: Int = 4096,
+                  dcBytes: Int = 4096, lineBytes: Int = 64, ways: Int = 2,
                   issueWidth: Int = 1, debug: Boolean = false, banks: Int = 4, earlyRecovery: Boolean = true,
-                  prefetch: Boolean = true, btbEntries: Int = 128, historyBits: Int = 1, l0Entries: Int = 0,
-                  storeEntries: Int = 0, checkpoints: Int = 4, fastRedirect: Boolean = false, storeSlots: Int = 16,
-                  loadEntries: Int = 8, l0FillStages: Int = 0, l0Replacement: Int = 0, ramReadAhead: Boolean = false, l0StoreStages: Int = 0, bankedLoadPayload: Boolean = false, cacheHierarchy: Boolean = false, prefetchTrainStages: Int = 0, trustedLoadCredit: Boolean = false, rasWriteStages: Int = 0, registeredSquashMask: Boolean = false, cacheReturnStages: Int = 0) {
+                  prefetch: Boolean = true, btbEntries: Int = 64, historyBits: Int = 1, l0Entries: Int = 32,
+                  storeEntries: Int = 4, checkpoints: Int = 4, fastRedirect: Boolean = true, storeSlots: Int = 8,
+                  loadEntries: Int = 8, l0FillStages: Int = 1, l0Replacement: Int = 1, ramReadAhead: Boolean = false, l0StoreStages: Int = 1, bankedLoadPayload: Boolean = true, cacheHierarchy: Boolean = false, prefetchTrainStages: Int = 1, trustedLoadCredit: Boolean = true, rasWriteStages: Int = 1, registeredSquashMask: Boolean = true) {
   require(issueWidth == 1, "This architecture has one issue port")
   require(rob >= 8 && isPow2(rob) && iq >= 2 && isPow2(iq))
   require(isPow2(icBytes) && isPow2(dcBytes) && isPow2(lineBytes))
@@ -18,14 +18,13 @@ case class Config(rob: Int = 16, iq: Int = 8, icBytes: Int = 4096,
   require(l0Entries == 0 || isPow2(l0Entries))
   require(prefetchTrainStages == 0 || prefetchTrainStages == 1)
   require(rasWriteStages == 0 || rasWriteStages == 1)
-  require(cacheReturnStages == 0 || cacheReturnStages == 1)
   require(storeEntries >= 0)
   require(!bankedLoadPayload || storeEntries > 0)
   require(!trustedLoadCredit || bankedLoadPayload)
   require(!registeredSquashMask || earlyRecovery)
   require(storeSlots >= 2 && isPow2(storeSlots))
   require(loadEntries >= 2 && isPow2(loadEntries))
-  require(l0FillStages >= 0 && l0FillStages <= 2)
+  require(l0FillStages >= 0 && l0FillStages <= 1,"Only the verified zero/one-cycle L0 fill paths are supported")
   require(l0StoreStages == 0 || l0StoreStages == 1)
   require(l0Replacement == 0 || l0Replacement == 1)
   require(l0Replacement == 0 || l0Entries <= 64)

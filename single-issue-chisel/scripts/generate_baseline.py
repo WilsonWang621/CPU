@@ -19,7 +19,7 @@ def code(text):
     # Keep SV string literals; discard source-location and generator comments.
     token = r'"(?:\\.|[^"\\])*"|//[^\n]*|/\*[\s\S]*?\*/'
     text = re.sub(token, lambda m: m[0] if m[0].startswith('"') else " ", text)
-    return re.sub(r"\s+", "", text)
+    return re.sub(r'"(?:\\.|[^"\\])*"|\s+', lambda m: m[0] if m[0].startswith('"') else "", text)
 
 
 def main():

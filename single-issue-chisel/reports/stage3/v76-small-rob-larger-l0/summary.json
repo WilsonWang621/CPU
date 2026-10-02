@@ -1,0 +1,189 @@
+{
+  "stage": 3,
+  "experiment": "v76-small-rob-larger-l0",
+  "parameters": {
+    "rob": 16,
+    "iq": 8,
+    "ic-bytes": 4096,
+    "dc-bytes": 4096,
+    "line-bytes": 64,
+    "ways": 2,
+    "banks": 4,
+    "early-recovery": 1,
+    "prefetch": 1,
+    "btb-entries": 64,
+    "history-bits": 1,
+    "l0-entries": 64,
+    "store-entries": 4,
+    "checkpoints": 4,
+    "fast-redirect": 1,
+    "store-slots": 8,
+    "load-entries": 8,
+    "debug": 0,
+    "l0-fill-stages": 1,
+    "l0-replacement": 1,
+    "ram-read-ahead": 0,
+    "l0-store-stages": 1,
+    "banked-load-payload": 1,
+    "cache-hierarchy": 0,
+    "prefetch-train-stages": 1,
+    "trusted-load-credit": 1,
+    "ras-write-stages": 0,
+    "registered-squash-mask": 1,
+    "issue-width": 1
+  },
+  "rtl_sha256": "07a3218307abf325cd57805cabb7d5f91ca2db11294b2d47643fc2c5b2832d8d",
+  "performance": [
+    {
+      "case": "perf_median",
+      "passed": true,
+      "cycles": 8708,
+      "instructions": 6961,
+      "ipc": 0.7993798805695912
+    },
+    {
+      "case": "perf_multiply",
+      "passed": true,
+      "cycles": 23430,
+      "instructions": 21722,
+      "ipc": 0.9271020059752454
+    },
+    {
+      "case": "perf_qsort",
+      "passed": true,
+      "cycles": 173139,
+      "instructions": 139900,
+      "ipc": 0.8080213008045559
+    },
+    {
+      "case": "perf_rsort",
+      "passed": true,
+      "cycles": 238660,
+      "instructions": 195719,
+      "ipc": 0.8200745830889131
+    },
+    {
+      "case": "perf_towers",
+      "passed": true,
+      "cycles": 6241,
+      "instructions": 5278,
+      "ipc": 0.8456978048389681
+    },
+    {
+      "case": "perf_vvadd",
+      "passed": true,
+      "cycles": 5421,
+      "instructions": 4524,
+      "ipc": 0.8345323741007195
+    }
+  ],
+  "correctness": {
+    "status": "passed",
+    "records": [
+      {
+        "case": "correctness_add_to_100",
+        "passed": true,
+        "cycles": 546
+      },
+      {
+        "case": "correctness_array_test1",
+        "passed": true,
+        "cycles": 432
+      },
+      {
+        "case": "correctness_array_test2",
+        "passed": true,
+        "cycles": 458
+      },
+      {
+        "case": "correctness_basicopt1",
+        "passed": true,
+        "cycles": 539602
+      },
+      {
+        "case": "correctness_bulgarian",
+        "passed": true,
+        "cycles": 275185
+      },
+      {
+        "case": "correctness_expr",
+        "passed": true,
+        "cycles": 578
+      },
+      {
+        "case": "correctness_gcd",
+        "passed": true,
+        "cycles": 488
+      },
+      {
+        "case": "correctness_hanoi",
+        "passed": true,
+        "cycles": 4940
+      },
+      {
+        "case": "correctness_lvalue2",
+        "passed": true,
+        "cycles": 247
+      },
+      {
+        "case": "correctness_magic",
+        "passed": true,
+        "cycles": 476922
+      },
+      {
+        "case": "correctness_manyarguments",
+        "passed": true,
+        "cycles": 232
+      },
+      {
+        "case": "correctness_multiarray",
+        "passed": true,
+        "cycles": 1995
+      },
+      {
+        "case": "correctness_naive",
+        "passed": true,
+        "cycles": 231
+      },
+      {
+        "case": "correctness_pi",
+        "passed": true,
+        "cycles": 21982880
+      },
+      {
+        "case": "correctness_qsort",
+        "passed": true,
+        "cycles": 1196652
+      },
+      {
+        "case": "correctness_queens",
+        "passed": true,
+        "cycles": 296227
+      },
+      {
+        "case": "correctness_statement_test",
+        "passed": true,
+        "cycles": 1110
+      },
+      {
+        "case": "correctness_superloop",
+        "passed": true,
+        "cycles": 414382
+      },
+      {
+        "case": "correctness_tak",
+        "passed": true,
+        "cycles": 1250707
+      }
+    ]
+  },
+  "synthesis": {
+    "status": "passed",
+    "fmax_mhz": 233.57664233576642,
+    "area_um2": 18592.22005999965
+  },
+  "tier2_pass": false,
+  "simulator_sha256": "ab4cc2760b9adb420ce688a838f91f2141ff43f18dc57460bf93675a57988bc2",
+  "ipc_geomean": 0.8381129438868746,
+  "stage_frequency_pass": false
+}

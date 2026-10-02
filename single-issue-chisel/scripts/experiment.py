@@ -33,8 +33,9 @@ def main():
     a = argparse.ArgumentParser(description=__doc__)
     a.add_argument("name")
     a.add_argument("--stage", type=int, choices=(1,2,3), default=1)
-    for key, default in (("rob",16),("iq",8),("ic-bytes",4096),("dc-bytes",4096),("line-bytes",32),("ways",2),("banks",4),("early-recovery",1),("prefetch",1),("btb-entries",128),("history-bits",1),("l0-entries",0),("store-entries",0),("checkpoints",4),("fast-redirect",0),("store-slots",16),("load-entries",8),("debug",0),("l0-fill-stages",0),("l0-replacement",0),("ram-read-ahead",0),("l0-store-stages",0),("banked-load-payload",0),("cache-hierarchy",0),("prefetch-train-stages",0)):
-        a.add_argument("--"+key,type=int,default=default)
+    baseline_parameters = json.loads((PROJECT/"baseline.json").read_text())["parameters"]
+    for key, default in (("rob",16),("iq",8),("ic-bytes",4096),("dc-bytes",4096),("line-bytes",32),("ways",2),("banks",4),("early-recovery",1),("prefetch",1),("btb-entries",128),("history-bits",1),("l0-entries",0),("store-entries",0),("checkpoints",4),("fast-redirect",0),("store-slots",16),("load-entries",8),("debug",0),("l0-fill-stages",0),("l0-replacement",0),("ram-read-ahead",0),("l0-store-stages",0),("banked-load-payload",0),("cache-hierarchy",0),("prefetch-train-stages",0),("trusted-load-credit",0),("ras-write-stages",0),("registered-squash-mask",0)):
+        a.add_argument("--"+key,type=int,default=baseline_parameters.get(key,default))
     a.add_argument("--jobs",type=int,default=8)
     a.add_argument("--skip-correctness",action="store_true")
     a.add_argument("--skip-perf",action="store_true")
@@ -48,7 +49,7 @@ def main():
     if out.exists() and not args.reuse_build:
         a.error("experiment already exists; choose a new name")
     out.mkdir(parents=True,exist_ok=True); build.mkdir(parents=True,exist_ok=True)
-    config = {k:getattr(args,k.replace("-","_")) for k in ("rob","iq","ic-bytes","dc-bytes","line-bytes","ways","banks","early-recovery","prefetch","btb-entries","history-bits","l0-entries","store-entries","checkpoints","fast-redirect","store-slots","load-entries","debug","l0-fill-stages","l0-replacement","ram-read-ahead","l0-store-stages","banked-load-payload","cache-hierarchy","prefetch-train-stages")}
+    config = {k:getattr(args,k.replace("-","_")) for k in ("rob","iq","ic-bytes","dc-bytes","line-bytes","ways","banks","early-recovery","prefetch","btb-entries","history-bits","l0-entries","store-entries","checkpoints","fast-redirect","store-slots","load-entries","debug","l0-fill-stages","l0-replacement","ram-read-ahead","l0-store-stages","banked-load-payload","cache-hierarchy","prefetch-train-stages","trusted-load-credit","ras-write-stages","registered-squash-mask")}
     config["issue-width"] = 1
     if args.stage > 1:
         prior = PROJECT/"reports"/("stage"+str(args.stage-1))
