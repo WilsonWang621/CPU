@@ -1,0 +1,31 @@
+{
+  "stage": 1,
+  "experiment": "v26-load-bank-selection",
+  "parameters": {
+    "rob": 32,
+    "iq": 8,
+    "ic-bytes": 4096,
+    "dc-bytes": 4096,
+    "line-bytes": 64,
+    "ways": 2,
+    "banks": 4,
+    "early-recovery": 1,
+    "prefetch": 1,
+    "btb-entries": 64,
+    "history-bits": 1,
+    "l0-entries": 32,
+    "store-entries": 4,
+    "checkpoints": 4,
+    "fast-redirect": 1,
+    "issue-width": 1
+  },
+  "status": "generation_failed",
+  "failure": "FIRRTL combinational dependency: load selection used readiness derived from combined load/store valid",
+  "correctness": {
+    "status": "not_run"
+  },
+  "synthesis": {
+    "status": "not_run"
+  },
+  "tier2_pass": false
+}

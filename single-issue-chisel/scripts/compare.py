@@ -16,6 +16,8 @@ for stage in (1,2,3):
         status=c.get("status",str(c.get("passed","not_run")))
         row={"experiment":path.parent.name,"rob":p.get("rob"),"iq":p.get("iq"),"line_bytes":p.get("line-bytes",p.get("line_bytes")),
              "banks":p.get("banks",1),"btb":p.get("btb-entries",64),"history_bits":p.get("history-bits",0),
+             "l0_entries":p.get("l0-entries",0),
+             "store_entries_per_bank":p.get("store-entries",0),"checkpoints":p.get("checkpoints",0),"fast_redirect":p.get("fast-redirect",0),
              "prefetch":p.get("prefetch",0),"ipc":s.get("ipc_geomean"),"frequency_mhz":t.get("fmax_mhz",s.get("fmax_mhz")),
              "area_um2":t.get("area_um2",s.get("area_um2")),"correctness":status,"tier2_pass":s.get("tier2_pass",False)}
         perf=s.get("performance",[])
@@ -26,7 +28,7 @@ for stage in (1,2,3):
     with (directory/"comparison.csv").open("w",newline="") as f:
         w=csv.DictWriter(f,fieldnames=list(rows[0]));w.writeheader();w.writerows(rows)
     def fmt(v): return "—" if v is None else (f"{v:.5f}" if isinstance(v,float) else str(v))
-    header=["experiment","rob","iq","line_bytes","banks","btb","history_bits","prefetch","ipc","frequency_mhz","area_um2","correctness","tier2_pass"]
+    header=["experiment","rob","iq","line_bytes","banks","btb","history_bits","l0_entries","store_entries_per_bank","checkpoints","fast_redirect","prefetch","ipc","frequency_mhz","area_um2","correctness","tier2_pass"]
     text="参数、正确性和默认综合对照。未运行项目用 `—` / `not_run` 标记；原始报告在对应实验目录。\n\n"
     text+="| "+" | ".join(header)+" |\n|"+"---|"*len(header)+"\n"
     for row in rows: text+="| "+" | ".join(fmt(row[k]) for k in header)+" |\n"

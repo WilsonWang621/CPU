@@ -1,0 +1,43 @@
+[info] welcome to sbt 1.10.2 (Ubuntu Java 21.0.12.1)
+[info] loading project definition from /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/build/stage1/v25b-scoped-read-write/generator/project
+[info] loading settings for project generator from build.sbt ...
+[info] set current project to generator (in build file:/home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/build/stage1/v25b-scoped-read-write/generator/)
+[info] compiling 8 Scala sources to /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/build/stage1/v25b-scoped-read-write/generator/target/scala-2.13/classes ...
+[warn] /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/build/stage1/v25b-scoped-read-write/generator/src/main/scala/tier2/Attributes.scala:2:8: Importing from firrtl is deprecated as of Chisel's 3.6.0 release.
+[warn] import firrtl.annotations.{ModuleTarget,SingleTargetAnnotation}
+[warn]        ^
+[warn] one warning found
+[info] done compiling
+[info] running (fork) tier2.Generate --out /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/reports/stage1/v25b-scoped-read-write/rtl --rob 32 --iq 8 --ic-bytes 4096 --dc-bytes 4096 --line-bytes 64 --ways 2 --banks 4 --early-recovery 1 --prefetch 1 --btb-entries 64 --history-bits 1 --l0-entries 32 --store-entries 4 --checkpoints 4 --fast-redirect 1
+[error] Exception in thread "main" chisel3.package$ChiselException: Connection between sink (Core.arch[2]: Reg[UInt<32>]) and source (Core.arch_1_?: Wire[UInt<32>]) failed @: Source arch_1_? in Core has escaped the scope of the when (@[src/main/scala/tier2/Core.scala 241:58]) in which it was constructed.
+[error] 	at ... ()
+[error] 	at tier2.Core.$anonfun$new$182(Core.scala:242)
+[error] 	at chisel3.WhenContext.<init>(When.scala:131)
+[error] 	at chisel3.when$.apply(When.scala:37)
+[error] 	at tier2.Core.$anonfun$new$180(Core.scala:241)
+[error] 	at tier2.Core.$anonfun$new$180$adapted(Core.scala:240)
+[error] 	at scala.collection.immutable.Range.foreach(Range.scala:190)
+[error] 	at tier2.Core.<init>(Core.scala:240)
+[error] 	at tier2.StudentTop.$anonfun$c$2(Core.scala:304)
+[error] 	at chisel3.Module$.evaluate(Module.scala:88)
+[error] 	at chisel3.Module$.do_apply(Module.scala:35)
+[error] 	at tier2.StudentTop.$anonfun$c$1(Core.scala:304)
+[error] 	at chisel3.internal.plugin.package$.autoNameRecursively(package.scala:33)
+[error] 	at tier2.StudentTop.<init>(Core.scala:304)
+[error] 	at tier2.Generate$.$anonfun$new$283(Core.scala:317)
+[error] 	at chisel3.Module$.evaluate(Module.scala:88)
+[error] 	at chisel3.Module$.do_apply(Module.scala:35)
+[error] 	at chisel3.stage.phases.Elaborate.$anonfun$transform$2(Elaborate.scala:52)
+[error] 	at chisel3.internal.Builder$.$anonfun$buildImpl$1(Builder.scala:1042)
+[error] 	at scala.util.DynamicVariable.withValue(DynamicVariable.scala:59)
+[error] 	at chisel3.internal.Builder$.buildImpl(Builder.scala:1032)
+[error] 	at chisel3.internal.Builder$.$anonfun$build$1(Builder.scala:1023)
+[error] 	at logger.Logger$.$anonfun$makeScope$4(Logger.scala:148)
+[error] 	at scala.util.DynamicVariable.withValue(DynamicVariable.scala:59)
+[error] 	at logger.Logger$.makeScope(Logger.scala:146)
+[error] 	at logger.Logger$.makeScope(Logger.scala:133)
+[error] 	at ... ()
+[error] 	at ... (Stack trace trimmed to user code only. Rerun with --full-stacktrace to see the full stack trace)
+[error] Nonzero exit code returned from runner: 1
+[error] (Compile / run) Nonzero exit code returned from runner: 1
+[error] Total time: 16 s, completed Oct 3, 2026, 4:26:10 AM
