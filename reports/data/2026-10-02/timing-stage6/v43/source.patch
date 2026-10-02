@@ -1,0 +1,58 @@
+--- /dev/null
++++ b/verilog/area_v2/v2_timing_buffer.sv
+@@ -0,0 +1,14 @@
++// Library-backed combinational fanout buffer. The native course synthesis
++// reads the real ASAP7 cell; simulation uses its non-inverting logic function.
++module v2_timing_buffer #(parameter integer WIDTH=1)(
++  input wire [WIDTH-1:0] data_in,
++  output wire [WIDTH-1:0] data_out
++);
++  for(genvar bit_id=0;bit_id<WIDTH;bit_id=bit_id+1) begin: bit_buffer
++`ifdef SYNTHESIS
++    (* keep=1 *) BUFx12_ASAP7_75t_R drive (.A(data_in[bit_id]),.Y(data_out[bit_id]));
++`else
++    assign data_out[bit_id]=data_in[bit_id];
++`endif
++  end
++endmodule
+--- a/verilog/area_v2/v2_rename.sv
++++ b/verilog/area_v2/v2_rename.sv
+@@ -21,6 +21,9 @@
+   input logic restore_valid,
+   input logic [CHECKPOINT_BITS-1:0] restore_index
+ );
++  wire [2*SLOT_BITS-1:0] local_commit_slot;
++  v2_timing_buffer #(.WIDTH(2*SLOT_BITS)) active_retirement_buffer (
++    .data_in(commit_slot),.data_out(local_commit_slot));
+   logic [31:0] pending_q,pending_next,save_pending;
+   logic [SLOT_BITS-1:0] tag_q [32],tag_next [32],save_tag [32];
+   logic [31:0] checkpoint_pending [CHECKPOINTS];
+@@ -52,8 +55,8 @@
+     for (integer r=1;r<32;r=r+1)
+       for (integer c=0;c<2;c=c+1)
+         if (commit_valid[c] && commit_rd[c*5+:5]==5'(r)) begin
+-          if (tag_next[r]==commit_slot[c*SLOT_BITS+:SLOT_BITS]) pending_next[r]=0;
+-          if (save_tag[r]==commit_slot[c*SLOT_BITS+:SLOT_BITS]) save_pending[r]=0;
++          if (tag_next[r]==local_commit_slot[c*SLOT_BITS+:SLOT_BITS]) pending_next[r]=0;
++          if (save_tag[r]==local_commit_slot[c*SLOT_BITS+:SLOT_BITS]) save_pending[r]=0;
+         end
+     pending_next[0]=0;save_pending[0]=0;
+   end
+@@ -81,13 +84,16 @@
+     for (integer r=0;r<32;r=r+1) tag_q[r]<=tag_next[r];
+   end
+   for (genvar cp=0;cp<CHECKPOINTS;cp=cp+1) begin: snapshot
++    wire [2*SLOT_BITS-1:0] local_checkpoint_slot;
++    v2_timing_buffer #(.WIDTH(2*SLOT_BITS)) checkpoint_retirement_buffer (
++      .data_in(commit_slot),.data_out(local_checkpoint_slot));
+     for (genvar r=0;r<32;r=r+1) begin: regmap
+       always_ff @(posedge clk) begin
+         if (rst) checkpoint_pending[cp][r]<=0;
+         else begin
+           for (integer c=0;c<2;c=c+1)
+             if (commit_valid[c] && commit_rd[c*5+:5]==5'(r) &&
+-                checkpoint_tag[cp][r]==commit_slot[c*SLOT_BITS+:SLOT_BITS])
++                checkpoint_tag[cp][r]==local_checkpoint_slot[c*SLOT_BITS+:SLOT_BITS])
+               checkpoint_pending[cp][r]<=0;
+           if (save_valid && save_index==CHECKPOINT_BITS'(cp) && !restore_valid) begin
+             checkpoint_pending[cp][r]<=save_pending[r];
