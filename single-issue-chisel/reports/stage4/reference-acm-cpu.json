@@ -1,0 +1,30 @@
+{
+  "repository": "https://github.com/Galuisss/ACM-CPU",
+  "branch": "perf-redesign",
+  "commit": "43e5a967828d80f73a1e1918054fbab36fc5775b",
+  "checked_at_utc": "2026-10-03T05:50:28.643504+00:00",
+  "source_sha256": {
+    "README.md": "559177d6a16d75ddd0ebdeb93add8d506498facc39011d07da75d2ab415594d9",
+    "reports/scheduler_refactor.md": "c1d81296a5a7e4356322a5e37415a8c84c7dfa8a368fe888942abaeccb76ee0d",
+    "designs/area_v2/rtl/v2_prepare_address.sv": "24198e8f75e7ffda299733532d040b8f0c89e88b965f6d404599234f30cea3fc",
+    "designs/area_v2/rtl/v2_age_matrix.sv": "d8f63ff56fbf56eb5961c8f9f3c774d1b40eb552c7215de13f73ac5492c65b1d",
+    "designs/area_v2/rtl/cpu_top.sv": "ff8f79b15234e747b573f2bb5644c5563e29de4a47ec0a4a3dbc14daa7a14bab",
+    "rtl/muldiv.sv": "1ba7fe604b95db1252f2feadf7c8ef794c61edc7116653f5eebe2cd0c8852499"
+  },
+  "upstream_reported_measurements": {
+    "fmax_mhz": 312.958435,
+    "area_um2": 13143.8525,
+    "ipc_geomean": 1.147841687,
+    "issue_architecture": "two integer ports and a separate memory port; not a single-issue baseline",
+    "locally_remeasured": false
+  },
+  "adaptations": [
+    "two restoring quotient bits per divider cycle",
+    "one completed operand-pair quotient/remainder cache with signedness key",
+    "parallel stored-base and completion candidate sums before dispatch bypass qualification, keeping local first-match priority"
+  ],
+  "considered": [
+    "registered next-cycle oldest-ready selection",
+    "parallel candidate address addition before late bypass selection"
+  ]
+}

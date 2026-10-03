@@ -1,0 +1,195 @@
+{
+  "stage": 4,
+  "experiment": "v90-div-step2",
+  "parameters": {
+    "rob": 32,
+    "iq": 8,
+    "ic-bytes": 4096,
+    "dc-bytes": 4096,
+    "line-bytes": 64,
+    "ways": 2,
+    "banks": 4,
+    "early-recovery": 1,
+    "prefetch": 1,
+    "btb-entries": 64,
+    "history-bits": 1,
+    "l0-entries": 32,
+    "store-entries": 4,
+    "checkpoints": 4,
+    "fast-redirect": 1,
+    "store-slots": 8,
+    "load-entries": 8,
+    "debug": 0,
+    "l0-fill-stages": 1,
+    "l0-replacement": 1,
+    "ram-read-ahead": 0,
+    "l0-store-stages": 1,
+    "banked-load-payload": 1,
+    "cache-hierarchy": 0,
+    "prefetch-train-stages": 1,
+    "trusted-load-credit": 1,
+    "ras-write-stages": 1,
+    "registered-squash-mask": 1,
+    "issue-width": 1,
+    "issue-slice-bits": 16,
+    "banked-return-match": 0,
+    "local-issue-eligibility": 0,
+    "fetch-head-slice-bits": 0,
+    "div-step-bits": 2,
+    "div-result-cache": 0
+  },
+  "rtl_sha256": "309585f6fce545381cb70db0e1e564079293b1f07e1ced2e68c191ceafdb12de",
+  "performance": [
+    {
+      "case": "perf_median",
+      "passed": true,
+      "cycles": 8527,
+      "instructions": 6961,
+      "ipc": 0.816348070833822
+    },
+    {
+      "case": "perf_multiply",
+      "passed": true,
+      "cycles": 23421,
+      "instructions": 21722,
+      "ipc": 0.9274582639511549
+    },
+    {
+      "case": "perf_qsort",
+      "passed": true,
+      "cycles": 170728,
+      "instructions": 139900,
+      "ipc": 0.8194320790965747
+    },
+    {
+      "case": "perf_rsort",
+      "passed": true,
+      "cycles": 234842,
+      "instructions": 195719,
+      "ipc": 0.8334071418230129
+    },
+    {
+      "case": "perf_towers",
+      "passed": true,
+      "cycles": 6291,
+      "instructions": 5278,
+      "ipc": 0.8389763153711651
+    },
+    {
+      "case": "perf_vvadd",
+      "passed": true,
+      "cycles": 5352,
+      "instructions": 4524,
+      "ipc": 0.8452914798206278
+    }
+  ],
+  "correctness": {
+    "status": "passed",
+    "records": [
+      {
+        "case": "correctness_add_to_100",
+        "passed": true,
+        "cycles": 546
+      },
+      {
+        "case": "correctness_array_test1",
+        "passed": true,
+        "cycles": 416
+      },
+      {
+        "case": "correctness_array_test2",
+        "passed": true,
+        "cycles": 442
+      },
+      {
+        "case": "correctness_basicopt1",
+        "passed": true,
+        "cycles": 337697
+      },
+      {
+        "case": "correctness_bulgarian",
+        "passed": true,
+        "cycles": 275561
+      },
+      {
+        "case": "correctness_expr",
+        "passed": true,
+        "cycles": 562
+      },
+      {
+        "case": "correctness_gcd",
+        "passed": true,
+        "cycles": 392
+      },
+      {
+        "case": "correctness_hanoi",
+        "passed": true,
+        "cycles": 4928
+      },
+      {
+        "case": "correctness_lvalue2",
+        "passed": true,
+        "cycles": 231
+      },
+      {
+        "case": "correctness_magic",
+        "passed": true,
+        "cycles": 483729
+      },
+      {
+        "case": "correctness_manyarguments",
+        "passed": true,
+        "cycles": 216
+      },
+      {
+        "case": "correctness_multiarray",
+        "passed": true,
+        "cycles": 1983
+      },
+      {
+        "case": "correctness_naive",
+        "passed": true,
+        "cycles": 215
+      },
+      {
+        "case": "correctness_pi",
+        "passed": true,
+        "cycles": 13029299
+      },
+      {
+        "case": "correctness_qsort",
+        "passed": true,
+        "cycles": 1165355
+      },
+      {
+        "case": "correctness_queens",
+        "passed": true,
+        "cycles": 302681
+      },
+      {
+        "case": "correctness_statement_test",
+        "passed": true,
+        "cycles": 1033
+      },
+      {
+        "case": "correctness_superloop",
+        "passed": true,
+        "cycles": 414366
+      },
+      {
+        "case": "correctness_tak",
+        "passed": true,
+        "cycles": 1250721
+      }
+    ]
+  },
+  "synthesis": {
+    "status": "passed",
+    "fmax_mhz": 256.5772989225758,
+    "area_um2": 17754.99271999961
+  },
+  "tier2_pass": false,
+  "simulator_sha256": "23f71bb57aa69f5e971eee4a37be2d324486767ca29cd669970f2365d3ac561b",
+  "ipc_geomean": 0.8460240058706379,
+  "stage_frequency_pass": false
+}

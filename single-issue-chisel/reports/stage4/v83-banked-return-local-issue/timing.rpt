@@ -1,0 +1,455 @@
+Startpoint: _113403_ (rising edge-triggered flip-flop clocked by core_clock)
+Endpoint: c.dc.caches_3.dataRam_1.lane_0
+          (rising edge-triggered flip-flop clocked by core_clock)
+Path Group: core_clock
+Path Type: max
+
+Fanout       Cap      Slew     Delay      Time   Description
+-------------------------------------------------------------------------------------
+                    0.0500    0.0000    0.0000   clock core_clock (rise edge)
+                              0.0000    0.0000   clock network delay (ideal)
+                    0.0500    0.0000    0.0000 ^ _113403_/CLK (DFFHQNx1_ASAP7_75t_R)
+     5    3.2854    0.0376    0.0733    0.0733 v _113403_/QN (DFFHQNx1_ASAP7_75t_R)
+                    0.0376    0.0000    0.0733 v _062220_/A (NAND2xp33_ASAP7_75t_R)
+     4    1.5886    0.0516    0.0383    0.1115 ^ _062220_/Y (NAND2xp33_ASAP7_75t_R)
+                    0.0516    0.0000    0.1115 ^ _077374_/B (NOR2xp33_ASAP7_75t_R)
+   135   65.8414    1.3119    0.6600    0.7715 v _077374_/Y (NOR2xp33_ASAP7_75t_R)
+                    1.3119    0.0000    0.7715 v _077380_/A (NAND2xp33_ASAP7_75t_R)
+    33   15.1765    0.6170    0.6905    1.4620 ^ _077380_/Y (NAND2xp33_ASAP7_75t_R)
+                    0.6170    0.0000    1.4620 ^ _080656_/B (NOR2xp33_ASAP7_75t_R)
+     3    1.5699    0.1424    0.1205    1.5825 v _080656_/Y (NOR2xp33_ASAP7_75t_R)
+                    0.1424    0.0000    1.5825 v c.loadRequests/_4947_/A (INVx1_ASAP7_75t_R)
+     7    3.3607    0.0627    0.0533    1.6359 ^ c.loadRequests/_4947_/Y (INVx1_ASAP7_75t_R)
+                    0.0627    0.0000    1.6359 ^ c.loadRequests/_5243_/A1 (OAI21xp33_ASAP7_75t_R)
+     1    0.4415    0.0259    0.0225    1.6584 v c.loadRequests/_5243_/Y (OAI21xp33_ASAP7_75t_R)
+                    0.0259    0.0000    1.6584 v c.loadRequests/_5244_/B (AOI21xp33_ASAP7_75t_R)
+     2    1.0440    0.0601    0.0270    1.6854 ^ c.loadRequests/_5244_/Y (AOI21xp33_ASAP7_75t_R)
+                    0.0601    0.0000    1.6854 ^ c.loadRequests/_5245_/A (INVx1_ASAP7_75t_R)
+     2    0.9997    0.0197    0.0174    1.7028 v c.loadRequests/_5245_/Y (INVx1_ASAP7_75t_R)
+                    0.0197    0.0000    1.7028 v c.loadRequests/_8333_/B (NAND3xp33_ASAP7_75t_R)
+     4    1.5589    0.0424    0.0213    1.7241 ^ c.loadRequests/_8333_/Y (NAND3xp33_ASAP7_75t_R)
+                    0.0424    0.0000    1.7241 ^ c.loadRequests/_8334_/B (NAND2xp33_ASAP7_75t_R)
+     6    2.5714    0.0565    0.0390    1.7631 v c.loadRequests/_8334_/Y (NAND2xp33_ASAP7_75t_R)
+                    0.0565    0.0000    1.7631 v c.loadRequests/_8336_/A2 (OAI21xp33_ASAP7_75t_R)
+     3    1.2591    0.0514    0.0376    1.8007 ^ c.loadRequests/_8336_/Y (OAI21xp33_ASAP7_75t_R)
+                    0.0514    0.0000    1.8007 ^ c.loadRequests/_8339_/A (OR2x2_ASAP7_75t_R)
+     1    0.5507    0.0089    0.0301    1.8307 ^ c.loadRequests/_8339_/Y (OR2x2_ASAP7_75t_R)
+                    0.0089    0.0000    1.8307 ^ c.loadRequests/_8362_/C (A2O1A1Ixp33_ASAP7_75t_R)
+     2    0.9498    0.0285    0.0179    1.8486 v c.loadRequests/_8362_/Y (A2O1A1Ixp33_ASAP7_75t_R)
+                    0.0285    0.0000    1.8486 v c.loadRequests/_8369_/A1 (AOI21xp33_ASAP7_75t_R)
+     5    2.2178    0.0661    0.0396    1.8882 ^ c.loadRequests/_8369_/Y (AOI21xp33_ASAP7_75t_R)
+                    0.0661    0.0000    1.8882 ^ c.loadRequests/_8371_/B (NOR2xp33_ASAP7_75t_R)
+     8    3.6240    0.0828    0.0626    1.9508 v c.loadRequests/_8371_/Y (NOR2xp33_ASAP7_75t_R)
+                    0.0828    0.0000    1.9508 v c.loadRequests/_8390_/A2 (OAI21xp33_ASAP7_75t_R)
+     2    0.7623    0.0434    0.0356    1.9865 ^ c.loadRequests/_8390_/Y (OAI21xp33_ASAP7_75t_R)
+                    0.0434    0.0000    1.9865 ^ c.loadRequests/_8394_/A1 (OAI21xp33_ASAP7_75t_R)
+     1    0.4229    0.0221    0.0194    2.0059 v c.loadRequests/_8394_/Y (OAI21xp33_ASAP7_75t_R)
+                    0.0221    0.0000    2.0059 v c.loadRequests/_8400_/A2 (OAI21xp33_ASAP7_75t_R)
+     1    0.5222    0.0232    0.0186    2.0245 ^ c.loadRequests/_8400_/Y (OAI21xp33_ASAP7_75t_R)
+                    0.0232    0.0000    2.0245 ^ c.loadRequests/_8407_/A1 (A2O1A1Ixp33_ASAP7_75t_R)
+     7    3.6474    0.0742    0.0441    2.0686 v c.loadRequests/_8407_/Y (A2O1A1Ixp33_ASAP7_75t_R)
+                    0.0742    0.0000    2.0686 v c.loadRequests/_8409_/C (AND3x1_ASAP7_75t_R)
+    46   21.7569    0.1472    0.1021    2.1707 v c.loadRequests/_8409_/Y (AND3x1_ASAP7_75t_R)
+                    0.1472    0.0000    2.1707 v c.loadRequests/_8418_/C (NOR4xp25_ASAP7_75t_R)
+    45   21.8058    0.7369    0.3801    2.5508 ^ c.loadRequests/_8418_/Y (NOR4xp25_ASAP7_75t_R)
+                    0.7369    0.0000    2.5508 ^ c.loadRequests/io_deq_bits_masked_word_7/_24_/A (AND2x2_ASAP7_75t_R)
+     1    0.4687    0.0240    0.0676    2.6183 ^ c.loadRequests/io_deq_bits_masked_word_7/_24_/Y (AND2x2_ASAP7_75t_R)
+                    0.0240    0.0000    2.6183 ^ c.loadRequests/_6788_/D (NOR4xp25_ASAP7_75t_R)
+     1    0.5320    0.0171    0.0159    2.6343 v c.loadRequests/_6788_/Y (NOR4xp25_ASAP7_75t_R)
+                    0.0171    0.0000    2.6343 v c.loadRequests/_6790_/A1 (A2O1A1Ixp33_ASAP7_75t_R)
+    17    9.6256    0.2492    0.0882    2.7225 ^ c.loadRequests/_6790_/Y (A2O1A1Ixp33_ASAP7_75t_R)
+                    0.2492    0.0000    2.7225 ^ _078899_/A (AND4x1_ASAP7_75t_R)
+    13    6.5934    0.0666    0.0892    2.8117 ^ _078899_/Y (AND4x1_ASAP7_75t_R)
+                    0.0666    0.0000    2.8117 ^ _080943_/C (AOI211xp5_ASAP7_75t_R)
+     1    0.3482    0.0715    0.0228    2.8344 v _080943_/Y (AOI211xp5_ASAP7_75t_R)
+                    0.0715    0.0000    2.8344 v _080944_/B (NOR2xp33_ASAP7_75t_R)
+     5    2.4220    0.0763    0.0558    2.8902 ^ _080944_/Y (NOR2xp33_ASAP7_75t_R)
+                    0.0763    0.0000    2.8902 ^ _080945_/A (INVx1_ASAP7_75t_R)
+     2    0.8201    0.0209    0.0178    2.9081 v _080945_/Y (INVx1_ASAP7_75t_R)
+                    0.0209    0.0000    2.9081 v _105420_/C (OAI221xp5_ASAP7_75t_R)
+     2    0.6604    0.0384    0.0172    2.9252 ^ _105420_/Y (OAI221xp5_ASAP7_75t_R)
+                    0.0384    0.0000    2.9252 ^ _105500_/A (NOR2xp33_ASAP7_75t_R)
+     4    1.7659    0.1328    0.0354    2.9606 v _105500_/Y (NOR2xp33_ASAP7_75t_R)
+                    0.1328    0.0000    2.9606 v _105508_/B (AOI21xp33_ASAP7_75t_R)
+     1    5.0000    0.1515    0.1087    3.0694 ^ _105508_/Y (AOI21xp33_ASAP7_75t_R)
+                    0.1136    0.0000    3.0694 ^ c.dc.caches_3.dataRam_1.lane_0/ce_in (fakeram_asap7_128x8)
+                                        3.0694   data arrival time
+
+                    0.0500    2.0000    2.0000   clock core_clock (rise edge)
+                              0.0000    2.0000   clock network delay (ideal)
+                             -0.0500    1.9500   clock uncertainty
+                              0.0000    1.9500   clock reconvergence pessimism
+                                        1.9500 ^ c.dc.caches_3.dataRam_1.lane_0/clk (fakeram_asap7_128x8)
+                             -0.0500    1.9000   library setup time
+                                        1.9000   data required time
+-------------------------------------------------------------------------------------
+                                        1.9000   data required time
+                                       -3.0694   data arrival time
+-------------------------------------------------------------------------------------
+                                       -1.1694   slack (VIOLATED)
+
+
+Startpoint: _113403_ (rising edge-triggered flip-flop clocked by core_clock)
+Endpoint: c.dc.caches_3.dataRam_1.lane_1
+          (rising edge-triggered flip-flop clocked by core_clock)
+Path Group: core_clock
+Path Type: max
+
+Fanout       Cap      Slew     Delay      Time   Description
+-------------------------------------------------------------------------------------
+                    0.0500    0.0000    0.0000   clock core_clock (rise edge)
+                              0.0000    0.0000   clock network delay (ideal)
+                    0.0500    0.0000    0.0000 ^ _113403_/CLK (DFFHQNx1_ASAP7_75t_R)
+     5    3.2854    0.0376    0.0733    0.0733 v _113403_/QN (DFFHQNx1_ASAP7_75t_R)
+                    0.0376    0.0000    0.0733 v _062220_/A (NAND2xp33_ASAP7_75t_R)
+     4    1.5886    0.0516    0.0383    0.1115 ^ _062220_/Y (NAND2xp33_ASAP7_75t_R)
+                    0.0516    0.0000    0.1115 ^ _077374_/B (NOR2xp33_ASAP7_75t_R)
+   135   65.8414    1.3119    0.6600    0.7715 v _077374_/Y (NOR2xp33_ASAP7_75t_R)
+                    1.3119    0.0000    0.7715 v _077380_/A (NAND2xp33_ASAP7_75t_R)
+    33   15.1765    0.6170    0.6905    1.4620 ^ _077380_/Y (NAND2xp33_ASAP7_75t_R)
+                    0.6170    0.0000    1.4620 ^ _080656_/B (NOR2xp33_ASAP7_75t_R)
+     3    1.5699    0.1424    0.1205    1.5825 v _080656_/Y (NOR2xp33_ASAP7_75t_R)
+                    0.1424    0.0000    1.5825 v c.loadRequests/_4947_/A (INVx1_ASAP7_75t_R)
+     7    3.3607    0.0627    0.0533    1.6359 ^ c.loadRequests/_4947_/Y (INVx1_ASAP7_75t_R)
+                    0.0627    0.0000    1.6359 ^ c.loadRequests/_5243_/A1 (OAI21xp33_ASAP7_75t_R)
+     1    0.4415    0.0259    0.0225    1.6584 v c.loadRequests/_5243_/Y (OAI21xp33_ASAP7_75t_R)
+                    0.0259    0.0000    1.6584 v c.loadRequests/_5244_/B (AOI21xp33_ASAP7_75t_R)
+     2    1.0440    0.0601    0.0270    1.6854 ^ c.loadRequests/_5244_/Y (AOI21xp33_ASAP7_75t_R)
+                    0.0601    0.0000    1.6854 ^ c.loadRequests/_5245_/A (INVx1_ASAP7_75t_R)
+     2    0.9997    0.0197    0.0174    1.7028 v c.loadRequests/_5245_/Y (INVx1_ASAP7_75t_R)
+                    0.0197    0.0000    1.7028 v c.loadRequests/_8333_/B (NAND3xp33_ASAP7_75t_R)
+     4    1.5589    0.0424    0.0213    1.7241 ^ c.loadRequests/_8333_/Y (NAND3xp33_ASAP7_75t_R)
+                    0.0424    0.0000    1.7241 ^ c.loadRequests/_8334_/B (NAND2xp33_ASAP7_75t_R)
+     6    2.5714    0.0565    0.0390    1.7631 v c.loadRequests/_8334_/Y (NAND2xp33_ASAP7_75t_R)
+                    0.0565    0.0000    1.7631 v c.loadRequests/_8336_/A2 (OAI21xp33_ASAP7_75t_R)
+     3    1.2591    0.0514    0.0376    1.8007 ^ c.loadRequests/_8336_/Y (OAI21xp33_ASAP7_75t_R)
+                    0.0514    0.0000    1.8007 ^ c.loadRequests/_8339_/A (OR2x2_ASAP7_75t_R)
+     1    0.5507    0.0089    0.0301    1.8307 ^ c.loadRequests/_8339_/Y (OR2x2_ASAP7_75t_R)
+                    0.0089    0.0000    1.8307 ^ c.loadRequests/_8362_/C (A2O1A1Ixp33_ASAP7_75t_R)
+     2    0.9498    0.0285    0.0179    1.8486 v c.loadRequests/_8362_/Y (A2O1A1Ixp33_ASAP7_75t_R)
+                    0.0285    0.0000    1.8486 v c.loadRequests/_8369_/A1 (AOI21xp33_ASAP7_75t_R)
+     5    2.2178    0.0661    0.0396    1.8882 ^ c.loadRequests/_8369_/Y (AOI21xp33_ASAP7_75t_R)
+                    0.0661    0.0000    1.8882 ^ c.loadRequests/_8371_/B (NOR2xp33_ASAP7_75t_R)
+     8    3.6240    0.0828    0.0626    1.9508 v c.loadRequests/_8371_/Y (NOR2xp33_ASAP7_75t_R)
+                    0.0828    0.0000    1.9508 v c.loadRequests/_8390_/A2 (OAI21xp33_ASAP7_75t_R)
+     2    0.7623    0.0434    0.0356    1.9865 ^ c.loadRequests/_8390_/Y (OAI21xp33_ASAP7_75t_R)
+                    0.0434    0.0000    1.9865 ^ c.loadRequests/_8394_/A1 (OAI21xp33_ASAP7_75t_R)
+     1    0.4229    0.0221    0.0194    2.0059 v c.loadRequests/_8394_/Y (OAI21xp33_ASAP7_75t_R)
+                    0.0221    0.0000    2.0059 v c.loadRequests/_8400_/A2 (OAI21xp33_ASAP7_75t_R)
+     1    0.5222    0.0232    0.0186    2.0245 ^ c.loadRequests/_8400_/Y (OAI21xp33_ASAP7_75t_R)
+                    0.0232    0.0000    2.0245 ^ c.loadRequests/_8407_/A1 (A2O1A1Ixp33_ASAP7_75t_R)
+     7    3.6474    0.0742    0.0441    2.0686 v c.loadRequests/_8407_/Y (A2O1A1Ixp33_ASAP7_75t_R)
+                    0.0742    0.0000    2.0686 v c.loadRequests/_8409_/C (AND3x1_ASAP7_75t_R)
+    46   21.7569    0.1472    0.1021    2.1707 v c.loadRequests/_8409_/Y (AND3x1_ASAP7_75t_R)
+                    0.1472    0.0000    2.1707 v c.loadRequests/_8418_/C (NOR4xp25_ASAP7_75t_R)
+    45   21.8058    0.7369    0.3801    2.5508 ^ c.loadRequests/_8418_/Y (NOR4xp25_ASAP7_75t_R)
+                    0.7369    0.0000    2.5508 ^ c.loadRequests/io_deq_bits_masked_word_7/_24_/A (AND2x2_ASAP7_75t_R)
+     1    0.4687    0.0240    0.0676    2.6183 ^ c.loadRequests/io_deq_bits_masked_word_7/_24_/Y (AND2x2_ASAP7_75t_R)
+                    0.0240    0.0000    2.6183 ^ c.loadRequests/_6788_/D (NOR4xp25_ASAP7_75t_R)
+     1    0.5320    0.0171    0.0159    2.6343 v c.loadRequests/_6788_/Y (NOR4xp25_ASAP7_75t_R)
+                    0.0171    0.0000    2.6343 v c.loadRequests/_6790_/A1 (A2O1A1Ixp33_ASAP7_75t_R)
+    17    9.6256    0.2492    0.0882    2.7225 ^ c.loadRequests/_6790_/Y (A2O1A1Ixp33_ASAP7_75t_R)
+                    0.2492    0.0000    2.7225 ^ _078899_/A (AND4x1_ASAP7_75t_R)
+    13    6.5934    0.0666    0.0892    2.8117 ^ _078899_/Y (AND4x1_ASAP7_75t_R)
+                    0.0666    0.0000    2.8117 ^ _080943_/C (AOI211xp5_ASAP7_75t_R)
+     1    0.3482    0.0715    0.0228    2.8344 v _080943_/Y (AOI211xp5_ASAP7_75t_R)
+                    0.0715    0.0000    2.8344 v _080944_/B (NOR2xp33_ASAP7_75t_R)
+     5    2.4220    0.0763    0.0558    2.8902 ^ _080944_/Y (NOR2xp33_ASAP7_75t_R)
+                    0.0763    0.0000    2.8902 ^ _080945_/A (INVx1_ASAP7_75t_R)
+     2    0.8201    0.0209    0.0178    2.9081 v _080945_/Y (INVx1_ASAP7_75t_R)
+                    0.0209    0.0000    2.9081 v _105420_/C (OAI221xp5_ASAP7_75t_R)
+     2    0.6604    0.0384    0.0172    2.9252 ^ _105420_/Y (OAI221xp5_ASAP7_75t_R)
+                    0.0384    0.0000    2.9252 ^ _105500_/A (NOR2xp33_ASAP7_75t_R)
+     4    1.7659    0.1328    0.0354    2.9606 v _105500_/Y (NOR2xp33_ASAP7_75t_R)
+                    0.1328    0.0000    2.9606 v _105506_/B (AOI21xp33_ASAP7_75t_R)
+     1    5.0000    0.1515    0.1087    3.0694 ^ _105506_/Y (AOI21xp33_ASAP7_75t_R)
+                    0.1136    0.0000    3.0694 ^ c.dc.caches_3.dataRam_1.lane_1/ce_in (fakeram_asap7_128x8)
+                                        3.0694   data arrival time
+
+                    0.0500    2.0000    2.0000   clock core_clock (rise edge)
+                              0.0000    2.0000   clock network delay (ideal)
+                             -0.0500    1.9500   clock uncertainty
+                              0.0000    1.9500   clock reconvergence pessimism
+                                        1.9500 ^ c.dc.caches_3.dataRam_1.lane_1/clk (fakeram_asap7_128x8)
+                             -0.0500    1.9000   library setup time
+                                        1.9000   data required time
+-------------------------------------------------------------------------------------
+                                        1.9000   data required time
+                                       -3.0694   data arrival time
+-------------------------------------------------------------------------------------
+                                       -1.1694   slack (VIOLATED)
+
+
+Startpoint: _113403_ (rising edge-triggered flip-flop clocked by core_clock)
+Endpoint: c.dc.caches_3.dataRam_1.lane_2
+          (rising edge-triggered flip-flop clocked by core_clock)
+Path Group: core_clock
+Path Type: max
+
+Fanout       Cap      Slew     Delay      Time   Description
+-------------------------------------------------------------------------------------
+                    0.0500    0.0000    0.0000   clock core_clock (rise edge)
+                              0.0000    0.0000   clock network delay (ideal)
+                    0.0500    0.0000    0.0000 ^ _113403_/CLK (DFFHQNx1_ASAP7_75t_R)
+     5    3.2854    0.0376    0.0733    0.0733 v _113403_/QN (DFFHQNx1_ASAP7_75t_R)
+                    0.0376    0.0000    0.0733 v _062220_/A (NAND2xp33_ASAP7_75t_R)
+     4    1.5886    0.0516    0.0383    0.1115 ^ _062220_/Y (NAND2xp33_ASAP7_75t_R)
+                    0.0516    0.0000    0.1115 ^ _077374_/B (NOR2xp33_ASAP7_75t_R)
+   135   65.8414    1.3119    0.6600    0.7715 v _077374_/Y (NOR2xp33_ASAP7_75t_R)
+                    1.3119    0.0000    0.7715 v _077380_/A (NAND2xp33_ASAP7_75t_R)
+    33   15.1765    0.6170    0.6905    1.4620 ^ _077380_/Y (NAND2xp33_ASAP7_75t_R)
+                    0.6170    0.0000    1.4620 ^ _080656_/B (NOR2xp33_ASAP7_75t_R)
+     3    1.5699    0.1424    0.1205    1.5825 v _080656_/Y (NOR2xp33_ASAP7_75t_R)
+                    0.1424    0.0000    1.5825 v c.loadRequests/_4947_/A (INVx1_ASAP7_75t_R)
+     7    3.3607    0.0627    0.0533    1.6359 ^ c.loadRequests/_4947_/Y (INVx1_ASAP7_75t_R)
+                    0.0627    0.0000    1.6359 ^ c.loadRequests/_5243_/A1 (OAI21xp33_ASAP7_75t_R)
+     1    0.4415    0.0259    0.0225    1.6584 v c.loadRequests/_5243_/Y (OAI21xp33_ASAP7_75t_R)
+                    0.0259    0.0000    1.6584 v c.loadRequests/_5244_/B (AOI21xp33_ASAP7_75t_R)
+     2    1.0440    0.0601    0.0270    1.6854 ^ c.loadRequests/_5244_/Y (AOI21xp33_ASAP7_75t_R)
+                    0.0601    0.0000    1.6854 ^ c.loadRequests/_5245_/A (INVx1_ASAP7_75t_R)
+     2    0.9997    0.0197    0.0174    1.7028 v c.loadRequests/_5245_/Y (INVx1_ASAP7_75t_R)
+                    0.0197    0.0000    1.7028 v c.loadRequests/_8333_/B (NAND3xp33_ASAP7_75t_R)
+     4    1.5589    0.0424    0.0213    1.7241 ^ c.loadRequests/_8333_/Y (NAND3xp33_ASAP7_75t_R)
+                    0.0424    0.0000    1.7241 ^ c.loadRequests/_8334_/B (NAND2xp33_ASAP7_75t_R)
+     6    2.5714    0.0565    0.0390    1.7631 v c.loadRequests/_8334_/Y (NAND2xp33_ASAP7_75t_R)
+                    0.0565    0.0000    1.7631 v c.loadRequests/_8336_/A2 (OAI21xp33_ASAP7_75t_R)
+     3    1.2591    0.0514    0.0376    1.8007 ^ c.loadRequests/_8336_/Y (OAI21xp33_ASAP7_75t_R)
+                    0.0514    0.0000    1.8007 ^ c.loadRequests/_8339_/A (OR2x2_ASAP7_75t_R)
+     1    0.5507    0.0089    0.0301    1.8307 ^ c.loadRequests/_8339_/Y (OR2x2_ASAP7_75t_R)
+                    0.0089    0.0000    1.8307 ^ c.loadRequests/_8362_/C (A2O1A1Ixp33_ASAP7_75t_R)
+     2    0.9498    0.0285    0.0179    1.8486 v c.loadRequests/_8362_/Y (A2O1A1Ixp33_ASAP7_75t_R)
+                    0.0285    0.0000    1.8486 v c.loadRequests/_8369_/A1 (AOI21xp33_ASAP7_75t_R)
+     5    2.2178    0.0661    0.0396    1.8882 ^ c.loadRequests/_8369_/Y (AOI21xp33_ASAP7_75t_R)
+                    0.0661    0.0000    1.8882 ^ c.loadRequests/_8371_/B (NOR2xp33_ASAP7_75t_R)
+     8    3.6240    0.0828    0.0626    1.9508 v c.loadRequests/_8371_/Y (NOR2xp33_ASAP7_75t_R)
+                    0.0828    0.0000    1.9508 v c.loadRequests/_8390_/A2 (OAI21xp33_ASAP7_75t_R)
+     2    0.7623    0.0434    0.0356    1.9865 ^ c.loadRequests/_8390_/Y (OAI21xp33_ASAP7_75t_R)
+                    0.0434    0.0000    1.9865 ^ c.loadRequests/_8394_/A1 (OAI21xp33_ASAP7_75t_R)
+     1    0.4229    0.0221    0.0194    2.0059 v c.loadRequests/_8394_/Y (OAI21xp33_ASAP7_75t_R)
+                    0.0221    0.0000    2.0059 v c.loadRequests/_8400_/A2 (OAI21xp33_ASAP7_75t_R)
+     1    0.5222    0.0232    0.0186    2.0245 ^ c.loadRequests/_8400_/Y (OAI21xp33_ASAP7_75t_R)
+                    0.0232    0.0000    2.0245 ^ c.loadRequests/_8407_/A1 (A2O1A1Ixp33_ASAP7_75t_R)
+     7    3.6474    0.0742    0.0441    2.0686 v c.loadRequests/_8407_/Y (A2O1A1Ixp33_ASAP7_75t_R)
+                    0.0742    0.0000    2.0686 v c.loadRequests/_8409_/C (AND3x1_ASAP7_75t_R)
+    46   21.7569    0.1472    0.1021    2.1707 v c.loadRequests/_8409_/Y (AND3x1_ASAP7_75t_R)
+                    0.1472    0.0000    2.1707 v c.loadRequests/_8418_/C (NOR4xp25_ASAP7_75t_R)
+    45   21.8058    0.7369    0.3801    2.5508 ^ c.loadRequests/_8418_/Y (NOR4xp25_ASAP7_75t_R)
+                    0.7369    0.0000    2.5508 ^ c.loadRequests/io_deq_bits_masked_word_7/_24_/A (AND2x2_ASAP7_75t_R)
+     1    0.4687    0.0240    0.0676    2.6183 ^ c.loadRequests/io_deq_bits_masked_word_7/_24_/Y (AND2x2_ASAP7_75t_R)
+                    0.0240    0.0000    2.6183 ^ c.loadRequests/_6788_/D (NOR4xp25_ASAP7_75t_R)
+     1    0.5320    0.0171    0.0159    2.6343 v c.loadRequests/_6788_/Y (NOR4xp25_ASAP7_75t_R)
+                    0.0171    0.0000    2.6343 v c.loadRequests/_6790_/A1 (A2O1A1Ixp33_ASAP7_75t_R)
+    17    9.6256    0.2492    0.0882    2.7225 ^ c.loadRequests/_6790_/Y (A2O1A1Ixp33_ASAP7_75t_R)
+                    0.2492    0.0000    2.7225 ^ _078899_/A (AND4x1_ASAP7_75t_R)
+    13    6.5934    0.0666    0.0892    2.8117 ^ _078899_/Y (AND4x1_ASAP7_75t_R)
+                    0.0666    0.0000    2.8117 ^ _080943_/C (AOI211xp5_ASAP7_75t_R)
+     1    0.3482    0.0715    0.0228    2.8344 v _080943_/Y (AOI211xp5_ASAP7_75t_R)
+                    0.0715    0.0000    2.8344 v _080944_/B (NOR2xp33_ASAP7_75t_R)
+     5    2.4220    0.0763    0.0558    2.8902 ^ _080944_/Y (NOR2xp33_ASAP7_75t_R)
+                    0.0763    0.0000    2.8902 ^ _080945_/A (INVx1_ASAP7_75t_R)
+     2    0.8201    0.0209    0.0178    2.9081 v _080945_/Y (INVx1_ASAP7_75t_R)
+                    0.0209    0.0000    2.9081 v _105420_/C (OAI221xp5_ASAP7_75t_R)
+     2    0.6604    0.0384    0.0172    2.9252 ^ _105420_/Y (OAI221xp5_ASAP7_75t_R)
+                    0.0384    0.0000    2.9252 ^ _105500_/A (NOR2xp33_ASAP7_75t_R)
+     4    1.7659    0.1328    0.0354    2.9606 v _105500_/Y (NOR2xp33_ASAP7_75t_R)
+                    0.1328    0.0000    2.9606 v _105504_/B (AOI21xp33_ASAP7_75t_R)
+     1    5.0000    0.1515    0.1087    3.0694 ^ _105504_/Y (AOI21xp33_ASAP7_75t_R)
+                    0.1136    0.0000    3.0694 ^ c.dc.caches_3.dataRam_1.lane_2/ce_in (fakeram_asap7_128x8)
+                                        3.0694   data arrival time
+
+                    0.0500    2.0000    2.0000   clock core_clock (rise edge)
+                              0.0000    2.0000   clock network delay (ideal)
+                             -0.0500    1.9500   clock uncertainty
+                              0.0000    1.9500   clock reconvergence pessimism
+                                        1.9500 ^ c.dc.caches_3.dataRam_1.lane_2/clk (fakeram_asap7_128x8)
+                             -0.0500    1.9000   library setup time
+                                        1.9000   data required time
+-------------------------------------------------------------------------------------
+                                        1.9000   data required time
+                                       -3.0694   data arrival time
+-------------------------------------------------------------------------------------
+                                       -1.1694   slack (VIOLATED)
+
+
+Startpoint: _113403_ (rising edge-triggered flip-flop clocked by core_clock)
+Endpoint: c.dc.caches_3.dataRam_1.lane_3
+          (rising edge-triggered flip-flop clocked by core_clock)
+Path Group: core_clock
+Path Type: max
+
+Fanout       Cap      Slew     Delay      Time   Description
+-------------------------------------------------------------------------------------
+                    0.0500    0.0000    0.0000   clock core_clock (rise edge)
+                              0.0000    0.0000   clock network delay (ideal)
+                    0.0500    0.0000    0.0000 ^ _113403_/CLK (DFFHQNx1_ASAP7_75t_R)
+     5    3.2854    0.0376    0.0733    0.0733 v _113403_/QN (DFFHQNx1_ASAP7_75t_R)
+                    0.0376    0.0000    0.0733 v _062220_/A (NAND2xp33_ASAP7_75t_R)
+     4    1.5886    0.0516    0.0383    0.1115 ^ _062220_/Y (NAND2xp33_ASAP7_75t_R)
+                    0.0516    0.0000    0.1115 ^ _077374_/B (NOR2xp33_ASAP7_75t_R)
+   135   65.8414    1.3119    0.6600    0.7715 v _077374_/Y (NOR2xp33_ASAP7_75t_R)
+                    1.3119    0.0000    0.7715 v _077380_/A (NAND2xp33_ASAP7_75t_R)
+    33   15.1765    0.6170    0.6905    1.4620 ^ _077380_/Y (NAND2xp33_ASAP7_75t_R)
+                    0.6170    0.0000    1.4620 ^ _080656_/B (NOR2xp33_ASAP7_75t_R)
+     3    1.5699    0.1424    0.1205    1.5825 v _080656_/Y (NOR2xp33_ASAP7_75t_R)
+                    0.1424    0.0000    1.5825 v c.loadRequests/_4947_/A (INVx1_ASAP7_75t_R)
+     7    3.3607    0.0627    0.0533    1.6359 ^ c.loadRequests/_4947_/Y (INVx1_ASAP7_75t_R)
+                    0.0627    0.0000    1.6359 ^ c.loadRequests/_5243_/A1 (OAI21xp33_ASAP7_75t_R)
+     1    0.4415    0.0259    0.0225    1.6584 v c.loadRequests/_5243_/Y (OAI21xp33_ASAP7_75t_R)
+                    0.0259    0.0000    1.6584 v c.loadRequests/_5244_/B (AOI21xp33_ASAP7_75t_R)
+     2    1.0440    0.0601    0.0270    1.6854 ^ c.loadRequests/_5244_/Y (AOI21xp33_ASAP7_75t_R)
+                    0.0601    0.0000    1.6854 ^ c.loadRequests/_5245_/A (INVx1_ASAP7_75t_R)
+     2    0.9997    0.0197    0.0174    1.7028 v c.loadRequests/_5245_/Y (INVx1_ASAP7_75t_R)
+                    0.0197    0.0000    1.7028 v c.loadRequests/_8333_/B (NAND3xp33_ASAP7_75t_R)
+     4    1.5589    0.0424    0.0213    1.7241 ^ c.loadRequests/_8333_/Y (NAND3xp33_ASAP7_75t_R)
+                    0.0424    0.0000    1.7241 ^ c.loadRequests/_8334_/B (NAND2xp33_ASAP7_75t_R)
+     6    2.5714    0.0565    0.0390    1.7631 v c.loadRequests/_8334_/Y (NAND2xp33_ASAP7_75t_R)
+                    0.0565    0.0000    1.7631 v c.loadRequests/_8336_/A2 (OAI21xp33_ASAP7_75t_R)
+     3    1.2591    0.0514    0.0376    1.8007 ^ c.loadRequests/_8336_/Y (OAI21xp33_ASAP7_75t_R)
+                    0.0514    0.0000    1.8007 ^ c.loadRequests/_8339_/A (OR2x2_ASAP7_75t_R)
+     1    0.5507    0.0089    0.0301    1.8307 ^ c.loadRequests/_8339_/Y (OR2x2_ASAP7_75t_R)
+                    0.0089    0.0000    1.8307 ^ c.loadRequests/_8362_/C (A2O1A1Ixp33_ASAP7_75t_R)
+     2    0.9498    0.0285    0.0179    1.8486 v c.loadRequests/_8362_/Y (A2O1A1Ixp33_ASAP7_75t_R)
+                    0.0285    0.0000    1.8486 v c.loadRequests/_8369_/A1 (AOI21xp33_ASAP7_75t_R)
+     5    2.2178    0.0661    0.0396    1.8882 ^ c.loadRequests/_8369_/Y (AOI21xp33_ASAP7_75t_R)
+                    0.0661    0.0000    1.8882 ^ c.loadRequests/_8371_/B (NOR2xp33_ASAP7_75t_R)
+     8    3.6240    0.0828    0.0626    1.9508 v c.loadRequests/_8371_/Y (NOR2xp33_ASAP7_75t_R)
+                    0.0828    0.0000    1.9508 v c.loadRequests/_8390_/A2 (OAI21xp33_ASAP7_75t_R)
+     2    0.7623    0.0434    0.0356    1.9865 ^ c.loadRequests/_8390_/Y (OAI21xp33_ASAP7_75t_R)
+                    0.0434    0.0000    1.9865 ^ c.loadRequests/_8394_/A1 (OAI21xp33_ASAP7_75t_R)
+     1    0.4229    0.0221    0.0194    2.0059 v c.loadRequests/_8394_/Y (OAI21xp33_ASAP7_75t_R)
+                    0.0221    0.0000    2.0059 v c.loadRequests/_8400_/A2 (OAI21xp33_ASAP7_75t_R)
+     1    0.5222    0.0232    0.0186    2.0245 ^ c.loadRequests/_8400_/Y (OAI21xp33_ASAP7_75t_R)
+                    0.0232    0.0000    2.0245 ^ c.loadRequests/_8407_/A1 (A2O1A1Ixp33_ASAP7_75t_R)
+     7    3.6474    0.0742    0.0441    2.0686 v c.loadRequests/_8407_/Y (A2O1A1Ixp33_ASAP7_75t_R)
+                    0.0742    0.0000    2.0686 v c.loadRequests/_8409_/C (AND3x1_ASAP7_75t_R)
+    46   21.7569    0.1472    0.1021    2.1707 v c.loadRequests/_8409_/Y (AND3x1_ASAP7_75t_R)
+                    0.1472    0.0000    2.1707 v c.loadRequests/_8418_/C (NOR4xp25_ASAP7_75t_R)
+    45   21.8058    0.7369    0.3801    2.5508 ^ c.loadRequests/_8418_/Y (NOR4xp25_ASAP7_75t_R)
+                    0.7369    0.0000    2.5508 ^ c.loadRequests/io_deq_bits_masked_word_7/_24_/A (AND2x2_ASAP7_75t_R)
+     1    0.4687    0.0240    0.0676    2.6183 ^ c.loadRequests/io_deq_bits_masked_word_7/_24_/Y (AND2x2_ASAP7_75t_R)
+                    0.0240    0.0000    2.6183 ^ c.loadRequests/_6788_/D (NOR4xp25_ASAP7_75t_R)
+     1    0.5320    0.0171    0.0159    2.6343 v c.loadRequests/_6788_/Y (NOR4xp25_ASAP7_75t_R)
+                    0.0171    0.0000    2.6343 v c.loadRequests/_6790_/A1 (A2O1A1Ixp33_ASAP7_75t_R)
+    17    9.6256    0.2492    0.0882    2.7225 ^ c.loadRequests/_6790_/Y (A2O1A1Ixp33_ASAP7_75t_R)
+                    0.2492    0.0000    2.7225 ^ _078899_/A (AND4x1_ASAP7_75t_R)
+    13    6.5934    0.0666    0.0892    2.8117 ^ _078899_/Y (AND4x1_ASAP7_75t_R)
+                    0.0666    0.0000    2.8117 ^ _080943_/C (AOI211xp5_ASAP7_75t_R)
+     1    0.3482    0.0715    0.0228    2.8344 v _080943_/Y (AOI211xp5_ASAP7_75t_R)
+                    0.0715    0.0000    2.8344 v _080944_/B (NOR2xp33_ASAP7_75t_R)
+     5    2.4220    0.0763    0.0558    2.8902 ^ _080944_/Y (NOR2xp33_ASAP7_75t_R)
+                    0.0763    0.0000    2.8902 ^ _080945_/A (INVx1_ASAP7_75t_R)
+     2    0.8201    0.0209    0.0178    2.9081 v _080945_/Y (INVx1_ASAP7_75t_R)
+                    0.0209    0.0000    2.9081 v _105420_/C (OAI221xp5_ASAP7_75t_R)
+     2    0.6604    0.0384    0.0172    2.9252 ^ _105420_/Y (OAI221xp5_ASAP7_75t_R)
+                    0.0384    0.0000    2.9252 ^ _105500_/A (NOR2xp33_ASAP7_75t_R)
+     4    1.7659    0.1328    0.0354    2.9606 v _105500_/Y (NOR2xp33_ASAP7_75t_R)
+                    0.1328    0.0000    2.9606 v _105502_/B (AOI21xp33_ASAP7_75t_R)
+     1    5.0000    0.1515    0.1087    3.0694 ^ _105502_/Y (AOI21xp33_ASAP7_75t_R)
+                    0.1136    0.0000    3.0694 ^ c.dc.caches_3.dataRam_1.lane_3/ce_in (fakeram_asap7_128x8)
+                                        3.0694   data arrival time
+
+                    0.0500    2.0000    2.0000   clock core_clock (rise edge)
+                              0.0000    2.0000   clock network delay (ideal)
+                             -0.0500    1.9500   clock uncertainty
+                              0.0000    1.9500   clock reconvergence pessimism
+                                        1.9500 ^ c.dc.caches_3.dataRam_1.lane_3/clk (fakeram_asap7_128x8)
+                             -0.0500    1.9000   library setup time
+                                        1.9000   data required time
+-------------------------------------------------------------------------------------
+                                        1.9000   data required time
+                                       -3.0694   data arrival time
+-------------------------------------------------------------------------------------
+                                       -1.1694   slack (VIOLATED)
+
+
+Startpoint: _113403_ (rising edge-triggered flip-flop clocked by core_clock)
+Endpoint: c.dc.caches_3.dataRam_0.lane_0
+          (rising edge-triggered flip-flop clocked by core_clock)
+Path Group: core_clock
+Path Type: max
+
+Fanout       Cap      Slew     Delay      Time   Description
+-------------------------------------------------------------------------------------
+                    0.0500    0.0000    0.0000   clock core_clock (rise edge)
+                              0.0000    0.0000   clock network delay (ideal)
+                    0.0500    0.0000    0.0000 ^ _113403_/CLK (DFFHQNx1_ASAP7_75t_R)
+     5    3.2854    0.0376    0.0733    0.0733 v _113403_/QN (DFFHQNx1_ASAP7_75t_R)
+                    0.0376    0.0000    0.0733 v _062220_/A (NAND2xp33_ASAP7_75t_R)
+     4    1.5886    0.0516    0.0383    0.1115 ^ _062220_/Y (NAND2xp33_ASAP7_75t_R)
+                    0.0516    0.0000    0.1115 ^ _077374_/B (NOR2xp33_ASAP7_75t_R)
+   135   65.8414    1.3119    0.6600    0.7715 v _077374_/Y (NOR2xp33_ASAP7_75t_R)
+                    1.3119    0.0000    0.7715 v _077380_/A (NAND2xp33_ASAP7_75t_R)
+    33   15.1765    0.6170    0.6905    1.4620 ^ _077380_/Y (NAND2xp33_ASAP7_75t_R)
+                    0.6170    0.0000    1.4620 ^ _080656_/B (NOR2xp33_ASAP7_75t_R)
+     3    1.5699    0.1424    0.1205    1.5825 v _080656_/Y (NOR2xp33_ASAP7_75t_R)
+                    0.1424    0.0000    1.5825 v c.loadRequests/_4947_/A (INVx1_ASAP7_75t_R)
+     7    3.3607    0.0627    0.0533    1.6359 ^ c.loadRequests/_4947_/Y (INVx1_ASAP7_75t_R)
+                    0.0627    0.0000    1.6359 ^ c.loadRequests/_5243_/A1 (OAI21xp33_ASAP7_75t_R)
+     1    0.4415    0.0259    0.0225    1.6584 v c.loadRequests/_5243_/Y (OAI21xp33_ASAP7_75t_R)
+                    0.0259    0.0000    1.6584 v c.loadRequests/_5244_/B (AOI21xp33_ASAP7_75t_R)
+     2    1.0440    0.0601    0.0270    1.6854 ^ c.loadRequests/_5244_/Y (AOI21xp33_ASAP7_75t_R)
+                    0.0601    0.0000    1.6854 ^ c.loadRequests/_5245_/A (INVx1_ASAP7_75t_R)
+     2    0.9997    0.0197    0.0174    1.7028 v c.loadRequests/_5245_/Y (INVx1_ASAP7_75t_R)
+                    0.0197    0.0000    1.7028 v c.loadRequests/_8333_/B (NAND3xp33_ASAP7_75t_R)
+     4    1.5589    0.0424    0.0213    1.7241 ^ c.loadRequests/_8333_/Y (NAND3xp33_ASAP7_75t_R)
+                    0.0424    0.0000    1.7241 ^ c.loadRequests/_8334_/B (NAND2xp33_ASAP7_75t_R)
+     6    2.5714    0.0565    0.0390    1.7631 v c.loadRequests/_8334_/Y (NAND2xp33_ASAP7_75t_R)
+                    0.0565    0.0000    1.7631 v c.loadRequests/_8336_/A2 (OAI21xp33_ASAP7_75t_R)
+     3    1.2591    0.0514    0.0376    1.8007 ^ c.loadRequests/_8336_/Y (OAI21xp33_ASAP7_75t_R)
+                    0.0514    0.0000    1.8007 ^ c.loadRequests/_8339_/A (OR2x2_ASAP7_75t_R)
+     1    0.5507    0.0089    0.0301    1.8307 ^ c.loadRequests/_8339_/Y (OR2x2_ASAP7_75t_R)
+                    0.0089    0.0000    1.8307 ^ c.loadRequests/_8362_/C (A2O1A1Ixp33_ASAP7_75t_R)
+     2    0.9498    0.0285    0.0179    1.8486 v c.loadRequests/_8362_/Y (A2O1A1Ixp33_ASAP7_75t_R)
+                    0.0285    0.0000    1.8486 v c.loadRequests/_8369_/A1 (AOI21xp33_ASAP7_75t_R)
+     5    2.2178    0.0661    0.0396    1.8882 ^ c.loadRequests/_8369_/Y (AOI21xp33_ASAP7_75t_R)
+                    0.0661    0.0000    1.8882 ^ c.loadRequests/_8371_/B (NOR2xp33_ASAP7_75t_R)
+     8    3.6240    0.0828    0.0626    1.9508 v c.loadRequests/_8371_/Y (NOR2xp33_ASAP7_75t_R)
+                    0.0828    0.0000    1.9508 v c.loadRequests/_8390_/A2 (OAI21xp33_ASAP7_75t_R)
+     2    0.7623    0.0434    0.0356    1.9865 ^ c.loadRequests/_8390_/Y (OAI21xp33_ASAP7_75t_R)
+                    0.0434    0.0000    1.9865 ^ c.loadRequests/_8394_/A1 (OAI21xp33_ASAP7_75t_R)
+     1    0.4229    0.0221    0.0194    2.0059 v c.loadRequests/_8394_/Y (OAI21xp33_ASAP7_75t_R)
+                    0.0221    0.0000    2.0059 v c.loadRequests/_8400_/A2 (OAI21xp33_ASAP7_75t_R)
+     1    0.5222    0.0232    0.0186    2.0245 ^ c.loadRequests/_8400_/Y (OAI21xp33_ASAP7_75t_R)
+                    0.0232    0.0000    2.0245 ^ c.loadRequests/_8407_/A1 (A2O1A1Ixp33_ASAP7_75t_R)
+     7    3.6474    0.0742    0.0441    2.0686 v c.loadRequests/_8407_/Y (A2O1A1Ixp33_ASAP7_75t_R)
+                    0.0742    0.0000    2.0686 v c.loadRequests/_8409_/C (AND3x1_ASAP7_75t_R)
+    46   21.7569    0.1472    0.1021    2.1707 v c.loadRequests/_8409_/Y (AND3x1_ASAP7_75t_R)
+                    0.1472    0.0000    2.1707 v c.loadRequests/_8418_/C (NOR4xp25_ASAP7_75t_R)
+    45   21.8058    0.7369    0.3801    2.5508 ^ c.loadRequests/_8418_/Y (NOR4xp25_ASAP7_75t_R)
+                    0.7369    0.0000    2.5508 ^ c.loadRequests/io_deq_bits_masked_word_7/_24_/A (AND2x2_ASAP7_75t_R)
+     1    0.4687    0.0240    0.0676    2.6183 ^ c.loadRequests/io_deq_bits_masked_word_7/_24_/Y (AND2x2_ASAP7_75t_R)
+                    0.0240    0.0000    2.6183 ^ c.loadRequests/_6788_/D (NOR4xp25_ASAP7_75t_R)
+     1    0.5320    0.0171    0.0159    2.6343 v c.loadRequests/_6788_/Y (NOR4xp25_ASAP7_75t_R)
+                    0.0171    0.0000    2.6343 v c.loadRequests/_6790_/A1 (A2O1A1Ixp33_ASAP7_75t_R)
+    17    9.6256    0.2492    0.0882    2.7225 ^ c.loadRequests/_6790_/Y (A2O1A1Ixp33_ASAP7_75t_R)
+                    0.2492    0.0000    2.7225 ^ _078899_/A (AND4x1_ASAP7_75t_R)
+    13    6.5934    0.0666    0.0892    2.8117 ^ _078899_/Y (AND4x1_ASAP7_75t_R)
+                    0.0666    0.0000    2.8117 ^ _080943_/C (AOI211xp5_ASAP7_75t_R)
+     1    0.3482    0.0715    0.0228    2.8344 v _080943_/Y (AOI211xp5_ASAP7_75t_R)
+                    0.0715    0.0000    2.8344 v _080944_/B (NOR2xp33_ASAP7_75t_R)
+     5    2.4220    0.0763    0.0558    2.8902 ^ _080944_/Y (NOR2xp33_ASAP7_75t_R)
+                    0.0763    0.0000    2.8902 ^ _080945_/A (INVx1_ASAP7_75t_R)
+     2    0.8201    0.0209    0.0178    2.9081 v _080945_/Y (INVx1_ASAP7_75t_R)
+                    0.0209    0.0000    2.9081 v _105420_/C (OAI221xp5_ASAP7_75t_R)
+     2    0.6604    0.0384    0.0172    2.9252 ^ _105420_/Y (OAI221xp5_ASAP7_75t_R)
+                    0.0384    0.0000    2.9252 ^ _105509_/A (NOR2xp33_ASAP7_75t_R)
+     4    1.7659    0.0759    0.0354    2.9606 v _105509_/Y (NOR2xp33_ASAP7_75t_R)
+                    0.0759    0.0000    2.9606 v _105513_/B (AOI21xp33_ASAP7_75t_R)
+     1    5.0000    0.1463    0.0900    3.0507 ^ _105513_/Y (AOI21xp33_ASAP7_75t_R)
+                    0.1097    0.0000    3.0507 ^ c.dc.caches_3.dataRam_0.lane_0/ce_in (fakeram_asap7_128x8)
+                                        3.0507   data arrival time
+
+                    0.0500    2.0000    2.0000   clock core_clock (rise edge)
+                              0.0000    2.0000   clock network delay (ideal)
+                             -0.0500    1.9500   clock uncertainty
+                              0.0000    1.9500   clock reconvergence pessimism
+                                        1.9500 ^ c.dc.caches_3.dataRam_0.lane_0/clk (fakeram_asap7_128x8)
+                             -0.0500    1.9000   library setup time
+                                        1.9000   data required time
+-------------------------------------------------------------------------------------
+                                        1.9000   data required time
+                                       -3.0507   data arrival time
+-------------------------------------------------------------------------------------
+                                       -1.1507   slack (VIOLATED)
+
+

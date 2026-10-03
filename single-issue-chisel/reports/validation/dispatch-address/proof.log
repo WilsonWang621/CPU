@@ -1,0 +1,181 @@
+
+-- Running command `read_verilog -sv "/home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/build/dispatch-address-proof/rtl/DispatchAddressProof.sv"; hierarchy -top DispatchAddressProof; proc; setattr -mod -unset keep_hierarchy; flatten; opt; sat -verify -prove correct 1 -show-inputs -show-outputs' --
+
+1. Executing Verilog-2005 frontend: /home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/build/dispatch-address-proof/rtl/DispatchAddressProof.sv
+Parsing SystemVerilog input from `/home/wangwenxuan/ACM/ParaRisc/single-issue-chisel/build/dispatch-address-proof/rtl/DispatchAddressProof.sv' to AST representation.
+Generating RTLIL representation for module `\CarryPrefix'.
+Generating RTLIL representation for module `\Adder32'.
+Generating RTLIL representation for module `\SourceOperand'.
+Generating RTLIL representation for module `\DispatchAddressProof'.
+Successfully finished Verilog frontend.
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+
+2.1. Analyzing design hierarchy..
+Top module:  \DispatchAddressProof
+Used module:     \SourceOperand
+Used module:         \Adder32
+Used module:             \CarryPrefix
+
+2.2. Analyzing design hierarchy..
+Top module:  \DispatchAddressProof
+Used module:     \SourceOperand
+Used module:         \Adder32
+Used module:             \CarryPrefix
+Removed 0 unused modules.
+
+3. Executing PROC pass (convert processes to netlists).
+
+3.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Removed a total of 0 dead cases.
+
+3.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 0 assignments to connections.
+
+3.4. Executing PROC_INIT pass (extract init attributes).
+
+3.5. Executing PROC_ARST pass (detect async resets in processes).
+
+3.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+
+3.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+
+3.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+
+3.9. Executing PROC_DFF pass (convert process syncs to FFs).
+
+3.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+3.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module DispatchAddressProof.
+Optimizing module SourceOperand.
+Optimizing module Adder32.
+Optimizing module CarryPrefix.
+
+4. Executing FLATTEN pass (flatten design).
+Deleting now unused module SourceOperand.
+Deleting now unused module Adder32.
+Deleting now unused module CarryPrefix.
+<suppressed ~19 debug messages>
+
+5. Executing OPT pass (performing simple optimizations).
+
+5.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module DispatchAddressProof.
+
+5.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\DispatchAddressProof'.
+Computing hashes of 735 cells of `\DispatchAddressProof'.
+Finding duplicate cells in `\DispatchAddressProof'.
+Computing hashes of 679 cells of `\DispatchAddressProof'.
+Finding duplicate cells in `\DispatchAddressProof'.
+<suppressed ~168 debug messages>
+Removed a total of 56 cells.
+
+5.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \DispatchAddressProof..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~13 debug messages>
+
+5.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \DispatchAddressProof.
+Performed a total of 0 changes.
+
+5.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\DispatchAddressProof'.
+Computing hashes of 679 cells of `\DispatchAddressProof'.
+Finding duplicate cells in `\DispatchAddressProof'.
+Removed a total of 0 cells.
+
+5.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+5.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \DispatchAddressProof..
+Removed 28 unused cells and 324 unused wires.
+<suppressed ~85 debug messages>
+
+5.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module DispatchAddressProof.
+
+5.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+5.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \DispatchAddressProof..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~13 debug messages>
+
+5.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \DispatchAddressProof.
+Performed a total of 0 changes.
+
+5.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\DispatchAddressProof'.
+Computing hashes of 651 cells of `\DispatchAddressProof'.
+Finding duplicate cells in `\DispatchAddressProof'.
+Removed a total of 0 cells.
+
+5.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+5.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \DispatchAddressProof..
+
+5.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module DispatchAddressProof.
+
+5.16. Finished fast OPT passes. (There is nothing left to do.)
+
+6. Executing SAT pass (solving SAT problems in the circuit).
+Using SAT solver `minisat`.
+
+Setting up SAT problem:
+Final constraint equation: { } = { }
+Imported 651 cells to SAT database.
+Import proof-constraint: \correct = 1'1
+Final proof equation: \correct = 1'1
+Import show expression: \completions_2_bits_data
+Import show expression: \completions_2_bits_tag
+Import show expression: \completions_2_valid
+Import show expression: \completions_1_bits_data
+Import show expression: \completions_1_bits_tag
+Import show expression: \completions_1_valid
+Import show expression: \completions_0_bits_data
+Import show expression: \completions_0_bits_tag
+Import show expression: \completions_0_valid
+Import show expression: \immediate
+Import show expression: \producer
+Import show expression: \architectural
+Import show expression: \tag
+Import show expression: \completed
+Import show expression: \waiting
+Import show expression: \used
+Import show expression: \reset
+Import show expression: \clock
+Import show expression: \correct
+
+Solving problem with 8451 variables and 22340 clauses..
+SAT proof finished - no model found: SUCCESS!
+
+                  /$$$$$$      /$$$$$$$$     /$$$$$$$    
+                 /$$__  $$    | $$_____/    | $$__  $$   
+                | $$  \ $$    | $$          | $$  \ $$   
+                | $$  | $$    | $$$$$       | $$  | $$   
+                | $$  | $$    | $$__/       | $$  | $$   
+                | $$/$$ $$    | $$          | $$  | $$   
+                |  $$$$$$/ /$$| $$$$$$$$ /$$| $$$$$$$//$$
+                 \____ $$$|__/|________/|__/|_______/|__/
+                       \__/                              
+
