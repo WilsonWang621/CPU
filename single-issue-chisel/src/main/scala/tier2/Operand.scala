@@ -19,7 +19,9 @@ class OperandEntry(p: Config) extends LocalLogic {
   val forwarded = MuxCase(value,(0 until 3).map(k => matches(k) -> io.completions(k).bits.data))
   when(!ready && matches.reduce(_ || _)) { value := forwarded; ready := true.B }
   when(io.prepare) { value := io.initialData; tag := io.initialTag; ready := io.initialReady }
-  io.ready := ready || matches.reduce(_ || _)
+  val matchReady = if(p.separateOperandReady) CompletionReady(p,tag,io.completions,io.loadReturn) else matches.reduce(_ || _)
+  if(p.debug && p.separateOperandReady) { assert(matchReady === matches.reduce(_ || _),"Independent operand readiness differs from data match") }
+  io.ready := ready || matchReady
   io.data := Mux(ready,value,forwarded)
 }
 
@@ -39,7 +41,9 @@ class SourceOperand(p: Config, prepareAddress: Boolean = false) extends LocalLog
   if(p.debug && p.bankedReturnMatch) {
     assert(matches(1) === (io.completions(1).valid && io.completions(1).bits.tag === io.tag),"Banked dispatch bypass differs from selected completion")
   }
-  io.ready := !io.waiting || io.completed || matches.reduce(_ || _)
+  val matchReady = if(p.separateOperandReady) CompletionReady(p,io.tag,io.completions,io.loadReturn) else matches.reduce(_ || _)
+  if(p.debug && p.separateOperandReady) { assert(matchReady === matches.reduce(_ || _),"Independent dispatch readiness differs from data match") }
+  io.ready := !io.waiting || io.completed || matchReady
   val forwarded = MuxCase(io.producer,(0 until 3).map(k => matches(k) -> io.completions(k).bits.data))
   io.data := Mux(io.used,Mux(io.waiting,forwarded,io.architectural),0.U)
   io.address.foreach { address =>
@@ -49,5 +53,25 @@ class SourceOperand(p: Config, prepareAddress: Boolean = false) extends LocalLog
     val baseSum = Util.add(base,io.immediate.get)
     val sums = io.completions.map(c => Util.add(c.bits.data,io.immediate.get))
     address := MuxCase(baseSum,(0 until 3).map(k => (io.used && io.waiting && matches(k)) -> sums(k)))
+  }
+}
+/** Readiness has its own small match cone, independent of wide data writes. */
+class CompletionReady(p: Config) extends LocalLogic {
+  val io = IO(new Bundle {
+    val tag = Input(UInt(p.tagBits.W)); val valid = Input(UInt(3.W))
+    val tags = Input(Vec(3,UInt(p.tagBits.W)))
+    val loadReturn = if(p.bankedReturnMatch) Some(Input(new BankedLoadReturn(p))) else None
+    val ready = Output(Bool())
+  })
+  io.ready := (0 until 3).map(k => if(k == 1 && p.bankedReturnMatch)
+    BankedLoadReturn.matches(io.loadReturn.get,io.tag) else io.valid(k) && io.tags(k) === io.tag).reduce(_ || _)
+}
+object CompletionReady {
+  def apply(p: Config, tag: UInt, completions: Vec[Valid[Completion]], loadReturn: Option[BankedLoadReturn]): Bool = {
+    val ready = Module(new CompletionReady(p))
+    ready.io.tag := tag; ready.io.valid := VecInit(completions.map(_.valid)).asUInt
+    ready.io.tags := VecInit(completions.map(_.bits.tag))
+    ready.io.loadReturn.foreach(_ := loadReturn.get)
+    ready.io.ready
   }
 }

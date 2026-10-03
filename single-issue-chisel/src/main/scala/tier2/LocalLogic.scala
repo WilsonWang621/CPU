@@ -70,12 +70,66 @@ class LocalResultWord(p: Config, index: Int) extends LocalLogic {
   val io = IO(new Bundle {
     val valid = Input(UInt(3.W)); val tags = Input(Vec(3,UInt(p.tagBits.W))); val data = Input(Vec(3,UInt(32.W)))
     val loadReturn = if(p.bankedReturnMatch) Some(Input(new BankedLoadReturn(p))) else None
+    val finalized = if(p.preparedLoadResult) Some(Input(Bool())) else None
     val completed = Output(Bool()); val value = Output(UInt(32.W))
   })
+  if(p.resultSliceBits < 32) {
+    val slices = (0 until 32 by p.resultSliceBits).map { low =>
+      val slice = Module(new LocalResultSlice(p,index,p.resultSliceBits))
+      slice.io.valid := io.valid; slice.io.tags := io.tags
+      slice.io.data := VecInit(io.data.map(_(low+p.resultSliceBits-1,low)))
+      slice.io.loadReturn.foreach(_ := io.loadReturn.get)
+      slice.io.finalized.foreach(_ := io.finalized.get)
+      slice
+    }
+    io.value := chisel3.util.Cat(slices.reverse.map(_.io.value))
+    io.completed := slices.head.io.completed
+  } else {
   val value = Reg(UInt(32.W))
   val matches = (0 until 3).map(k => io.valid(k) && (if(k == 1 && p.bankedReturnMatch)
     BankedLoadReturn.matches(io.loadReturn.get,index.U) else io.tags(k) === index.U))
-  for(k <- 0 until 3) { when(matches(k)) { value := io.data(k) } }
+  if(p.preparedLoadResult) {
+    // An unfinished load may prepare its payload before hit/arbitration is
+    // known. The actual response writes the final word at the completion
+    // edge; completed words then freeze. Dead owners cannot prepare a reused
+    // ROB tag, and actual execution/MDU completions have priority.
+    val pending = BankedLoadReturn.pendingMatches(io.loadReturn.get,index.U) && !io.finalized.get
+    when(pending) { value := io.data(1) }
+    when(matches(0)) { value := io.data(0) }
+    when(matches(2)) { value := io.data(2) }
+    if(p.debug) {
+      when(matches(1)) { assert(pending,"Selected load lacks an unfinished pending result owner") }
+      assert(chisel3.util.PopCount(VecInit(matches)) <= 1.U,"Multiple producers completed one ROB result")
+    }
+  } else {
+    for(k <- 0 until 3) { when(matches(k)) { value := io.data(k) } }
+  }
+  io.completed := matches.reduce(_ || _); io.value := value
+  }
+}
+/** A completion match drives only a bounded group of result bits. */
+class LocalResultSlice(p: Config, index: Int, width: Int) extends LocalLogic {
+  val io = IO(new Bundle {
+    val valid = Input(UInt(3.W)); val tags = Input(Vec(3,UInt(p.tagBits.W))); val data = Input(Vec(3,UInt(width.W)))
+    val loadReturn = if(p.bankedReturnMatch) Some(Input(new BankedLoadReturn(p))) else None
+    val finalized = if(p.preparedLoadResult) Some(Input(Bool())) else None
+    val completed = Output(Bool()); val value = Output(UInt(width.W))
+  })
+  val value = Reg(UInt(width.W))
+  val matches = (0 until 3).map(k => io.valid(k) && (if(k == 1 && p.bankedReturnMatch)
+    BankedLoadReturn.matches(io.loadReturn.get,index.U) else io.tags(k) === index.U))
+  if(p.preparedLoadResult) {
+    val pending = BankedLoadReturn.pendingMatches(io.loadReturn.get,index.U) && !io.finalized.get
+    when(pending) { value := io.data(1) }
+    when(matches(0)) { value := io.data(0) }
+    when(matches(2)) { value := io.data(2) }
+    if(p.debug) {
+      when(matches(1)) { assert(pending,"Selected load lacks an unfinished pending result owner") }
+      assert(chisel3.util.PopCount(VecInit(matches)) <= 1.U,"Multiple producers completed one ROB result")
+    }
+  } else {
+    for(k <- 0 until 3) { when(matches(k)) { value := io.data(k) } }
+  }
   io.completed := matches.reduce(_ || _); io.value := value
 }
 class LocalArchWord(index: Int) extends LocalLogic {
@@ -85,4 +139,15 @@ class LocalArchWord(index: Int) extends LocalLogic {
   val value = RegInit(0.U(32.W))
   when(io.commit && io.rd === index.U) { value := io.data }
   io.value := value
+}
+/** Keep byte alignment/sign extension local to a group of CDB consumers. */
+class LocalLoadValue extends LocalLogic {
+  val io = IO(new Bundle {
+    val word = Input(UInt(32.W)); val offset = Input(UInt(2.W)); val fn = Input(UInt(3.W))
+    val value = Output(UInt(32.W))
+  })
+  val shifted = io.word >> chisel3.util.Cat(io.offset,0.U(3.W))
+  io.value := chisel3.util.MuxLookup(io.fn,shifted)(Seq(
+    0.U -> Util.sext(shifted(7,0)),1.U -> Util.sext(shifted(15,0)),
+    4.U -> chisel3.util.Cat(0.U(24.W),shifted(7,0)),5.U -> chisel3.util.Cat(0.U(16.W),shifted(15,0))))
 }

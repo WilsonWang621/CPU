@@ -10,7 +10,16 @@ case class Config(rob: Int = 32, iq: Int = 8, icBytes: Int = 4096,
                   storeEntries: Int = 4, checkpoints: Int = 4, fastRedirect: Boolean = true, storeSlots: Int = 8,
                   loadEntries: Int = 8, l0FillStages: Int = 1, l0Replacement: Int = 1, ramReadAhead: Boolean = false, l0StoreStages: Int = 1, bankedLoadPayload: Boolean = true, cacheHierarchy: Boolean = false, prefetchTrainStages: Int = 1, trustedLoadCredit: Boolean = true, rasWriteStages: Int = 1, registeredSquashMask: Boolean = true,
                   issueSliceBits: Int = 16, bankedReturnMatch: Boolean = false, localIssueEligibility: Boolean = false, fetchHeadSliceBits: Int = 0,
-                  divStepBits: Int = 1, divResultCache: Boolean = false, parallelDispatchAddress: Boolean = false) {
+                  divStepBits: Int = 1, divResultCache: Boolean = false, parallelDispatchAddress: Boolean = false,
+                  cachedFetchHead: Boolean = false, resultSliceBits: Int = 32, issueAgeMatrix: Boolean = false,
+                  localResultQualification: Boolean = false, preparedLoadResult: Boolean = false,
+                  loadValueCopies: Int = 1, earlyLoadFormat: Boolean = false, cachedFetchInstruction: Boolean = false,
+                  separateOperandReady: Boolean = false) {
+  require(!cachedFetchInstruction || cachedFetchHead)
+  require(!earlyLoadFormat || loadValueCopies == 1)
+  require(Set(1,2,4).contains(loadValueCopies))
+  require(Set(8,16,32).contains(resultSliceBits))
+  require(!preparedLoadResult || bankedReturnMatch,"Prepared load results require banked return matching")
   require(issueWidth == 1, "This architecture has one issue port")
   require(Set(8,16,32).contains(issueSliceBits))
   require(Set(0,16,32).contains(fetchHeadSliceBits))
@@ -64,10 +73,13 @@ class BankResponse(p: Config) extends Bundle { val rsp = new MemRsp; val info = 
   */
 class BankedLoadReturn(p: Config) extends Bundle {
   val selected = Vec(p.banks,Bool()); val tags = Vec(p.banks,UInt(p.tagBits.W))
+  val pending = if(p.preparedLoadResult) Some(Vec(p.banks,Bool())) else None
 }
 object BankedLoadReturn {
   def matches(returned: BankedLoadReturn, tag: UInt): Bool =
     returned.tags.indices.map(i => returned.selected(i) && returned.tags(i) === tag).reduce(_ || _)
+  def pendingMatches(returned: BankedLoadReturn, tag: UInt): Bool =
+    returned.tags.indices.map(i => returned.pending.get(i) && returned.tags(i) === tag).reduce(_ || _)
 }
 class MemPort extends Bundle {
   val req = Decoupled(new MemReq)
