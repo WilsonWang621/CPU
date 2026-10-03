@@ -1,12 +1,12 @@
 {
-  "stage": 3,
-  "report": "reports/stage3/v75-recovery-mask-ras-stage",
-  "rtl_sha256": "08c5861e540e2febc1929ccec9fb3aea09ee625587e3568e81bed12e14398509",
+  "stage": 4,
+  "report": "reports/stage4/v94-final-source-slice16",
+  "rtl_sha256": "21b67993246cc4bd379fbf1b41585be908001f79c7c818a417dc27023287f43a",
   "ipc_geomean": 0.8460240058706379,
   "synthesis": {
     "status": "passed",
-    "fmax_mhz": 308.7126921917395,
-    "area_um2": 17754.13249999949
+    "fmax_mhz": 332.1440155692507,
+    "area_um2": 17784.663019999472
   },
   "correctness": "19/19",
   "parameters": {
@@ -38,8 +38,15 @@
     "trusted-load-credit": 1,
     "ras-write-stages": 1,
     "registered-squash-mask": 1,
-    "issue-width": 1
+    "issue-width": 1,
+    "issue-slice-bits": 16,
+    "banked-return-match": 0,
+    "local-issue-eligibility": 0,
+    "fetch-head-slice-bits": 0,
+    "div-step-bits": 1,
+    "div-result-cache": 0,
+    "parallel-dispatch-address": 0
   },
-  "target_mhz": 500,
+  "target_mhz": 400,
   "target_reached": false
 }

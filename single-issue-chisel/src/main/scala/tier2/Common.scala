@@ -9,7 +9,7 @@ case class Config(rob: Int = 32, iq: Int = 8, icBytes: Int = 4096,
                   prefetch: Boolean = true, btbEntries: Int = 64, historyBits: Int = 1, l0Entries: Int = 32,
                   storeEntries: Int = 4, checkpoints: Int = 4, fastRedirect: Boolean = true, storeSlots: Int = 8,
                   loadEntries: Int = 8, l0FillStages: Int = 1, l0Replacement: Int = 1, ramReadAhead: Boolean = false, l0StoreStages: Int = 1, bankedLoadPayload: Boolean = true, cacheHierarchy: Boolean = false, prefetchTrainStages: Int = 1, trustedLoadCredit: Boolean = true, rasWriteStages: Int = 1, registeredSquashMask: Boolean = true,
-                  issueSliceBits: Int = 32, bankedReturnMatch: Boolean = false, localIssueEligibility: Boolean = false, fetchHeadSliceBits: Int = 0,
+                  issueSliceBits: Int = 16, bankedReturnMatch: Boolean = false, localIssueEligibility: Boolean = false, fetchHeadSliceBits: Int = 0,
                   divStepBits: Int = 1, divResultCache: Boolean = false, parallelDispatchAddress: Boolean = false) {
   require(issueWidth == 1, "This architecture has one issue port")
   require(Set(8,16,32).contains(issueSliceBits))
