@@ -1,12 +1,12 @@
 {
-  "stage": 4,
-  "report": "reports/stage4/v94-final-source-slice16",
-  "rtl_sha256": "21b67993246cc4bd379fbf1b41585be908001f79c7c818a417dc27023287f43a",
+  "stage": 5,
+  "report": "reports/stage5/v109-final-cached-banked",
+  "rtl_sha256": "98875bedd710fc8373e539fd5ae3133ed8a3fa14b181335ec41198828eb58693",
   "ipc_geomean": 0.8460240058706379,
   "synthesis": {
     "status": "passed",
-    "fmax_mhz": 332.1440155692507,
-    "area_um2": 17784.663019999472
+    "fmax_mhz": 342.13164049448716,
+    "area_um2": 17942.622739999555
   },
   "correctness": "19/19",
   "parameters": {
@@ -40,12 +40,21 @@
     "registered-squash-mask": 1,
     "issue-width": 1,
     "issue-slice-bits": 16,
-    "banked-return-match": 0,
-    "local-issue-eligibility": 0,
+    "banked-return-match": 1,
+    "local-issue-eligibility": 1,
     "fetch-head-slice-bits": 0,
     "div-step-bits": 1,
     "div-result-cache": 0,
-    "parallel-dispatch-address": 0
+    "parallel-dispatch-address": 0,
+    "cached-fetch-head": 1,
+    "result-slice-bits": 32,
+    "issue-age-matrix": 0,
+    "local-result-qualification": 0,
+    "prepared-load-result": 0,
+    "load-value-copies": 1,
+    "early-load-format": 0,
+    "cached-fetch-instruction": 0,
+    "separate-operand-ready": 0
   },
   "target_mhz": 400,
   "target_reached": false
