@@ -495,6 +495,7 @@ module cpu_top #(
     save_checkpoint=0;save_after_lane=0;
     for(integer lane=0;lane<2;lane=lane+1) begin
       dispatch_rid[lane]=tail+rid_t'(lane);dispatch_bank[lane]=0;dispatch_index[lane]=0;bank_choice=0;
+      rename_rd[lane*5+:5]=decoded[lane].writes_rd ? decoded[lane].rd:5'd0;
       if(lane<RENAME_WIDTH && !blocked_dispatch && fetch_valid[lane] && int'(rob_count)+lane<ROB_ENTRIES) begin
         if(decoded[lane].op==OP_LOAD || decoded[lane].op==OP_STORE) bank_choice=2;
         else if(is_branch(decoded[lane].op) || is_mdu(decoded[lane].op) || INTEGER_PORTS==1) bank_choice=0;
@@ -508,7 +509,7 @@ module cpu_top #(
                     (!is_branch(decoded[lane].op) || (checkpoint_available && !save_checkpoint))) begin
           dispatch_prepare[lane]=1;dispatch_count=dispatch_count+1'b1;
           dispatch_bank[lane]=2'(bank_choice);dispatch_index[lane]=free_queue[bank_choice];used_bank[bank_choice]=1;
-          rename_prepare[lane]=decoded[lane].writes_rd;rename_rd[lane*5+:5]=decoded[lane].writes_rd ? decoded[lane].rd:5'd0;
+          rename_prepare[lane]=decoded[lane].writes_rd;
           if(is_branch(decoded[lane].op)) begin save_checkpoint=1;save_after_lane=1'(lane);end
         end else blocked_dispatch=1;
       end else blocked_dispatch=1;

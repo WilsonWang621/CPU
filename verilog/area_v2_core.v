@@ -871,6 +871,7 @@ reg  blocked_dispatch;
 integer lane;
 for(lane=0;lane<2;lane=lane+1) begin
       dispatch_rid[lane]=tail+narrow_1(lane);dispatch_bank[lane]=0;dispatch_index[lane]=0;bank_choice=0;
+      rename_rd[lane*5+:5]=decoded[lane][DECODED_T_WRITES_RD_LSB+:DECODED_T_WRITES_RD_WIDTH] ? decoded[lane][DECODED_T_RD_LSB+:DECODED_T_RD_WIDTH]:5'd0;
       if(lane<RENAME_WIDTH && !blocked_dispatch && fetch_valid[lane] && narrow_8(rob_count)+lane<ROB_ENTRIES) begin
         if(decoded[lane][DECODED_T_OP_LSB+:DECODED_T_OP_WIDTH]==OP_LOAD || decoded[lane][DECODED_T_OP_LSB+:DECODED_T_OP_WIDTH]==OP_STORE) bank_choice=2;
         else if(is_branch(decoded[lane][DECODED_T_OP_LSB+:DECODED_T_OP_WIDTH]) || is_mdu(decoded[lane][DECODED_T_OP_LSB+:DECODED_T_OP_WIDTH]) || INTEGER_PORTS==1) bank_choice=0;
@@ -884,7 +885,7 @@ for(lane=0;lane<2;lane=lane+1) begin
                     (!is_branch(decoded[lane][DECODED_T_OP_LSB+:DECODED_T_OP_WIDTH]) || (checkpoint_available && !save_checkpoint))) begin
           dispatch_prepare[lane]=1;dispatch_count=dispatch_count+1'b1;
           dispatch_bank[lane]=narrow_3(bank_choice);dispatch_index[lane]=free_queue[bank_choice];used_bank[bank_choice]=1;
-          rename_prepare[lane]=decoded[lane][DECODED_T_WRITES_RD_LSB+:DECODED_T_WRITES_RD_WIDTH];rename_rd[lane*5+:5]=decoded[lane][DECODED_T_WRITES_RD_LSB+:DECODED_T_WRITES_RD_WIDTH] ? decoded[lane][DECODED_T_RD_LSB+:DECODED_T_RD_WIDTH]:5'd0;
+          rename_prepare[lane]=decoded[lane][DECODED_T_WRITES_RD_LSB+:DECODED_T_WRITES_RD_WIDTH];
           if(is_branch(decoded[lane][DECODED_T_OP_LSB+:DECODED_T_OP_WIDTH])) begin save_checkpoint=1;save_after_lane=narrow_9(lane);end
         end else blocked_dispatch=1;
       end else blocked_dispatch=1;
@@ -1517,7 +1518,7 @@ end
 endmodule
 
 module muldiv #(
-  parameter integer DIV_STEP_BITS=4
+  parameter integer DIV_STEP_BITS=2
 )(
   input wire  clk,
   input wire  rst,
@@ -1621,6 +1622,7 @@ reg  quotient_negative_q;
 reg [31:0] quotient_next;
 reg [32:0] remainder_next;
   reg [32:0] shifted;
+reg [33:0] trial_difference;
 reg [31:0] div_a_q;
   reg [31:0] div_b_q;
   wire [31:0] completed_quotient;
@@ -1712,14 +1714,15 @@ end
   always @* begin
     quotient_next=quotient_q;
     remainder_next=remainder_q;
-    shifted=0;
+    shifted=0;trial_difference=0;
     if(div_live) begin: loop_1
 integer bit_step;
 for(bit_step=0;bit_step<DIV_STEP_BITS;bit_step=bit_step+1) begin
       shifted={remainder_next[31:0],quotient_next[31]};
       quotient_next={quotient_next[30:0],1'b0};
-      if(shifted>={1'b0,divisor_q}) begin
-        remainder_next=shifted-{1'b0,divisor_q};
+      trial_difference={1'b0,shifted}-{2'b0,divisor_q};
+      if(!trial_difference[33]) begin
+        remainder_next=trial_difference[32:0];
         quotient_next[0]=1'b1;
       end else remainder_next=shifted;
     end
