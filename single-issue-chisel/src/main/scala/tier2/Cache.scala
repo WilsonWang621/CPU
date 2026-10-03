@@ -215,9 +215,16 @@ class DataCache(p: Config) extends Module {
     c.io.cpu.rsp.ready := (responses.io.in(i).ready || metadata.io.info.prefetch || metadata.io.dead) && metadata.io.valid
     responses.io.in(i).valid := c.io.cpu.rsp.valid && metadata.io.valid && !metadata.io.info.prefetch && !metadata.io.dead
     responses.io.in(i).bits.rsp := c.io.cpu.rsp.bits; responses.io.in(i).bits.info := metadata.io.info
+    if(p.earlyLoadFormat) {
+      val formatted = Module(new LocalLoadValue)
+      formatted.io.word := c.io.cpu.rsp.bits.data
+      formatted.io.offset := metadata.io.info.offset; formatted.io.fn := metadata.io.info.fn
+      responses.io.in(i).bits.rsp.data := formatted.io.value
+    }
     io.loadReturn.foreach { returned =>
       returned.tags(i) := metadata.io.info.tag
       returned.selected(i) := responses.io.in(i).fire
+      returned.pending.foreach(_(i) := metadata.io.valid && !metadata.io.info.prefetch && !metadata.io.dead)
     }
     metadata.io.consume := c.io.cpu.rsp.fire
     requests.io.clients(i) <> c.io.mem
@@ -280,7 +287,8 @@ class Frontend(p: Config) extends Module {
   val meta = Module(new PreparedQueue(new Bundle { val pc = UInt(32.W); val next = UInt(32.W); val epoch = UInt(4.W); val history = UInt(2.W)
     val callApplied = Bool(); val returnApplied = Bool(); val rasTop = UInt(32.W); val rasValid = Bool() }, 2))
   val fetched = withReset(reset.asBool || io.redirect.valid) {
-    Module(new PreparedQueue(new FetchPacket,8,flow=true,headSliceBits=p.fetchHeadSliceBits,debugHead=p.debug))
+    Module(new PreparedQueue(new FetchPacket,8,flow=true,headSliceBits=p.fetchHeadSliceBits,debugHead=p.debug,cachedHead=p.cachedFetchHead,
+      cacheLow=34,cacheWidth=if(p.cachedFetchInstruction) 32 else 0))
   }
   io.out <> fetched.io.deq
   val repair = Wire(Bool())

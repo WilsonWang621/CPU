@@ -32,7 +32,7 @@ def save_summary(out, result):
 def main():
     a = argparse.ArgumentParser(description=__doc__)
     a.add_argument("name")
-    a.add_argument("--stage", type=int, choices=(1,2,3,4), default=1)
+    a.add_argument("--stage", type=int, choices=(1,2,3,4,5), default=1)
     baseline_parameters = json.loads((PROJECT/"baseline.json").read_text())["parameters"]
     for key, default in (("rob",16),("iq",8),("ic-bytes",4096),("dc-bytes",4096),("line-bytes",32),("ways",2),("banks",4),("early-recovery",1),("prefetch",1),("btb-entries",128),("history-bits",1),("l0-entries",0),("store-entries",0),("checkpoints",4),("fast-redirect",0),("store-slots",16),("load-entries",8),("debug",0),("l0-fill-stages",0),("l0-replacement",0),("ram-read-ahead",0),("l0-store-stages",0),("banked-load-payload",0),("cache-hierarchy",0),("prefetch-train-stages",0),("trusted-load-credit",0),("ras-write-stages",0),("registered-squash-mask",0)):
         a.add_argument("--"+key,type=int,default=baseline_parameters.get(key,default))
@@ -44,11 +44,22 @@ def main():
     a.add_argument("--div-step-bits",type=int,choices=(1,2),default=baseline_parameters.get("div-step-bits",1))
     a.add_argument("--div-result-cache",type=int,choices=(0,1),default=baseline_parameters.get("div-result-cache",0))
     a.add_argument("--parallel-dispatch-address",type=int,choices=(0,1),default=baseline_parameters.get("parallel-dispatch-address",0))
+    a.add_argument("--cached-fetch-head",type=int,choices=(0,1),default=baseline_parameters.get("cached-fetch-head",0))
+    a.add_argument("--result-slice-bits",type=int,choices=(8,16,32),default=baseline_parameters.get("result-slice-bits",32))
+    a.add_argument("--issue-age-matrix",type=int,choices=(0,1),default=baseline_parameters.get("issue-age-matrix",0))
+    a.add_argument("--local-result-qualification",type=int,choices=(0,1),default=baseline_parameters.get("local-result-qualification",0))
+    a.add_argument("--prepared-load-result",type=int,choices=(0,1),default=baseline_parameters.get("prepared-load-result",0))
+    a.add_argument("--load-value-copies",type=int,choices=(1,2,4),default=baseline_parameters.get("load-value-copies",1))
+    a.add_argument("--early-load-format",type=int,choices=(0,1),default=baseline_parameters.get("early-load-format",0))
+    a.add_argument("--cached-fetch-instruction",type=int,choices=(0,1),default=baseline_parameters.get("cached-fetch-instruction",0))
+    a.add_argument("--separate-operand-ready",type=int,choices=(0,1),default=baseline_parameters.get("separate-operand-ready",0))
     a.add_argument("--skip-correctness",action="store_true")
     a.add_argument("--skip-perf",action="store_true")
     a.add_argument("--skip-synth",action="store_true")
     a.add_argument("--reuse-build",action="store_true")
     args = a.parse_args()
+    if args.prepared_load_result and not args.banked_return_match:
+        a.error("--prepared-load-result requires --banked-return-match 1")
     if not re.fullmatch(r"[a-z0-9][a-z0-9_-]*",args.name):
         a.error("name must use lowercase letters, numbers, underscore or hyphen")
     out = PROJECT / "reports" / ("stage"+str(args.stage)) / args.name
@@ -65,6 +76,15 @@ def main():
     config["div-step-bits"] = args.div_step_bits
     config["div-result-cache"] = args.div_result_cache
     config["parallel-dispatch-address"] = args.parallel_dispatch_address
+    config["cached-fetch-head"] = args.cached_fetch_head
+    config["result-slice-bits"] = args.result_slice_bits
+    config["issue-age-matrix"] = args.issue_age_matrix
+    config["local-result-qualification"] = args.local_result_qualification
+    config["prepared-load-result"] = args.prepared_load_result
+    config["load-value-copies"] = args.load_value_copies
+    config["early-load-format"] = args.early_load_format
+    config["cached-fetch-instruction"] = args.cached_fetch_instruction
+    config["separate-operand-ready"] = args.separate_operand_ready
     if args.stage > 1:
         prior = PROJECT/"reports"/("stage"+str(args.stage-1))
         summaries = [json.loads(p.read_text()) for p in prior.glob("*/summary.json")]
@@ -169,7 +189,7 @@ def main():
     t = result["synthesis"]
     result["tier2_pass"] = (not config.get("debug",0) and result["correctness"]["status"]=="passed" and result.get("ipc_geomean",0)>=0.845 and
         t.get("status")=="passed" and t["area_um2"]<=18000 and t["fmax_mhz"]>300)
-    result["stage_frequency_pass"] = result["tier2_pass"] and t["fmax_mhz"] >= {1:300,2:400,3:500,4:400}[args.stage]
+    result["stage_frequency_pass"] = result["tier2_pass"] and t["fmax_mhz"] >= {1:300,2:400,3:500,4:400,5:400}[args.stage]
     save_summary(out,result)
     print(json.dumps({k:v for k,v in result.items() if k not in ("performance","correctness")},indent=2),flush=True)
 

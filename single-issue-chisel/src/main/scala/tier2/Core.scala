@@ -135,8 +135,14 @@ class Core(p: Config) extends Module {
   }
   val returned = dc.io.rsp.bits.info
   val shiftedLoad = dc.io.rsp.bits.rsp.data >> Cat(returned.offset,0.U(3.W))
-  val loadValue = MuxLookup(returned.fn,shiftedLoad)(Seq(0.U -> Util.sext(shiftedLoad(7,0)),1.U -> Util.sext(shiftedLoad(15,0)),
+  val originalLoadValue = MuxLookup(returned.fn,shiftedLoad)(Seq(0.U -> Util.sext(shiftedLoad(7,0)),1.U -> Util.sext(shiftedLoad(15,0)),
     4.U -> Cat(0.U(24.W),shiftedLoad(7,0)),5.U -> Cat(0.U(16.W),shiftedLoad(15,0))))
+  val loadValues = if(p.loadValueCopies == 1) Seq(if(p.earlyLoadFormat) dc.io.rsp.bits.rsp.data else originalLoadValue) else Seq.fill(p.loadValueCopies) {
+    val value = Module(new LocalLoadValue)
+    value.io.word := dc.io.rsp.bits.rsp.data; value.io.offset := returned.offset; value.io.fn := returned.fn
+    value.io.value
+  }
+  val loadValue = loadValues.head
   val forwardingMask = Wire(UInt(4.W)); val forwardingData = Wire(UInt(32.W))
   val readMask = (MuxLookup(xd.fn(1,0),15.U(4.W))(Seq(0.U -> 1.U(4.W),1.U -> 3.U(4.W))) << addressWord.io.value(1,0))(3,0)
   val fullyForwarded = (forwardingMask & readMask) === readMask
@@ -209,10 +215,15 @@ class Core(p: Config) extends Module {
   resultWords.zipWithIndex.foreach { case (r,index) =>
     // Match each early owner locally, including recovery permission for this
     // fixed ROB row. The selected tag need not feed a global valid gate.
-    r.io.valid := VecInit((0 until 3).map(k => if(k == 1 && p.bankedReturnMatch) survives(index.U(p.tagBits.W)) else cdb(k).valid)).asUInt
+    val raw = Seq(xv && (!xd.load || badAddress || bypassLoad) && !xd.muldiv && !xd.store,
+      loadReturn,md.io.rsp.valid)
+    r.io.valid := VecInit((0 until 3).map(k => if(k == 1 && p.bankedReturnMatch) survives(index.U(p.tagBits.W))
+      else if(p.localResultQualification) raw(k) && survives(index.U(p.tagBits.W)) else cdb(k).valid)).asUInt
     r.io.tags := VecInit(cdb.map(_.bits.tag)); r.io.data := VecInit(cdb.map(_.bits.data))
+    if(p.loadValueCopies > 1) { r.io.data(1) := loadValues(index % p.loadValueCopies) }
     r.io.loadReturn.foreach(_ := dc.io.loadReturn.get)
-    if(p.debug && p.bankedReturnMatch) {
+    r.io.finalized.foreach(_ := done(index))
+    if(p.debug && (p.bankedReturnMatch || p.localResultQualification)) {
       assert(r.io.completed === cdb.map(c => c.valid && c.bits.tag === index.U(p.tagBits.W)).reduce(_ || _),"Banked ROB completion differs from selected completion")
     }
   }
@@ -250,8 +261,29 @@ class Core(p: Config) extends Module {
       (a._1 || b._1,Mux(pickA,a._2,b._2),Mux(pickA,a._3,b._3))
     }
   }
-  val winner = Util.orderTreeWrapped((0 until p.iq).map(i => (eligible(i),qtag(i),i.U(log2Ceil(p.iq).W))),(0 until p.iq).map(i => wrapped(qtag(i))),false)
-  val olderMasks = (0 until p.iq).map(i => VecInit((0 until p.iq).map(j => if(i==j) false.B else before(qtag(j),qtag(i)))).asUInt)
+  val olderMasks = if(p.issueAgeMatrix) {
+    val ages = Module(new IssueAge(p.iq))
+    ages.io.prepare := ~qvalid.asUInt & UIntToOH(PriorityEncoder(~qvalid.asUInt),p.iq)
+    if(p.debug) {
+      for(i <- 0 until p.iq; j <- 0 until p.iq if i != j) {
+        when(qvalid(i) && qvalid(j)) {
+          assert(ages.io.older(i)(j) === before(qtag(j),qtag(i)),"IQ pair age disagrees with live ROB order")
+        }
+      }
+    }
+    ages.io.older.toSeq
+  } else (0 until p.iq).map(i => VecInit((0 until p.iq).map(j => if(i==j) false.B else before(qtag(j),qtag(i)))).asUInt)
+  val winner = if(p.issueAgeMatrix) {
+    val picked = VecInit((0 until p.iq).map(i => eligible(i) && !(olderMasks(i) & eligible.asUInt).orR))
+    val selected = OHToUInt(picked.asUInt)
+    if(p.debug) {
+      val legacy = Util.orderTreeWrapped((0 until p.iq).map(i => (eligible(i),qtag(i),i.U(log2Ceil(p.iq).W))),(0 until p.iq).map(i => wrapped(qtag(i))),false)
+      assert(PopCount(picked) <= 1.U,"IQ age matrix selected multiple instructions")
+      assert(picked.asUInt.orR === legacy._1,"IQ age matrix changed issue availability")
+      when(legacy._1) { assert(selected === legacy._3,"IQ age matrix changed issue order") }
+    }
+    (picked.asUInt.orR,Util.select(picked.toSeq,qtag.toSeq),selected)
+  } else Util.orderTreeWrapped((0 until p.iq).map(i => (eligible(i),qtag(i),i.U(log2Ceil(p.iq).W))),(0 until p.iq).map(i => wrapped(qtag(i))),false)
   def scheduled(xs: Seq[UInt], fallback: UInt): UInt = {
     val width = fallback.getWidth
     Cat((0 until width by p.issueSliceBits).reverse.map(low => {
@@ -277,12 +309,13 @@ class Core(p: Config) extends Module {
   val dispatch = fetch.io.out.fire
   fetch.io.out.ready := count < p.rob.U && !qvalid.asUInt.andR && !flush && !halted &&
     (!(d.branch || d.jal || d.jalr) || checkpointAvailable) && (!d.store || storeSpace)
-  def source(rs: UInt, used: Bool, prepareAddress: Boolean = false): (Bool,UInt,UInt,Option[UInt]) = {
+  def source(rs: UInt, used: Bool, prepareAddress: Boolean = false, loadCopy: Int = 0): (Bool,UInt,UInt,Option[UInt]) = {
     val tag = mapping(rs); val waiting = used && rs =/= 0.U && mapped(rs)
     val operand = Module(new SourceOperand(p,prepareAddress))
     operand.io.used := used && rs =/= 0.U; operand.io.waiting := waiting; operand.io.completed := done(tag)
     operand.io.tag := tag; operand.io.architectural := Util.choose(rs,arch.toSeq); operand.io.producer := Util.choose(tag,values.toSeq)
     operand.io.completions := preparedCdb
+    if(p.loadValueCopies > 1) { operand.io.completions(1).bits.data := loadValues(loadCopy % p.loadValueCopies) }
     operand.io.loadReturn.foreach(_ := dc.io.loadReturn.get)
     operand.io.immediate.foreach(_ := d.imm)
     (operand.io.ready,operand.io.data,tag,operand.io.address)
@@ -299,7 +332,7 @@ class Core(p: Config) extends Module {
     when(dispatch && d.store && storeFree === i.U) { storeLive(i) := true.B; storeOwner(i) := tail }
     when(flush && storeLive(i) && (if(p.earlyRecovery) younger(storeOwner(i)) else true.B)) { storeLive(i) := false.B }
   }
-  val s1 = source(d.rs1,d.use1,p.parallelDispatchAddress); val s2 = source(d.rs2,d.use2)
+  val s1 = source(d.rs1,d.use1,p.parallelDispatchAddress); val s2 = source(d.rs2,d.use2,loadCopy=1)
   val unknownStore = (0 until p.rob).map(i => live(i) && stores(i) && !done(i)).reduce(_ || _)
   val direct = dispatch && !winner._1 && xspace && s1._1 && s2._1 &&
     (!d.load || (!unknownStore && loadCredit)) && (!d.muldiv || (md.io.req.ready && !(xv && xd.muldiv)))
@@ -340,6 +373,7 @@ class Core(p: Config) extends Module {
       op.io.prepare := !qvalid(i) && free === i.U
       op.io.initialData := source._2; op.io.initialTag := source._3; op.io.initialReady := source._1
       op.io.completions := preparedCdb
+      if(p.loadValueCopies > 1) { op.io.completions(1).bits.data := loadValues(i % p.loadValueCopies) }
       op.io.loadReturn.foreach(_ := dc.io.loadReturn.get)
     }
     when(!qvalid(i) && free === i.U) {
@@ -440,7 +474,8 @@ object Generate extends App {
   val options = args.grouped(2).map { case Array(k,v) => k -> v }.toMap
   def n(key: String, default: Int): Int = options.get(key).map(_.toInt).getOrElse(default)
   val supported = Set("--banked-load-payload","--banked-return-match","--banks","--btb-entries","--cache-hierarchy","--checkpoints","--dc-bytes","--debug","--div-step-bits","--div-result-cache","--early-recovery","--fast-redirect","--fetch-head-slice-bits","--history-bits","--ic-bytes","--iq","--issue-width","--issue-slice-bits","--l0-entries","--l0-fill-stages","--l0-replacement","--l0-store-stages","--line-bytes","--load-entries","--local-issue-eligibility","--parallel-dispatch-address","--prefetch","--prefetch-train-stages","--ram-read-ahead","--ras-write-stages","--registered-squash-mask","--rob","--store-entries","--store-slots","--trusted-load-credit","--ways","--out")
-  require(options.keySet.subsetOf(supported),"Unknown CPU parameter: " + (options.keySet -- supported).mkString(", "))
+  val supportedExtra = supported ++ Set("--cached-fetch-head","--result-slice-bits","--issue-age-matrix","--local-result-qualification","--prepared-load-result","--load-value-copies","--early-load-format","--cached-fetch-instruction","--separate-operand-ready")
+  require(options.keySet.subsetOf(supportedExtra),"Unknown CPU parameter: " + (options.keySet -- supportedExtra).mkString(", "))
   require(n("--issue-width",1) == 1,"Only single issue is supported")
   val defaults = Config()
   val p = Config(rob=n("--rob",defaults.rob),iq=n("--iq",defaults.iq),icBytes=n("--ic-bytes",defaults.icBytes),dcBytes=n("--dc-bytes",defaults.dcBytes),
@@ -451,7 +486,16 @@ object Generate extends App {
     localIssueEligibility=n("--local-issue-eligibility",if(defaults.localIssueEligibility) 1 else 0) != 0,
     fetchHeadSliceBits=n("--fetch-head-slice-bits",defaults.fetchHeadSliceBits),divStepBits=n("--div-step-bits",defaults.divStepBits),
     divResultCache=n("--div-result-cache",if(defaults.divResultCache) 1 else 0) != 0,
-    parallelDispatchAddress=n("--parallel-dispatch-address",if(defaults.parallelDispatchAddress) 1 else 0) != 0)
+    parallelDispatchAddress=n("--parallel-dispatch-address",if(defaults.parallelDispatchAddress) 1 else 0) != 0,
+    cachedFetchHead=n("--cached-fetch-head",if(defaults.cachedFetchHead) 1 else 0) != 0,
+    resultSliceBits=n("--result-slice-bits",defaults.resultSliceBits),
+    issueAgeMatrix=n("--issue-age-matrix",if(defaults.issueAgeMatrix) 1 else 0) != 0,
+    localResultQualification=n("--local-result-qualification",if(defaults.localResultQualification) 1 else 0) != 0,
+    preparedLoadResult=n("--prepared-load-result",if(defaults.preparedLoadResult) 1 else 0) != 0,
+    loadValueCopies=n("--load-value-copies",defaults.loadValueCopies),
+    earlyLoadFormat=n("--early-load-format",if(defaults.earlyLoadFormat) 1 else 0) != 0,
+    cachedFetchInstruction=n("--cached-fetch-instruction",if(defaults.cachedFetchInstruction) 1 else 0) != 0,
+    separateOperandReady=n("--separate-operand-ready",if(defaults.separateOperandReady) 1 else 0) != 0)
   _root_.circt.stage.ChiselStage.emitSystemVerilogFile(new StudentTop(p), Array("--target-dir", options.getOrElse("--out","rtl")),
     Array("--disable-all-randomization", "--lowering-options=disallowLocalVariables,disallowPackedArrays"))
 }

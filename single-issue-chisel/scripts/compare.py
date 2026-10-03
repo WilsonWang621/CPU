@@ -6,7 +6,7 @@ from pathlib import Path
 
 project = Path(__file__).resolve().parents[1]
 benchmarks = ["median","multiply","qsort","rsort","towers","vvadd"]
-for stage in (1,2,3,4):
+for stage in (1,2,3,4,5):
     directory = project/"reports"/("stage"+str(stage))
     directory.mkdir(exist_ok=True)
     rows=[]
@@ -23,7 +23,7 @@ for stage in (1,2,3,4):
              "store_entries_per_bank":p.get("store-entries",0),"store_slots":p.get("store-slots",p.get("rob")),"load_entries":p.get("load-entries",4),"checkpoints":p.get("checkpoints",0),"fast_redirect":p.get("fast-redirect",0),
              "prefetch":p.get("prefetch",0),"ipc":s.get("ipc_geomean"),"frequency_mhz":t.get("fmax_mhz",s.get("fmax_mhz")),
              "area_um2":t.get("area_um2",s.get("area_um2")),"correctness":status,"tier2_pass":s.get("tier2_pass",False)}
-        if stage == 4:
+        if stage >= 4:
             row["issue_slice_bits"] = p.get("issue-slice-bits",32)
             row["banked_return_match"] = p.get("banked-return-match",0)
             row["local_issue_eligibility"] = p.get("local-issue-eligibility",0)
@@ -31,6 +31,16 @@ for stage in (1,2,3,4):
             row["div_step_bits"] = p.get("div-step-bits",1)
             row["div_result_cache"] = p.get("div-result-cache",0)
             row["parallel_dispatch_address"] = p.get("parallel-dispatch-address",0)
+        if stage == 5:
+            row["cached_fetch_head"] = p.get("cached-fetch-head",0)
+            row["result_slice_bits"] = p.get("result-slice-bits",32)
+            row["issue_age_matrix"] = p.get("issue-age-matrix",0)
+            row["local_result_qualification"] = p.get("local-result-qualification",0)
+            row["prepared_load_result"] = p.get("prepared-load-result",0)
+            row["load_value_copies"] = p.get("load-value-copies",1)
+            row["early_load_format"] = p.get("early-load-format",0)
+            row["cached_fetch_instruction"] = p.get("cached-fetch-instruction",0)
+            row["separate_operand_ready"] = p.get("separate-operand-ready",0)
         perf=s.get("performance",[])
         for b in benchmarks:
             row[b+"_ipc"]=next((x.get("ipc") for x in perf if x["case"]=="perf_"+b),None)
@@ -40,7 +50,7 @@ for stage in (1,2,3,4):
         w=csv.DictWriter(f,fieldnames=list(rows[0]),lineterminator="\n");w.writeheader();w.writerows(rows)
     def fmt(v): return "—" if v is None else (f"{v:.5f}" if isinstance(v,float) else str(v))
     header=["experiment","status","debug","rob","iq","line_bytes","ic_bytes","dc_bytes","banks","btb","history_bits","l0_entries","l0_fill_stages","l0_replacement","l0_store_stages","ram_read_ahead","banked_load_payload","cache_hierarchy","prefetch_train_stages","trusted_load_credit","ras_write_stages","registered_squash_mask","cache_return_stages","store_entries_per_bank","store_slots","load_entries","checkpoints","fast_redirect","prefetch","ipc","frequency_mhz","area_um2","correctness","tier2_pass"]
-    if stage == 4:
+    if stage >= 4:
         header.insert(header.index("ipc"),"issue_slice_bits")
         header.insert(header.index("ipc"),"banked_return_match")
         header.insert(header.index("ipc"),"local_issue_eligibility")
@@ -48,6 +58,9 @@ for stage in (1,2,3,4):
         header.insert(header.index("ipc"),"div_step_bits")
         header.insert(header.index("ipc"),"div_result_cache")
         header.insert(header.index("ipc"),"parallel_dispatch_address")
+    if stage == 5:
+        for key in ("cached_fetch_head","result_slice_bits","issue_age_matrix","local_result_qualification","prepared_load_result","load_value_copies","early_load_format","cached_fetch_instruction","separate_operand_ready"):
+            header.insert(header.index("ipc"),key)
     text="参数、正确性和默认综合对照。未运行项目用 `—` / `not_run` 标记；原始报告在对应实验目录。\n\n"
     text+="| "+" | ".join(header)+" |\n|"+"---|"*len(header)+"\n"
     for row in rows: text+="| "+" | ".join(fmt(row[k]) for k in header)+" |\n"
