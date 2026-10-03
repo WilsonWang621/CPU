@@ -128,6 +128,7 @@ class Cache(bytes: Int, ways: Int, lineBytes: Int, writeEntries: Int = 16, reado
 class DataCache(p: Config) extends Module {
   val io = IO(new Bundle {
     val req = Flipped(Decoupled(new BankRequest(p))); val rsp = Decoupled(new BankResponse(p)); val mem = new MemPort
+    val loadReturn = if(p.bankedReturnMatch) Some(Output(new BankedLoadReturn(p))) else None
     val fill = Valid(new MemReq)
     val candidates = Input(Vec(p.banks,Valid(new LoadRequest(p))))
     val loadReady = Output(Vec(p.banks,Bool()))
@@ -214,6 +215,10 @@ class DataCache(p: Config) extends Module {
     c.io.cpu.rsp.ready := (responses.io.in(i).ready || metadata.io.info.prefetch || metadata.io.dead) && metadata.io.valid
     responses.io.in(i).valid := c.io.cpu.rsp.valid && metadata.io.valid && !metadata.io.info.prefetch && !metadata.io.dead
     responses.io.in(i).bits.rsp := c.io.cpu.rsp.bits; responses.io.in(i).bits.info := metadata.io.info
+    io.loadReturn.foreach { returned =>
+      returned.tags(i) := metadata.io.info.tag
+      returned.selected(i) := responses.io.in(i).fire
+    }
     metadata.io.consume := c.io.cpu.rsp.fire
     requests.io.clients(i) <> c.io.mem
     if(p.banks != 1) { requests.io.clients(i).req.bits.addr := Cat(c.io.mem.req.bits.addr(31-b,o),i.U(b.W),c.io.mem.req.bits.addr(o-1,0)) }
@@ -274,7 +279,9 @@ class Frontend(p: Config) extends Module {
   val predicted = Mux(taken,target,pc+4.U)
   val meta = Module(new PreparedQueue(new Bundle { val pc = UInt(32.W); val next = UInt(32.W); val epoch = UInt(4.W); val history = UInt(2.W)
     val callApplied = Bool(); val returnApplied = Bool(); val rasTop = UInt(32.W); val rasValid = Bool() }, 2))
-  val fetched = withReset(reset.asBool || io.redirect.valid) { Module(new PreparedQueue(new FetchPacket, 8,flow=true)) }
+  val fetched = withReset(reset.asBool || io.redirect.valid) {
+    Module(new PreparedQueue(new FetchPacket,8,flow=true,headSliceBits=p.fetchHeadSliceBits,debugHead=p.debug))
+  }
   io.out <> fetched.io.deq
   val repair = Wire(Bool())
   cache.io.cpu.req.valid := meta.io.enq.ready && !io.redirect.valid && !repair

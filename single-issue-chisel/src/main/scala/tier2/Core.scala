@@ -18,7 +18,7 @@ class Core(p: Config) extends Module {
   val live = RegInit(VecInit(Seq.fill(p.rob)(false.B)))
   val done = RegInit(VecInit(Seq.fill(p.rob)(false.B)))
   val fault = Reg(Vec(p.rob,Bool()))
-  val resultWords = Seq.tabulate(p.rob)(i => Module(new LocalResultWord(p.tagBits,i)))
+  val resultWords = Seq.tabulate(p.rob)(i => Module(new LocalResultWord(p,i)))
   val values = VecInit(resultWords.map(_.io.value))
   val rd = Reg(Vec(p.rob,UInt(5.W))); val writes = Reg(Vec(p.rob,Bool()))
   val predicted = Reg(Vec(p.rob,UInt(32.W))); val actual = Reg(Vec(p.rob,UInt(32.W)))
@@ -60,7 +60,7 @@ class Core(p: Config) extends Module {
   val xdWord = Module(new LocalWord((new Decoded).getWidth)); val xpcWord = Module(new LocalWord(32))
   val xtWord = Module(new LocalWord(p.tagBits)); val xaWord = Module(new LocalWord(32)); val xbWord = Module(new LocalWord(32))
   val xnWord = Module(new LocalWord(32)); val xhWord = Module(new LocalWord(2))
-  val addressWord = Module(new LocalAddress)
+  val addressWord = Module(new LocalAddress(p.parallelDispatchAddress,p.debug))
   val xd = xdWord.io.value.asTypeOf(new Decoded); val xpc = xpcWord.io.value
   val xt = xtWord.io.value; val xa = xaWord.io.value; val xb = xbWord.io.value
   val xnext = xnWord.io.value; val xhistory = xhWord.io.value
@@ -119,6 +119,14 @@ class Core(p: Config) extends Module {
   dc.io.rsp.ready := true.B
   val loadAccept = dc.io.req.fire && !headStore
   val loadReturn = dc.io.rsp.fire
+  if(p.debug && p.bankedReturnMatch) {
+    val selected = dc.io.loadReturn.get.selected.asUInt
+    assert(PopCount(selected) <= 1.U,"Multiple banks selected for one completion")
+    assert(selected.orR === loadReturn,"Banked wakeup and cache response handshake differ")
+    for(i <- 0 until p.banks) {
+      when(selected(i)) { assert(dc.io.loadReturn.get.tags(i) === dc.io.rsp.bits.info.tag,"Selected bank tag differs from response data owner") }
+    }
+  }
   // A valid dequeue already requires this bank's current admission credit.
   loadRequests.io.deq.ready := (if(p.trustedLoadCredit) true.B else dc.io.req.ready) && !headStore
   if(p.debug && p.trustedLoadCredit) {
@@ -198,9 +206,15 @@ class Core(p: Config) extends Module {
   cdb(1).valid := loadReturn && survives(returned.tag)
   cdb(1).bits.tag := returned.tag; cdb(1).bits.data := loadValue
   cdb(2).valid := md.io.rsp.valid && survives(md.io.rsp.bits.tag); cdb(2).bits := md.io.rsp.bits
-  resultWords.foreach { r =>
-    r.io.valid := VecInit(cdb.map(_.valid)).asUInt
+  resultWords.zipWithIndex.foreach { case (r,index) =>
+    // Match each early owner locally, including recovery permission for this
+    // fixed ROB row. The selected tag need not feed a global valid gate.
+    r.io.valid := VecInit((0 until 3).map(k => if(k == 1 && p.bankedReturnMatch) survives(index.U(p.tagBits.W)) else cdb(k).valid)).asUInt
     r.io.tags := VecInit(cdb.map(_.bits.tag)); r.io.data := VecInit(cdb.map(_.bits.data))
+    r.io.loadReturn.foreach(_ := dc.io.loadReturn.get)
+    if(p.debug && p.bankedReturnMatch) {
+      assert(r.io.completed === cdb.map(c => c.valid && c.bits.tag === index.U(p.tagBits.W)).reduce(_ || _),"Banked ROB completion differs from selected completion")
+    }
   }
   val preparedCdb = Wire(Vec(3,Valid(new Completion(p))))
   preparedCdb := cdb
@@ -220,11 +234,14 @@ class Core(p: Config) extends Module {
     }
     when(xv && xt === i.U && (xd.load || xd.store) && badAddress) { fault(i) := true.B }
   }
-  val eligible = Wire(Vec(p.iq,Bool()))
+  val eligible = Wire(Vec(p.iq,Bool())); val issueAllowed = Wire(Vec(p.iq,Bool()))
   for(i <- 0 until p.iq) {
     val olderStore = (0 until p.rob).map(j => live(j) && stores(j) && !done(j) && before(j.U(p.tagBits.W),qtag(i))).reduce(_ || _)
-    eligible(i) := qvalid(i) && qar(i) && qbr(i) &&
+    issueAllowed(i) := qvalid(i) &&
       (!qd(i).load || (!olderStore && loadCredit)) && (!qd(i).muldiv || (md.io.req.ready && !(xv && xd.muldiv)))
+    eligible(i) := (if(p.localIssueEligibility) issueAllowed(i) && qar(i) && qbr(i) else
+      qvalid(i) && qar(i) && qbr(i) &&
+        (!qd(i).load || (!olderStore && loadCredit)) && (!qd(i).muldiv || (md.io.req.ready && !(xv && xd.muldiv))))
   }
   def oldest(xs: Seq[(Bool,UInt,UInt)]): (Bool,UInt,UInt) = {
     if(xs.size == 1) xs.head else {
@@ -237,10 +254,12 @@ class Core(p: Config) extends Module {
   val olderMasks = (0 until p.iq).map(i => VecInit((0 until p.iq).map(j => if(i==j) false.B else before(qtag(j),qtag(i)))).asUInt)
   def scheduled(xs: Seq[UInt], fallback: UInt): UInt = {
     val width = fallback.getWidth
-    Cat((0 until width by 32).reverse.map(low => {
-      val high = math.min(width-1,low+31)
-      val choice = Module(new IssueChoice(high-low+1,p.iq))
+    Cat((0 until width by p.issueSliceBits).reverse.map(low => {
+      val high = math.min(width-1,low+p.issueSliceBits-1)
+      val choice = Module(new IssueChoice(high-low+1,p.iq,p.localIssueEligibility))
       choice.io.eligible := eligible.asUInt; choice.io.older := VecInit(olderMasks)
+      choice.io.allowed.foreach(_ := issueAllowed.asUInt)
+      choice.io.readyA.foreach(_ := qar.asUInt); choice.io.readyB.foreach(_ := qbr.asUInt)
       choice.io.words := VecInit(xs.map(_(high,low))); choice.io.fallback := fallback(high,low)
       choice.io.value
     }))
@@ -258,13 +277,15 @@ class Core(p: Config) extends Module {
   val dispatch = fetch.io.out.fire
   fetch.io.out.ready := count < p.rob.U && !qvalid.asUInt.andR && !flush && !halted &&
     (!(d.branch || d.jal || d.jalr) || checkpointAvailable) && (!d.store || storeSpace)
-  def source(rs: UInt, used: Bool): (Bool,UInt,UInt) = {
+  def source(rs: UInt, used: Bool, prepareAddress: Boolean = false): (Bool,UInt,UInt,Option[UInt]) = {
     val tag = mapping(rs); val waiting = used && rs =/= 0.U && mapped(rs)
-    val operand = Module(new SourceOperand(p))
+    val operand = Module(new SourceOperand(p,prepareAddress))
     operand.io.used := used && rs =/= 0.U; operand.io.waiting := waiting; operand.io.completed := done(tag)
     operand.io.tag := tag; operand.io.architectural := Util.choose(rs,arch.toSeq); operand.io.producer := Util.choose(tag,values.toSeq)
     operand.io.completions := preparedCdb
-    (operand.io.ready,operand.io.data,tag)
+    operand.io.loadReturn.foreach(_ := dc.io.loadReturn.get)
+    operand.io.immediate.foreach(_ := d.imm)
+    (operand.io.ready,operand.io.data,tag,operand.io.address)
   }
   // Only stores reserve address/data slots; unrelated ROB instructions do
   // not carry 68 unused payload bits. Squash releases only younger owners.
@@ -278,7 +299,7 @@ class Core(p: Config) extends Module {
     when(dispatch && d.store && storeFree === i.U) { storeLive(i) := true.B; storeOwner(i) := tail }
     when(flush && storeLive(i) && (if(p.earlyRecovery) younger(storeOwner(i)) else true.B)) { storeLive(i) := false.B }
   }
-  val s1 = source(d.rs1,d.use1); val s2 = source(d.rs2,d.use2)
+  val s1 = source(d.rs1,d.use1,p.parallelDispatchAddress); val s2 = source(d.rs2,d.use2)
   val unknownStore = (0 until p.rob).map(i => live(i) && stores(i) && !done(i)).reduce(_ || _)
   val direct = dispatch && !winner._1 && xspace && s1._1 && s2._1 &&
     (!d.load || (!unknownStore && loadCredit)) && (!d.muldiv || (md.io.req.ready && !(xv && xd.muldiv)))
@@ -292,6 +313,9 @@ class Core(p: Config) extends Module {
   val preparedA = scheduled(qa.toSeq,s1._2)
   xaWord.io.data := preparedA
   addressWord.io.prepare := xspace; addressWord.io.base := preparedA; addressWord.io.immediate := preparedDecoded.imm
+  addressWord.io.direct.foreach { direct =>
+    direct.valid := !eligible.asUInt.orR; direct.bits := s1._4.get
+  }
   xbWord.io.data := scheduled(qb.toSeq,s2._2)
   xnWord.io.data := scheduled(qnext.toSeq,fetch.io.out.bits.next)
   xhWord.io.data := scheduled(qhistory.toSeq,fetch.io.out.bits.history)
@@ -316,6 +340,7 @@ class Core(p: Config) extends Module {
       op.io.prepare := !qvalid(i) && free === i.U
       op.io.initialData := source._2; op.io.initialTag := source._3; op.io.initialReady := source._1
       op.io.completions := preparedCdb
+      op.io.loadReturn.foreach(_ := dc.io.loadReturn.get)
     }
     when(!qvalid(i) && free === i.U) {
       qd(i) := d; qpc(i) := fetch.io.out.bits.pc; qtag(i) := tail
@@ -414,14 +439,19 @@ class StudentTop(p: Config) extends Module {
 object Generate extends App {
   val options = args.grouped(2).map { case Array(k,v) => k -> v }.toMap
   def n(key: String, default: Int): Int = options.get(key).map(_.toInt).getOrElse(default)
-  val supported = Set("--banked-load-payload","--banks","--btb-entries","--cache-hierarchy","--checkpoints","--dc-bytes","--debug","--early-recovery","--fast-redirect","--history-bits","--ic-bytes","--iq","--issue-width","--l0-entries","--l0-fill-stages","--l0-replacement","--l0-store-stages","--line-bytes","--load-entries","--prefetch","--prefetch-train-stages","--ram-read-ahead","--ras-write-stages","--registered-squash-mask","--rob","--store-entries","--store-slots","--trusted-load-credit","--ways","--out")
+  val supported = Set("--banked-load-payload","--banked-return-match","--banks","--btb-entries","--cache-hierarchy","--checkpoints","--dc-bytes","--debug","--div-step-bits","--div-result-cache","--early-recovery","--fast-redirect","--fetch-head-slice-bits","--history-bits","--ic-bytes","--iq","--issue-width","--issue-slice-bits","--l0-entries","--l0-fill-stages","--l0-replacement","--l0-store-stages","--line-bytes","--load-entries","--local-issue-eligibility","--parallel-dispatch-address","--prefetch","--prefetch-train-stages","--ram-read-ahead","--ras-write-stages","--registered-squash-mask","--rob","--store-entries","--store-slots","--trusted-load-credit","--ways","--out")
   require(options.keySet.subsetOf(supported),"Unknown CPU parameter: " + (options.keySet -- supported).mkString(", "))
   require(n("--issue-width",1) == 1,"Only single issue is supported")
   val defaults = Config()
   val p = Config(rob=n("--rob",defaults.rob),iq=n("--iq",defaults.iq),icBytes=n("--ic-bytes",defaults.icBytes),dcBytes=n("--dc-bytes",defaults.dcBytes),
     lineBytes=n("--line-bytes",defaults.lineBytes),ways=n("--ways",defaults.ways),debug=n("--debug",if(defaults.debug) 1 else 0) != 0,banks=n("--banks",defaults.banks),earlyRecovery=n("--early-recovery",if(defaults.earlyRecovery) 1 else 0) != 0,
     prefetch=n("--prefetch",if(defaults.prefetch) 1 else 0) != 0,btbEntries=n("--btb-entries",defaults.btbEntries),historyBits=n("--history-bits",defaults.historyBits),l0Entries=n("--l0-entries",defaults.l0Entries),
-    storeEntries=n("--store-entries",defaults.storeEntries),checkpoints=n("--checkpoints",defaults.checkpoints),fastRedirect=n("--fast-redirect",if(defaults.fastRedirect) 1 else 0) != 0,storeSlots=n("--store-slots",defaults.storeSlots),loadEntries=n("--load-entries",defaults.loadEntries),l0FillStages=n("--l0-fill-stages",defaults.l0FillStages),l0Replacement=n("--l0-replacement",defaults.l0Replacement),ramReadAhead=n("--ram-read-ahead",if(defaults.ramReadAhead) 1 else 0) != 0,l0StoreStages=n("--l0-store-stages",defaults.l0StoreStages),bankedLoadPayload=n("--banked-load-payload",if(defaults.bankedLoadPayload) 1 else 0) != 0,cacheHierarchy=n("--cache-hierarchy",if(defaults.cacheHierarchy) 1 else 0) != 0,prefetchTrainStages=n("--prefetch-train-stages",defaults.prefetchTrainStages),trustedLoadCredit=n("--trusted-load-credit",if(defaults.trustedLoadCredit) 1 else 0) != 0,rasWriteStages=n("--ras-write-stages",defaults.rasWriteStages),registeredSquashMask=n("--registered-squash-mask",if(defaults.registeredSquashMask) 1 else 0) != 0)
+    storeEntries=n("--store-entries",defaults.storeEntries),checkpoints=n("--checkpoints",defaults.checkpoints),fastRedirect=n("--fast-redirect",if(defaults.fastRedirect) 1 else 0) != 0,storeSlots=n("--store-slots",defaults.storeSlots),loadEntries=n("--load-entries",defaults.loadEntries),l0FillStages=n("--l0-fill-stages",defaults.l0FillStages),l0Replacement=n("--l0-replacement",defaults.l0Replacement),ramReadAhead=n("--ram-read-ahead",if(defaults.ramReadAhead) 1 else 0) != 0,l0StoreStages=n("--l0-store-stages",defaults.l0StoreStages),bankedLoadPayload=n("--banked-load-payload",if(defaults.bankedLoadPayload) 1 else 0) != 0,cacheHierarchy=n("--cache-hierarchy",if(defaults.cacheHierarchy) 1 else 0) != 0,prefetchTrainStages=n("--prefetch-train-stages",defaults.prefetchTrainStages),trustedLoadCredit=n("--trusted-load-credit",if(defaults.trustedLoadCredit) 1 else 0) != 0,rasWriteStages=n("--ras-write-stages",defaults.rasWriteStages),registeredSquashMask=n("--registered-squash-mask",if(defaults.registeredSquashMask) 1 else 0) != 0,
+    issueSliceBits=n("--issue-slice-bits",defaults.issueSliceBits),bankedReturnMatch=n("--banked-return-match",if(defaults.bankedReturnMatch) 1 else 0) != 0,
+    localIssueEligibility=n("--local-issue-eligibility",if(defaults.localIssueEligibility) 1 else 0) != 0,
+    fetchHeadSliceBits=n("--fetch-head-slice-bits",defaults.fetchHeadSliceBits),divStepBits=n("--div-step-bits",defaults.divStepBits),
+    divResultCache=n("--div-result-cache",if(defaults.divResultCache) 1 else 0) != 0,
+    parallelDispatchAddress=n("--parallel-dispatch-address",if(defaults.parallelDispatchAddress) 1 else 0) != 0)
   _root_.circt.stage.ChiselStage.emitSystemVerilogFile(new StudentTop(p), Array("--target-dir", options.getOrElse("--out","rtl")),
     Array("--disable-all-randomization", "--lowering-options=disallowLocalVariables,disallowPackedArrays"))
 }

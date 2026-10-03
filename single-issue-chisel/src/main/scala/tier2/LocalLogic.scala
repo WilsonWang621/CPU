@@ -28,14 +28,19 @@ class LocalWord(width: Int) extends LocalLogic {
   io.value := value
 }
 /** Prepare address alongside operands, before the load lookup stage. */
-class LocalAddress extends LocalLogic {
+class LocalAddress(directBypass: Boolean = false, debug: Boolean = false) extends LocalLogic {
   val io = IO(new Bundle {
     val prepare = Input(Bool()); val base = Input(UInt(32.W)); val immediate = Input(UInt(32.W))
+    val direct = if(directBypass) Some(Input(chisel3.util.Valid(UInt(32.W)))) else None
     val value = Output(UInt(32.W))
   })
   val value = Reg(UInt(32.W))
   val address = Util.add(io.base,io.immediate)
-  when(io.prepare) { value := address }
+  val prepared = if(directBypass) chisel3.util.MuxCase(address,Seq(io.direct.get.valid -> io.direct.get.bits)) else address
+  when(io.prepare) { value := prepared }
+  if(debug && directBypass) {
+    when(io.prepare && io.direct.get.valid) { assert(io.direct.get.bits === address,"Parallel dispatch address differs from selected base plus immediate") }
+  }
   io.value := value
 }
 class LocalCounter(width: Int) extends LocalLogic {
@@ -43,6 +48,14 @@ class LocalCounter(width: Int) extends LocalLogic {
   val value = RegInit(0.U(width.W))
   when(io.step) { value := value+1.U }
   when(io.clear) { value := 0.U }
+  io.value := value
+}
+/** A local ring pointer keeps a queue's read select near one payload slice. */
+class LocalQueueHead(entries: Int) extends LocalLogic {
+  require(entries >= 2)
+  val io = IO(new Bundle { val step = Input(Bool()); val value = Output(UInt(entries.W)) })
+  val value = RegInit(1.U(entries.W))
+  when(io.step) { value := chisel3.util.Cat(value(entries-2,0),value(entries-1)) }
   io.value := value
 }
 class LocalIndexedWord(width: Int, indexBits: Int, index: Int) extends LocalLogic {
@@ -53,13 +66,15 @@ class LocalIndexedWord(width: Int, indexBits: Int, index: Int) extends LocalLogi
   when(io.write && io.index === index.U) { value := io.data }
   io.value := value
 }
-class LocalResultWord(tagBits: Int, index: Int) extends LocalLogic {
+class LocalResultWord(p: Config, index: Int) extends LocalLogic {
   val io = IO(new Bundle {
-    val valid = Input(UInt(3.W)); val tags = Input(Vec(3,UInt(tagBits.W))); val data = Input(Vec(3,UInt(32.W)))
+    val valid = Input(UInt(3.W)); val tags = Input(Vec(3,UInt(p.tagBits.W))); val data = Input(Vec(3,UInt(32.W)))
+    val loadReturn = if(p.bankedReturnMatch) Some(Input(new BankedLoadReturn(p))) else None
     val completed = Output(Bool()); val value = Output(UInt(32.W))
   })
   val value = Reg(UInt(32.W))
-  val matches = (0 until 3).map(k => io.valid(k) && io.tags(k) === index.U)
+  val matches = (0 until 3).map(k => io.valid(k) && (if(k == 1 && p.bankedReturnMatch)
+    BankedLoadReturn.matches(io.loadReturn.get,index.U) else io.tags(k) === index.U))
   for(k <- 0 until 3) { when(matches(k)) { value := io.data(k) } }
   io.completed := matches.reduce(_ || _); io.value := value
 }

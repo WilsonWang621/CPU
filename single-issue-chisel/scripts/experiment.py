@@ -32,11 +32,18 @@ def save_summary(out, result):
 def main():
     a = argparse.ArgumentParser(description=__doc__)
     a.add_argument("name")
-    a.add_argument("--stage", type=int, choices=(1,2,3), default=1)
+    a.add_argument("--stage", type=int, choices=(1,2,3,4), default=1)
     baseline_parameters = json.loads((PROJECT/"baseline.json").read_text())["parameters"]
     for key, default in (("rob",16),("iq",8),("ic-bytes",4096),("dc-bytes",4096),("line-bytes",32),("ways",2),("banks",4),("early-recovery",1),("prefetch",1),("btb-entries",128),("history-bits",1),("l0-entries",0),("store-entries",0),("checkpoints",4),("fast-redirect",0),("store-slots",16),("load-entries",8),("debug",0),("l0-fill-stages",0),("l0-replacement",0),("ram-read-ahead",0),("l0-store-stages",0),("banked-load-payload",0),("cache-hierarchy",0),("prefetch-train-stages",0),("trusted-load-credit",0),("ras-write-stages",0),("registered-squash-mask",0)):
         a.add_argument("--"+key,type=int,default=baseline_parameters.get(key,default))
     a.add_argument("--jobs",type=int,default=8)
+    a.add_argument("--issue-slice-bits",type=int,choices=(8,16,32),default=baseline_parameters.get("issue-slice-bits",32))
+    a.add_argument("--banked-return-match",type=int,choices=(0,1),default=baseline_parameters.get("banked-return-match",0))
+    a.add_argument("--local-issue-eligibility",type=int,choices=(0,1),default=baseline_parameters.get("local-issue-eligibility",0))
+    a.add_argument("--fetch-head-slice-bits",type=int,choices=(0,16,32),default=baseline_parameters.get("fetch-head-slice-bits",0))
+    a.add_argument("--div-step-bits",type=int,choices=(1,2),default=baseline_parameters.get("div-step-bits",1))
+    a.add_argument("--div-result-cache",type=int,choices=(0,1),default=baseline_parameters.get("div-result-cache",0))
+    a.add_argument("--parallel-dispatch-address",type=int,choices=(0,1),default=baseline_parameters.get("parallel-dispatch-address",0))
     a.add_argument("--skip-correctness",action="store_true")
     a.add_argument("--skip-perf",action="store_true")
     a.add_argument("--skip-synth",action="store_true")
@@ -51,6 +58,13 @@ def main():
     out.mkdir(parents=True,exist_ok=True); build.mkdir(parents=True,exist_ok=True)
     config = {k:getattr(args,k.replace("-","_")) for k in ("rob","iq","ic-bytes","dc-bytes","line-bytes","ways","banks","early-recovery","prefetch","btb-entries","history-bits","l0-entries","store-entries","checkpoints","fast-redirect","store-slots","load-entries","debug","l0-fill-stages","l0-replacement","ram-read-ahead","l0-store-stages","banked-load-payload","cache-hierarchy","prefetch-train-stages","trusted-load-credit","ras-write-stages","registered-squash-mask")}
     config["issue-width"] = 1
+    config["issue-slice-bits"] = args.issue_slice_bits
+    config["banked-return-match"] = args.banked_return_match
+    config["local-issue-eligibility"] = args.local_issue_eligibility
+    config["fetch-head-slice-bits"] = args.fetch_head_slice_bits
+    config["div-step-bits"] = args.div_step_bits
+    config["div-result-cache"] = args.div_result_cache
+    config["parallel-dispatch-address"] = args.parallel_dispatch_address
     if args.stage > 1:
         prior = PROJECT/"reports"/("stage"+str(args.stage-1))
         summaries = [json.loads(p.read_text()) for p in prior.glob("*/summary.json")]
@@ -155,7 +169,7 @@ def main():
     t = result["synthesis"]
     result["tier2_pass"] = (not config.get("debug",0) and result["correctness"]["status"]=="passed" and result.get("ipc_geomean",0)>=0.845 and
         t.get("status")=="passed" and t["area_um2"]<=18000 and t["fmax_mhz"]>300)
-    result["stage_frequency_pass"] = result["tier2_pass"] and t["fmax_mhz"] >= {1:300,2:400,3:500}[args.stage]
+    result["stage_frequency_pass"] = result["tier2_pass"] and t["fmax_mhz"] >= {1:300,2:400,3:500,4:400}[args.stage]
     save_summary(out,result)
     print(json.dumps({k:v for k,v in result.items() if k not in ("performance","correctness")},indent=2),flush=True)
 

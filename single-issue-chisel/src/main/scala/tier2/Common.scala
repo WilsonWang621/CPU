@@ -8,8 +8,13 @@ case class Config(rob: Int = 32, iq: Int = 8, icBytes: Int = 4096,
                   issueWidth: Int = 1, debug: Boolean = false, banks: Int = 4, earlyRecovery: Boolean = true,
                   prefetch: Boolean = true, btbEntries: Int = 64, historyBits: Int = 1, l0Entries: Int = 32,
                   storeEntries: Int = 4, checkpoints: Int = 4, fastRedirect: Boolean = true, storeSlots: Int = 8,
-                  loadEntries: Int = 8, l0FillStages: Int = 1, l0Replacement: Int = 1, ramReadAhead: Boolean = false, l0StoreStages: Int = 1, bankedLoadPayload: Boolean = true, cacheHierarchy: Boolean = false, prefetchTrainStages: Int = 1, trustedLoadCredit: Boolean = true, rasWriteStages: Int = 1, registeredSquashMask: Boolean = true) {
+                  loadEntries: Int = 8, l0FillStages: Int = 1, l0Replacement: Int = 1, ramReadAhead: Boolean = false, l0StoreStages: Int = 1, bankedLoadPayload: Boolean = true, cacheHierarchy: Boolean = false, prefetchTrainStages: Int = 1, trustedLoadCredit: Boolean = true, rasWriteStages: Int = 1, registeredSquashMask: Boolean = true,
+                  issueSliceBits: Int = 32, bankedReturnMatch: Boolean = false, localIssueEligibility: Boolean = false, fetchHeadSliceBits: Int = 0,
+                  divStepBits: Int = 1, divResultCache: Boolean = false, parallelDispatchAddress: Boolean = false) {
   require(issueWidth == 1, "This architecture has one issue port")
+  require(Set(8,16,32).contains(issueSliceBits))
+  require(Set(0,16,32).contains(fetchHeadSliceBits))
+  require(Set(1,2).contains(divStepBits))
   require(rob >= 8 && isPow2(rob) && iq >= 2 && isPow2(iq))
   require(isPow2(icBytes) && isPow2(dcBytes) && isPow2(lineBytes))
   require(ways == 1 || ways == 2)
@@ -54,6 +59,16 @@ class LoadInfo(p: Config) extends Bundle {
 class LoadRequest(p: Config) extends Bundle { val addr = UInt(32.W); val info = new LoadInfo(p) }
 class BankRequest(p: Config) extends Bundle { val mem = new MemReq; val info = new LoadInfo(p) }
 class BankResponse(p: Config) extends Bundle { val rsp = new MemRsp; val info = new LoadInfo(p) }
+/** Owner tags are registered before hit/response arbitration. Only selected
+  * banks may wake consumers; data still comes from the original arbiter.
+  */
+class BankedLoadReturn(p: Config) extends Bundle {
+  val selected = Vec(p.banks,Bool()); val tags = Vec(p.banks,UInt(p.tagBits.W))
+}
+object BankedLoadReturn {
+  def matches(returned: BankedLoadReturn, tag: UInt): Bool =
+    returned.tags.indices.map(i => returned.selected(i) && returned.tags(i) === tag).reduce(_ || _)
+}
 class MemPort extends Bundle {
   val req = Decoupled(new MemReq)
   val rsp = Flipped(Decoupled(new MemRsp))
