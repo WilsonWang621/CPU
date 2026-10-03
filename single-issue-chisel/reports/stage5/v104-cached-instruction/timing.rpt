@@ -1,0 +1,215 @@
+Startpoint: _106556_ (rising edge-triggered flip-flop clocked by core_clock)
+Endpoint: c.operandsA_7/_688_
+          (rising edge-triggered flip-flop clocked by core_clock)
+Path Group: core_clock
+Path Type: max
+
+Fanout       Cap      Slew     Delay      Time   Description
+-------------------------------------------------------------------------------------
+                    0.0500    0.0000    0.0000   clock core_clock (rise edge)
+                              0.0000    0.0000   clock network delay (ideal)
+                    0.0500    0.0000    0.0000 ^ _106556_/CLK (DFFHQNx1_ASAP7_75t_R)
+   272  100.2396    0.6694    0.3936    0.3936 v _106556_/QN (DFFHQNx1_ASAP7_75t_R)
+                    0.6694    0.0000    0.3936 v _055961_/A (INVx1_ASAP7_75t_R)
+     7    2.5898    0.1376    0.1077    0.5013 ^ _055961_/Y (INVx1_ASAP7_75t_R)
+                    0.1376    0.0000    0.5013 ^ _069422_/A (NAND2xp33_ASAP7_75t_R)
+     1    0.5441    0.0312    0.0241    0.5255 v _069422_/Y (NAND2xp33_ASAP7_75t_R)
+                    0.0312    0.0000    0.5255 v _080919_/C (O2A1O1Ixp33_ASAP7_75t_R)
+     2    1.1006    0.0430    0.0293    0.5548 ^ _080919_/Y (O2A1O1Ixp33_ASAP7_75t_R)
+                    0.0430    0.0000    0.5548 ^ _096300_/D (NAND4xp25_ASAP7_75t_R)
+     2    0.6867    0.0559    0.0246    0.5794 v _096300_/Y (NAND4xp25_ASAP7_75t_R)
+                    0.0559    0.0000    0.5794 v _096301_/B (NOR2xp33_ASAP7_75t_R)
+   298  114.8406    2.8740    1.3497    1.9290 ^ _096301_/Y (NOR2xp33_ASAP7_75t_R)
+                    2.8740    0.0000    1.9290 ^ c.operandsA_7/_580_/A (NOR2xp33_ASAP7_75t_R)
+    32   13.9629    0.8496    1.1623    3.0914 v c.operandsA_7/_580_/Y (NOR2xp33_ASAP7_75t_R)
+                    0.8496    0.0000    3.0914 v c.operandsA_7/_650_/B2 (AOI221xp5_ASAP7_75t_R)
+     1    0.5588    0.1411    0.1075    3.1989 ^ c.operandsA_7/_650_/Y (AOI221xp5_ASAP7_75t_R)
+                    0.1411    0.0000    3.1989 ^ c.operandsA_7/_688_/D (DFFHQNx1_ASAP7_75t_R)
+                                        3.1989   data arrival time
+
+                    0.0500    2.0000    2.0000   clock core_clock (rise edge)
+                              0.0000    2.0000   clock network delay (ideal)
+                             -0.0500    1.9500   clock uncertainty
+                              0.0000    1.9500   clock reconvergence pessimism
+                                        1.9500 ^ c.operandsA_7/_688_/CLK (DFFHQNx1_ASAP7_75t_R)
+                             -0.0174    1.9326   library setup time
+                                        1.9326   data required time
+-------------------------------------------------------------------------------------
+                                        1.9326   data required time
+                                       -3.1989   data arrival time
+-------------------------------------------------------------------------------------
+                                       -1.2663   slack (VIOLATED)
+
+
+Startpoint: _106556_ (rising edge-triggered flip-flop clocked by core_clock)
+Endpoint: c.operandsB_7/_688_
+          (rising edge-triggered flip-flop clocked by core_clock)
+Path Group: core_clock
+Path Type: max
+
+Fanout       Cap      Slew     Delay      Time   Description
+-------------------------------------------------------------------------------------
+                    0.0500    0.0000    0.0000   clock core_clock (rise edge)
+                              0.0000    0.0000   clock network delay (ideal)
+                    0.0500    0.0000    0.0000 ^ _106556_/CLK (DFFHQNx1_ASAP7_75t_R)
+   272  100.2396    0.6694    0.3936    0.3936 v _106556_/QN (DFFHQNx1_ASAP7_75t_R)
+                    0.6694    0.0000    0.3936 v _055961_/A (INVx1_ASAP7_75t_R)
+     7    2.5898    0.1376    0.1077    0.5013 ^ _055961_/Y (INVx1_ASAP7_75t_R)
+                    0.1376    0.0000    0.5013 ^ _069422_/A (NAND2xp33_ASAP7_75t_R)
+     1    0.5441    0.0312    0.0241    0.5255 v _069422_/Y (NAND2xp33_ASAP7_75t_R)
+                    0.0312    0.0000    0.5255 v _080919_/C (O2A1O1Ixp33_ASAP7_75t_R)
+     2    1.1006    0.0430    0.0293    0.5548 ^ _080919_/Y (O2A1O1Ixp33_ASAP7_75t_R)
+                    0.0430    0.0000    0.5548 ^ _096300_/D (NAND4xp25_ASAP7_75t_R)
+     2    0.6867    0.0559    0.0246    0.5794 v _096300_/Y (NAND4xp25_ASAP7_75t_R)
+                    0.0559    0.0000    0.5794 v _096301_/B (NOR2xp33_ASAP7_75t_R)
+   298  114.8406    2.8740    1.3497    1.9290 ^ _096301_/Y (NOR2xp33_ASAP7_75t_R)
+                    2.8740    0.0000    1.9290 ^ c.operandsB_7/_580_/A (NOR2xp33_ASAP7_75t_R)
+    32   13.9629    0.8496    1.1623    3.0914 v c.operandsB_7/_580_/Y (NOR2xp33_ASAP7_75t_R)
+                    0.8496    0.0000    3.0914 v c.operandsB_7/_650_/B2 (AOI221xp5_ASAP7_75t_R)
+     1    0.5588    0.1411    0.1075    3.1989 ^ c.operandsB_7/_650_/Y (AOI221xp5_ASAP7_75t_R)
+                    0.1411    0.0000    3.1989 ^ c.operandsB_7/_688_/D (DFFHQNx1_ASAP7_75t_R)
+                                        3.1989   data arrival time
+
+                    0.0500    2.0000    2.0000   clock core_clock (rise edge)
+                              0.0000    2.0000   clock network delay (ideal)
+                             -0.0500    1.9500   clock uncertainty
+                              0.0000    1.9500   clock reconvergence pessimism
+                                        1.9500 ^ c.operandsB_7/_688_/CLK (DFFHQNx1_ASAP7_75t_R)
+                             -0.0174    1.9326   library setup time
+                                        1.9326   data required time
+-------------------------------------------------------------------------------------
+                                        1.9326   data required time
+                                       -3.1989   data arrival time
+-------------------------------------------------------------------------------------
+                                       -1.2663   slack (VIOLATED)
+
+
+Startpoint: _106556_ (rising edge-triggered flip-flop clocked by core_clock)
+Endpoint: c.operandsA_6/_688_
+          (rising edge-triggered flip-flop clocked by core_clock)
+Path Group: core_clock
+Path Type: max
+
+Fanout       Cap      Slew     Delay      Time   Description
+-------------------------------------------------------------------------------------
+                    0.0500    0.0000    0.0000   clock core_clock (rise edge)
+                              0.0000    0.0000   clock network delay (ideal)
+                    0.0500    0.0000    0.0000 ^ _106556_/CLK (DFFHQNx1_ASAP7_75t_R)
+   272  100.2396    0.6694    0.3936    0.3936 v _106556_/QN (DFFHQNx1_ASAP7_75t_R)
+                    0.6694    0.0000    0.3936 v _055961_/A (INVx1_ASAP7_75t_R)
+     7    2.5898    0.1376    0.1077    0.5013 ^ _055961_/Y (INVx1_ASAP7_75t_R)
+                    0.1376    0.0000    0.5013 ^ _069422_/A (NAND2xp33_ASAP7_75t_R)
+     1    0.5441    0.0312    0.0241    0.5255 v _069422_/Y (NAND2xp33_ASAP7_75t_R)
+                    0.0312    0.0000    0.5255 v _080919_/C (O2A1O1Ixp33_ASAP7_75t_R)
+     2    1.1006    0.0430    0.0293    0.5548 ^ _080919_/Y (O2A1O1Ixp33_ASAP7_75t_R)
+                    0.0430    0.0000    0.5548 ^ _080920_/A (INVx1_ASAP7_75t_R)
+     2    0.9762    0.0167    0.0152    0.5700 v _080920_/Y (INVx1_ASAP7_75t_R)
+                    0.0167    0.0000    0.5700 v _096209_/C (NOR3xp33_ASAP7_75t_R)
+   299  115.3070    2.8658    1.3439    1.9139 ^ _096209_/Y (NOR3xp33_ASAP7_75t_R)
+                    2.8658    0.0000    1.9139 ^ c.operandsA_6/_580_/A (NOR2xp33_ASAP7_75t_R)
+    32   13.9629    0.8480    1.1594    3.0733 v c.operandsA_6/_580_/Y (NOR2xp33_ASAP7_75t_R)
+                    0.8480    0.0000    3.0733 v c.operandsA_6/_650_/B2 (AOI221xp5_ASAP7_75t_R)
+     1    0.5588    0.1409    0.1074    3.1807 ^ c.operandsA_6/_650_/Y (AOI221xp5_ASAP7_75t_R)
+                    0.1409    0.0000    3.1807 ^ c.operandsA_6/_688_/D (DFFHQNx1_ASAP7_75t_R)
+                                        3.1807   data arrival time
+
+                    0.0500    2.0000    2.0000   clock core_clock (rise edge)
+                              0.0000    2.0000   clock network delay (ideal)
+                             -0.0500    1.9500   clock uncertainty
+                              0.0000    1.9500   clock reconvergence pessimism
+                                        1.9500 ^ c.operandsA_6/_688_/CLK (DFFHQNx1_ASAP7_75t_R)
+                             -0.0174    1.9326   library setup time
+                                        1.9326   data required time
+-------------------------------------------------------------------------------------
+                                        1.9326   data required time
+                                       -3.1807   data arrival time
+-------------------------------------------------------------------------------------
+                                       -1.2481   slack (VIOLATED)
+
+
+Startpoint: _106556_ (rising edge-triggered flip-flop clocked by core_clock)
+Endpoint: c.operandsB_6/_688_
+          (rising edge-triggered flip-flop clocked by core_clock)
+Path Group: core_clock
+Path Type: max
+
+Fanout       Cap      Slew     Delay      Time   Description
+-------------------------------------------------------------------------------------
+                    0.0500    0.0000    0.0000   clock core_clock (rise edge)
+                              0.0000    0.0000   clock network delay (ideal)
+                    0.0500    0.0000    0.0000 ^ _106556_/CLK (DFFHQNx1_ASAP7_75t_R)
+   272  100.2396    0.6694    0.3936    0.3936 v _106556_/QN (DFFHQNx1_ASAP7_75t_R)
+                    0.6694    0.0000    0.3936 v _055961_/A (INVx1_ASAP7_75t_R)
+     7    2.5898    0.1376    0.1077    0.5013 ^ _055961_/Y (INVx1_ASAP7_75t_R)
+                    0.1376    0.0000    0.5013 ^ _069422_/A (NAND2xp33_ASAP7_75t_R)
+     1    0.5441    0.0312    0.0241    0.5255 v _069422_/Y (NAND2xp33_ASAP7_75t_R)
+                    0.0312    0.0000    0.5255 v _080919_/C (O2A1O1Ixp33_ASAP7_75t_R)
+     2    1.1006    0.0430    0.0293    0.5548 ^ _080919_/Y (O2A1O1Ixp33_ASAP7_75t_R)
+                    0.0430    0.0000    0.5548 ^ _080920_/A (INVx1_ASAP7_75t_R)
+     2    0.9762    0.0167    0.0152    0.5700 v _080920_/Y (INVx1_ASAP7_75t_R)
+                    0.0167    0.0000    0.5700 v _096209_/C (NOR3xp33_ASAP7_75t_R)
+   299  115.3070    2.8658    1.3439    1.9139 ^ _096209_/Y (NOR3xp33_ASAP7_75t_R)
+                    2.8658    0.0000    1.9139 ^ c.operandsB_6/_580_/A (NOR2xp33_ASAP7_75t_R)
+    32   13.9629    0.8480    1.1594    3.0733 v c.operandsB_6/_580_/Y (NOR2xp33_ASAP7_75t_R)
+                    0.8480    0.0000    3.0733 v c.operandsB_6/_650_/B2 (AOI221xp5_ASAP7_75t_R)
+     1    0.5588    0.1409    0.1074    3.1807 ^ c.operandsB_6/_650_/Y (AOI221xp5_ASAP7_75t_R)
+                    0.1409    0.0000    3.1807 ^ c.operandsB_6/_688_/D (DFFHQNx1_ASAP7_75t_R)
+                                        3.1807   data arrival time
+
+                    0.0500    2.0000    2.0000   clock core_clock (rise edge)
+                              0.0000    2.0000   clock network delay (ideal)
+                             -0.0500    1.9500   clock uncertainty
+                              0.0000    1.9500   clock reconvergence pessimism
+                                        1.9500 ^ c.operandsB_6/_688_/CLK (DFFHQNx1_ASAP7_75t_R)
+                             -0.0174    1.9326   library setup time
+                                        1.9326   data required time
+-------------------------------------------------------------------------------------
+                                        1.9326   data required time
+                                       -3.1807   data arrival time
+-------------------------------------------------------------------------------------
+                                       -1.2481   slack (VIOLATED)
+
+
+Startpoint: _106556_ (rising edge-triggered flip-flop clocked by core_clock)
+Endpoint: c.operandsA_7/_657_
+          (rising edge-triggered flip-flop clocked by core_clock)
+Path Group: core_clock
+Path Type: max
+
+Fanout       Cap      Slew     Delay      Time   Description
+-------------------------------------------------------------------------------------
+                    0.0500    0.0000    0.0000   clock core_clock (rise edge)
+                              0.0000    0.0000   clock network delay (ideal)
+                    0.0500    0.0000    0.0000 ^ _106556_/CLK (DFFHQNx1_ASAP7_75t_R)
+   272  100.2396    0.6694    0.3936    0.3936 v _106556_/QN (DFFHQNx1_ASAP7_75t_R)
+                    0.6694    0.0000    0.3936 v _055961_/A (INVx1_ASAP7_75t_R)
+     7    2.5898    0.1376    0.1077    0.5013 ^ _055961_/Y (INVx1_ASAP7_75t_R)
+                    0.1376    0.0000    0.5013 ^ _069422_/A (NAND2xp33_ASAP7_75t_R)
+     1    0.5441    0.0312    0.0241    0.5255 v _069422_/Y (NAND2xp33_ASAP7_75t_R)
+                    0.0312    0.0000    0.5255 v _080919_/C (O2A1O1Ixp33_ASAP7_75t_R)
+     2    1.1006    0.0430    0.0293    0.5548 ^ _080919_/Y (O2A1O1Ixp33_ASAP7_75t_R)
+                    0.0430    0.0000    0.5548 ^ _096300_/D (NAND4xp25_ASAP7_75t_R)
+     2    0.6867    0.0559    0.0246    0.5794 v _096300_/Y (NAND4xp25_ASAP7_75t_R)
+                    0.0559    0.0000    0.5794 v _096301_/B (NOR2xp33_ASAP7_75t_R)
+   298  114.8406    2.8740    1.3497    1.9290 ^ _096301_/Y (NOR2xp33_ASAP7_75t_R)
+                    2.8740    0.0000    1.9290 ^ c.operandsA_7/_580_/A (NOR2xp33_ASAP7_75t_R)
+    32   13.9629    0.8496    1.1623    3.0914 v c.operandsA_7/_580_/Y (NOR2xp33_ASAP7_75t_R)
+                    0.8496    0.0000    3.0914 v c.operandsA_7/_643_/A2 (AOI221xp5_ASAP7_75t_R)
+     1    0.5588    0.1285    0.0805    3.1718 ^ c.operandsA_7/_643_/Y (AOI221xp5_ASAP7_75t_R)
+                    0.1285    0.0000    3.1718 ^ c.operandsA_7/_657_/D (DFFHQNx1_ASAP7_75t_R)
+                                        3.1718   data arrival time
+
+                    0.0500    2.0000    2.0000   clock core_clock (rise edge)
+                              0.0000    2.0000   clock network delay (ideal)
+                             -0.0500    1.9500   clock uncertainty
+                              0.0000    1.9500   clock reconvergence pessimism
+                                        1.9500 ^ c.operandsA_7/_657_/CLK (DFFHQNx1_ASAP7_75t_R)
+                             -0.0169    1.9331   library setup time
+                                        1.9331   data required time
+-------------------------------------------------------------------------------------
+                                        1.9331   data required time
+                                       -3.1718   data arrival time
+-------------------------------------------------------------------------------------
+                                       -1.2387   slack (VIOLATED)
+
+

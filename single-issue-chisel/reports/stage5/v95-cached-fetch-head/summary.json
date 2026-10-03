@@ -1,0 +1,101 @@
+{
+  "stage": 5,
+  "experiment": "v95-cached-fetch-head",
+  "parameters": {
+    "rob": 32,
+    "iq": 8,
+    "ic-bytes": 4096,
+    "dc-bytes": 4096,
+    "line-bytes": 64,
+    "ways": 2,
+    "banks": 4,
+    "early-recovery": 1,
+    "prefetch": 1,
+    "btb-entries": 64,
+    "history-bits": 1,
+    "l0-entries": 32,
+    "store-entries": 4,
+    "checkpoints": 4,
+    "fast-redirect": 1,
+    "store-slots": 8,
+    "load-entries": 8,
+    "debug": 0,
+    "l0-fill-stages": 1,
+    "l0-replacement": 1,
+    "ram-read-ahead": 0,
+    "l0-store-stages": 1,
+    "banked-load-payload": 1,
+    "cache-hierarchy": 0,
+    "prefetch-train-stages": 1,
+    "trusted-load-credit": 1,
+    "ras-write-stages": 1,
+    "registered-squash-mask": 1,
+    "issue-width": 1,
+    "issue-slice-bits": 16,
+    "banked-return-match": 0,
+    "local-issue-eligibility": 0,
+    "fetch-head-slice-bits": 0,
+    "div-step-bits": 1,
+    "div-result-cache": 0,
+    "parallel-dispatch-address": 0,
+    "cached-fetch-head": 1
+  },
+  "rtl_sha256": "5dc38ff92551da2175c468053827be9b1d6d9b2584f8028d2d88c6c2c3a0602f",
+  "performance": [
+    {
+      "case": "perf_median",
+      "passed": true,
+      "cycles": 8527,
+      "instructions": 6961,
+      "ipc": 0.816348070833822
+    },
+    {
+      "case": "perf_multiply",
+      "passed": true,
+      "cycles": 23421,
+      "instructions": 21722,
+      "ipc": 0.9274582639511549
+    },
+    {
+      "case": "perf_qsort",
+      "passed": true,
+      "cycles": 170728,
+      "instructions": 139900,
+      "ipc": 0.8194320790965747
+    },
+    {
+      "case": "perf_rsort",
+      "passed": true,
+      "cycles": 234842,
+      "instructions": 195719,
+      "ipc": 0.8334071418230129
+    },
+    {
+      "case": "perf_towers",
+      "passed": true,
+      "cycles": 6291,
+      "instructions": 5278,
+      "ipc": 0.8389763153711651
+    },
+    {
+      "case": "perf_vvadd",
+      "passed": true,
+      "cycles": 5352,
+      "instructions": 4524,
+      "ipc": 0.8452914798206278
+    }
+  ],
+  "correctness": {
+    "status": "not_run"
+  },
+  "synthesis": {
+    "status": "passed",
+    "fmax_mhz": 327.9948750800769,
+    "area_um2": 17846.613439999506
+  },
+  "tier2_pass": false,
+  "simulator_sha256": "1c787b81259a47767f04a6a96166c4dd802f84102bbee4a6f36a57686d89548b",
+  "ipc_geomean": 0.8460240058706379,
+  "stage_frequency_pass": false,
+  "decision": "rejected_no_improvement"
+}
