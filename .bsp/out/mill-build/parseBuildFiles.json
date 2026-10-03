@@ -1,0 +1,15 @@
+{
+    "value": {
+        "seenScripts": [
+            [
+                "/home/tangz/CPU/build.mill",
+                "//| mill-jvm-version: system\n\n\nimport mill._\nimport mill.scalalib._\n\nobject chisel extends ScalaModule {\n  def sources = Task.Sources(mill.api.BuildCtx.workspaceRoot / \"src\")\n  def scalaVersion = \"2.13.18\"\n  def chiselVersion = \"7.7.0\" // Includes the resolver for firtool 1.139.0.\n\n  def mvnDeps = Seq(mvn\"org.chipsalliance::chisel:$chiselVersion\")\n  def scalacPluginMvnDeps = Seq(mvn\"org.chipsalliance:::chisel-plugin:$chiselVersion\")\n  def scalacOptions = Seq(\"-deprecation\", \"-feature\", \"-unchecked\", \"-language:reflectiveCalls\")\n  def mainClass = Some(\"cpu2026.Generate\")\n  def forkArgs = Seq(s\"-Dchisel.project.root=${mill.api.BuildCtx.workspaceRoot}\")\n}"
+            ]
+        ]
+    },
+    "valueHash": 1826118201,
+    "inputsHash": -2110908087,
+    "millVersion": "1.1.2",
+    "millJvmVersion": "21.0.12.1",
+    "classLoaderSigHash": 613590218
+}

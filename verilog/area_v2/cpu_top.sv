@@ -86,6 +86,9 @@ module cpu_top #(
   logic [31:0] source_result [4],source_architectural [4];
   logic [5:0] source_status [4];
   issue_t queue [3][IQ_ENTRIES],dispatch_payload[2];
+  logic [31:0] memory_address_q [IQ_ENTRIES];
+  wire [IQ_ENTRIES*32-1:0] memory_address_words;
+  wire [IQ_ENTRIES-1:0] issue_grant [3];
   store_t stores [STORE_SLOTS];
   load_t loads [LOAD_SLOTS];
   rid_t head,tail;
@@ -310,21 +313,25 @@ module cpu_top #(
   for(genvar bank=0;bank<3;bank=bank+1) begin: balanced_selection
     wire [IQ_ENTRIES*ISSUE_BITS-1:0] payloads;
     wire [ISSUE_BITS-1:0] selected_payload;
+    wire [IQ_ENTRIES-1:0] allocated;
     for(genvar q=0;q<IQ_ENTRIES;q=q+1) begin: candidate
       assign select_ready[bank][q]=queue[bank][q].valid && (bank==2 || (queue[bank][q].ready_a && queue[bank][q].ready_b));
       assign select_owner[bank][q*(RW+1)+:(RW+1)]={queue[bank][q].generation,queue[bank][q].rid};
       assign payloads[q*ISSUE_BITS+:ISSUE_BITS]=queue[bank][q];
+      assign allocated[q]=(dispatch_valid[0] && dispatch_bank[0]==2'(bank) && dispatch_index[0]==QW'(q)) ||
+                          (dispatch_valid[1] && dispatch_bank[1]==2'(bank) && dispatch_index[1]==QW'(q));
     end
-    v2_select #(.ENTRIES(IQ_ENTRIES),.SLOT_BITS(RW+1),.EXTENDED_ORDER(1)) choose (
-      .ready(select_ready[bank]),.owner(select_owner[bank]),.rob_head({(RW+1){1'b0}}),.valid(selected_valid[bank]),.index(selected[bank]));
+    v2_issue_order #(.ENTRIES(IQ_ENTRIES)) choose (
+      .clk,.rst,.allocate(allocated),.ready(select_ready[bank]),.grant(issue_grant[bank]),
+      .valid(selected_valid[bank]),.index(selected[bank]));
     for(genvar first=0;first<ISSUE_BITS;first=first+32) begin: read_payload
       wire [IQ_ENTRIES*(ISSUE_BITS-first<32 ? ISSUE_BITS-first:32)-1:0] slice_words;
       for(genvar row=0;row<IQ_ENTRIES;row=row+1) begin: slice_row
         assign slice_words[row*(ISSUE_BITS-first<32 ? ISSUE_BITS-first:32)+:(ISSUE_BITS-first<32 ? ISSUE_BITS-first:32)]=
           payloads[row*ISSUE_BITS+first+:(ISSUE_BITS-first<32 ? ISSUE_BITS-first:32)];
       end
-      v2_iq_read #(.ENTRIES(IQ_ENTRIES),.WORD_BITS(ISSUE_BITS-first<32 ? ISSUE_BITS-first:32)) read_slice (
-        .index(selected[bank]),.words(slice_words),.value(selected_payload[first+:(ISSUE_BITS-first<32 ? ISSUE_BITS-first:32)]));
+      v2_issue_read #(.ENTRIES(IQ_ENTRIES),.WORD_BITS(ISSUE_BITS-first<32 ? ISSUE_BITS-first:32)) read_slice (
+        .grant(issue_grant[bank]),.words(slice_words),.value(selected_payload[first+:(ISSUE_BITS-first<32 ? ISSUE_BITS-first:32)]));
     end
     assign executing[bank]=selected_payload;
     assign select_valid[bank]=selected_valid[bank] && (bank!=2 || (executing[bank].ready_a && executing[bank].ready_b));
@@ -362,9 +369,12 @@ module cpu_top #(
   // register. A resolving branch cannot retire before this recovery cycle.
   assign branch_capture=select_valid[0] && is_branch(executing[0].op) &&
                         !flush_all && !mdu_result_valid && !younger(executing[0].rid);
+  logic branch_redirect_q;
   always_ff @(posedge clk) begin
     if(rst) branch_pending<=0;
     else branch_pending<=branch_capture;
+    if(rst) branch_redirect_q<=0;
+    else branch_redirect_q<=branch_capture && !branch_bad && branch_next!={executing[0].prediction,2'b0};
     branch_bad_q<=branch_bad;branch_taken_q<=branch_taken;
     branch_next_q<=branch_next;branch_pc_q<=execute_pc[0];
     branch_prediction_q<=executing[0].prediction;
@@ -374,7 +384,7 @@ module cpu_top #(
     branch_op_q<=executing[0].op;
   end
   assign branch_fire=branch_pending && !flush_all;
-  assign redirect=branch_fire && !branch_bad_q && branch_next_q!={branch_prediction_q,2'b0};
+  assign redirect=branch_redirect_q && !flush_all;
   assign redirect_pc=branch_next_q;
   assign redirect_rid=branch_rid_q;
   assign redirect_checkpoint=branch_checkpoint_q;
@@ -386,7 +396,11 @@ module cpu_top #(
   assign mdu_valid=select_valid[0] && is_mdu(executing[0].op) && !flush_all &&
                    !mdu_result_valid && !younger(executing[0].rid);
   assign mdu_result_ready=!flush_all;
-  assign memory_address=executing[2].a+executing[2].imm;
+  for(genvar q=0;q<IQ_ENTRIES;q=q+1) begin: prepared_memory_address
+    assign memory_address_words[q*32+:32]=memory_address_q[q];
+  end
+  v2_issue_read #(.ENTRIES(IQ_ENTRIES),.WORD_BITS(32)) read_memory_address (
+    .grant(issue_grant[2]),.words(memory_address_words),.value(memory_address));
   assign memory_data=executing[2].b<<(8*memory_address[1:0]);
   assign memory_mask=(executing[2].size==0 ? 4'b0001:executing[2].size==1 ? 4'b0011:4'b1111)<<memory_address[1:0];
   assign memory_exit=executing[2].op==OP_STORE && memory_address==32'h80000000 && executing[2].size==2;
@@ -653,6 +667,16 @@ module cpu_top #(
       always_ff @(posedge clk) begin
         queue[bank][q].ready_a<=next_ready_a;queue[bank][q].a<=next_value_a;
         queue[bank][q].ready_b<=next_ready_b;queue[bank][q].b<=next_value_b;
+      end
+      if(bank==2) begin: address_preparation
+        wire [31:0] next_immediate=queue[bank][q].valid ? queue[bank][q].imm:
+          prepare_lane[1] ? dispatch_payload[1].imm:dispatch_payload[0].imm;
+        wire [31:0] next_address;
+        v2_address_add add_address (.a(next_value_a),.b(next_immediate),.value(next_address));
+        // Compute with the same forwarded operand that becomes ready at this
+        // edge. Selection can read an address without another carry chain.
+        always_ff @(posedge clk)
+          memory_address_q[q]<=next_address;
       end
       always_ff @(posedge clk) begin
         if(rst) queue[bank][q].valid<=0;
