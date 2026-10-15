@@ -1,0 +1,40 @@
+name: Validate RTL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install RTL tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y iverilog verilator
+
+      - name: Check deterministic Verilog export
+        run: |
+          make export-verilog
+          git diff --exit-code -- verilog/area_v2_core.v verilog/area_v2_core.json
+
+      - name: Run RTL unit checks
+        run: make verify-rtl
+
+      - name: Build default simulator
+        run: make build CONFIG=/dev/null APPIMAGE= VERILATOR=verilator BUILD=build/ci JOBS=2
+
+      - name: Check high memory addresses
+        run: make run SIM=build/ci/sim PROGRAM=tests/rtl/high_address.data EXPECTED=0x40100 LATENCY=20 MAX_CYCLES=100000

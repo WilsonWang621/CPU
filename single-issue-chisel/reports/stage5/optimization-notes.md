@@ -54,9 +54,7 @@ IPC 几何平均为 **0.8460240059**，超过 0.845 门槛。完整正确性、�
 - [取指队列独立验证](../validation/prepared-queue/result.json)：8/8 配置，2/8 项队列 × flow 关闭/开启 × 完整/部分头部缓存，1,613,830 周期、1,369,396 次完整 98 位 FIFO 数据核对；覆盖空满、同时入出队、回绕、随机背压、每种占用下的 reset/redirect 和全部合法占用/事务组合。当前 `PreparedQueue.scala` 与冻结验证哈希一致。
 - [临时结果独立验证](../validation/prepared-result/result.json)：真实 LocalResultWord 与 CacheOwner，8/16/32 位分片共 184,527 周期、7,565,630 次已发布结果核对；覆盖所有 32 个 ROB 行、垃圾数据准备、完成后冻结、并发不同生产者、分支取消、dead owner、tag 复用及 prefetch。该选项默认关闭，测试不声称覆盖整个缓存 SRAM 或整核。
 
-## 参考与剩余瓶颈
-
-通过 GitHub 连接器复核用户指定 [Galuisss/ACM-CPU](https://github.com/Galuisss/ACM-CPU/tree/43e5a967828d80f73a1e1918054fbab36fc5775b) 的默认 `perf-redesign` 分支，仍为 `43e5a967828d80f73a1e1918054fbab36fc5775b`，与阶段 4 相同；重新读取调度报告、年龄矩阵与核心源码，文件哈希在 [reference-acm-cpu.json](reference-acm-cpu.json)。采用其成对年龄矩阵思路作为实验，随后按本项目实测路径自主设计取指头部预存、结果准备与数据/就绪结构。上游双整数端口及独立访存端口的 IPC 不作为本单发射核的测量。
+## 剩余瓶颈
 
 v94 的最差路径起于取指队列 head，经寄存器索引、重命名和 ROB 数据选择到地址加法。取指预存去掉该选择边界后，v95 暴露返回 tag 的扇出和 ROB 完成路径；组合 bank 归属匹配后，v109 的最差终点仍为地址寄存器，路径经过 Load 返回数据、SourceOperand 旁路和地址加法。原默认 STA 最小周期为 **2.9228515625 ns**，距 400 MHz 的 2.5 ns 仍需约 **14.47%** 的压缩。时钟仍为理想模型、无布线寄生，频率为课程综合/STA 流程的结果。
 

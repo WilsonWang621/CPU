@@ -1,69 +1,54 @@
 # ParaRisc
 
-当前默认实现已换成 Area-v2 结构的普通 Verilog CPU，顶层为 [`verilog/student_top.sv`](verilog/student_top.sv)，
-核心为 [`verilog/area_v2_core.v`](verilog/area_v2_core.v)。采用独立发射队列、树形仲裁、ROB 槽号重命名、
-分支检查点和非阻塞缓存，支持 AXI4-Lite、256 MiB 地址空间和退出响应处理。
+RV32IM CPU 工程。根目录为双发射 Verilog 实现，[single-issue-chisel/](single-issue-chisel/README.md) 独立保留单发射 Chisel 实现及其复现实验。
 
-## 双发射 500 MHz 验收结果
+## 当前默认版本
 
-当前默认文件独立实测 **503.69 MHz、35900.33 μm²**，IPC几何平均为 **1.222171（延迟10）/ 1.113846（延迟20）**。
-保留32项ROB、双发射/双提交及2 KiB数据缓存，恢复、ROB、Cache、写回和地址选择使用保留层次的反相器分发树。
-完整RTL单元、六项性能、高地址检查及默认AppImage的 **19/19正确性** 均已通过，满足本地 **Tier3及500 MHz目标**。
-详见[最终默认实现验收](reports/frequency-stage10.md)及[测量与验证证据](reports/data/2026-10-16/timing-stage10/clean-default/)。
-官方`302f0cf`的综合器更新已同步并在本轮复核，见[同步记录](reports/upstream-sync-2026-10-15.md)。
+默认顶层为 [verilog/student_top.sv](verilog/student_top.sv)，交付核心为 [verilog/area_v2_core.v](verilog/area_v2_core.v)，使用 [verilog/filelist.f](verilog/filelist.f)。
 
-## 双发射旧流程基准
-
-2026-10-03 固定的 v42，更新前的原样 `make synth`：
-
-| 指标 | 结果 |
+| 指标 | 最终验收结果 |
 | --- | ---: |
-| 默认综合频率 | **205.746 MHz** |
-| 总面积 | **32,388.245 μm²** |
-| 性能 IPC 几何平均（延迟 20） | **1.113846** |
-| 正确性 / 性能 | **19/19 / 6/6** |
-| 完整 RTL 定向检查 | 通过 |
+| 默认综合频率 | **503.69 MHz** |
+| 总面积 | **35,900.33 μm²** |
+| IPC 几何平均，内存延迟 10 / 20 | **1.222171 / 1.113846** |
+| 完整正确性 | **19/19** |
+| 性能、RTL 单元及高地址检查 | 全部通过 |
 
-该旧流程未达到 300 MHz。历史 368.27 MHz 来自额外物理缓冲流程，不能作为默认综合成绩。
-旧流程证据见 [阶段 6 报告](reports/frequency-stage6.md) 和
-[固定基准](reports/data/2026-10-02/timing-stage6/final-baseline.json)。
+配置为 32 项 ROB、双分派/双提交、两个整数端口及独立访存端口、三组 4 项 IQ、三个分支检查点、8 个 Load 槽和 16 个 Store 槽，I-cache 1 KiB、D-cache 2 KiB。已完成本地 Tier3 和 500 MHz 目标验收。
 
-单发射 Chisel 实现位于独立目录 [single-issue-chisel](single-issue-chisel/README.md)。最终默认 v109：原样综合 **342.13 MHz**、总面积 **17,942.62 μm²（含 SRAM）**、延迟 20 的几何平均 IPC **0.84602**，正确性 **19/19**，满足 Tier2。阶段 5 将取指队列头部预存与逐 bank 返回归属匹配、局部发射就绪组合，相对 v94 的 332.14 MHz 提升 **3.01%**，六项性能周期不变；400/500 MHz 仍未达到。参考方法、参数/性能对照及未采用尝试见该目录的 `reports/stage1` 至 `stage5`。
-
-Tier2 门槛：
-面积 ≤18,000 μm²、IPC ≥0.845、原样综合频率 >300 MHz。新核达标状态以该目录的实际验收记录为准。
+实测条件、精确值及输入哈希见 [最终验收报告](reports/dual-issue/frequency-stage10.md)，原始证据见 [最终测量归档](reports/data/2026-10-16/timing-stage10/clean-default/)。单发射最终版本为 v109：342.13 MHz、17,942.62 μm²、延迟 20 IPC 0.84602、正确性 19/19，满足 Tier2。
 
 ## 编译与验证
 
-默认 filelist 已指向普通 Verilog 核心，不需要外部 SystemVerilog 转换工具。
+在仓库根目录执行；工具配置见 [config.mk](config.mk) 和[课程框架说明](README-ZH.md)。默认交付文件不需要 Chisel 或外部 SystemVerilog 转换工具。
 
 ```sh
-make build BUILD=build/area-v2-verilog JOBS=8
-make test SIM=build/area-v2-verilog/sim LATENCY=20 MAX_CYCLES=30000000
-make perf SIM=build/area-v2-verilog/sim LATENCY=20 MAX_CYCLES=30000000
+make build BUILD=build/default JOBS=8
+make test SIM=build/default/sim LATENCY=20 MAX_CYCLES=20000000
+make perf SIM=build/default/sim LATENCY=10 MAX_CYCLES=20000000
+make perf SIM=build/default/sim LATENCY=20 MAX_CYCLES=20000000
 make verify-rtl
-make run SIM=build/area-v2-verilog/sim PROGRAM=tests/rtl/high_address.data EXPECTED=0x40100 LATENCY=20
-```
-
-`make verify-rtl` 用 Icarus Verilog 检查 Verilog-2005 编译，并验证分发树、算术、AXI 背压、M 扩展、恢复、缓存和退休路径。
-结构化源描述保存在 `verilog/area_v2/`，工程内的 `make export-verilog` 确定性地展开到交付 Verilog；输入和输出都有 SHA-256。
-
-## 后续手动综合
-
-```sh
-# 最新官方默认综合，已包含 ABC 缓冲与尺寸优化
+make run SIM=build/default/sim PROGRAM=tests/rtl/high_address.data EXPECTED=0x40100 LATENCY=20
 make synth
-
-# 旧流程网表后处理诊断，不作为默认评分结果
-make synth-stage1
 ```
 
-后者将原始映射报告写入 `build/area-v2/frequency/raw/opt/`，完整实现报告写入 `build/area-v2/frequency/mapped/`。
-本次实测原始产物保存在 `build/area-v2/synth-direct/opt/` 与 `build/area-v2/synth-buffered/`；关键报告已归档进仓库。
+AppImage 所在环境无法使用 FUSE 时，在编译或综合命令前加 `APPIMAGE_EXTRACT_AND_RUN=1`。结构化源描述位于 [verilog/area_v2/](verilog/area_v2/)，`make export-verilog` 确定性地生成交付 Verilog 及 SHA-256 清单。
 
-## 默认结构
+单发射工程使用 `make -C single-issue-chisel generate`、`build`、`test`、`perf`、`synth`；工具版本和参数见[独立说明](single-issue-chisel/README.md)。
 
-32 项 ROB，两路分派/提交，两个整数端口与一个独立访存端口，三组 4 项发射队列，三个分支检查点，
-8 个 Load 槽、16 个 Store 槽；1 KiB I-cache、2 KiB 两路 D-cache、64 B 行、四个 MSHR，AXI 最多 16 笔在途。
-顶层参数包括 `ROB_BITS`、`IQ_ENTRIES`、`LOAD_SLOTS`、`STORE_SLOTS`、`CHECKPOINTS`、`ISSUE_WIDTH`、`COMMIT_WIDTH`、
-`IC_INDEX_BITS`、`DC_INDEX_BITS` 与 `DC_LINE_BITS`。
+## 仓库目录
+
+| 目录 / 入口 | 内容 |
+| --- | --- |
+| [verilog/](verilog/) | 当前双发射 RTL、顶层、AXI 适配器及 filelist |
+| [single-issue-chisel/](single-issue-chisel/) | 独立单发射 Chisel 工程、冻结基准及报告 |
+| [scripts/](scripts/) | 课程工具；`area_v2/` 为导出与定向验证工具 |
+| [tests/rtl/](tests/rtl/) | 当前 RTL 单元与高地址用例 |
+| [docs/](docs/README.md) | 架构、参数、AXI 和 SRAM 说明 |
+| [reports/](reports/README.md) | 各阶段报告、框架同步记录及原始测量索引 |
+| [archive/](archive/README.md) | 停用的早期 RTL、Chisel 原型入口和初始计划 |
+| [packaging/appimage/](packaging/appimage/README.md) | 课程工具打包 |
+| `testcases/` | 课程测试子模块 |
+| `build/` | 本地构建与实验输出，已忽略 |
+
+课程接口和评测规则见 [中文说明](README-ZH.md) / [English](README-EN.md)。历史测量按阶段保留，最新结论以最终验收报告为准。

@@ -8,7 +8,7 @@
 | `7eba21e6d1eb6b5d76fe5fba55f303ea6ff3aa7e` | `IssueAge` 成对年龄矩阵 | v97、v99 |
 | `d5322ba916e6d5eaf8f2e9e102a3d1a2f4a4f670` | `Common` 实验参数、`LocalResultWord/Slice`、`LocalLoadValue`、`CompletionReady`，临时结果独立验证 | v96、v101–v103、v106、v107 |
 | `e4f518bbbc225e81b355d9baa7f9d470d68985d6` | `Core/Cache` 接线、局部结果资格判定、debug 等价断言、生成与 stage5 实验/对照脚本 | v95–v109；局部结果资格判定对应 v98 |
-| `76a8a4d0165b64319b860502f3adc24585c8353d` | 15 个候选的冻结源码/RTL、参数、综合/仿真原始日志、性能对照和上游参考证据 | v95–v109，含复用的 v94 对照 |
+| `76a8a4d0165b64319b860502f3adc24585c8353d` | 15 个候选的冻结源码/RTL、参数、综合/仿真原始日志、性能对照和验证记录 | v95–v109，含复用的 v94 对照 |
 | `single-issue-v109` | v109 默认发布：启用完整头部预存、逐 bank 返回归属匹配和局部发射就绪，更新 `baseline.json`、发布 RTL 与说明 | v109，342.13164 MHz / 17942.62 μm² / IPC 0.84602401 / 正确性 19/19 |
 
 `single-issue-v109` 是指向本文件首次加入的默认发布提交的本地 tag。可用 `git rev-parse single-issue-v109` 获取其完整 commit hash，或用 `git show single-issue-v109` 查看默认发布改动。

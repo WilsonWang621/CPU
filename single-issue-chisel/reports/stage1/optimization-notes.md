@@ -54,15 +54,13 @@ v66 缩短 `退休 Store 地址 -> bank 就绪 -> Load 队列选择 -> SRAM 地�
 
 v67 的 SRAM 提前读与 v68 的缓存局部映射均未提高频率，不选为基准。v66 的关键路径终点已变为 `dc.prefetch.count`，下一阶段寄存已接受 Demand 的训练事件，并分别准备各 bank 的训练地址，继续使用原始综合流程。
 
-参考 [tianhangj/RISC-V-CPU-2026 interfaces.md](https://github.com/tianhangj/RISC-V-CPU-2026/blob/f3ed8dd3bbaf0caae0b245e20bdd0f5ef95477c4/interfaces.md) 第 17 节。该版本记录 331.42 MHz、6569.85 μm²、IPC 0.2166，并使用 3.333 ns 目标约束；本工程继续使用课程默认 2 ns 目标约束。借鉴逐条目译码、提前准备数据、有效位单独发布和寄存候选的思路，不能将其频率直接作为本实现的成绩。
-
-`verilog/area_v2/` 的借鉴点：
+与双发射模块对应的局部结构：
 
 - `v2_rename.sv`：分支快照，退休时清除快照中的旧生产者，恢复不复活已复用 ROB 的标签。
 - `v2_retire_read.sv`：旋转独热头指针，减少退休读取的二进制选择扇出。
 - `v2_dcache.sv`：独立 Store 队列、关键字先返回、多个 Miss 所有权、等待 Load 合并。
 - `v2_read.sv` / `v2_operand.sv`：保持每个字的局部译码和反馈边界，避免综合重新形成宽二进制选择器。
 
-上述思路以 Chisel 重写。单发射和单退休保持为 1；三个完成广播允许长延迟单元与 Load 同时完成，不构成多发射。
+这些结构使用 Chisel 描述。单发射和单退休保持为 1；三个完成广播允许长延迟单元与 Load 同时完成，不构成多发射。
 
 每个实验保存参数、源码 SHA-256、RTL SHA-256、仿真器 SHA-256、六项 IPC、综合报告和原始日志。新实验从冻结源码的独立 sbt 目录生成，避免工作区继续编辑改变被测 RTL。完整参数对照见 [comparison.csv](comparison.csv)。生成失败也保留日志并标为失败，未运行项目不标记通过。

@@ -1,6 +1,6 @@
 # Single issue Chisel CPU
 
-独立单发射乱序 RV32IM 工程，根目录的 v42 双发射实现已经封存。CPU 源码按译码/执行、乘除法、缓存/前端、总线、乱序核心分模块。
+本目录为独立的单发射乱序 RV32IM 工程，根目录为双发射工程。CPU 源码按译码/执行、乘除法、缓存/前端、总线、乱序核心分模块。
 
 验收固定使用课程原样 `scripts/synth.py`、ASAP7 RVT TT 及课程默认时序约束；性能测试内存延迟 20、上限 30,000,000 周期。总面积包括 SRAM。
 
@@ -36,9 +36,9 @@ make synth
 
 优化前后、六项 IPC 和参数明细见 [阶段 1](reports/stage1/comparison.md)、[阶段 2](reports/stage2/comparison.md)、[阶段 3](reports/stage3/comparison.md)、[阶段 4](reports/stage4/comparison.md)、[阶段 5](reports/stage5/comparison.md)。各阶段 `optimization-notes.md` 说明采用与拒绝的结果，`baseline.json` 固定该阶段最后保留的 Tier2 版本；每项实验冻结源码与原始日志可复核结果。本轮版本和模块提交见 [阶段 5 commit 对照](reports/stage5/commit-map.md)。
 
-阶段 4 参考 [Galuisss/ACM-CPU](https://github.com/Galuisss/ACM-CPU/tree/43e5a967828d80f73a1e1918054fbab36fc5775b) 的调度、地址准备和除法方法，试验逐 bank 归属匹配、局部就绪/取指头、两位除法、商余数缓存和并行分派地址。完整验收后只有 16 位发射分片保留为默认，其余选项默认关闭。MDU 四种配置通过 76,544 个算术用例和 640 次取消测试；并行地址的全部 218 位输入通过 SAT 等价证明。原因、参考提交、测试和原始结果见 [本轮记录](reports/stage4/optimization-notes.md)。
+阶段 4 试验逐 bank 归属匹配、局部就绪/取指头、两位除法、商余数缓存和并行分派地址。完整验收后只有 16 位发射分片保留为默认，其余选项默认关闭。MDU 四种配置通过 76,544 个算术用例和 640 次取消测试；并行地址的全部 218 位输入通过 SAT 等价证明。取舍、测试和原始结果见 [本轮记录](reports/stage4/optimization-notes.md)。
 
-阶段 5 重新核对上游提交未改变，试验年龄矩阵、头部预存、结果准备、Load 格式转换及独立就绪等 15 个冻结候选。只有完整头部预存与 bank 归属/局部就绪的组合改善频率并满足全部 Tier2 门槛。其余新增开关默认关闭；取指队列和临时结果分别通过约 161 万周期、757 万次结果核对，最终源码重新综合与完整仿真通过。见 [阶段 5 优化记录](reports/stage5/optimization-notes.md)。
+阶段 5 试验年龄矩阵、头部预存、结果准备、Load 格式转换及独立就绪等 15 个冻结候选。只有完整头部预存与 bank 归属/局部就绪的组合改善频率并满足全部 Tier2 门槛。其余新增开关默认关闭；取指队列和临时结果分别通过约 161 万周期、757 万次结果核对，最终源码重新综合与完整仿真通过。见 [阶段 5 优化记录](reports/stage5/optimization-notes.md)。
 
 | 模块 | 源码 | 职责 |
 |---|---|---|
