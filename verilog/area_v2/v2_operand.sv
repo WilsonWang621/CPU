@@ -1,4 +1,4 @@
-// Bound each wakeup decoder and feedback mux to one operand word.
+// Parallel, mutually exclusive operand source selection.
 (* keep_hierarchy=1 *)
 module v2_operand #(parameter integer SLOT_BITS=5)(
   input wire live,prepare,old_ready,initial_ready,
@@ -7,18 +7,21 @@ module v2_operand #(parameter integer SLOT_BITS=5)(
   input wire [2:0] wb_good,
   input wire [3*SLOT_BITS-1:0] wb_slots,
   input wire [95:0] wb_values,
-  output logic next_ready,
-  output logic [31:0] next_value
+  output wire next_ready,
+  output wire [31:0] next_value
 );
-  always_comb begin
-    next_ready=old_ready;next_value=old_value;
-    if(live) begin
-      for(integer w=0;w<3;w=w+1)
-        if(!old_ready && wb_good[w] && source==wb_slots[w*SLOT_BITS+:SLOT_BITS]) begin
-          next_ready=1;next_value=wb_values[w*32+:32];
-        end
-    end else if(prepare) begin
-      next_ready=initial_ready;next_value=initial_value;
-    end
+  wire [2:0] hit,chosen;
+  for(genvar w=0;w<3;w=w+1) begin: matching
+    assign hit[w]=live && !old_ready && wb_good[w] && source==wb_slots[w*SLOT_BITS+:SLOT_BITS];
   end
+  assign chosen[2]=hit[2];
+  assign chosen[1]=hit[1] && !hit[2];
+  assign chosen[0]=hit[0] && !(hit[1] || hit[2]);
+  wire initializing=!live && prepare;
+  wire holding=!(initializing || |chosen);
+  assign next_ready=live ? (old_ready || |hit):(prepare ? initial_ready:old_ready);
+  assign next_value=(old_value & {32{holding}}) | (initial_value & {32{initializing}}) |
+                    (wb_values[31:0] & {32{chosen[0]}}) |
+                    (wb_values[63:32] & {32{chosen[1]}}) |
+                    (wb_values[95:64] & {32{chosen[2]}});
 endmodule

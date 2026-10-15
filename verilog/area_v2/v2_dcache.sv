@@ -101,14 +101,23 @@ module v2_dcache #(
   assign load_set=load_address[SB+OFFSET-1:OFFSET];
   assign store_set=store_address[SB+OFFSET-1:OFFSET];
   for(genvar way=0;way<2;way=way+1) begin: tag_read
-    assign load_matches[way]=tag_valid[{load_set,1'(way)}] && tags[{load_set,1'(way)}]==load_address[RB-1:SB+OFFSET];
+
     assign store_matches[way]=tag_valid[{store_set,1'(way)}] && tags[{store_set,1'(way)}]==store_address[RB-1:SB+OFFSET];
   end
   assign load_tag_hit=|load_matches;
   assign store_tag_hit=|store_matches;
   assign load_line={load_set,!load_matches[0]};
   assign store_line={store_set,!store_matches[0]};
-  assign load_hit=load_tag_hit && word_valid[load_line][load_address[OFFSET-1:2]];
+  wire [LINES*TB-1:0] lookup_tags;
+  wire [LINES*WORDS-1:0] lookup_words;
+  for(genvar line=0;line<LINES;line=line+1) begin: lookup_payload
+    assign lookup_tags[line*TB+:TB]=tags[line];
+    assign lookup_words[line*WORDS+:WORDS]=word_valid[line];
+  end
+  v2_cache_lookup #(.SETS(SETS),.TAG_BITS(TB),.WORDS(WORDS)) lookup (
+    .address(load_address[RB-1:2]),.tags(lookup_tags),.valid(tag_valid),.word_valid(lookup_words),
+    .match_bits(load_matches),.hit(load_hit));
+
   assign mem_req_valid=!rst && out_valid && int'(count)<CREDITS;
   assign mem_req_write=out_owner.write;
   assign mem_req_addr=out_address;

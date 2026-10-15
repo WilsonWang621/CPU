@@ -1,7 +1,8 @@
 from pathlib import Path
 import argparse,importlib.util,re,json,hashlib
-p=argparse.ArgumentParser();p.add_argument('name');p.add_argument('--wb-tree',action='store_true');p.add_argument('--operand',action='store_true');p.add_argument('--wake-qualified',action='store_true');p.add_argument('--wake-tree',action='store_true');p.add_argument('--forward-priority',action='store_true');p.add_argument('--prefix-div',action='store_true');p.add_argument('--dispatch-wake',action='store_true');p.add_argument('--parallel-issue',action='store_true');p.add_argument('--forward-onehot',action='store_true');p.add_argument('--memory-grants',action='store_true');p.add_argument('--parallel-forward-mask',action='store_true');p.add_argument('--cache-lookup',action='store_true');p.add_argument('--split-address',action='store_true');p.add_argument('--parallel-dispatch',action='store_true');p.add_argument('--parallel-return',action='store_true');p.add_argument('--store-grants',action='store_true');a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('name');p.add_argument('--wb-tree',action='store_true');p.add_argument('--operand',action='store_true');p.add_argument('--wake-qualified',action='store_true');p.add_argument('--wake-tree',action='store_true');p.add_argument('--forward-priority',action='store_true');p.add_argument('--prefix-div',action='store_true');p.add_argument('--dispatch-wake',action='store_true');p.add_argument('--parallel-issue',action='store_true');p.add_argument('--forward-onehot',action='store_true');p.add_argument('--memory-grants',action='store_true');p.add_argument('--parallel-forward-mask',action='store_true');p.add_argument('--cache-lookup',action='store_true');p.add_argument('--split-address',action='store_true');p.add_argument('--parallel-dispatch',action='store_true');p.add_argument('--parallel-return',action='store_true');p.add_argument('--store-grants',action='store_true');p.add_argument('--load-value-tree',action='store_true');p.add_argument('--store-priority',action='store_true');p.add_argument('--split-load-address',action='store_true');p.add_argument('--return-lookahead',action='store_true');p.add_argument('--dc-index-bits',type=int);p.add_argument('--rob-bits',type=int);p.add_argument('--address-register',action='store_true');a=p.parse_args()
 out=Path('build/frequency-stage8')/a.name/'rtl';out.mkdir(parents=True,exist_ok=True)
+BASE=Path('reports/data/2026-10-15/timing-stage8/baseline433/structured')
 changed={}
 if a.operand:
  changed['v2_operand.sv']='''// Parallel, mutually exclusive operand source selection.
@@ -33,7 +34,7 @@ module v2_operand #(parameter integer SLOT_BITS=5)(
 endmodule
 '''
 if a.wb_tree or a.wake_qualified or a.wake_tree or a.forward_priority or a.dispatch_wake or a.parallel_issue or a.forward_onehot or a.memory_grants or a.parallel_forward_mask or a.split_address or a.parallel_dispatch:
- core=Path('verilog/area_v2/cpu_top.sv').read_text()
+ core=(BASE/'cpu_top.sv').read_text()
 if a.wb_tree:
  needle='  wire [95:0] wb_values;'
  assert core.count(needle)==1
@@ -266,6 +267,42 @@ if a.parallel_dispatch:
           (wb_value[1] & {32{bypass_chosen[1]}}) |
           (wb_value[2] & {32{bypass_chosen[2]}});""")
  changed['cpu_top.sv']=core
+if a.store_priority:
+ assert not a.store_grants
+ old="""  v2_select #(.ENTRIES(STORE_SLOTS),.SLOT_BITS(ST)) choose_store (
+    .ready(store_send_candidates),.owner(store_owners),.rob_head(store_head),.valid(store_send_valid),.index(store_send_slot));"""
+ assert core.count(old)==1
+ core=core.replace(old,"""  v2_oldest_store #(.ENTRIES(STORE_SLOTS),.INDEX_BITS(ST)) choose_store (
+    .ready(store_send_candidates),.head(store_head),.valid(store_send_valid),.index(store_send_slot),.grant());""")
+ changed['cpu_top.sv']=core
+ changed['v2_oldest_store.sv']=Path('build/frequency-stage8/v2_oldest_store.sv').read_text()
+if a.split_load_address:
+ assert a.split_address
+ start=core.index('      if(bank==2) begin: address_prepare')
+ stop=core.index('      always_ff @(posedge clk) begin',start)
+ part=core[start:stop]
+ part=part.replace('wire [31:0] live_value,live_sum;','wire [31:0] live_value,live_sum,non_load_sum,load_sum;')
+ part=part.replace('.wb_good(wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+3*RW+:3]),',
+   ".wb_good({1'b0,wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+3*RW+:2]}),")
+ part=part.replace('.sum(live_sum),.carry_out());',""".sum(non_load_sum),.carry_out());
+        v2_prefix_adder #(.WIDTH(32)) load_address_add (
+          .a(wb_value[2]),.b(queue[bank][q].imm),.carry_in(1'b0),.sum(load_sum),.carry_out());
+        wire load_matches=!queue[bank][q].ready_a &&
+          wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+3*RW+2] &&
+          queue[bank][q].source_a==wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+2*RW+:RW];
+        assign live_sum=load_matches ? load_sum:non_load_sum;""")
+ part=part.replace('''        always_ff @(posedge clk)
+          if(address_update) prepared_address[q]<=address_sum;''',"""        always_ff @(posedge clk)
+          if(address_update) prepared_address[q]<=address_sum;
+`ifndef SYNTHESIS
+        wire [31:0] reference_immediate=queue[bank][q].valid ? queue[bank][q].imm:
+          (prepare_lane[1] ? dispatch_payload[1].imm:dispatch_payload[0].imm);
+        wire [31:0] reference_address=next_value_a+reference_immediate;
+        always_ff @(posedge clk) if(!rst && address_update && next_ready_a)
+          assert(address_sum === reference_address)
+            else $fatal(1,"prepared effective address differs");
+`endif""")
+ core=core[:start]+part+core[stop:];changed['cpu_top.sv']=core
 if a.store_grants:
  assert a.parallel_issue
  old="""  v2_select #(.ENTRIES(STORE_SLOTS),.SLOT_BITS(ST)) choose_store (
@@ -303,8 +340,40 @@ if a.store_grants:
 """,1)
  changed['cpu_top.sv']=core
  changed['v2_oldest_store.sv']=Path('build/frequency-stage8/v2_oldest_store.sv').read_text()
+if a.load_value_tree:
+ assert not a.wb_tree and a.split_address and a.parallel_dispatch
+ needle='  wire [95:0] wb_values;'
+ assert core.count(needle)==1
+ core=core.replace(needle,needle+"""
+  wire [6*32-1:0] load_value_copies;
+  v2_distribution #(.WIDTH(32),.LEAVES(6)) distribute_load_result (
+    .data_in(wb_value[2]),.data_out(load_value_copies));
+""")
+ assert core.count('.wb_values,')==3
+ core=core.replace('.wb_values,','.wb_values({load_value_copies[(2+bank)*32+:32],wb_values[63:0]}),')
+ old='(wb_value[2] & {32{bypass_chosen[2]}})'
+ assert core.count(old)==1
+ core=core.replace(old,'(load_value_copies[5*32+:32] & {32{bypass_chosen[2]}})')
+ core=core.replace('values[r]<=wb_value[w];','values[r]<=(w==2 ? load_value_copies[(2*r/ROB_ENTRIES)*32+:32]:wb_value[w]);')
+ core=core.replace('values[r][bit_id]<=wb_value[w][bit_id];','values[r][bit_id]<=(w==2 ? load_value_copies[(2*r/ROB_ENTRIES)*32+bit_id]:wb_value[w][bit_id]);')
+ changed['cpu_top.sv']=core
+if a.address_register:
+ assert a.split_address
+ old="""        always_ff @(posedge clk)
+          if(address_update) prepared_address[q]<=address_sum;"""
+ assert core.count(old)==1
+ core=core.replace(old,"""        wire [31:0] address_next;
+        v2_priority_mux #(.WORD_BITS(32),.PORTS(3)) capture_address (
+          .enable({queue[bank][q].valid && !queue[bank][q].ready_a,
+                   !queue[bank][q].valid && prepare_lane[1],
+                   !queue[bank][q].valid && prepare_lane[0]}),
+          .old_value(prepared_address[q]),
+          .data({live_sum,dispatch_address[1],dispatch_address[0]}),.value(address_next));
+        always_ff @(posedge clk) prepared_address[q]<=address_next;""")
+ changed['cpu_top.sv']=core
+ changed['v2_priority_mux.sv']=Path('build/frequency-stage8/v2_priority_mux.sv').read_text()
 if a.prefix_div:
- source=Path('verilog/area_v2/muldiv.sv').read_text()
+ source=(BASE/'muldiv.sv').read_text()
  old="""  always_comb begin
     quotient_next=quotient_q;
     remainder_next=remainder_q;
@@ -339,7 +408,7 @@ if a.prefix_div:
  changed['muldiv.sv']=source
  changed['v2_div_step.sv']=Path('build/frequency-stage8/v2_div_step.sv').read_text()
 if a.cache_lookup:
- cache=Path('verilog/area_v2/v2_dcache.sv').read_text()
+ cache=(BASE/'v2_dcache.sv').read_text()
  old="    assign load_matches[way]=tag_valid[{load_set,1'(way)}] && tags[{load_set,1'(way)}]==load_address[RB-1:SB+OFFSET];"
  assert cache.count(old)==1
  cache=cache.replace(old,'')
@@ -358,9 +427,56 @@ if a.cache_lookup:
  changed['v2_dcache.sv']=cache
  for name in ('v2_cache_lookup.sv','v2_cache_tag_match.sv'):
   changed[name]=(Path('build/frequency-stage8')/name).read_text()
+if a.return_lookahead:
+ assert not a.parallel_return
+ cache=changed.get('v2_dcache.sv',(BASE/'v2_dcache.sv').read_text())
+ old='(waiter_next[w].error || word_valid_next[waiter_next[w].physical][waiter_next[w].word_index])'
+ assert cache.count(old)==1
+ cache=cache.replace(old,'return_candidates[w]')
+ needle='  always_comb begin: returning_load'
+ assert cache.count(needle)==1
+ cache=cache.replace(needle,"""  wire [LOAD_SLOTS-1:0] return_candidates;
+  logic incoming_word_ready;
+  wire incoming_error=(merge_valid && misses[merge_slot].failed[load_address[OFFSET-1:2]]) ||
+    (fill_fire && mem_rsp_error && response_line==selected_line && response_word==load_address[OFFSET-1:2]);
+  always_comb begin
+    incoming_word_ready=word_valid[selected_line][load_address[OFFSET-1:2]];
+    if(allocate && !load_tag_hit) incoming_word_ready=0;
+    if(fill_fire && response_line==selected_line && response_word==load_address[OFFSET-1:2])
+      incoming_word_ready=!mem_rsp_error;
+    if(store_accept && store_tag_hit && store_line==selected_line && store_mask==15 &&
+        store_address[OFFSET-1:2]==load_address[OFFSET-1:2]) incoming_word_ready=1;
+  end
+  for(genvar waiter=0;waiter<LOAD_SLOTS;waiter=waiter+1) begin: return_lookahead
+    logic resident_word_ready;
+    wire publish=load_accept && !load_hit && load_tag==LT'(waiter);
+    wire consumed=result_valid && result_ready && result_tag==LT'(waiter);
+    wire resident_error=waiters[waiter].error ||
+      (fill_fire && mem_rsp_error && waiters[waiter].valid &&
+       waiters[waiter].physical==response_line && waiters[waiter].word_index==response_word);
+    always_comb begin
+      resident_word_ready=word_valid[waiters[waiter].physical][waiters[waiter].word_index];
+      if(allocate && !load_tag_hit && selected_line==waiters[waiter].physical) resident_word_ready=0;
+      if(fill_fire && response_line==waiters[waiter].physical && response_word==waiters[waiter].word_index)
+        resident_word_ready=!mem_rsp_error;
+      if(store_accept && store_tag_hit && store_line==waiters[waiter].physical && store_mask==15 &&
+          store_address[OFFSET-1:2]==waiters[waiter].word_index) resident_word_ready=1;
+    end
+    assign return_candidates[waiter]=publish ? (incoming_error || incoming_word_ready):
+      (waiters[waiter].valid && !consumed && (resident_error || resident_word_ready));
+`ifndef SYNTHESIS
+    always_ff @(posedge clk) if(!rst)
+      assert((waiter_next[waiter].valid && return_candidates[waiter]) ===
+        (waiter_next[waiter].valid && (waiter_next[waiter].error ||
+          word_valid_next[waiter_next[waiter].physical][waiter_next[waiter].word_index])))
+        else $fatal(1,"cache return eligibility differs");
+`endif
+  end
+"""+needle)
+ changed['v2_dcache.sv']=cache
 if a.parallel_return:
  assert a.parallel_issue
- cache=changed.get('v2_dcache.sv',Path('verilog/area_v2/v2_dcache.sv').read_text())
+ cache=changed.get('v2_dcache.sv',(BASE/'v2_dcache.sv').read_text())
  start=cache.index('  always_comb begin: returning_load')
  stop=cache.index('  always_ff @(posedge clk)',start)
  cache=cache[:start]+"""  localparam integer RETURN_BITS=1+LT+LB+WW;
@@ -382,18 +498,22 @@ if a.parallel_return:
 """+cache[stop:]
  changed['v2_dcache.sv']=cache
 spec=importlib.util.spec_from_file_location('export_plain','scripts/area_v2/export_plain.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
-package=Path('verilog/area_v2/cpu_pkg.sv').read_text();result='// Frozen stage8 experiment.\n'
-for source in sorted(Path('verilog/area_v2').glob('*.sv')):
+package=(BASE/'cpu_pkg.sv').read_text();result='// Frozen stage8 experiment.\n'
+for source in sorted(BASE.glob('*.sv')):
  if source.name=='cpu_pkg.sv':continue
  data=changed.get(source.name,source.read_text())
  result+=m.lower(data,package)+'\n'
  if source.name in changed:(out/source.name).write_text(data)
 for name,data in changed.items():
- if not (Path('verilog/area_v2')/name).exists():
+ if not (BASE/name).exists():
   result+=m.lower(data,package)+'\n'
   (out/name).write_text(data)
 (out/'area_v2_core.v').write_text(result)
-for name in ('student_top.sv','pararisc_axi_adapter.sv'):(out/name).write_bytes((Path('verilog')/name).read_bytes())
+for name in ('student_top.sv','pararisc_axi_adapter.sv'):(out/name).write_bytes((BASE.parent/name).read_bytes())
+if a.rob_bits is not None:
+ top=(out/'student_top.sv').read_text();assert top.count('ROB_BITS=5')==1;top=top.replace('ROB_BITS=5',f'ROB_BITS={a.rob_bits}');(out/'student_top.sv').write_text(top)
+if a.dc_index_bits is not None:
+ top=(out/'student_top.sv').read_text();assert top.count('DC_INDEX_BITS=4')==1;top=top.replace('DC_INDEX_BITS=4',f'DC_INDEX_BITS={a.dc_index_bits}');(out/'student_top.sv').write_text(top)
 (out/'filelist.f').write_text('area_v2_core.v\npararisc_axi_adapter.sv\nstudent_top.sv\n')
 (out/'source-hashes.json').write_text(json.dumps({p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in out.iterdir() if p.suffix in ('.v','.sv')},indent=2)+'\n')
 (out/'trial-options.json').write_text(json.dumps(vars(a),indent=2)+'\n')

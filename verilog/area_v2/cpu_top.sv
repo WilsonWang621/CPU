@@ -87,6 +87,13 @@ module cpu_top #(
   logic [31:0] source_result [4],source_architectural [4];
   logic [5:0] source_status [4];
   issue_t queue [3][IQ_ENTRIES],dispatch_payload[2];
+  wire [31:0] dispatch_address [0:1];
+  for(genvar address_lane=0;address_lane<2;address_lane=address_lane+1) begin: prepare_dispatch_address
+    v2_prefix_adder #(.WIDTH(32)) add (
+      .a(dispatch_payload[address_lane].a),.b(dispatch_payload[address_lane].imm),
+      .carry_in(1'b0),.sum(dispatch_address[address_lane]),.carry_out());
+  end
+
   store_t stores [STORE_SLOTS];
   load_t loads [LOAD_SLOTS];
   rid_t head,tail;
@@ -158,8 +165,20 @@ module cpu_top #(
   wire [2:0] wb_good;
   wire [3*RW-1:0] wb_slots;
   wire [95:0] wb_values;
+  localparam integer WAKE_BITS=3+3*RW;
+  wire [6*WAKE_BITS-1:0] wake_copies;
+  v2_distribution #(.WIDTH(WAKE_BITS),.LEAVES(6)) distribute_wakeup (
+    .data_in({wb_good,wb_slots}),.data_out(wake_copies));
+
   for(genvar w=0;w<3;w=w+1) begin: writeback_ports
-    assign wb_good[w]=wb_valid[w] && wb_fault[w]==0 && rob[wb_rid[w]].rd!=0;
+    // Only JAL/JALR among branches have a register consumer. Compute their
+    // alignment directly so conditional-branch comparisons do not gate wakeup.
+    assign wb_good[w]=wb_valid[w] && rob[wb_rid[w]].rd!=0 &&
+      (w!=0 ? wb_fault[w]==0 :
+       (mdu_result_valid || is_alu(executing[0].op) ||
+        (executing[0].op==OP_JAL && executing[0].imm[1:0]==0) ||
+        (executing[0].op==OP_JALR &&
+         !(executing[0].a[1]^executing[0].imm[1]^(executing[0].a[0]&executing[0].imm[0])))));
     assign wb_slots[w*RW+:RW]=wb_rid[w];
     assign wb_values[w*32+:32]=wb_value[w];
   end
@@ -184,9 +203,25 @@ module cpu_top #(
   logic [31:0] memory_address,memory_data,load_word,load_result;
   logic [31:0] prepared_address [IQ_ENTRIES];
   wire [IQ_ENTRIES*32-1:0] prepared_address_words;
+  wire [IQ_ENTRIES-1:0] memory_address_grant;
   logic [3:0] memory_mask,memory_fault;
   logic memory_exit,forward_match,forward_full;
   logic [ST-1:0] forward_slot;
+  wire [STORE_SLOTS-1:0] forward_grant;
+  wire [STORE_SLOTS*36-1:0] forwarding_words;
+  wire [35:0] forwarding_payload;
+  wire [STORE_SLOTS-1:0] forwarding_full_grants;
+  for(genvar s=0;s<STORE_SLOTS;s=s+1) begin: forwarding_coverage
+    assign forwarding_full_grants[s]=forward_grant[s] &&
+      (stores[s].mask & memory_mask)==memory_mask;
+  end
+
+  for(genvar s=0;s<STORE_SLOTS;s=s+1) begin: forward_payloads
+    assign forwarding_words[s*36+:36]={stores[s].mask,stores[s].data};
+  end
+  v2_grant_read #(.ENTRIES(STORE_SLOTS),.WORD_BITS(36)) read_forward_payload (
+    .grant(forward_grant),.words(forwarding_words),.value(forwarding_payload));
+
   logic store_pop,store_send_valid;
   logic [ST-1:0] store_send_slot;
   logic [ST:0] squashed_stores;
@@ -334,6 +369,38 @@ module cpu_top #(
   for(genvar bank=0;bank<3;bank=bank+1) begin: balanced_selection
     wire [IQ_ENTRIES*ISSUE_BITS-1:0] payloads;
     wire [ISSUE_BITS-1:0] selected_payload;
+    wire [IQ_ENTRIES-1:0] direct_grant;
+    wire [IQ_ENTRIES*((ISSUE_BITS+31)/32)-1:0] payload_grants;
+    if(bank==2) begin: unused_direct_grant
+      assign direct_grant=0;
+      wire [(QW+1)*((ISSUE_BITS+31)/32+1)-1:0] next_controls;
+      v2_distribution #(.WIDTH(QW+1),.LEAVES((ISSUE_BITS+31)/32+1)) controls (
+        .data_in({prepared_selection.next_valid,prepared_selection.next_index}),.data_out(next_controls));
+      for(genvar group=0;group<(ISSUE_BITS+31)/32;group=group+1) begin: payload_copy
+        v2_registered_grant #(.ENTRIES(IQ_ENTRIES),.INDEX_BITS(QW)) local_grant (
+          .clk,.rst,.valid(next_controls[group*(QW+1)+QW]),.index(next_controls[group*(QW+1)+:QW]),
+          .grant(payload_grants[group*IQ_ENTRIES+:IQ_ENTRIES]));
+`ifndef SYNTHESIS
+  always_ff @(posedge clk) if(!rst && select_valid[2])
+    assert(forward_full === (forward_match &&
+           ((forwarding_payload[35:32] & memory_mask)==memory_mask)))
+      else $fatal(1,"parallel store coverage differs");
+
+        always_ff @(posedge clk) if(!rst)
+          assert(payload_grants[group*IQ_ENTRIES+:IQ_ENTRIES]===
+                 (selected_valid[bank] ? ({{(IQ_ENTRIES-1){1'b0}},1'b1}<<selected[bank]):{IQ_ENTRIES{1'b0}}))
+            else $fatal(1,"registered memory payload grant differs");
+`endif
+      end
+      v2_registered_grant #(.ENTRIES(IQ_ENTRIES),.INDEX_BITS(QW)) address_copy (
+        .clk,.rst,.valid(next_controls[((ISSUE_BITS+31)/32)*(QW+1)+QW]),
+        .index(next_controls[((ISSUE_BITS+31)/32)*(QW+1)+:QW]),.grant(memory_address_grant));
+
+    end else begin: distribute_grants
+      v2_distribution #(.WIDTH(IQ_ENTRIES),.LEAVES((ISSUE_BITS+31)/32)) tree (
+        .data_in(direct_grant),.data_out(payload_grants));
+    end
+
     for(genvar q=0;q<IQ_ENTRIES;q=q+1) begin: candidate
       assign select_ready[bank][q]=queue[bank][q].valid && (bank==2 || (queue[bank][q].ready_a && queue[bank][q].ready_b));
       assign select_owner[bank][q*(RW+1)+:(RW+1)]={queue[bank][q].generation,queue[bank][q].rid};
@@ -367,8 +434,9 @@ module cpu_top #(
       assign selected_valid[bank]=grant_valid;
       assign selected[bank]=grant_index;
     end else begin: current_selection
-      v2_select #(.ENTRIES(IQ_ENTRIES),.SLOT_BITS(RW+1),.EXTENDED_ORDER(1)) choose (
-        .ready(select_ready[bank]),.owner(select_owner[bank]),.rob_head({(RW+1){1'b0}}),.valid(selected_valid[bank]),.index(selected[bank]));
+      v2_parallel_select #(.ENTRIES(IQ_ENTRIES),.SLOT_BITS(RW+1)) choose (
+        .ready(select_ready[bank]),.owner(select_owner[bank]),.rob_head({(RW+1){1'b0}}),
+        .valid(selected_valid[bank]),.index(selected[bank]),.grant(direct_grant));
     end
     for(genvar first=0;first<ISSUE_BITS;first=first+32) begin: read_payload
       wire [IQ_ENTRIES*(ISSUE_BITS-first<32 ? ISSUE_BITS-first:32)-1:0] slice_words;
@@ -376,8 +444,10 @@ module cpu_top #(
         assign slice_words[row*(ISSUE_BITS-first<32 ? ISSUE_BITS-first:32)+:(ISSUE_BITS-first<32 ? ISSUE_BITS-first:32)]=
           payloads[row*ISSUE_BITS+first+:(ISSUE_BITS-first<32 ? ISSUE_BITS-first:32)];
       end
-      v2_iq_read #(.ENTRIES(IQ_ENTRIES),.WORD_BITS(ISSUE_BITS-first<32 ? ISSUE_BITS-first:32)) read_slice (
-        .index(selected[bank]),.words(slice_words),.value(selected_payload[first+:(ISSUE_BITS-first<32 ? ISSUE_BITS-first:32)]));
+        v2_grant_read #(.ENTRIES(IQ_ENTRIES),.WORD_BITS(ISSUE_BITS-first<32 ? ISSUE_BITS-first:32)) read_slice (
+          .grant(payload_grants[(first/32)*IQ_ENTRIES+:IQ_ENTRIES]),.words(slice_words),
+          .value(selected_payload[first+:(ISSUE_BITS-first<32 ? ISSUE_BITS-first:32)]));
+
     end
     assign executing[bank]=selected_payload;
     assign select_valid[bank]=selected_valid[bank] && (bank!=2 || (executing[bank].ready_a && executing[bank].ready_b));
@@ -388,8 +458,8 @@ module cpu_top #(
                                        (|(stores[s].mask & memory_mask));
     assign store_send_candidates[s]=stores[s].valid && stores[s].committed && !stores[s].issued;
   end
-  v2_select #(.ENTRIES(STORE_SLOTS),.SLOT_BITS(ST),.YOUNGEST(1)) choose_forward (
-    .ready(store_forward_candidates),.owner(store_owners),.rob_head(store_head),.valid(forward_match),.index(forward_slot));
+  v2_circular_grant #(.ENTRIES(STORE_SLOTS),.INDEX_BITS(ST)) choose_forward (
+    .ready(store_forward_candidates),.head(store_head),.valid(forward_match),.index(forward_slot),.grant(forward_grant));
   v2_select #(.ENTRIES(STORE_SLOTS),.SLOT_BITS(ST)) choose_store (
     .ready(store_send_candidates),.owner(store_owners),.rob_head(store_head),.valid(store_send_valid),.index(store_send_slot));
   always_comb begin: select_instructions
@@ -449,8 +519,8 @@ module cpu_top #(
   for(genvar q=0;q<IQ_ENTRIES;q=q+1) begin: memory_address_words
     assign prepared_address_words[q*32+:32]=prepared_address[q];
   end
-  v2_iq_read #(.ENTRIES(IQ_ENTRIES),.WORD_BITS(32)) read_memory_address (
-    .index(selected[2]),.words(prepared_address_words),.value(memory_address));
+  v2_grant_read #(.ENTRIES(IQ_ENTRIES),.WORD_BITS(32)) read_memory_address (
+    .grant(memory_address_grant),.words(prepared_address_words),.value(memory_address));
 
   assign memory_data=executing[2].b<<(8*memory_address[1:0]);
   assign memory_mask=(executing[2].size==0 ? 4'b0001:executing[2].size==1 ? 4'b0011:4'b1111)<<memory_address[1:0];
@@ -461,12 +531,12 @@ module cpu_top #(
       memory_fault=executing[2].op==OP_LOAD ? FAULT_LOAD_ALIGN:FAULT_STORE_ALIGN;
     else if(memory_address>=RAM_BYTES && !memory_exit)
       memory_fault=executing[2].op==OP_LOAD ? FAULT_LOAD_RANGE:FAULT_STORE_RANGE;
-    forward_full=0;squashed_stores=0;
+    forward_full=|forwarding_full_grants;squashed_stores=0;
     for(integer s=0;s<STORE_SLOTS;s=s+1) begin
       if(stores[s].valid && !stores[s].committed && (younger(stores[s].rid) || flush_all))
         squashed_stores=squashed_stores+1'b1;
     end
-    if(forward_match) forward_full=(stores[forward_slot].mask & memory_mask)==memory_mask;
+
   end
   assign cache_store_valid=store_send_valid && state!=DONE && state!=FAULT;
   assign cache_store_tag=store_send_slot;
@@ -479,7 +549,7 @@ module cpu_top #(
                          !forward_match && load_available;
   assign cache_load_address={memory_address[31:2],2'b0};
   assign cache_load_tag=free_load;
-  assign load_word=forward_full ? stores[forward_slot].data:cache_load_data;
+  assign load_word=forward_full ? forwarding_payload[31:0]:cache_load_data;
   assign load_result=extend_load(load_word,memory_address[1:0],executing[2].size,executing[2].sign_extend);
   assign load_allocate=cache_load_valid && cache_load_ready && !cache_load_hit;
   assign store_allocate=memory_allowed && executing[2].op==OP_STORE && memory_fault==0 && !memory_exit && int'(store_count)<STORE_SLOTS;
@@ -573,8 +643,9 @@ module cpu_top #(
     rid_t source_id;
     logic [4:0] register_id;
     logic pending,ready_value;
+    logic [2:0] bypass_matches,bypass_chosen;
     logic [31:0] source_value;
-    source_id=0;register_id=0;pending=0;ready_value=0;source_value=0;
+    source_id=0;register_id=0;pending=0;ready_value=0;source_value=0;bypass_matches=0;bypass_chosen=0;
     for(integer lane=0;lane<2;lane=lane+1) begin
       dispatch_payload[lane]='0;dispatch_payload[lane].valid=1;dispatch_payload[lane].rid=dispatch_rid[lane];
       dispatch_payload[lane].generation=dispatch_order[lane*(RW+1)+RW];
@@ -594,7 +665,15 @@ module cpu_top #(
         source_value=pending ? source_result[lane*2+source_number]:
                      (register_id==0 ? 32'd0:source_architectural[lane*2+source_number]);
         for(integer w=0;w<3;w=w+1)
-          if(pending && wb_valid[w] && wb_rid[w]==source_id && wb_fault[w]==0) begin ready_value=1;source_value=wb_value[w];end
+          bypass_matches[w]=pending && wb_good[w] && wb_rid[w]==source_id;
+        bypass_chosen[2]=bypass_matches[2];
+        bypass_chosen[1]=bypass_matches[1] && !bypass_matches[2];
+        bypass_chosen[0]=bypass_matches[0] && !(bypass_matches[1] || bypass_matches[2]);
+        ready_value=ready_value || |bypass_matches;
+        source_value=(source_value & {32{!(|bypass_matches)}}) |
+          (wb_value[0] & {32{bypass_chosen[0]}}) |
+          (wb_value[1] & {32{bypass_chosen[1]}}) |
+          (wb_value[2] & {32{bypass_chosen[2]}});
         // A fresh intra-bundle writer has no value even if its old physical
         // row still contains a completed result from an earlier wrap.
         if(lane==1 && rename_prepare[0] && source_id==dispatch_rid[0] && pending) ready_value=0;
@@ -753,23 +832,32 @@ module cpu_top #(
         .old_ready(queue[bank][q].ready_a),.old_value(queue[bank][q].a),.source(queue[bank][q].source_a),
         .initial_ready(prepare_lane[1] ? dispatch_payload[1].ready_a:dispatch_payload[0].ready_a),
         .initial_value(prepare_lane[1] ? dispatch_payload[1].a:dispatch_payload[0].a),
-        .wb_good,.wb_slots,.wb_values,.next_ready(next_ready_a),.next_value(next_value_a));
+        .wb_good(wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+3*RW+:3]),.wb_slots(wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+:3*RW]),.wb_values,.next_ready(next_ready_a),.next_value(next_value_a));
       v2_operand #(.SLOT_BITS(RW)) operand_b (
         .live(queue[bank][q].valid),.prepare(|prepare_lane),
         .old_ready(queue[bank][q].ready_b),.old_value(queue[bank][q].b),.source(queue[bank][q].source_b),
         .initial_ready(prepare_lane[1] ? dispatch_payload[1].ready_b:dispatch_payload[0].ready_b),
         .initial_value(prepare_lane[1] ? dispatch_payload[1].b:dispatch_payload[0].b),
-        .wb_good,.wb_slots,.wb_values,.next_ready(next_ready_b),.next_value(next_value_b));
+        .wb_good(wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+3*RW+:3]),.wb_slots(wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+:3*RW]),.wb_values,.next_ready(next_ready_b),.next_value(next_value_b));
       always_ff @(posedge clk) begin
         queue[bank][q].ready_a<=next_ready_a;queue[bank][q].a<=next_value_a;
         queue[bank][q].ready_b<=next_ready_b;queue[bank][q].b<=next_value_b;
       end
 
       if(bank==2) begin: address_prepare
-        wire [31:0] address_immediate=queue[bank][q].valid ? queue[bank][q].imm:
-          (prepare_lane[1] ? dispatch_payload[1].imm:dispatch_payload[0].imm);
-        wire [31:0] address_sum;
-        v2_prefix_adder #(.WIDTH(32)) effective_address_add (.a(next_value_a),.b(address_immediate),.carry_in(1'b0),.sum(address_sum),.carry_out());
+        wire [31:0] live_value,live_sum;
+        v2_operand #(.SLOT_BITS(RW)) address_operand (
+          .live(1'b1),.prepare(1'b0),.old_ready(queue[bank][q].ready_a),
+          .old_value(queue[bank][q].a),.source(queue[bank][q].source_a),
+          .initial_ready(1'b0),.initial_value(32'b0),
+          .wb_good(wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+3*RW+:3]),
+          .wb_slots(wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+:3*RW]),
+          .wb_values,.next_ready(),.next_value(live_value));
+        v2_prefix_adder #(.WIDTH(32)) effective_address_add (
+          .a(live_value),.b(queue[bank][q].imm),.carry_in(1'b0),.sum(live_sum),.carry_out());
+        wire [31:0] address_sum=queue[bank][q].valid ? live_sum:
+          (prepare_lane[1] ? dispatch_address[1]:dispatch_address[0]);
+
         wire address_update=(!queue[bank][q].valid && |prepare_lane) ||
                             (queue[bank][q].valid && !queue[bank][q].ready_a);
         always_ff @(posedge clk)
@@ -853,6 +941,21 @@ module cpu_top #(
     end
   end
 `ifndef SYNTHESIS
+  // A pending RAT tag must identify a real register-writing producer.
+  always_ff @(posedge clk) if(!rst) begin
+    for(integer src=0;src<4;src=src+1)
+      for(integer port=0;port<3;port=port+1)
+        if(source_pending[src] && source_register[src*5+:5]!=0 &&
+           wb_rid[port]==source_slot[src*RW+:RW])
+          assert(wb_good[port] === (wb_valid[port] && wb_fault[port]==0))
+            else $fatal(1,"dispatch wakeup predicate differs for a pending source");
+  end
+
+  // Verify exact equivalence of wakeup eligibility in reachable CPU states.
+  always_ff @(posedge clk) if(!rst)
+    assert(wb_good[0] === (wb_valid[0] && wb_fault[0]==0 && rob[wb_rid[0]].rd!=0))
+      else $fatal(1,"specialized integer wakeup qualification differs");
+
 `ifdef V2_VERIFY
   longint unsigned coverage_redirect,coverage_dual_commit,coverage_load_cancel,coverage_canceled_response;
   longint unsigned coverage_canceled_error,coverage_live_tag_reuse,coverage_forward,coverage_partial_wait,coverage_multi_load;

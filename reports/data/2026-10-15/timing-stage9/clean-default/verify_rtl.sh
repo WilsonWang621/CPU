@@ -1,0 +1,75 @@
+#!/bin/sh
+set -eu
+out=${1:-build/area-v2/unit}
+rtl=${2:-verilog/area_v2_core.v}
+top=${3:-verilog/student_top.sv}
+prepared_define=-DV2_PREPARED_ADDRESS_TEST
+# Older frozen cores form the effective address at issue instead.
+if [ "${4:-}" = direct-address ]; then prepared_define=; fi
+if grep -q 'begin: payload_copy' "$rtl"; then
+  prepared_define="$prepared_define -DV2_REGISTERED_MEMORY_GRANTS_TEST"
+fi
+mkdir -p "$out"
+iverilog $prepared_define -g2005 -s student_top -o "$out/plain-parser" "$rtl" verilog/pararisc_axi_adapter.sv "$top"
+iverilog $prepared_define -g2012 -s v2_distribution_tb -o "$out/distribution" tests/rtl/v2_distribution_tb.sv "$rtl"
+vvp "$out/distribution"
+iverilog $prepared_define -g2012 -s v2_prefix_adder_tb -o "$out/prefix_adder" tests/rtl/v2_prefix_adder_tb.sv "$rtl"
+vvp "$out/prefix_adder"
+iverilog $prepared_define -g2012 -s v2_alu_tb -o "$out/alu" tests/rtl/v2_alu_tb.sv "$rtl"
+vvp "$out/alu"
+iverilog $prepared_define -g2012 -s pararisc_axi_adapter_tb -o "$out/axi" tests/rtl/pararisc_axi_adapter_tb.sv verilog/pararisc_axi_adapter.sv
+vvp "$out/axi"
+iverilog $prepared_define -g2012 -s pararisc_mdu_tb -o "$out/mdu" tests/rtl/pararisc_mdu_tb.sv "$rtl"
+vvp "$out/mdu"
+iverilog $prepared_define -g2012 -s v2_mdu_stream_tb -o "$out/mdu_stream" tests/rtl/v2_mdu_stream_tb.sv "$rtl"
+vvp "$out/mdu_stream"
+iverilog $prepared_define -g2012 -s v2_rename_prepare_tb -o "$out/rename" tests/rtl/v2_rename_prepare_tb.sv "$rtl"
+vvp "$out/rename"
+iverilog $prepared_define -g2012 -s v2_rename_prepare_tb -P v2_rename_prepare_tb.COMMIT_TREE=1 -o "$out/rename_tree" tests/rtl/v2_rename_prepare_tb.sv "$rtl"
+vvp "$out/rename_tree"
+iverilog $prepared_define -g2012 -s v2_frontend_prepare_tb -o "$out/frontend" tests/rtl/v2_frontend_prepare_tb.sv "$rtl"
+vvp "$out/frontend"
+iverilog $prepared_define -g2012 -s v2_frontend_target_tb -o "$out/frontend_target" tests/rtl/v2_frontend_prepare_tb.sv "$rtl"
+vvp "$out/frontend_target"
+iverilog $prepared_define -g2012 -s v2_frontend_sequential_tb -o "$out/frontend_sequential" tests/rtl/v2_frontend_sequential_tb.sv "$rtl"
+vvp "$out/frontend_sequential"
+iverilog $prepared_define -g2012 -s v2_predictor_read_tb -o "$out/predictor" tests/rtl/v2_predictor_read_tb.sv "$rtl"
+vvp "$out/predictor"
+iverilog $prepared_define -g2012 -s v2_select_wrap_tb -o "$out/select" tests/rtl/v2_select_wrap_tb.sv "$rtl"
+vvp "$out/select"
+iverilog $prepared_define -g2012 -s v2_dcache_write_tb -o "$out/dcache" tests/rtl/v2_dcache_write_tb.sv "$rtl"
+vvp "$out/dcache"
+iverilog $prepared_define -g2012 -s v2_dcache_return_tb -o "$out/dcache_return" tests/rtl/v2_dcache_return_tb.sv "$rtl"
+vvp "$out/dcache_return"
+iverilog $prepared_define -g2012 -s v2_dcache_write_tb -P v2_dcache_write_tb.CACHE_TREE=1 -P v2_dcache_write_tb.CACHE_BYTES=2048 -o "$out/dcache_tree" tests/rtl/v2_dcache_write_tb.sv "$rtl"
+vvp "$out/dcache_tree"
+iverilog $prepared_define -g2012 -s v2_dcache_return_tb -P v2_dcache_return_tb.CACHE_TREE=1 -P v2_dcache_return_tb.CACHE_BYTES=2048 -o "$out/dcache_return_tree" tests/rtl/v2_dcache_return_tb.sv "$rtl"
+vvp "$out/dcache_return_tree"
+iverilog $prepared_define -g2012 -s v2_terminal_squash_tb -o "$out/terminal" tests/rtl/v2_terminal_squash_tb.sv "$rtl"
+vvp "$out/terminal"
+iverilog $prepared_define -g2012 -s v2_branch_recovery_tb -o "$out/branch_recovery" tests/rtl/v2_branch_recovery_tb.sv "$rtl"
+vvp "$out/branch_recovery"
+iverilog $prepared_define -g2012 -s v2_branch_recovery_tb -P v2_branch_recovery_tb.CONTROL_TREE=1 -o "$out/branch_recovery_tree" tests/rtl/v2_branch_recovery_tb.sv "$rtl"
+vvp "$out/branch_recovery_tree"
+iverilog $prepared_define -g2012 -s v2_branch_recovery_tb -P v2_branch_recovery_tb.CONTROL_TREE=1 -P v2_branch_recovery_tb.ROB_WRITE_TREE=1 -P v2_branch_recovery_tb.COMMIT_TREE=1 -P v2_branch_recovery_tb.REGISTER_REDIRECT=1 -o "$out/branch_recovery_full_tree" tests/rtl/v2_branch_recovery_tb.sv "$rtl"
+vvp "$out/branch_recovery_full_tree"
+iverilog $prepared_define -g2012 -s v2_retire_read_tb -o "$out/retire_read" tests/rtl/v2_retire_read_tb.sv "$rtl"
+vvp "$out/retire_read"
+iverilog $prepared_define -g2012 -s v2_retire_read_tb -P v2_retire_read_tb.CONTROL_TREE=1 -o "$out/retire_read_tree" tests/rtl/v2_retire_read_tb.sv "$rtl"
+vvp "$out/retire_read_tree"
+iverilog $prepared_define -g2012 -s v2_retire_boundary_tb -o "$out/retire_boundary" tests/rtl/v2_retire_boundary_tb.sv "$rtl"
+vvp "$out/retire_boundary"
+iverilog $prepared_define -g2012 -s v2_retire_index_tb -o "$out/retire_index" tests/rtl/v2_retire_index_tb.sv "$rtl"
+vvp "$out/retire_index"
+iverilog $prepared_define -g2012 -s v2_increment_tb -o "$out/increment" tests/rtl/v2_increment_tb.sv "$rtl"
+vvp "$out/increment"
+iverilog $prepared_define -g2012 -s v2_operand_tb -o "$out/operand" tests/rtl/v2_operand_tb.sv "$rtl"
+vvp "$out/operand"
+
+# Exercise the optional parallel selectors and local address mux when present.
+for helper in v2_circular_priority v2_circular_grant v2_parallel_select v2_oldest_store v2_priority_mux; do
+  if grep -q "module $helper " "$rtl"; then
+    iverilog $prepared_define -g2012 -s "${helper}_tb" -o "$out/$helper" "tests/rtl/${helper}_tb.sv" "$rtl"
+    vvp "$out/$helper"
+  fi
+done

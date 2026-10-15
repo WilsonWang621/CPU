@@ -65,3 +65,11 @@ iverilog $prepared_define -g2012 -s v2_increment_tb -o "$out/increment" tests/rt
 vvp "$out/increment"
 iverilog $prepared_define -g2012 -s v2_operand_tb -o "$out/operand" tests/rtl/v2_operand_tb.sv "$rtl"
 vvp "$out/operand"
+
+# Exercise the optional parallel selectors and local address mux when present.
+for helper in v2_circular_priority v2_circular_grant v2_parallel_select v2_oldest_store v2_priority_mux; do
+  if grep -q "module $helper " "$rtl"; then
+    iverilog $prepared_define -g2012 -s "${helper}_tb" -o "$out/$helper" "tests/rtl/${helper}_tb.sv" "$rtl"
+    vvp "$out/$helper"
+  fi
+done
