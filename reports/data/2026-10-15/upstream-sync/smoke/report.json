@@ -1,0 +1,459 @@
+{
+  "schema_version": 1,
+  "mode": "opt",
+  "output_directory": "/home/wangwenxuan/ACM/ParaRisc/build/upstream-sync-smoke/synth/opt",
+  "abc_constraints": {
+    "driving_cell": "INVx1_ASAP7_75t_R",
+    "output_load_ff": 5.0
+  },
+  "area": {
+    "logic_area_um2": 10.701720000000007,
+    "sequential_area_um2": 4.6656,
+    "combinational_area_um2": 6.036120000000007,
+    "sram_area_um2": 0.0,
+    "area_um2": 10.701720000000007,
+    "module_tree": {
+      "instance": "student_top",
+      "module": "student_top",
+      "source_module": "student_top",
+      "direct_area_um2": 10.701720000000007,
+      "direct": {
+        "logic_area_um2": 10.701720000000007,
+        "sequential_area_um2": 4.6656,
+        "combinational_area_um2": 6.036120000000007,
+        "sram_area_um2": 0.0,
+        "area_um2": 10.701720000000007
+      },
+      "logic_area_um2": 10.701720000000007,
+      "sequential_area_um2": 4.6656,
+      "combinational_area_um2": 6.036120000000007,
+      "sram_area_um2": 0.0,
+      "area_um2": 10.701720000000007,
+      "children": [],
+      "percent_of_total": 100.0
+    },
+    "sram_instances": []
+  },
+  "timing": {
+    "clock_port": "clock",
+    "clock_period_ns": 2.0,
+    "input_delay_ns": 0.2,
+    "output_delay_ns": 0.2,
+    "input_transition_ns": 0.05,
+    "clock_transition_ns": 0.05,
+    "clock_uncertainty_ns": 0.05,
+    "output_load_ff": 5.0,
+    "reset_value": 0,
+    "clock_model": "ideal",
+    "interconnect": "no_parasitics",
+    "frequency_resolution_ns": 0.001,
+    "minimum_period_ns": 0.4443359375,
+    "estimated_fmax_mhz": 2250.5494505494507,
+    "worst_setup_slack_ns": 1.556474,
+    "critical_paths": [
+      {
+        "startpoint": "a[2]",
+        "endpoint": "_162_/D",
+        "slack_ns": 1.556,
+        "arrival_ns": 0.38380000000000003,
+        "required_ns": 1.94,
+        "points": [
+          {
+            "pin": "a[2]",
+            "cell": "student_top",
+            "arrival_ns": 0.2
+          },
+          {
+            "pin": "_099_/A",
+            "cell": "XOR2xp5_ASAP7_75t_R",
+            "arrival_ns": 0.2
+          },
+          {
+            "pin": "_099_/Y",
+            "cell": "XOR2xp5_ASAP7_75t_R",
+            "arrival_ns": 0.2395
+          },
+          {
+            "pin": "_101_/C",
+            "cell": "A2O1A1O1Ixp25_ASAP7_75t_R",
+            "arrival_ns": 0.2395
+          },
+          {
+            "pin": "_101_/Y",
+            "cell": "A2O1A1O1Ixp25_ASAP7_75t_R",
+            "arrival_ns": 0.2785
+          },
+          {
+            "pin": "_104_/A2",
+            "cell": "AO211x2_ASAP7_75t_R",
+            "arrival_ns": 0.2785
+          },
+          {
+            "pin": "_104_/Y",
+            "cell": "AO211x2_ASAP7_75t_R",
+            "arrival_ns": 0.3123
+          },
+          {
+            "pin": "_110_/A3",
+            "cell": "AOI311xp33_ASAP7_75t_R",
+            "arrival_ns": 0.3123
+          },
+          {
+            "pin": "_110_/Y",
+            "cell": "AOI311xp33_ASAP7_75t_R",
+            "arrival_ns": 0.343
+          },
+          {
+            "pin": "_157_/A2",
+            "cell": "OAI31xp33_ASAP7_75t_R",
+            "arrival_ns": 0.343
+          },
+          {
+            "pin": "_157_/Y",
+            "cell": "OAI31xp33_ASAP7_75t_R",
+            "arrival_ns": 0.3635
+          },
+          {
+            "pin": "_158_/C",
+            "cell": "O2A1O1Ixp33_ASAP7_75t_R",
+            "arrival_ns": 0.3635
+          },
+          {
+            "pin": "_158_/Y",
+            "cell": "O2A1O1Ixp33_ASAP7_75t_R",
+            "arrival_ns": 0.38380000000000003
+          },
+          {
+            "pin": "_162_/D",
+            "cell": "DFFHQNx1_ASAP7_75t_R",
+            "arrival_ns": 0.38380000000000003
+          }
+        ]
+      },
+      {
+        "startpoint": "a[0]",
+        "endpoint": "_176_/D",
+        "slack_ns": 1.5650000000000002,
+        "arrival_ns": 0.3759,
+        "required_ns": 1.9409999999999998,
+        "points": [
+          {
+            "pin": "a[0]",
+            "cell": "student_top",
+            "arrival_ns": 0.2
+          },
+          {
+            "pin": "_096_/A",
+            "cell": "AND2x2_ASAP7_75t_R",
+            "arrival_ns": 0.2
+          },
+          {
+            "pin": "_096_/Y",
+            "cell": "AND2x2_ASAP7_75t_R",
+            "arrival_ns": 0.23539999999999997
+          },
+          {
+            "pin": "_101_/A1",
+            "cell": "A2O1A1O1Ixp25_ASAP7_75t_R",
+            "arrival_ns": 0.23539999999999997
+          },
+          {
+            "pin": "_101_/Y",
+            "cell": "A2O1A1O1Ixp25_ASAP7_75t_R",
+            "arrival_ns": 0.277
+          },
+          {
+            "pin": "_104_/A2",
+            "cell": "AO211x2_ASAP7_75t_R",
+            "arrival_ns": 0.277
+          },
+          {
+            "pin": "_104_/Y",
+            "cell": "AO211x2_ASAP7_75t_R",
+            "arrival_ns": 0.31829999999999997
+          },
+          {
+            "pin": "_115_/B",
+            "cell": "NAND2xp33_ASAP7_75t_R",
+            "arrival_ns": 0.31829999999999997
+          },
+          {
+            "pin": "_115_/Y",
+            "cell": "NAND2xp33_ASAP7_75t_R",
+            "arrival_ns": 0.33499999999999996
+          },
+          {
+            "pin": "_117_/A",
+            "cell": "XNOR2xp5_ASAP7_75t_R",
+            "arrival_ns": 0.33499999999999996
+          },
+          {
+            "pin": "_117_/Y",
+            "cell": "XNOR2xp5_ASAP7_75t_R",
+            "arrival_ns": 0.3602
+          },
+          {
+            "pin": "_118_/B",
+            "cell": "NOR2xp33_ASAP7_75t_R",
+            "arrival_ns": 0.3602
+          },
+          {
+            "pin": "_118_/Y",
+            "cell": "NOR2xp33_ASAP7_75t_R",
+            "arrival_ns": 0.3759
+          },
+          {
+            "pin": "_176_/D",
+            "cell": "DFFHQNx1_ASAP7_75t_R",
+            "arrival_ns": 0.3759
+          }
+        ]
+      },
+      {
+        "startpoint": "a[0]",
+        "endpoint": "_177_/D",
+        "slack_ns": 1.579,
+        "arrival_ns": 0.3619,
+        "required_ns": 1.9409999999999998,
+        "points": [
+          {
+            "pin": "a[0]",
+            "cell": "student_top",
+            "arrival_ns": 0.2
+          },
+          {
+            "pin": "_096_/A",
+            "cell": "AND2x2_ASAP7_75t_R",
+            "arrival_ns": 0.2
+          },
+          {
+            "pin": "_096_/Y",
+            "cell": "AND2x2_ASAP7_75t_R",
+            "arrival_ns": 0.23539999999999997
+          },
+          {
+            "pin": "_101_/A1",
+            "cell": "A2O1A1O1Ixp25_ASAP7_75t_R",
+            "arrival_ns": 0.23539999999999997
+          },
+          {
+            "pin": "_101_/Y",
+            "cell": "A2O1A1O1Ixp25_ASAP7_75t_R",
+            "arrival_ns": 0.277
+          },
+          {
+            "pin": "_104_/A2",
+            "cell": "AO211x2_ASAP7_75t_R",
+            "arrival_ns": 0.277
+          },
+          {
+            "pin": "_104_/Y",
+            "cell": "AO211x2_ASAP7_75t_R",
+            "arrival_ns": 0.31829999999999997
+          },
+          {
+            "pin": "_110_/A3",
+            "cell": "AOI311xp33_ASAP7_75t_R",
+            "arrival_ns": 0.31829999999999997
+          },
+          {
+            "pin": "_110_/Y",
+            "cell": "AOI311xp33_ASAP7_75t_R",
+            "arrival_ns": 0.3411
+          },
+          {
+            "pin": "_114_/A",
+            "cell": "NOR2xp33_ASAP7_75t_R",
+            "arrival_ns": 0.3411
+          },
+          {
+            "pin": "_114_/Y",
+            "cell": "NOR2xp33_ASAP7_75t_R",
+            "arrival_ns": 0.3619
+          },
+          {
+            "pin": "_177_/D",
+            "cell": "DFFHQNx1_ASAP7_75t_R",
+            "arrival_ns": 0.3619
+          }
+        ]
+      },
+      {
+        "startpoint": "a[0]",
+        "endpoint": "_175_/D",
+        "slack_ns": 1.602,
+        "arrival_ns": 0.34290000000000004,
+        "required_ns": 1.9449999999999998,
+        "points": [
+          {
+            "pin": "a[0]",
+            "cell": "student_top",
+            "arrival_ns": 0.2
+          },
+          {
+            "pin": "_096_/A",
+            "cell": "AND2x2_ASAP7_75t_R",
+            "arrival_ns": 0.2
+          },
+          {
+            "pin": "_096_/Y",
+            "cell": "AND2x2_ASAP7_75t_R",
+            "arrival_ns": 0.23539999999999997
+          },
+          {
+            "pin": "_101_/A1",
+            "cell": "A2O1A1O1Ixp25_ASAP7_75t_R",
+            "arrival_ns": 0.23539999999999997
+          },
+          {
+            "pin": "_101_/Y",
+            "cell": "A2O1A1O1Ixp25_ASAP7_75t_R",
+            "arrival_ns": 0.277
+          },
+          {
+            "pin": "_104_/A2",
+            "cell": "AO211x2_ASAP7_75t_R",
+            "arrival_ns": 0.277
+          },
+          {
+            "pin": "_104_/Y",
+            "cell": "AO211x2_ASAP7_75t_R",
+            "arrival_ns": 0.31829999999999997
+          },
+          {
+            "pin": "_120_/B",
+            "cell": "AND3x1_ASAP7_75t_R",
+            "arrival_ns": 0.31829999999999997
+          },
+          {
+            "pin": "_120_/Y",
+            "cell": "AND3x1_ASAP7_75t_R",
+            "arrival_ns": 0.34290000000000004
+          },
+          {
+            "pin": "_175_/D",
+            "cell": "DFFHQNx1_ASAP7_75t_R",
+            "arrival_ns": 0.34290000000000004
+          }
+        ]
+      },
+      {
+        "startpoint": "a[0]",
+        "endpoint": "_174_/D",
+        "slack_ns": 1.603,
+        "arrival_ns": 0.3417,
+        "required_ns": 1.944,
+        "points": [
+          {
+            "pin": "a[0]",
+            "cell": "student_top",
+            "arrival_ns": 0.2
+          },
+          {
+            "pin": "_096_/A",
+            "cell": "AND2x2_ASAP7_75t_R",
+            "arrival_ns": 0.2
+          },
+          {
+            "pin": "_096_/Y",
+            "cell": "AND2x2_ASAP7_75t_R",
+            "arrival_ns": 0.23539999999999997
+          },
+          {
+            "pin": "_101_/A1",
+            "cell": "A2O1A1O1Ixp25_ASAP7_75t_R",
+            "arrival_ns": 0.23539999999999997
+          },
+          {
+            "pin": "_101_/Y",
+            "cell": "A2O1A1O1Ixp25_ASAP7_75t_R",
+            "arrival_ns": 0.277
+          },
+          {
+            "pin": "_122_/A1",
+            "cell": "OAI21xp33_ASAP7_75t_R",
+            "arrival_ns": 0.277
+          },
+          {
+            "pin": "_122_/Y",
+            "cell": "OAI21xp33_ASAP7_75t_R",
+            "arrival_ns": 0.3007
+          },
+          {
+            "pin": "_123_/B",
+            "cell": "AOI21xp33_ASAP7_75t_R",
+            "arrival_ns": 0.3007
+          },
+          {
+            "pin": "_123_/Y",
+            "cell": "AOI21xp33_ASAP7_75t_R",
+            "arrival_ns": 0.319
+          },
+          {
+            "pin": "_124_/A",
+            "cell": "HB1xp67_ASAP7_75t_R",
+            "arrival_ns": 0.319
+          },
+          {
+            "pin": "_124_/Y",
+            "cell": "HB1xp67_ASAP7_75t_R",
+            "arrival_ns": 0.3417
+          },
+          {
+            "pin": "_174_/D",
+            "cell": "DFFHQNx1_ASAP7_75t_R",
+            "arrival_ns": 0.3417
+          }
+        ]
+      }
+    ],
+    "timing_analyzed": true
+  },
+  "inputs": [
+    {
+      "path": "/home/wangwenxuan/ACM/ParaRisc/build/upstream-sync-smoke/student_top.sv",
+      "sha256": "1c5b76d8601ce63c6baaa32749312915242a16d5923393998f41a814b4e953eb"
+    },
+    {
+      "path": "/home/wangwenxuan/ACM/ParaRisc/scripts/ram/sram_fakeram.sv",
+      "sha256": "c0a2389d5c3211fbd2fbca22a2e2e86edc38eafa9260407d72a55841274098cc"
+    }
+  ],
+  "libraries": [
+    {
+      "path": "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_AO_RVT_TT_nldm_211120.lib",
+      "sha256": "b1ece108c0a2acd8d01c05cee6daee2834425037b1d9aad625d6f1dd640f1940"
+    },
+    {
+      "path": "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_INVBUF_RVT_TT_nldm_220122.lib",
+      "sha256": "a4ceb32e418e1aac8667e28fbd8e9e46baf520180be4db075598a4d7c681a56e"
+    },
+    {
+      "path": "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_OA_RVT_TT_nldm_211120.lib",
+      "sha256": "6529c6c72465cd133dfbfb03952327ab2774bb6aa4be866d78fd7bc6c58c9f6f"
+    },
+    {
+      "path": "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_SEQ_RVT_TT_nldm_220123.lib",
+      "sha256": "57a0b403485b99ebd676942af4673ac086b86c7c75fbdc3e5c0038501dd22ba3"
+    },
+    {
+      "path": "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib",
+      "sha256": "fa92e6ab1481810602811b1eea54bc016a341f11fb5188d7512c026599adf038"
+    }
+  ],
+  "sram_model": {
+    "name": "fakeram-asap7-v1",
+    "upstream": "ABKGroup/FakeRAM2.0",
+    "commit": "49dad15badc28a55363813e105c830c7776fc588",
+    "estimated": true,
+    "area_per_bit_um2": 0.0419904,
+    "clock_to_q_formula_ns": "0.071262 + 0.0000167155 * depth + 0.001243254 * width",
+    "setup_ns": 0.05,
+    "hold_ns": 0.05,
+    "min_period_ns": 0.157
+  },
+  "tools": {
+    "yosys": "Yosys 0.63 (git sha1 70a11c6bf, g++ 13.3.0-6ubuntu2~24.04.1 -fPIC -O3)",
+    "opensta": "3.1.0"
+  }
+}
