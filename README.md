@@ -6,17 +6,11 @@
 
 ## 双发射 500 MHz 优化进展
 
-2026-10-15 已同步官方 `302f0cf` 的 ABC buffering / cell sizing 更新。
-新版默认流程对冻结 v42 测得 **302.69 MHz、35,006.83 μm²**。
-默认源码现已加入恢复、ROB、Cache分发树、两级乘法、前缀进位、并行发射/转发、访存选择副本及地址准备路径优化。
-整理后独立实测 **487.85 MHz、35,914.00 μm²**，IPC为 **1.2222（延迟10）/ 1.113846（延迟20）**。
-完整单元、六项性能和高地址检查通过；对应整理前冻结设计已通过19/19正确性，整理后默认AppImage的完整正确性正在独立复验。
-最佳冻结试验达到 **496.61 MHz、35,888.93 μm²**，尚无该组合完整CPU验证结论，尚未合入默认源码。**500 MHz目标仍未达到。**
-记录见[阶段8报告](reports/frequency-stage8.md)及[默认源码复验](reports/frequency-stage9.md)。
-详见[阶段 7 报告](reports/frequency-stage7.md)、[433.90 MHz 冻结证据](reports/data/2026-10-15/timing-stage7/address-mul2-prefix-v4/identity.json)与
-[上游同步记录](reports/upstream-sync-2026-10-15.md)。
-
-500 MHz 写回唤醒优化及整理后测量见[阶段 8 报告](reports/frequency-stage8.md)。
+当前默认文件独立实测 **503.69 MHz、35900.33 μm²**，IPC几何平均为 **1.222171（延迟10）/ 1.113846（延迟20）**。
+保留32项ROB、双发射/双提交及2 KiB数据缓存，恢复、ROB、Cache、写回和地址选择使用保留层次的反相器分发树。
+完整RTL单元、六项性能及高地址检查通过；本版19项完整正确性正在运行。
+详见[最终默认实现验收](reports/frequency-stage10.md)及[测量与验证证据](reports/data/2026-10-16/timing-stage10/clean-default/)。
+官方`302f0cf`的综合器更新已同步并在本轮复核，见[同步记录](reports/upstream-sync-2026-10-15.md)。
 
 ## 双发射旧流程基准
 

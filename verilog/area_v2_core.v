@@ -518,6 +518,9 @@ reg [RW-1:0] wb_rid [0:(3)-1];
   wire [2:0] wb_good;
   wire [3*RW-1:0] wb_slots;
   wire [95:0] wb_values;
+  wire [6*32-1:0] load_value_copies;
+  v2_distribution #(.WIDTH(32),.LEAVES(6)) distribute_load_result (
+    .data_in(wb_value[2]),.data_out(load_value_copies));
 
   wire [6*WAKE_BITS-1:0] wake_copies;
   v2_distribution #(.WIDTH(WAKE_BITS),.LEAVES(6)) distribute_wakeup (
@@ -1051,7 +1054,7 @@ end
         source_value=(source_value & {32{!(|bypass_matches)}}) |
           (wb_value[0] & {32{bypass_chosen[0]}}) |
           (wb_value[1] & {32{bypass_chosen[1]}}) |
-          (wb_value[2] & {32{bypass_chosen[2]}});
+          (load_value_copies[5*32+:32] & {32{bypass_chosen[2]}});
 
         if(lane==1 && rename_prepare[0] && source_id==dispatch_rid[0] && pending) ready_value=0;
         if(source_number==0) begin
@@ -1130,7 +1133,7 @@ integer w;
 for(w=0;w<3;w=w+1)
           if(wb_valid[w] && wb_rid[w]==narrow_1(r)) begin
             rob[r][ROB_T_DONE_LSB+:ROB_T_DONE_WIDTH]<=1;rob[r][ROB_T_FAULT_LSB+:ROB_T_FAULT_WIDTH]<=wb_fault[w];
-            if(!ROB_WRITE_TREE) begin rob[r][ROB_T_FAULT_ADDRESS_LSB+:ROB_T_FAULT_ADDRESS_WIDTH]<=wb_address[w];values[r]<=wb_value[w];end
+            if(!ROB_WRITE_TREE) begin rob[r][ROB_T_FAULT_ADDRESS_LSB+:ROB_T_FAULT_ADDRESS_WIDTH]<=wb_address[w];values[r]<=(w==2 ? load_value_copies[(2*r/ROB_ENTRIES)*32+:32]:wb_value[w]);end
           end
 end
         if(memory_complete && executing[2][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH]==narrow_1(r) && executing[2][ISSUE_T_OP_LSB+:ISSUE_T_OP_WIDTH]==OP_STORE) begin
@@ -1174,7 +1177,7 @@ end
 integer w;
 for(w=0;w<3;w=w+1)
               if(controls[w]) begin
-                rob[r][ROB_T_FAULT_ADDRESS_LSB+(bit_id)]<=wb_address[w][bit_id];values[r][bit_id]<=wb_value[w][bit_id];
+                rob[r][ROB_T_FAULT_ADDRESS_LSB+(bit_id)]<=wb_address[w][bit_id];values[r][bit_id]<=(w==2 ? load_value_copies[(2*r/ROB_ENTRIES)*32+bit_id]:wb_value[w][bit_id]);
               end
 end
             if(controls[3]) begin rob[r][ROB_T_ADDRESS_LSB+(bit_id)]<=memory_address[bit_id];rob[r][ROB_T_WDATA_LSB+(bit_id)]<=memory_data[bit_id];end
@@ -1230,13 +1233,13 @@ end
         .old_ready(queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_READY_A_LSB+:ISSUE_T_READY_A_WIDTH]),.old_value(queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_A_LSB+:ISSUE_T_A_WIDTH]),.source(queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_SOURCE_A_LSB+:ISSUE_T_SOURCE_A_WIDTH]),
         .initial_ready(prepare_lane[1] ? dispatch_payload[1][ISSUE_T_READY_A_LSB+:ISSUE_T_READY_A_WIDTH]:dispatch_payload[0][ISSUE_T_READY_A_LSB+:ISSUE_T_READY_A_WIDTH]),
         .initial_value(prepare_lane[1] ? dispatch_payload[1][ISSUE_T_A_LSB+:ISSUE_T_A_WIDTH]:dispatch_payload[0][ISSUE_T_A_LSB+:ISSUE_T_A_WIDTH]),
-        .wb_good(wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+3*RW+:3]),.wb_slots(wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+:3*RW]),.wb_values(wb_values),.next_ready(next_ready_a),.next_value(next_value_a));
+        .wb_good(wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+3*RW+:3]),.wb_slots(wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+:3*RW]),.wb_values({load_value_copies[(2+bank)*32+:32],wb_values[63:0]}),.next_ready(next_ready_a),.next_value(next_value_a));
       v2_operand #(.SLOT_BITS(RW)) operand_b (
         .live(queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_VALID_LSB+:ISSUE_T_VALID_WIDTH]),.prepare(|prepare_lane),
         .old_ready(queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_READY_B_LSB+:ISSUE_T_READY_B_WIDTH]),.old_value(queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_B_LSB+:ISSUE_T_B_WIDTH]),.source(queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_SOURCE_B_LSB+:ISSUE_T_SOURCE_B_WIDTH]),
         .initial_ready(prepare_lane[1] ? dispatch_payload[1][ISSUE_T_READY_B_LSB+:ISSUE_T_READY_B_WIDTH]:dispatch_payload[0][ISSUE_T_READY_B_LSB+:ISSUE_T_READY_B_WIDTH]),
         .initial_value(prepare_lane[1] ? dispatch_payload[1][ISSUE_T_B_LSB+:ISSUE_T_B_WIDTH]:dispatch_payload[0][ISSUE_T_B_LSB+:ISSUE_T_B_WIDTH]),
-        .wb_good(wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+3*RW+:3]),.wb_slots(wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+:3*RW]),.wb_values(wb_values),.next_ready(next_ready_b),.next_value(next_value_b));
+        .wb_good(wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+3*RW+:3]),.wb_slots(wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+:3*RW]),.wb_values({load_value_copies[(2+bank)*32+:32],wb_values[63:0]}),.next_ready(next_ready_b),.next_value(next_value_b));
       always @(posedge clk) begin
         queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_READY_A_LSB+:ISSUE_T_READY_A_WIDTH]<=next_ready_a;queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_A_LSB+:ISSUE_T_A_WIDTH]<=next_value_a;
         queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_READY_B_LSB+:ISSUE_T_READY_B_WIDTH]<=next_ready_b;queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_B_LSB+:ISSUE_T_B_WIDTH]<=next_value_b;
@@ -1249,7 +1252,8 @@ end
           .old_value(queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_A_LSB+:ISSUE_T_A_WIDTH]),.source(queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_SOURCE_A_LSB+:ISSUE_T_SOURCE_A_WIDTH]),
           .initial_ready(1'b0),.initial_value(32'b0),
           .wb_good(wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+3*RW+:3]),
-          .wb_slots(wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+:3*RW]),.wb_values(wb_values),.next_ready(),.next_value(live_value));
+          .wb_slots(wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+:3*RW]),
+          .wb_values({load_value_copies[(2+bank)*32+:32],wb_values[63:0]}),.next_ready(),.next_value(live_value));
         v2_prefix_adder #(.WIDTH(32)) effective_address_add (
           .a(live_value),.b(queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_IMM_LSB+:ISSUE_T_IMM_WIDTH]),.carry_in(1'b0),.sum(live_sum),.carry_out());
         wire [31:0] address_sum=queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_VALID_LSB+:ISSUE_T_VALID_WIDTH] ? live_sum:
@@ -1257,8 +1261,14 @@ end
 
         wire address_update=(!queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_VALID_LSB+:ISSUE_T_VALID_WIDTH] && |prepare_lane) ||
                             (queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_VALID_LSB+:ISSUE_T_VALID_WIDTH] && !queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_READY_A_LSB+:ISSUE_T_READY_A_WIDTH]);
-        always @(posedge clk)
-          if(address_update) prepared_address[q]<=address_sum;
+        wire [31:0] address_next;
+        v2_priority_mux #(.WORD_BITS(32),.PORTS(3)) capture_address (
+          .enable({queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_VALID_LSB+:ISSUE_T_VALID_WIDTH] && !queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_READY_A_LSB+:ISSUE_T_READY_A_WIDTH],
+                   !queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_VALID_LSB+:ISSUE_T_VALID_WIDTH] && prepare_lane[1],
+                   !queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_VALID_LSB+:ISSUE_T_VALID_WIDTH] && prepare_lane[0]}),
+          .old_value(prepared_address[q]),
+          .data({live_sum,dispatch_address[1],dispatch_address[0]}),.value(address_next));
+        always @(posedge clk) prepared_address[q]<=address_next;
       end
       always @(posedge clk) begin
         if(rst) queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_VALID_LSB+:ISSUE_T_VALID_WIDTH]<=0;
@@ -2493,7 +2503,7 @@ module v2_dcache #(
   output reg  idle,
   output reg [63:0] miss_count
 );
-genvar bank,byte_id,line,m,row,set_index,w,way;
+genvar bank,byte_id,line,m,row,set_index,w,waiter,way;
 function automatic [1-1:0] narrow_0;
   input [63:0] value;
   begin narrow_0=value; end
@@ -2715,13 +2725,44 @@ reg [MSHRS-1:0] release_miss;
   assign store_error=store_done && mem_rsp_error;
   assign out_space=!out_valid || request_fire;
 
+  wire [LOAD_SLOTS-1:0] return_candidates;
+reg  incoming_word_ready;
+  wire incoming_error=(merge_valid && misses[merge_slot][MISS_T_FAILED_LSB+(load_address[OFFSET-1:2])]) ||
+    (fill_fire && mem_rsp_error && response_line==selected_line && response_word==load_address[OFFSET-1:2]);
+  always @* begin
+    incoming_word_ready=word_valid[selected_line][load_address[OFFSET-1:2]];
+    if(allocate && !load_tag_hit) incoming_word_ready=0;
+    if(fill_fire && response_line==selected_line && response_word==load_address[OFFSET-1:2])
+      incoming_word_ready=!mem_rsp_error;
+    if(store_accept && store_tag_hit && store_line==selected_line && store_mask==15 &&
+        store_address[OFFSET-1:2]==load_address[OFFSET-1:2]) incoming_word_ready=1;
+  end
+  for(waiter=0;waiter<LOAD_SLOTS;waiter=waiter+1) begin: return_lookahead
+reg  resident_word_ready;
+    wire publish=load_accept && !load_hit && load_tag==narrow_2(waiter);
+    wire consumed=result_valid && result_ready && result_tag==narrow_2(waiter);
+    wire resident_error=waiters[waiter][WAITER_T_ERROR_LSB+:WAITER_T_ERROR_WIDTH] ||
+      (fill_fire && mem_rsp_error && waiters[waiter][WAITER_T_VALID_LSB+:WAITER_T_VALID_WIDTH] &&
+       waiters[waiter][WAITER_T_PHYSICAL_LSB+:WAITER_T_PHYSICAL_WIDTH]==response_line && waiters[waiter][WAITER_T_WORD_INDEX_LSB+:WAITER_T_WORD_INDEX_WIDTH]==response_word);
+    always @* begin
+      resident_word_ready=word_valid[waiters[waiter][WAITER_T_PHYSICAL_LSB+:WAITER_T_PHYSICAL_WIDTH]][waiters[waiter][WAITER_T_WORD_INDEX_LSB+:WAITER_T_WORD_INDEX_WIDTH]];
+      if(allocate && !load_tag_hit && selected_line==waiters[waiter][WAITER_T_PHYSICAL_LSB+:WAITER_T_PHYSICAL_WIDTH]) resident_word_ready=0;
+      if(fill_fire && response_line==waiters[waiter][WAITER_T_PHYSICAL_LSB+:WAITER_T_PHYSICAL_WIDTH] && response_word==waiters[waiter][WAITER_T_WORD_INDEX_LSB+:WAITER_T_WORD_INDEX_WIDTH])
+        resident_word_ready=!mem_rsp_error;
+      if(store_accept && store_tag_hit && store_line==waiters[waiter][WAITER_T_PHYSICAL_LSB+:WAITER_T_PHYSICAL_WIDTH] && store_mask==15 &&
+          store_address[OFFSET-1:2]==waiters[waiter][WAITER_T_WORD_INDEX_LSB+:WAITER_T_WORD_INDEX_WIDTH]) resident_word_ready=1;
+    end
+    assign return_candidates[waiter]=publish ? (incoming_error || incoming_word_ready):
+      (waiters[waiter][WAITER_T_VALID_LSB+:WAITER_T_VALID_WIDTH] && !consumed && (resident_error || resident_word_ready));
+
+  end
   always @* begin: returning_load
     return_valid_next=0;return_tag_next=0;return_error_next=0;return_address_next=0;
     begin: loop_5
 integer w;
 for(w=0;w<LOAD_SLOTS;w=w+1)
       if(!return_valid_next && waiter_next[w][WAITER_T_VALID_LSB+:WAITER_T_VALID_WIDTH] &&
-          (waiter_next[w][WAITER_T_ERROR_LSB+:WAITER_T_ERROR_WIDTH] || word_valid_next[waiter_next[w][WAITER_T_PHYSICAL_LSB+:WAITER_T_PHYSICAL_WIDTH]][waiter_next[w][WAITER_T_WORD_INDEX_LSB+:WAITER_T_WORD_INDEX_WIDTH]])) begin
+          return_candidates[w]) begin
         return_valid_next=1;return_tag_next=narrow_2(w);return_error_next=waiter_next[w][WAITER_T_ERROR_LSB+:WAITER_T_ERROR_WIDTH];
         return_address_next={waiter_next[w][WAITER_T_PHYSICAL_LSB+:WAITER_T_PHYSICAL_WIDTH],waiter_next[w][WAITER_T_WORD_INDEX_LSB+:WAITER_T_WORD_INDEX_WIDTH]};
       end
@@ -4057,6 +4098,88 @@ localparam integer FETCH_T_WIDTH=FETCH_T_PC_LSB+FETCH_T_PC_WIDTH;
 
   assign group_g=high_g | (high_p & low_g);
   assign group_p=high_p & low_p;
+endmodule
+
+
+(* keep_hierarchy=1 *)
+module v2_priority_mux #(
+  parameter integer WORD_BITS=32,PORTS=3,GROUP_BITS=8,
+  parameter integer GROUPS=(WORD_BITS+GROUP_BITS-1)/GROUP_BITS
+)(
+  input wire [PORTS-1:0] enable,
+  input wire [WORD_BITS-1:0] old_value,
+  input wire [PORTS*WORD_BITS-1:0] data,
+  output wire [WORD_BITS-1:0] value
+);
+genvar bit_id,p;
+
+
+  localparam OP_ADD=0, OP_SUB=1, OP_SLL=2, OP_SLT=3, OP_SLTU=4, OP_XOR=5, OP_SRL=6, OP_SRA=7, OP_OR=8, OP_AND=9, OP_LUI=10, OP_AUIPC=11, OP_JAL=12, OP_JALR=13, OP_BEQ=14, OP_BNE=15, OP_BLT=16, OP_BGE=17, OP_BLTU=18, OP_BGEU=19, OP_LOAD=20, OP_STORE=21, OP_MUL=22, OP_MULH=23, OP_MULHSU=24, OP_MULHU=25, OP_DIV=26, OP_DIVU=27, OP_REM=28, OP_REMU=29;
+
+  localparam [3:0] FAULT_NONE=0, FAULT_ILLEGAL=1,
+    FAULT_FETCH_ALIGN=2, FAULT_FETCH_RANGE=3, FAULT_FETCH_BUS=4,
+    FAULT_TARGET_ALIGN=5, FAULT_LOAD_ALIGN=6, FAULT_LOAD_RANGE=7,
+    FAULT_STORE_ALIGN=8, FAULT_STORE_RANGE=9, FAULT_LOAD_BUS=10,
+    FAULT_STORE_BUS=11;
+  function automatic is_branch(input [5:0] op);
+    is_branch = op >= OP_JAL && op <= OP_BGEU;
+  endfunction
+  function automatic is_mdu(input [5:0] op);
+    is_mdu = op >= OP_MUL && op <= OP_REMU;
+  endfunction
+  function automatic is_alu(input [5:0] op);
+    is_alu = op <= OP_AUIPC;
+  endfunction
+
+localparam integer DECODED_T_ILLEGAL_LSB=0, DECODED_T_ILLEGAL_WIDTH=1;
+localparam integer DECODED_T_LOAD_SIGNED_LSB=DECODED_T_ILLEGAL_LSB+DECODED_T_ILLEGAL_WIDTH, DECODED_T_LOAD_SIGNED_WIDTH=1;
+localparam integer DECODED_T_MEM_SIZE_LSB=DECODED_T_LOAD_SIGNED_LSB+DECODED_T_LOAD_SIGNED_WIDTH, DECODED_T_MEM_SIZE_WIDTH=2;
+localparam integer DECODED_T_IMM_LSB=DECODED_T_MEM_SIZE_LSB+DECODED_T_MEM_SIZE_WIDTH, DECODED_T_IMM_WIDTH=32;
+localparam integer DECODED_T_USE_IMM_LSB=DECODED_T_IMM_LSB+DECODED_T_IMM_WIDTH, DECODED_T_USE_IMM_WIDTH=1;
+localparam integer DECODED_T_WRITES_RD_LSB=DECODED_T_USE_IMM_LSB+DECODED_T_USE_IMM_WIDTH, DECODED_T_WRITES_RD_WIDTH=1;
+localparam integer DECODED_T_USES_RS2_LSB=DECODED_T_WRITES_RD_LSB+DECODED_T_WRITES_RD_WIDTH, DECODED_T_USES_RS2_WIDTH=1;
+localparam integer DECODED_T_USES_RS1_LSB=DECODED_T_USES_RS2_LSB+DECODED_T_USES_RS2_WIDTH, DECODED_T_USES_RS1_WIDTH=1;
+localparam integer DECODED_T_RD_LSB=DECODED_T_USES_RS1_LSB+DECODED_T_USES_RS1_WIDTH, DECODED_T_RD_WIDTH=5;
+localparam integer DECODED_T_RS2_LSB=DECODED_T_RD_LSB+DECODED_T_RD_WIDTH, DECODED_T_RS2_WIDTH=5;
+localparam integer DECODED_T_RS1_LSB=DECODED_T_RS2_LSB+DECODED_T_RS2_WIDTH, DECODED_T_RS1_WIDTH=5;
+localparam integer DECODED_T_OP_LSB=DECODED_T_RS1_LSB+DECODED_T_RS1_WIDTH, DECODED_T_OP_WIDTH=6;
+localparam integer DECODED_T_WIDTH=DECODED_T_OP_LSB+DECODED_T_OP_WIDTH;
+localparam integer FETCH_T_GSHARE_TAKEN_LSB=0, FETCH_T_GSHARE_TAKEN_WIDTH=1;
+localparam integer FETCH_T_BIMODAL_TAKEN_LSB=FETCH_T_GSHARE_TAKEN_LSB+FETCH_T_GSHARE_TAKEN_WIDTH, FETCH_T_BIMODAL_TAKEN_WIDTH=1;
+localparam integer FETCH_T_PREDICTED_TAKEN_LSB=FETCH_T_BIMODAL_TAKEN_LSB+FETCH_T_BIMODAL_TAKEN_WIDTH, FETCH_T_PREDICTED_TAKEN_WIDTH=1;
+localparam integer FETCH_T_RAS_COUNT_LSB=FETCH_T_PREDICTED_TAKEN_LSB+FETCH_T_PREDICTED_TAKEN_WIDTH, FETCH_T_RAS_COUNT_WIDTH=5;
+localparam integer FETCH_T_RAS_SNAPSHOT_LSB=FETCH_T_RAS_COUNT_LSB+FETCH_T_RAS_COUNT_WIDTH, FETCH_T_RAS_SNAPSHOT_WIDTH=512;
+localparam integer FETCH_T_HISTORY_LSB=FETCH_T_RAS_SNAPSHOT_LSB+FETCH_T_RAS_SNAPSHOT_WIDTH, FETCH_T_HISTORY_WIDTH=16;
+localparam integer FETCH_T_FAULT_ADDR_LSB=FETCH_T_HISTORY_LSB+FETCH_T_HISTORY_WIDTH, FETCH_T_FAULT_ADDR_WIDTH=32;
+localparam integer FETCH_T_FAULT_LSB=FETCH_T_FAULT_ADDR_LSB+FETCH_T_FAULT_ADDR_WIDTH, FETCH_T_FAULT_WIDTH=4;
+localparam integer FETCH_T_INST_VALID_LSB=FETCH_T_FAULT_LSB+FETCH_T_FAULT_WIDTH, FETCH_T_INST_VALID_WIDTH=1;
+localparam integer FETCH_T_PREDICTED_PC_LSB=FETCH_T_INST_VALID_LSB+FETCH_T_INST_VALID_WIDTH, FETCH_T_PREDICTED_PC_WIDTH=32;
+localparam integer FETCH_T_INST_LSB=FETCH_T_PREDICTED_PC_LSB+FETCH_T_PREDICTED_PC_WIDTH, FETCH_T_INST_WIDTH=32;
+localparam integer FETCH_T_PC_LSB=FETCH_T_INST_LSB+FETCH_T_INST_WIDTH, FETCH_T_PC_WIDTH=32;
+localparam integer FETCH_T_WIDTH=FETCH_T_PC_LSB+FETCH_T_PC_WIDTH;
+
+  wire [PORTS-1:0] chosen;
+  wire [(PORTS+1)*GROUPS-1:0] controls;
+  for(p=0;p<PORTS;p=p+1) begin: priority_decode
+    if(p==PORTS-1) begin: last_port
+      assign chosen[p]=enable[p];
+    end else begin: lower_port
+      assign chosen[p]=enable[p] && !(|enable[PORTS-1:p+1]);
+    end
+  end
+  v2_distribution #(.WIDTH(PORTS+1),.LEAVES(GROUPS)) tree (
+    .data_in({!(|enable),chosen}),.data_out(controls));
+  for(bit_id=0;bit_id<WORD_BITS;bit_id=bit_id+1) begin: bit_mux
+    wire [PORTS:0] local_control=controls[(bit_id/GROUP_BITS)*(PORTS+1)+:PORTS+1];
+    integer p;
+reg  result_bit;
+    always @* begin
+      result_bit=old_value[bit_id] && local_control[PORTS];
+      for(p=0;p<PORTS;p=p+1)
+        result_bit=result_bit | (data[p*WORD_BITS+bit_id] && local_control[p]);
+    end
+    assign value[bit_id]=result_bit;
+  end
 endmodule
 
 

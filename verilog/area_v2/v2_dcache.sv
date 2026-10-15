@@ -136,11 +136,48 @@ module v2_dcache #(
   // Select using the state that the cache publishes at the next edge.
   // The data remains combinational, but its late priority selection no
   // longer precedes the wide data read. This preserves the return cycle.
+  wire [LOAD_SLOTS-1:0] return_candidates;
+  logic incoming_word_ready;
+  wire incoming_error=(merge_valid && misses[merge_slot].failed[load_address[OFFSET-1:2]]) ||
+    (fill_fire && mem_rsp_error && response_line==selected_line && response_word==load_address[OFFSET-1:2]);
+  always_comb begin
+    incoming_word_ready=word_valid[selected_line][load_address[OFFSET-1:2]];
+    if(allocate && !load_tag_hit) incoming_word_ready=0;
+    if(fill_fire && response_line==selected_line && response_word==load_address[OFFSET-1:2])
+      incoming_word_ready=!mem_rsp_error;
+    if(store_accept && store_tag_hit && store_line==selected_line && store_mask==15 &&
+        store_address[OFFSET-1:2]==load_address[OFFSET-1:2]) incoming_word_ready=1;
+  end
+  for(genvar waiter=0;waiter<LOAD_SLOTS;waiter=waiter+1) begin: return_lookahead
+    logic resident_word_ready;
+    wire publish=load_accept && !load_hit && load_tag==LT'(waiter);
+    wire consumed=result_valid && result_ready && result_tag==LT'(waiter);
+    wire resident_error=waiters[waiter].error ||
+      (fill_fire && mem_rsp_error && waiters[waiter].valid &&
+       waiters[waiter].physical==response_line && waiters[waiter].word_index==response_word);
+    always_comb begin
+      resident_word_ready=word_valid[waiters[waiter].physical][waiters[waiter].word_index];
+      if(allocate && !load_tag_hit && selected_line==waiters[waiter].physical) resident_word_ready=0;
+      if(fill_fire && response_line==waiters[waiter].physical && response_word==waiters[waiter].word_index)
+        resident_word_ready=!mem_rsp_error;
+      if(store_accept && store_tag_hit && store_line==waiters[waiter].physical && store_mask==15 &&
+          store_address[OFFSET-1:2]==waiters[waiter].word_index) resident_word_ready=1;
+    end
+    assign return_candidates[waiter]=publish ? (incoming_error || incoming_word_ready):
+      (waiters[waiter].valid && !consumed && (resident_error || resident_word_ready));
+`ifndef SYNTHESIS
+    always_ff @(posedge clk) if(!rst)
+      assert((waiter_next[waiter].valid && return_candidates[waiter]) ===
+        (waiter_next[waiter].valid && (waiter_next[waiter].error ||
+          word_valid_next[waiter_next[waiter].physical][waiter_next[waiter].word_index])))
+        else $fatal(1,"cache return eligibility differs");
+`endif
+  end
   always_comb begin: returning_load
     return_valid_next=0;return_tag_next=0;return_error_next=0;return_address_next=0;
     for(integer w=0;w<LOAD_SLOTS;w=w+1)
       if(!return_valid_next && waiter_next[w].valid &&
-          (waiter_next[w].error || word_valid_next[waiter_next[w].physical][waiter_next[w].word_index])) begin
+          return_candidates[w]) begin
         return_valid_next=1;return_tag_next=LT'(w);return_error_next=waiter_next[w].error;
         return_address_next={waiter_next[w].physical,waiter_next[w].word_index};
       end

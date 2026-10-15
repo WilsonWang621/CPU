@@ -1,0 +1,30 @@
+read_json "/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/local-address-rob16/synth/opt/ram/prepared.json"
+read_verilog "/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/local-address-rob16/synth/opt/ram/wrappers.v"
+read_liberty -lib -ignore_miss_func "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_AO_RVT_TT_nldm_211120.lib"
+read_liberty -lib -ignore_miss_func "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_INVBUF_RVT_TT_nldm_220122.lib"
+read_liberty -lib -ignore_miss_func "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_OA_RVT_TT_nldm_211120.lib"
+read_liberty -lib -ignore_miss_func "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_SEQ_RVT_TT_nldm_220123.lib"
+read_liberty -lib -ignore_miss_func "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib"
+hierarchy -check -top student_top
+synth -top student_top -noabc -flatten
+check -assert
+select -assert-none a:init t:$dlatch* t:$_DLATCH*
+dfflibmap -liberty "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_SEQ_RVT_TT_nldm_220123.lib"
+abc -exe "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/bin/yosys-abc" -liberty "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_AO_RVT_TT_nldm_211120.lib" -liberty "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_INVBUF_RVT_TT_nldm_220122.lib" -liberty "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_OA_RVT_TT_nldm_211120.lib" -liberty "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_SEQ_RVT_TT_nldm_220123.lib" -liberty "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib" -constr "/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/local-address-rob16/synth/opt/abc.constr" -D 2000
+clean
+delete t:$scopeinfo
+clean -purge
+hilomap -hicell TIEHIx1_ASAP7_75t_R H -locell TIELOx1_ASAP7_75t_R L
+check -assert -mapped
+tee -o "/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/local-address-rob16/synth/opt/stat.json" stat -json -liberty "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_AO_RVT_TT_nldm_211120.lib" -liberty "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_INVBUF_RVT_TT_nldm_220122.lib" -liberty "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_OA_RVT_TT_nldm_211120.lib" -liberty "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_SEQ_RVT_TT_nldm_220123.lib" -liberty "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib"
+write_json "/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/local-address-rob16/synth/opt/design.json"
+write_verilog -noattr -noexpr "/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/local-address-rob16/synth/opt/mapped.v"
+design -reset
+read_liberty -lib -ignore_miss_func "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_AO_RVT_TT_nldm_211120.lib"
+read_liberty -lib -ignore_miss_func "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_INVBUF_RVT_TT_nldm_220122.lib"
+read_liberty -lib -ignore_miss_func "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_OA_RVT_TT_nldm_211120.lib"
+read_liberty -lib -ignore_miss_func "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_SEQ_RVT_TT_nldm_220123.lib"
+read_liberty -lib -ignore_miss_func "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib"
+read_verilog "/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/local-address-rob16/synth/opt/mapped.v"
+hierarchy -check -top student_top
+check -assert -mapped

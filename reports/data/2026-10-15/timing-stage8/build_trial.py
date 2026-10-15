@@ -1,6 +1,6 @@
 from pathlib import Path
 import argparse,importlib.util,re,json,hashlib
-p=argparse.ArgumentParser();p.add_argument('name');p.add_argument('--wb-tree',action='store_true');p.add_argument('--operand',action='store_true');p.add_argument('--wake-qualified',action='store_true');p.add_argument('--wake-tree',action='store_true');p.add_argument('--forward-priority',action='store_true');p.add_argument('--prefix-div',action='store_true');p.add_argument('--dispatch-wake',action='store_true');p.add_argument('--parallel-issue',action='store_true');p.add_argument('--forward-onehot',action='store_true');p.add_argument('--memory-grants',action='store_true');p.add_argument('--parallel-forward-mask',action='store_true');p.add_argument('--cache-lookup',action='store_true');p.add_argument('--split-address',action='store_true');p.add_argument('--parallel-dispatch',action='store_true');p.add_argument('--parallel-return',action='store_true');p.add_argument('--store-grants',action='store_true');p.add_argument('--load-value-tree',action='store_true');p.add_argument('--store-priority',action='store_true');p.add_argument('--split-load-address',action='store_true');p.add_argument('--return-lookahead',action='store_true');p.add_argument('--dc-index-bits',type=int);p.add_argument('--rob-bits',type=int);p.add_argument('--address-register',action='store_true');a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('name');p.add_argument('--wb-tree',action='store_true');p.add_argument('--operand',action='store_true');p.add_argument('--wake-qualified',action='store_true');p.add_argument('--wake-tree',action='store_true');p.add_argument('--forward-priority',action='store_true');p.add_argument('--prefix-div',action='store_true');p.add_argument('--dispatch-wake',action='store_true');p.add_argument('--parallel-issue',action='store_true');p.add_argument('--forward-onehot',action='store_true');p.add_argument('--memory-grants',action='store_true');p.add_argument('--parallel-forward-mask',action='store_true');p.add_argument('--cache-lookup',action='store_true');p.add_argument('--split-address',action='store_true');p.add_argument('--parallel-dispatch',action='store_true');p.add_argument('--parallel-return',action='store_true');p.add_argument('--store-grants',action='store_true');p.add_argument('--load-value-tree',action='store_true');p.add_argument('--store-priority',action='store_true');p.add_argument('--split-load-address',action='store_true');p.add_argument('--return-lookahead',action='store_true');p.add_argument('--dc-index-bits',type=int);p.add_argument('--rob-bits',type=int);p.add_argument('--address-register',action='store_true');p.add_argument('--compact-load-tree',action='store_true');a=p.parse_args()
 out=Path('build/frequency-stage8')/a.name/'rtl';out.mkdir(parents=True,exist_ok=True)
 BASE=Path('reports/data/2026-10-15/timing-stage8/baseline433/structured')
 changed={}
@@ -356,6 +356,14 @@ if a.load_value_tree:
  core=core.replace(old,'(load_value_copies[5*32+:32] & {32{bypass_chosen[2]}})')
  core=core.replace('values[r]<=wb_value[w];','values[r]<=(w==2 ? load_value_copies[(2*r/ROB_ENTRIES)*32+:32]:wb_value[w]);')
  core=core.replace('values[r][bit_id]<=wb_value[w][bit_id];','values[r][bit_id]<=(w==2 ? load_value_copies[(2*r/ROB_ENTRIES)*32+bit_id]:wb_value[w][bit_id]);')
+ changed['cpu_top.sv']=core
+if a.compact_load_tree:
+ assert a.load_value_tree
+ core=core.replace('wire [6*32-1:0] load_value_copies;','wire [4*32-1:0] load_value_copies;')
+ core=core.replace('v2_distribution #(.WIDTH(32),.LEAVES(6)) distribute_load_result (',
+   'v2_distribution #(.WIDTH(32),.LEAVES(4)) distribute_load_result (')
+ core=core.replace('(2+bank)*32+:32','(bank<2 ? 1:2)*32+:32').replace('[5*32+:32] & {32{bypass_chosen[2]}}','[3*32+:32] & {32{bypass_chosen[2]}}')
+ core=core.replace('(2*r/ROB_ENTRIES)*32+:32','0+:32').replace('(2*r/ROB_ENTRIES)*32+bit_id','bit_id')
  changed['cpu_top.sv']=core
 if a.address_register:
  assert a.split_address

@@ -165,6 +165,10 @@ module cpu_top #(
   wire [2:0] wb_good;
   wire [3*RW-1:0] wb_slots;
   wire [95:0] wb_values;
+  wire [6*32-1:0] load_value_copies;
+  v2_distribution #(.WIDTH(32),.LEAVES(6)) distribute_load_result (
+    .data_in(wb_value[2]),.data_out(load_value_copies));
+
   localparam integer WAKE_BITS=3+3*RW;
   wire [6*WAKE_BITS-1:0] wake_copies;
   v2_distribution #(.WIDTH(WAKE_BITS),.LEAVES(6)) distribute_wakeup (
@@ -673,7 +677,7 @@ module cpu_top #(
         source_value=(source_value & {32{!(|bypass_matches)}}) |
           (wb_value[0] & {32{bypass_chosen[0]}}) |
           (wb_value[1] & {32{bypass_chosen[1]}}) |
-          (wb_value[2] & {32{bypass_chosen[2]}});
+          (load_value_copies[5*32+:32] & {32{bypass_chosen[2]}});
         // A fresh intra-bundle writer has no value even if its old physical
         // row still contains a completed result from an earlier wrap.
         if(lane==1 && rename_prepare[0] && source_id==dispatch_rid[0] && pending) ready_value=0;
@@ -743,7 +747,7 @@ module cpu_top #(
         for(integer w=0;w<3;w=w+1)
           if(wb_valid[w] && wb_rid[w]==rid_t'(r)) begin
             rob[r].done<=1;rob[r].fault<=wb_fault[w];
-            if(!ROB_WRITE_TREE) begin rob[r].fault_address<=wb_address[w];values[r]<=wb_value[w];end
+            if(!ROB_WRITE_TREE) begin rob[r].fault_address<=wb_address[w];values[r]<=(w==2 ? load_value_copies[(2*r/ROB_ENTRIES)*32+:32]:wb_value[w]);end
           end
         if(memory_complete && executing[2].rid==rid_t'(r) && executing[2].op==OP_STORE) begin
           if(!ROB_WRITE_TREE) begin rob[r].address<=memory_address;rob[r].wdata<=memory_data;end
@@ -781,7 +785,7 @@ module cpu_top #(
           if(!rst) begin
             for(integer w=0;w<3;w=w+1)
               if(controls[w]) begin
-                rob[r].fault_address[bit_id]<=wb_address[w][bit_id];values[r][bit_id]<=wb_value[w][bit_id];
+                rob[r].fault_address[bit_id]<=wb_address[w][bit_id];values[r][bit_id]<=(w==2 ? load_value_copies[(2*r/ROB_ENTRIES)*32+bit_id]:wb_value[w][bit_id]);
               end
             if(controls[3]) begin rob[r].address[bit_id]<=memory_address[bit_id];rob[r].wdata[bit_id]<=memory_data[bit_id];end
             for(integer lane=0;lane<2;lane=lane+1)
@@ -832,13 +836,13 @@ module cpu_top #(
         .old_ready(queue[bank][q].ready_a),.old_value(queue[bank][q].a),.source(queue[bank][q].source_a),
         .initial_ready(prepare_lane[1] ? dispatch_payload[1].ready_a:dispatch_payload[0].ready_a),
         .initial_value(prepare_lane[1] ? dispatch_payload[1].a:dispatch_payload[0].a),
-        .wb_good(wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+3*RW+:3]),.wb_slots(wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+:3*RW]),.wb_values,.next_ready(next_ready_a),.next_value(next_value_a));
+        .wb_good(wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+3*RW+:3]),.wb_slots(wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+:3*RW]),.wb_values({load_value_copies[(2+bank)*32+:32],wb_values[63:0]}),.next_ready(next_ready_a),.next_value(next_value_a));
       v2_operand #(.SLOT_BITS(RW)) operand_b (
         .live(queue[bank][q].valid),.prepare(|prepare_lane),
         .old_ready(queue[bank][q].ready_b),.old_value(queue[bank][q].b),.source(queue[bank][q].source_b),
         .initial_ready(prepare_lane[1] ? dispatch_payload[1].ready_b:dispatch_payload[0].ready_b),
         .initial_value(prepare_lane[1] ? dispatch_payload[1].b:dispatch_payload[0].b),
-        .wb_good(wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+3*RW+:3]),.wb_slots(wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+:3*RW]),.wb_values,.next_ready(next_ready_b),.next_value(next_value_b));
+        .wb_good(wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+3*RW+:3]),.wb_slots(wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+:3*RW]),.wb_values({load_value_copies[(2+bank)*32+:32],wb_values[63:0]}),.next_ready(next_ready_b),.next_value(next_value_b));
       always_ff @(posedge clk) begin
         queue[bank][q].ready_a<=next_ready_a;queue[bank][q].a<=next_value_a;
         queue[bank][q].ready_b<=next_ready_b;queue[bank][q].b<=next_value_b;
@@ -852,7 +856,7 @@ module cpu_top #(
           .initial_ready(1'b0),.initial_value(32'b0),
           .wb_good(wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+3*RW+:3]),
           .wb_slots(wake_copies[(bank*2+2*q/IQ_ENTRIES)*WAKE_BITS+:3*RW]),
-          .wb_values,.next_ready(),.next_value(live_value));
+          .wb_values({load_value_copies[(2+bank)*32+:32],wb_values[63:0]}),.next_ready(),.next_value(live_value));
         v2_prefix_adder #(.WIDTH(32)) effective_address_add (
           .a(live_value),.b(queue[bank][q].imm),.carry_in(1'b0),.sum(live_sum),.carry_out());
         wire [31:0] address_sum=queue[bank][q].valid ? live_sum:
@@ -860,8 +864,14 @@ module cpu_top #(
 
         wire address_update=(!queue[bank][q].valid && |prepare_lane) ||
                             (queue[bank][q].valid && !queue[bank][q].ready_a);
-        always_ff @(posedge clk)
-          if(address_update) prepared_address[q]<=address_sum;
+        wire [31:0] address_next;
+        v2_priority_mux #(.WORD_BITS(32),.PORTS(3)) capture_address (
+          .enable({queue[bank][q].valid && !queue[bank][q].ready_a,
+                   !queue[bank][q].valid && prepare_lane[1],
+                   !queue[bank][q].valid && prepare_lane[0]}),
+          .old_value(prepared_address[q]),
+          .data({live_sum,dispatch_address[1],dispatch_address[0]}),.value(address_next));
+        always_ff @(posedge clk) prepared_address[q]<=address_next;
       end
       always_ff @(posedge clk) begin
         if(rst) queue[bank][q].valid<=0;
