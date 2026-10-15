@@ -65,6 +65,16 @@ module v2_branch_recovery_tb #(parameter integer CONTROL_TREE=0, REGISTER_REDIRE
       dut.queue[4][dut.ISSUE_T_OP_LSB+:6]=dut.OP_STORE;
       dut.balanced_selection[2].prepared_selection.grant_valid=1;
       dut.balanced_selection[2].prepared_selection.grant_index=0;
+`ifdef V2_REGISTERED_MEMORY_GRANTS_TEST
+      // Keep the manually injected memory row coherent with its local copies.
+      dut.balanced_selection[2].unused_direct_grant.payload_copy[0].local_grant.grant=1;
+      dut.balanced_selection[2].unused_direct_grant.payload_copy[1].local_grant.grant=1;
+      dut.balanced_selection[2].unused_direct_grant.payload_copy[2].local_grant.grant=1;
+      dut.balanced_selection[2].unused_direct_grant.payload_copy[3].local_grant.grant=1;
+      dut.balanced_selection[2].unused_direct_grant.payload_copy[4].local_grant.grant=1;
+      dut.balanced_selection[2].unused_direct_grant.payload_copy[5].local_grant.grant=1;
+      dut.balanced_selection[2].unused_direct_grant.address_copy.grant=1;
+`endif
       dut.queue[4][dut.ISSUE_T_A_LSB+:32]=32'h100;
 `ifdef V2_PREPARED_ADDRESS_TEST
       dut.prepared_address[0]=32'h100;

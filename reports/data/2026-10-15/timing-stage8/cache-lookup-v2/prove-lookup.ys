@@ -1,0 +1,7 @@
+read_verilog -sv -D SYNTHESIS "/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/cache-lookup-v2/rtl/area_v2_core.v" "/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/cache-lookup-v2/lookup_miter.v"
+hierarchy -check -top lookup_miter
+proc
+setattr -mod -unset keep_hierarchy
+flatten
+opt
+sat -verify -prove bad 0 -show-inputs -show-outputs -timeout 60

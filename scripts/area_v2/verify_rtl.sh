@@ -6,6 +6,9 @@ top=${3:-verilog/student_top.sv}
 prepared_define=-DV2_PREPARED_ADDRESS_TEST
 # Older frozen cores form the effective address at issue instead.
 if [ "${4:-}" = direct-address ]; then prepared_define=; fi
+if grep -q 'begin: payload_copy' "$rtl"; then
+  prepared_define="$prepared_define -DV2_REGISTERED_MEMORY_GRANTS_TEST"
+fi
 mkdir -p "$out"
 iverilog $prepared_define -g2005 -s student_top -o "$out/plain-parser" "$rtl" verilog/pararisc_axi_adapter.sv "$top"
 iverilog $prepared_define -g2012 -s v2_distribution_tb -o "$out/distribution" tests/rtl/v2_distribution_tb.sv "$rtl"

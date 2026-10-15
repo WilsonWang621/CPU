@@ -1,6 +1,6 @@
 # 官方框架同步：2026-10-15
 
-已将官方 [ACMClassCourse-2025/RISC-V-CPU-2026](https://github.com/ACMClassCourse-2025/RISC-V-CPU-2026) 的综合器更新同步到当前工作树。来源为官方主分支提交 [`302f0cf3cccdaa5de084a2120e0d950c663e4cf5`](https://github.com/ACMClassCourse-2025/RISC-V-CPU-2026/commit/302f0cf3cccdaa5de084a2120e0d950c663e4cf5)，提交时间 2026-10-14 05:51:59 UTC，标题为 `Enable configurable ABC buffering and cell sizing constraints`。其唯一父提交是本地原有课程框架 `54fc150ffc290f52aa024209ffb9a29d43856f6d`；核对时官方提交列表只有这两个提交。
+已将官方 ACMClassCourse-2025/RISC-V-CPU-2026 的综合器更新同步到当前工作树。来源为官方主分支提交 `302f0cf3cccdaa5de084a2120e0d950c663e4cf5`，提交时间 2026-10-14 05:51:59 UTC，标题为 `Enable configurable ABC buffering and cell sizing constraints`。其唯一父提交是本地原有课程框架 `54fc150ffc290f52aa024209ffb9a29d43856f6d`；核对时官方提交列表只有这两个提交。
 
 ## 同步范围
 

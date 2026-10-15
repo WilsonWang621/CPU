@@ -1,0 +1,334 @@
+
+-- Executing script file `/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/prove-selection.ys' --
+
+1. Executing Verilog-2005 frontend: /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v
+Parsing SystemVerilog input from `/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v' to AST representation.
+Generating RTLIL representation for module `\alu'.
+Generating RTLIL representation for module `\branch_unit'.
+Generating RTLIL representation for module `\cpu_top'.
+Warning: Replacing memory \loads with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:1290
+Warning: Replacing memory \stores with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:1267
+Warning: Replacing memory \checkpoint_owner with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:1253
+Warning: Replacing memory \prepared_address with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:1214
+Warning: Replacing memory \queue with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:1202
+Warning: Replacing memory \values with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:1094
+Warning: Replacing memory \rob with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:1082
+Warning: Replacing memory \dispatch_payload with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:992
+Warning: Replacing memory \dispatch_index with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:957
+Warning: Replacing memory \dispatch_bank with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:957
+Warning: Replacing memory \dispatch_rid with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:957
+Warning: Replacing memory \wb_address with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:894
+Warning: Replacing memory \wb_fault with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:894
+Warning: Replacing memory \wb_value with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:894
+Warning: Replacing memory \wb_rid with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:894
+Warning: Replacing memory \occupancy with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:791, /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:786
+Warning: Replacing memory \free_queue with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:786
+Generating RTLIL representation for module `\decoder'.
+Generating RTLIL representation for module `\memory_controller'.
+Generating RTLIL representation for module `\muldiv'.
+Warning: Replacing memory \mul_tag_q with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:1910
+Generating RTLIL representation for module `\v2_arch_word'.
+Generating RTLIL representation for module `\v2_cache_read'.
+Generating RTLIL representation for module `\v2_dcache'.
+Warning: Replacing memory \tags with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:2632
+Warning: Replacing memory \word_valid with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:2628
+Warning: Replacing memory \waiters with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:2613
+Warning: Replacing memory \waiter_next with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:2602
+Warning: Replacing memory \misses with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:2584
+Warning: Replacing memory \data with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:2546
+Warning: Replacing memory \pending_mask with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:2528
+Warning: Replacing memory \pending_data with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:2527
+Warning: Replacing memory \pending_address with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:2526
+Generating RTLIL representation for module `\v2_distribution'.
+Generating RTLIL representation for module `\v2_distribution_inverter'.
+Generating RTLIL representation for module `\v2_frontend'.
+Warning: Replacing memory \local_history with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:3171
+Warning: Replacing memory \tags with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:3163
+Warning: Replacing memory \failed_words with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:3161
+Warning: Replacing memory \valid_words with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:3161
+Warning: Replacing memory \fifo with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:3145
+Warning: Replacing memory \even_target with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:3135
+Warning: Replacing memory \even_data with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:3135
+Warning: Replacing memory \odd_target with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:3134
+Warning: Replacing memory \odd_data with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:3134
+Warning: Replacing memory \prediction with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:3029
+Warning: Replacing memory \incoming with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:3059
+Generating RTLIL representation for module `\v2_increment'.
+Generating RTLIL representation for module `\v2_inc_join'.
+Generating RTLIL representation for module `\v2_iq_read'.
+Generating RTLIL representation for module `\v2_operand'.
+Generating RTLIL representation for module `\v2_prefix_adder'.
+Generating RTLIL representation for module `\v2_prefix_node'.
+Generating RTLIL representation for module `\v2_priority_register'.
+Generating RTLIL representation for module `\v2_read'.
+Generating RTLIL representation for module `\v2_read_mask'.
+Generating RTLIL representation for module `\v2_rename'.
+Warning: Replacing memory \checkpoint_tag with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:3925
+Warning: Replacing memory \checkpoint_pending with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:3914
+Warning: Replacing memory \tag_q with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:3899
+Warning: Replacing memory \save_tag with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:3872, /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:3836
+Warning: Replacing memory \tag_next with list of registers. See /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:3850, /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:3831
+Generating RTLIL representation for module `\v2_retire_read'.
+Generating RTLIL representation for module `\v2_select'.
+Generating RTLIL representation for module `\v2_circular_priority'.
+Generating RTLIL representation for module `\v2_order_compare'.
+Generating RTLIL representation for module `\v2_parallel_select'.
+Generating RTLIL representation for module `\v2_grant_read'.
+Successfully finished Verilog frontend.
+
+2. Executing Verilog-2005 frontend: /home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/selection_miter.v
+Parsing SystemVerilog input from `/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/selection_miter.v' to AST representation.
+Generating RTLIL representation for module `\selection_miter'.
+Successfully finished Verilog frontend.
+
+3. Executing HIERARCHY pass (managing design hierarchy).
+
+3.1. Analyzing design hierarchy..
+Top module:  \selection_miter
+Used module:     \v2_parallel_select
+Used module:         \v2_order_compare
+Used module:     \v2_select
+Parameter \BITS = 6
+
+3.2. Executing AST frontend in derive mode using pre-parsed AST for module `\v2_order_compare'.
+Parameter \BITS = 6
+Generating RTLIL representation for module `$paramod\v2_order_compare\BITS=s32'00000000000000000000000000000110'.
+Parameter \BITS = 6
+Found cached RTLIL representation for module `$paramod\v2_order_compare\BITS=s32'00000000000000000000000000000110'.
+Parameter \BITS = 6
+Found cached RTLIL representation for module `$paramod\v2_order_compare\BITS=s32'00000000000000000000000000000110'.
+Parameter \BITS = 6
+Found cached RTLIL representation for module `$paramod\v2_order_compare\BITS=s32'00000000000000000000000000000110'.
+Parameter \BITS = 6
+Found cached RTLIL representation for module `$paramod\v2_order_compare\BITS=s32'00000000000000000000000000000110'.
+Parameter \BITS = 6
+Found cached RTLIL representation for module `$paramod\v2_order_compare\BITS=s32'00000000000000000000000000000110'.
+Parameter \ENTRIES = 4
+Parameter \SLOT_BITS = 6
+
+3.3. Executing AST frontend in derive mode using pre-parsed AST for module `\v2_parallel_select'.
+Parameter \ENTRIES = 4
+Parameter \SLOT_BITS = 6
+Generating RTLIL representation for module `$paramod$cc4dfb9c23a4b88d25de02feee5de6108e37ae75\v2_parallel_select'.
+Parameter \ENTRIES = 4
+Parameter \SLOT_BITS = 6
+Parameter \EXTENDED_ORDER = 1
+
+3.4. Executing AST frontend in derive mode using pre-parsed AST for module `\v2_select'.
+Parameter \ENTRIES = 4
+Parameter \SLOT_BITS = 6
+Parameter \EXTENDED_ORDER = 1
+Generating RTLIL representation for module `$paramod$02b934ad4860f3b57414633c9f0413d81e77cf4e\v2_select'.
+
+3.5. Analyzing design hierarchy..
+Top module:  \selection_miter
+Used module:     $paramod$cc4dfb9c23a4b88d25de02feee5de6108e37ae75\v2_parallel_select
+Used module:         \v2_order_compare
+Used module:     $paramod$02b934ad4860f3b57414633c9f0413d81e77cf4e\v2_select
+Parameter \BITS = 6
+Found cached RTLIL representation for module `$paramod\v2_order_compare\BITS=s32'00000000000000000000000000000110'.
+Parameter \BITS = 6
+Found cached RTLIL representation for module `$paramod\v2_order_compare\BITS=s32'00000000000000000000000000000110'.
+Parameter \BITS = 6
+Found cached RTLIL representation for module `$paramod\v2_order_compare\BITS=s32'00000000000000000000000000000110'.
+Parameter \BITS = 6
+Found cached RTLIL representation for module `$paramod\v2_order_compare\BITS=s32'00000000000000000000000000000110'.
+Parameter \BITS = 6
+Found cached RTLIL representation for module `$paramod\v2_order_compare\BITS=s32'00000000000000000000000000000110'.
+Parameter \BITS = 6
+Found cached RTLIL representation for module `$paramod\v2_order_compare\BITS=s32'00000000000000000000000000000110'.
+
+3.6. Analyzing design hierarchy..
+Top module:  \selection_miter
+Used module:     $paramod$cc4dfb9c23a4b88d25de02feee5de6108e37ae75\v2_parallel_select
+Used module:         $paramod\v2_order_compare\BITS=s32'00000000000000000000000000000110
+Used module:     $paramod$02b934ad4860f3b57414633c9f0413d81e77cf4e\v2_select
+
+3.7. Analyzing design hierarchy..
+Top module:  \selection_miter
+Used module:     $paramod$cc4dfb9c23a4b88d25de02feee5de6108e37ae75\v2_parallel_select
+Used module:         $paramod\v2_order_compare\BITS=s32'00000000000000000000000000000110
+Used module:     $paramod$02b934ad4860f3b57414633c9f0413d81e77cf4e\v2_select
+Removing unused module `\v2_grant_read'.
+Removing unused module `\v2_parallel_select'.
+Removing unused module `\v2_order_compare'.
+Removing unused module `\v2_circular_priority'.
+Removing unused module `\v2_select'.
+Removing unused module `\v2_retire_read'.
+Removing unused module `\v2_rename'.
+Removing unused module `\v2_read_mask'.
+Removing unused module `\v2_read'.
+Removing unused module `\v2_priority_register'.
+Removing unused module `\v2_prefix_node'.
+Removing unused module `\v2_prefix_adder'.
+Removing unused module `\v2_operand'.
+Removing unused module `\v2_iq_read'.
+Removing unused module `\v2_inc_join'.
+Removing unused module `\v2_increment'.
+Removing unused module `\v2_frontend'.
+Removing unused module `\v2_distribution_inverter'.
+Removing unused module `\v2_distribution'.
+Removing unused module `\v2_dcache'.
+Removing unused module `\v2_cache_read'.
+Removing unused module `\v2_arch_word'.
+Removing unused module `\muldiv'.
+Removing unused module `\memory_controller'.
+Removing unused module `\decoder'.
+Removing unused module `\cpu_top'.
+Removing unused module `\branch_unit'.
+Removing unused module `\alu'.
+Removed 28 unused modules.
+
+4. Executing PROC pass (convert processes to netlists).
+
+4.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+4.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Removed a total of 0 dead cases.
+
+4.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 2 assignments to connections.
+
+4.4. Executing PROC_INIT pass (extract init attributes).
+
+4.5. Executing PROC_ARST pass (detect async resets in processes).
+
+4.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+
+4.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `$paramod$cc4dfb9c23a4b88d25de02feee5de6108e37ae75\v2_parallel_select.$proc$/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:4338$28932'.
+
+4.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `$paramod$cc4dfb9c23a4b88d25de02feee5de6108e37ae75\v2_parallel_select.\index' from process `$paramod$cc4dfb9c23a4b88d25de02feee5de6108e37ae75\v2_parallel_select.$proc$/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:4338$28932'.
+No latch inferred for signal `$paramod$cc4dfb9c23a4b88d25de02feee5de6108e37ae75\v2_parallel_select.\loop_0.row' from process `$paramod$cc4dfb9c23a4b88d25de02feee5de6108e37ae75\v2_parallel_select.$proc$/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:4338$28932'.
+
+4.9. Executing PROC_DFF pass (convert process syncs to FFs).
+
+4.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+4.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Removing empty process `$paramod$cc4dfb9c23a4b88d25de02feee5de6108e37ae75\v2_parallel_select.$proc$/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:4338$28932'.
+Cleaned up 0 empty switches.
+
+4.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod$02b934ad4860f3b57414633c9f0413d81e77cf4e\v2_select.
+<suppressed ~12 debug messages>
+Optimizing module $paramod$cc4dfb9c23a4b88d25de02feee5de6108e37ae75\v2_parallel_select.
+<suppressed ~20 debug messages>
+Optimizing module $paramod\v2_order_compare\BITS=s32'00000000000000000000000000000110.
+Optimizing module selection_miter.
+
+5. Executing FLATTEN pass (flatten design).
+Deleting now unused module $paramod$02b934ad4860f3b57414633c9f0413d81e77cf4e\v2_select.
+Deleting now unused module $paramod$cc4dfb9c23a4b88d25de02feee5de6108e37ae75\v2_parallel_select.
+Deleting now unused module $paramod\v2_order_compare\BITS=s32'00000000000000000000000000000110.
+<suppressed ~8 debug messages>
+
+6. Executing OPT pass (performing simple optimizations).
+
+6.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module selection_miter.
+
+6.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\selection_miter'.
+Computing hashes of 104 cells of `\selection_miter'.
+Finding duplicate cells in `\selection_miter'.
+Computing hashes of 96 cells of `\selection_miter'.
+Finding duplicate cells in `\selection_miter'.
+<suppressed ~24 debug messages>
+Removed a total of 8 cells.
+
+6.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \selection_miter..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 1/2 on $mux $flatten\old_selection.$ternary$/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:4115$29004.
+    dead port 2/2 on $mux $flatten\old_selection.$ternary$/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:4115$29004.
+Removed 2 multiplexer ports.
+<suppressed ~10 debug messages>
+
+6.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \selection_miter.
+    New input vector for $reduce_or cell $flatten\new_selection.$reduce_or$/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:4335$28961: { $flatten\new_selection.$logic_and$/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:4333$28954_Y $flatten\new_selection.$logic_and$/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:4333$28958_Y $flatten\new_selection.$logic_and$/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:4333$28960_Y }
+    New input vector for $reduce_or cell $flatten\new_selection.$reduce_or$/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:4335$28974: { $flatten\new_selection.$logic_and$/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:4333$28966_Y $flatten\new_selection.$logic_and$/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:4333$28969_Y $flatten\new_selection.$logic_and$/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:4333$28973_Y }
+    New input vector for $reduce_or cell $flatten\new_selection.$reduce_or$/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:4335$28949: { $flatten\new_selection.$logic_and$/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:4333$28944_Y $flatten\new_selection.$logic_and$/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:4333$28946_Y $flatten\new_selection.$logic_and$/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:4333$28948_Y }
+    New input vector for $reduce_or cell $flatten\new_selection.$reduce_or$/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:4335$28988: { $flatten\new_selection.$logic_and$/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:4333$28979_Y $flatten\new_selection.$logic_and$/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:4333$28982_Y $flatten\new_selection.$logic_and$/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v:4333$28985_Y }
+  Optimizing cells in module \selection_miter.
+Performed a total of 4 changes.
+
+6.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\selection_miter'.
+Computing hashes of 95 cells of `\selection_miter'.
+Finding duplicate cells in `\selection_miter'.
+Removed a total of 0 cells.
+
+6.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+6.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \selection_miter..
+Removed 0 unused cells and 94 unused wires.
+<suppressed ~2 debug messages>
+
+6.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module selection_miter.
+
+6.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+6.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \selection_miter..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~10 debug messages>
+
+6.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \selection_miter.
+Performed a total of 0 changes.
+
+6.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\selection_miter'.
+Computing hashes of 95 cells of `\selection_miter'.
+Finding duplicate cells in `\selection_miter'.
+Removed a total of 0 cells.
+
+6.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+6.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \selection_miter..
+
+6.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module selection_miter.
+
+6.16. Finished fast OPT passes. (There is nothing left to do.)
+
+7. Executing SAT pass (solving SAT problems in the circuit).
+Using SAT solver `minisat`.
+
+Setting up SAT problem:
+Final constraint equation: { } = { }
+Imported 95 cells to SAT database.
+Import proof-constraint: \bad = 1'0
+Final proof equation: \bad = 1'0
+Import show expression: \ready
+Import show expression: \offsets
+Import show expression: \base
+Import show expression: \bad
+
+Solving problem with 1416 variables and 3874 clauses..
+SAT proof finished - no model found: SUCCESS!
+
+                  /$$$$$$      /$$$$$$$$     /$$$$$$$    
+                 /$$__  $$    | $$_____/    | $$__  $$   
+                | $$  \ $$    | $$          | $$  \ $$   
+                | $$  | $$    | $$$$$       | $$  | $$   
+                | $$  | $$    | $$__/       | $$  | $$   
+                | $$/$$ $$    | $$          | $$  | $$   
+                |  $$$$$$/ /$$| $$$$$$$$ /$$| $$$$$$$//$$
+                 \____ $$$|__/|________/|__/|_______/|__/
+                       \__/                              
+

@@ -1,0 +1,7 @@
+read_verilog -sv "/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/rtl/area_v2_core.v" "/home/wangwenxuan/ACM/ParaRisc/build/frequency-stage8/parallel-issue/selection_miter.v"
+hierarchy -check -top selection_miter
+proc
+setattr -mod -unset keep_hierarchy
+flatten
+opt
+sat -verify -prove bad 0 -show-inputs -show-outputs -timeout 60
