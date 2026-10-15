@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-module v2_dcache_write_tb;
+module v2_dcache_write_tb #(parameter integer CACHE_TREE=0,CACHE_BYTES=512);
   reg clk=0; always #5 clk=~clk;
   reg rst=1,load_valid=0,store_valid=0;
   reg [31:0] load_address=0,store_address=0,store_data=0;
@@ -13,7 +13,7 @@ module v2_dcache_write_tb;
   reg mem_req_ready=0,mem_rsp_valid=0;
   reg [31:0] mem_rsp_data=0;
   wire [63:0] miss_count;
-  v2_dcache #(.CACHE_BYTES(512),.LINE_BYTES(16),.MSHRS(2),.LOAD_SLOTS(4),.STORE_SLOTS(4),.CREDITS(8)) dut (
+  v2_dcache #(.CACHE_BYTES(CACHE_BYTES),.LINE_BYTES(16),.MSHRS(2),.LOAD_SLOTS(4),.STORE_SLOTS(4),.CREDITS(8),.CACHE_TREE(CACHE_TREE)) dut (
     .clk(clk),.rst(rst),.load_valid(load_valid),.load_address(load_address),.load_tag(2'd0),
     .load_ready(load_ready),.load_hit(load_hit),.load_data(load_data),
     .result_valid(result_valid),.result_ready(1'b1),.result_tag(result_tag),.result_data(result_data),.result_error(result_error),

@@ -9,7 +9,7 @@ module alu (
   output reg [31:0] result
 );
 
-  
+
   localparam OP_ADD=0, OP_SUB=1, OP_SLL=2, OP_SLT=3, OP_SLTU=4, OP_XOR=5, OP_SRL=6, OP_SRA=7, OP_OR=8, OP_AND=9, OP_LUI=10, OP_AUIPC=11, OP_JAL=12, OP_JALR=13, OP_BEQ=14, OP_BNE=15, OP_BLT=16, OP_BGE=17, OP_BLTU=18, OP_BGEU=19, OP_LOAD=20, OP_STORE=21, OP_MUL=22, OP_MULH=23, OP_MULHSU=24, OP_MULHU=25, OP_DIV=26, OP_DIVU=27, OP_REM=28, OP_REMU=29;
 
   localparam [3:0] FAULT_NONE=0, FAULT_ILLEGAL=1,
@@ -85,7 +85,7 @@ module branch_unit (
   output reg  misaligned
 );
 
-  
+
   localparam OP_ADD=0, OP_SUB=1, OP_SLL=2, OP_SLT=3, OP_SLTU=4, OP_XOR=5, OP_SRL=6, OP_SRA=7, OP_OR=8, OP_AND=9, OP_LUI=10, OP_AUIPC=11, OP_JAL=12, OP_JALR=13, OP_BEQ=14, OP_BNE=15, OP_BLT=16, OP_BGE=17, OP_BLTU=18, OP_BGEU=19, OP_LOAD=20, OP_STORE=21, OP_MUL=22, OP_MULH=23, OP_MULHSU=24, OP_MULHU=25, OP_DIV=26, OP_DIVU=27, OP_REM=28, OP_REMU=29;
 
   localparam [3:0] FAULT_NONE=0, FAULT_ILLEGAL=1,
@@ -137,7 +137,7 @@ reg [31:0] target;
       OP_JAL: taken = 1'b1;
       OP_JALR: begin
         taken = 1'b1;
-        
+
         target = (a + imm) & 32'hfffffffe;
       end
       OP_BEQ:  taken = a == b;
@@ -158,7 +158,8 @@ module cpu_top #(
   parameter integer CHECKPOINTS=3, RENAME_WIDTH=2, COMMIT_WIDTH=2, INTEGER_PORTS=2,
   parameter integer ICACHE_BYTES=1024, DCACHE_BYTES=2048, DCACHE_LINE_BYTES=64, D_MSHRS=4,
   parameter integer FETCH_QUEUE_ENTRIES=8, BHT_ENTRIES=256, BTB_ENTRIES=32, LOCAL_HISTORY_BITS=1, HISTORY_ENTRIES=64,
-  parameter integer MAX_MEM_OUTSTANDING=64, RAM_BYTES=268435456
+  parameter integer MAX_MEM_OUTSTANDING=64, RAM_BYTES=268435456,
+  parameter integer CONTROL_TREE=0, ROB_WRITE_TREE=0, CACHE_TREE=0, COMMIT_TREE=0, REGISTER_REDIRECT=0
 ) (
   input wire  clk,
   input wire  rst,
@@ -195,7 +196,7 @@ module cpu_top #(
   output wire [63:0] icache_miss_count,
   output wire [63:0] dcache_miss_count
 );
-genvar bank,cp,d,first,l,lane,p,port_id,q,r,row,s,w;
+genvar bank,bit_id,cp,d,first,l,lane,p,port_id,q,r,row,s,w;
 function automatic [RW+1-1:0] narrow_0;
   input [63:0] value;
   begin narrow_0=value; end
@@ -256,7 +257,7 @@ function automatic [64-1:0] narrow_11;
   begin narrow_11=value; end
 endfunction
 
-  
+
   localparam OP_ADD=0, OP_SUB=1, OP_SLL=2, OP_SLT=3, OP_SLTU=4, OP_XOR=5, OP_SRL=6, OP_SRA=7, OP_OR=8, OP_AND=9, OP_LUI=10, OP_AUIPC=11, OP_JAL=12, OP_JALR=13, OP_BEQ=14, OP_BNE=15, OP_BLT=16, OP_BGE=17, OP_BLTU=18, OP_BGEU=19, OP_LOAD=20, OP_STORE=21, OP_MUL=22, OP_MULH=23, OP_MULHSU=24, OP_MULHU=25, OP_DIV=26, OP_DIVU=27, OP_REM=28, OP_REMU=29;
 
   localparam [3:0] FAULT_NONE=0, FAULT_ILLEGAL=1,
@@ -280,6 +281,11 @@ localparam integer LT=$clog2(LOAD_SLOTS), ST=$clog2(STORE_SLOTS), CPW=$clog2(CHE
 localparam integer RETIRE_META_BITS=RETIRE_META_T_WIDTH;
 localparam integer ISSUE_BITS=ISSUE_T_WIDTH;
 localparam RUN=0, DRAIN=1, DONE=2, FAULT=3;
+localparam integer REC_BITS=2*RW+3;
+localparam integer ROB_REC_GROUPS=(ROB_ENTRIES+3)/4;
+localparam integer STORE_REC_GROUPS=(STORE_SLOTS+3)/4;
+localparam integer LOAD_REC_GROUPS=(LOAD_SLOTS+3)/4;
+localparam integer REC_LEAVES=ROB_REC_GROUPS+3+STORE_REC_GROUPS+LOAD_REC_GROUPS+1;
 localparam integer DECODED_T_ILLEGAL_LSB=0, DECODED_T_ILLEGAL_WIDTH=1;
 localparam integer DECODED_T_LOAD_SIGNED_LSB=DECODED_T_ILLEGAL_LSB+DECODED_T_ILLEGAL_WIDTH, DECODED_T_LOAD_SIGNED_WIDTH=1;
 localparam integer DECODED_T_MEM_SIZE_LSB=DECODED_T_LOAD_SIGNED_LSB+DECODED_T_LOAD_SIGNED_WIDTH, DECODED_T_MEM_SIZE_WIDTH=2;
@@ -516,6 +522,7 @@ wire  branch_taken;
 reg  branch_pending;
   reg  branch_bad_q;
   reg  branch_taken_q;
+  reg  branch_recovery_q;
 reg [31:0] branch_next_q;
   reg [31:0] branch_pc_q;
 reg [29:0] branch_prediction_q;
@@ -556,6 +563,21 @@ reg [ST:0] squashed_stores;
 wire  exit_send;
   wire  exit_accept;
 
+  wire [REC_BITS-1:0] recovery_control={flush_all,redirect,(redirect_rid<head),redirect_rid,head};
+  wire [REC_BITS*REC_LEAVES-1:0] recovery_copies;
+  generate
+    if(CONTROL_TREE) begin: distributed_recovery
+      v2_distribution #(.WIDTH(REC_BITS),.LEAVES(REC_LEAVES)) tree (
+        .data_in(recovery_control),.data_out(recovery_copies));
+    end else begin: direct_recovery
+      assign recovery_copies={REC_LEAVES{recovery_control}};
+    end
+  endgenerate
+  function automatic recovery_younger(input [RW-1:0] rid,input [REC_BITS-1:0] controls);
+    recovery_younger = controls[2*RW+1] &&
+      ((rid<controls[0+:RW])==controls[2*RW] ? rid>controls[RW+:RW]:rid<controls[0+:RW]);
+  endfunction
+
   function automatic [31:0] extend_load(input [31:0] word_value,
       input [1:0] offset,
   input [1:0] size,input  sign_extend);
@@ -574,7 +596,7 @@ reg [31:0] shifted;
   assign load_replay_count=0;
   assign exit_head=state==RUN && rob_count!=0 && retirement_meta[0][RETIRE_META_T_DONE_LSB+:RETIRE_META_T_DONE_WIDTH] && retirement_meta[0][RETIRE_META_T_EXITING_LSB+:RETIRE_META_T_EXITING_WIDTH] && retirement_meta[0][RETIRE_META_T_FAULT_LSB+:RETIRE_META_T_FAULT_WIDTH]==0;
   assign fault_head=state==RUN && rob_count!=0 && retirement_meta[0][RETIRE_META_T_DONE_LSB+:RETIRE_META_T_DONE_WIDTH] && retirement_meta[0][RETIRE_META_T_FAULT_LSB+:RETIRE_META_T_FAULT_WIDTH]!=0;
-  
+
   assign flush_all=state!=RUN;
   assign stop_frontend=flush_all;
   assign exit_send=state==DRAIN && store_count==0 && cache_idle && frontend_idle && controller_idle;
@@ -596,8 +618,8 @@ reg [31:0] shifted;
     assign commit_rid[lane]=head+narrow_1(lane);
     wire [RETIRE_META_BITS-1:0] meta_word;
     assign retirement_meta[lane]=meta_word;
-    v2_retire_read #(.ENTRIES(ROB_ENTRIES),.WORD_BITS(RETIRE_META_BITS),.LANE(lane)) read_metadata (.clk(clk),.rst(rst),.advance(commit_count),.words(retirement_words),.value(meta_word));
-    v2_retire_read #(.ENTRIES(ROB_ENTRIES),.LANE(lane)) read_value (.clk(clk),.rst(rst),.advance(commit_count),.words(result_words),.value(retirement_value[lane]));
+    v2_retire_read #(.ENTRIES(ROB_ENTRIES),.WORD_BITS(RETIRE_META_BITS),.LANE(lane),.CONTROL_TREE(COMMIT_TREE)) read_metadata (.clk(clk),.rst(rst),.advance(commit_count),.words(retirement_words),.value(meta_word));
+    v2_retire_read #(.ENTRIES(ROB_ENTRIES),.LANE(lane),.CONTROL_TREE(COMMIT_TREE)) read_value (.clk(clk),.rst(rst),.advance(commit_count),.words(result_words),.value(retirement_value[lane]));
   end
   for(row=0;row<32;row=row+1) begin: architectural_read_words
     assign architectural_words[row*32+:32]=architectural[row];
@@ -612,7 +634,7 @@ reg [31:0] shifted;
   end
   v2_frontend #(.CACHE_BYTES(ICACHE_BYTES),.QUEUE_ENTRIES(FETCH_QUEUE_ENTRIES),
     .BHT_ENTRIES(BHT_ENTRIES),.BTB_ENTRIES(BTB_ENTRIES),.LOCAL_HISTORY_BITS(LOCAL_HISTORY_BITS),
-    .HISTORY_ENTRIES(HISTORY_ENTRIES),.RAM_BYTES(RAM_BYTES)) frontend (.clk(clk),.rst(rst),.stop(stop_frontend),.redirect(redirect),.redirect_pc(redirect_pc),.pop_count(pop_count),
+    .HISTORY_ENTRIES(HISTORY_ENTRIES),.RAM_BYTES(RAM_BYTES),.CACHE_TREE(CACHE_TREE)) frontend (.clk(clk),.rst(rst),.stop(stop_frontend),.redirect(redirect),.redirect_pc(redirect_pc),.pop_count(pop_count),
     .packet_valid(fetch_valid),.packet_pc(fetch_pc),.packet_inst(fetch_inst),.packet_prediction(fetch_prediction),
     .packet_fault(fetch_fault),.packet_inst_valid(fetch_iv),.packet_history(fetch_history),.train_history(branch_history_q),.train_valid(train_valid),.train_taken(train_taken),.train_op(train_op),.train_pc(train_pc),.train_target(train_target),
     .mem_req_valid(client_req_valid[0]),.mem_req_ready(client_req_ready[0]),.mem_req_addr(client_req_addr[31:0]),
@@ -620,7 +642,7 @@ reg [31:0] shifted;
     .mem_rsp_error(client_rsp_error[0]),.idle(frontend_idle),.miss_count(icache_miss_count));
   assign client_req_write[0]=0;assign client_req_data[31:0]=0;assign client_req_mask[3:0]=0;
   v2_dcache #(.CACHE_BYTES(DCACHE_BYTES),.LINE_BYTES(DCACHE_LINE_BYTES),.MSHRS(D_MSHRS),.LOAD_SLOTS(LOAD_SLOTS),.STORE_SLOTS(STORE_SLOTS),
-    .CREDITS(MAX_MEM_OUTSTANDING),.RAM_BYTES(RAM_BYTES)) dcache (.clk(clk),.rst(rst),.load_valid(cache_load_valid),.load_address(cache_load_address),.load_tag(cache_load_tag),
+    .CREDITS(MAX_MEM_OUTSTANDING),.RAM_BYTES(RAM_BYTES),.CACHE_TREE(CACHE_TREE)) dcache (.clk(clk),.rst(rst),.load_valid(cache_load_valid),.load_address(cache_load_address),.load_tag(cache_load_tag),
     .load_ready(cache_load_ready),.load_hit(cache_load_hit),.load_data(cache_load_data),
     .result_valid(cache_result_valid),.result_ready(1'b1),.result_tag(cache_result_tag),
     .result_data(cache_result_data),.result_error(cache_result_error),
@@ -644,7 +666,7 @@ reg [31:0] shifted;
     assign commit_slot[d*RW+:RW]=commit_rid[d];
     assign dispatch_order[d*(RW+1)+:(RW+1)]={tail_generation,tail}+narrow_0(d);
   end
-  v2_rename #(.SLOT_BITS(RW),.CHECKPOINTS(CHECKPOINTS)) rename_maps (.clk(clk),.rst(rst),.dispatch_valid(rename_valid),.prepare_valid(rename_prepare),.dispatch_rd(rename_rd),.dispatch_slot(rename_slot),.source_register(source_register),.source_pending(source_pending),.source_slot(source_slot),.commit_valid(commit_valid),.commit_rd(commit_rd),.commit_slot(commit_slot),
+  v2_rename #(.SLOT_BITS(RW),.CHECKPOINTS(CHECKPOINTS),.COMMIT_TREE(COMMIT_TREE)) rename_maps (.clk(clk),.rst(rst),.dispatch_valid(rename_valid),.prepare_valid(rename_prepare),.dispatch_rd(rename_rd),.dispatch_slot(rename_slot),.source_register(source_register),.source_pending(source_pending),.source_slot(source_slot),.commit_valid(commit_valid),.commit_rd(commit_rd),.commit_slot(commit_slot),
     .save_valid(save_checkpoint),.save_after_lane(save_after_lane),.save_index(free_checkpoint),
     .restore_valid(redirect),.restore_index(redirect_checkpoint));
   for(p=0;p<2;p=p+1) begin: integer_units
@@ -678,7 +700,9 @@ reg [QW-1:0] grant_index;
       for(q=0;q<IQ_ENTRIES;q=q+1) begin: next_row
         wire lane0=dispatch_valid[0] && dispatch_bank[0]==2 && dispatch_index[0]==narrow_3(q);
         wire lane1=dispatch_valid[1] && dispatch_bank[1]==2 && dispatch_index[1]==narrow_3(q);
-        wire removed=(issue_fire[2] && selected[2]==narrow_3(q)) || (redirect && (((queue[(2)*(IQ_ENTRIES)+(q)][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])<head)==(redirect_rid<head) ? (queue[(2)*(IQ_ENTRIES)+(q)][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])>redirect_rid:(queue[(2)*(IQ_ENTRIES)+(q)][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])<head)) || flush_all;
+        wire [REC_BITS-1:0] controls=recovery_copies[(ROB_REC_GROUPS+2)*REC_BITS+:REC_BITS];
+        wire removed=(issue_fire[2] && selected[2]==narrow_3(q)) ||
+          recovery_younger(queue[(2)*(IQ_ENTRIES)+(q)][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH],controls) || controls[REC_BITS-1];
         assign next_candidates[q]=(queue[(2)*(IQ_ENTRIES)+(q)][ISSUE_T_VALID_LSB+:ISSUE_T_VALID_WIDTH] && !removed) || lane0 || lane1;
         assign next_owners[q*(RW+1)+:(RW+1)]=lane1 ? dispatch_order[(RW+1)+:(RW+1)]:
           lane0 ? dispatch_order[0+:(RW+1)]:select_owner[2][q*(RW+1)+:(RW+1)];
@@ -720,11 +744,11 @@ reg [QW-1:0] grant_index;
     .ready(store_send_candidates),.owner(store_owners),.rob_head(store_head),.valid(store_send_valid),.index(store_send_slot));
   always @* begin: select_instructions
     free_queue_valid=0;
-    begin: loop_19
+    begin: loop_21
 integer bank;
 for(bank=0;bank<3;bank=bank+1) begin
       free_queue[bank]=0;occupancy[bank]=0;
-      begin: loop_18
+      begin: loop_20
 integer q;
 for(q=0;q<IQ_ENTRIES;q=q+1) begin
         if(queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_VALID_LSB+:ISSUE_T_VALID_WIDTH]) begin
@@ -735,19 +759,19 @@ end
     end
 end
     checkpoint_available=0;free_checkpoint=0;
-    begin: loop_17
+    begin: loop_19
 integer c;
 for(c=0;c<CHECKPOINTS;c=c+1)
       if(!checkpoint_valid[c] && !checkpoint_available) begin checkpoint_available=1;free_checkpoint=narrow_5(c);end
 end
     load_available=0;free_load=0;
-    begin: loop_16
+    begin: loop_18
 integer l;
 for(l=0;l<LOAD_SLOTS;l=l+1)
       if(!loads[l][LOAD_T_VALID_LSB+:LOAD_T_VALID_WIDTH] && !load_available) begin load_available=1;free_load=narrow_6(l);end
 end
     mdu_kill=~0;
-    begin: loop_15
+    begin: loop_17
 integer r;
 for(r=0;r<ROB_ENTRIES;r=r+1) mdu_kill[r]=!rob[r][ROB_T_VALID_LSB+:ROB_T_VALID_WIDTH];
 end
@@ -756,8 +780,11 @@ end
   assign branch_capture=select_valid[0] && is_branch(executing[0][ISSUE_T_OP_LSB+:ISSUE_T_OP_WIDTH]) &&
                         !flush_all && !mdu_result_valid && !(redirect && (((executing[0][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])<head)==(redirect_rid<head) ? (executing[0][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])>redirect_rid:(executing[0][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])<head));
   always @(posedge clk) begin
-    if(rst) branch_pending<=0;
-    else branch_pending<=branch_capture;
+    if(rst) begin branch_pending<=0;branch_recovery_q<=0;end
+    else begin
+      branch_pending<=branch_capture;
+      branch_recovery_q<=branch_capture && !branch_bad && branch_next!={executing[0][ISSUE_T_PREDICTION_LSB+:ISSUE_T_PREDICTION_WIDTH],2'b0};
+    end
     branch_bad_q<=branch_bad;branch_taken_q<=branch_taken;
     branch_next_q<=branch_next;branch_pc_q<=execute_pc[0];
     branch_prediction_q<=executing[0][ISSUE_T_PREDICTION_LSB+:ISSUE_T_PREDICTION_WIDTH];
@@ -767,7 +794,9 @@ end
     branch_op_q<=executing[0][ISSUE_T_OP_LSB+:ISSUE_T_OP_WIDTH];
   end
   assign branch_fire=branch_pending && !flush_all;
-  assign redirect=branch_fire && !branch_bad_q && branch_next_q!={branch_prediction_q,2'b0};
+
+  assign redirect=REGISTER_REDIRECT ? (branch_recovery_q && !flush_all):
+    (branch_fire && !branch_bad_q && branch_next_q!={branch_prediction_q,2'b0});
   assign redirect_pc=branch_next_q;
   assign redirect_rid=branch_rid_q;
   assign redirect_checkpoint=branch_checkpoint_q;
@@ -790,7 +819,7 @@ end
     else if(memory_address>=RAM_BYTES && !memory_exit)
       memory_fault=executing[2][ISSUE_T_OP_LSB+:ISSUE_T_OP_WIDTH]==OP_LOAD ? FAULT_LOAD_RANGE:FAULT_STORE_RANGE;
     forward_full=0;squashed_stores=0;
-    begin: loop_14
+    begin: loop_16
 integer s;
 for(s=0;s<STORE_SLOTS;s=s+1) begin
       if(stores[s][STORE_T_VALID_LSB+:STORE_T_VALID_WIDTH] && !stores[s][STORE_T_COMMITTED_LSB+:STORE_T_COMMITTED_WIDTH] && ((redirect && (((stores[s][STORE_T_RID_LSB+:STORE_T_RID_WIDTH])<head)==(redirect_rid<head) ? (stores[s][STORE_T_RID_LSB+:STORE_T_RID_WIDTH])>redirect_rid:(stores[s][STORE_T_RID_LSB+:STORE_T_RID_WIDTH])<head)) || flush_all))
@@ -818,7 +847,7 @@ end
                           (executing[2][ISSUE_T_OP_LSB+:ISSUE_T_OP_WIDTH]==OP_LOAD && (forward_full || (cache_load_valid && cache_load_ready && cache_load_hit))));
   always @* begin: completion
     wb_valid=0;issue_fire=0;
-    begin: loop_13
+    begin: loop_15
 integer w;
 for(w=0;w<3;w=w+1) begin wb_rid[w]=executing[w][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH];wb_value[w]=0;wb_fault[w]=0;wb_address[w]=0;end
 end
@@ -857,7 +886,7 @@ end
 reg  blocked_retirement;
   reg  committed_store;
     blocked_retirement=0;committed_store=0;commit_count=0;commit_valid=0;commit_rd=0;
-    begin: loop_12
+    begin: loop_14
 integer lane;
 for(lane=0;lane<2;lane=lane+1) begin
       if(lane<COMMIT_WIDTH && !blocked_retirement && state==RUN && narrow_7(rob_count)>lane &&
@@ -880,7 +909,7 @@ reg  blocked_dispatch;
     blocked_dispatch=0;
     dispatch_prepare=0;dispatch_valid=0;dispatch_count=0;rename_prepare=0;rename_valid=0;rename_rd=0;used_bank=0;
     save_checkpoint=0;save_after_lane=0;
-    begin: loop_11
+    begin: loop_13
 integer lane;
 for(lane=0;lane<2;lane=lane+1) begin
       dispatch_rid[lane]=tail+narrow_1(lane);dispatch_bank[lane]=0;dispatch_index[lane]=0;bank_choice=0;
@@ -915,7 +944,7 @@ reg  pending;
   reg  ready_value;
 reg [31:0] source_value;
     source_id=0;register_id=0;pending=0;ready_value=0;source_value=0;
-    begin: loop_10
+    begin: loop_12
 integer lane;
 for(lane=0;lane<2;lane=lane+1) begin
       dispatch_payload[lane]=0;dispatch_payload[lane][ISSUE_T_VALID_LSB+:ISSUE_T_VALID_WIDTH]=1;dispatch_payload[lane][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH]=dispatch_rid[lane];
@@ -926,7 +955,7 @@ for(lane=0;lane<2;lane=lane+1) begin
       dispatch_payload[lane][ISSUE_T_PREDICTION_LSB+:ISSUE_T_PREDICTION_WIDTH]=fetch_prediction[lane*32+2+:30];
       dispatch_payload[lane][ISSUE_T_SIZE_LSB+:ISSUE_T_SIZE_WIDTH]=decoded[lane][DECODED_T_MEM_SIZE_LSB+:DECODED_T_MEM_SIZE_WIDTH];dispatch_payload[lane][ISSUE_T_SIGN_EXTEND_LSB+:ISSUE_T_SIGN_EXTEND_WIDTH]=decoded[lane][DECODED_T_LOAD_SIGNED_LSB+:DECODED_T_LOAD_SIGNED_WIDTH];
       dispatch_payload[lane][ISSUE_T_USE_IMM_LSB+:ISSUE_T_USE_IMM_WIDTH]=decoded[lane][DECODED_T_USE_IMM_LSB+:DECODED_T_USE_IMM_WIDTH];dispatch_payload[lane][ISSUE_T_CHECKPOINT_LSB+:ISSUE_T_CHECKPOINT_WIDTH]=free_checkpoint;
-      begin: loop_9
+      begin: loop_11
 integer source_number;
 for(source_number=0;source_number<2;source_number=source_number+1) begin
         register_id=source_register[(lane*2+source_number)*5+:5];
@@ -937,7 +966,7 @@ for(source_number=0;source_number<2;source_number=source_number+1) begin
                                 source_status[lane*2+source_number][3:0]==0);
         source_value=pending ? source_result[lane*2+source_number]:
                      (register_id==0 ? 32'd0:source_architectural[lane*2+source_number]);
-        begin: loop_8
+        begin: loop_10
 integer w;
 for(w=0;w<3;w=w+1)
           if(pending && wb_valid[w] && wb_rid[w]==source_id && wb_fault[w]==0) begin ready_value=1;source_value=wb_value[w];end
@@ -976,7 +1005,7 @@ end
       if(dispatch_count!=0) steer<=!steer;
       if(redirect) branch_miss_count<=branch_miss_count+1;
       retired_count<=retired_count+narrow_11(commit_count)+narrow_11(exit_accept);
-      begin: loop_7
+      begin: loop_9
 integer lane;
 for(lane=0;lane<2;lane=lane+1)
         if(narrow_7(commit_count)>lane) begin
@@ -1006,35 +1035,77 @@ end
     end
   end
   for(r=0;r<ROB_ENTRIES;r=r+1) begin: rob_rows
+    wire [REC_BITS-1:0] controls=recovery_copies[(r/4)*REC_BITS+:REC_BITS];
     always @(posedge clk) begin
       if(rst) begin rob[r][ROB_T_VALID_LSB+:ROB_T_VALID_WIDTH]<=0;rob[r][ROB_T_DONE_LSB+:ROB_T_DONE_WIDTH]<=0;end
       else begin
-        begin: loop_6
+        begin: loop_8
 integer lane;
 for(lane=0;lane<2;lane=lane+1)
           if(narrow_7(commit_count)>lane && commit_rid[lane]==narrow_1(r)) rob[r][ROB_T_VALID_LSB+:ROB_T_VALID_WIDTH]<=0;
 end
-        begin: loop_5
+        begin: loop_7
 integer w;
 for(w=0;w<3;w=w+1)
           if(wb_valid[w] && wb_rid[w]==narrow_1(r)) begin
-            rob[r][ROB_T_DONE_LSB+:ROB_T_DONE_WIDTH]<=1;rob[r][ROB_T_FAULT_LSB+:ROB_T_FAULT_WIDTH]<=wb_fault[w];rob[r][ROB_T_FAULT_ADDRESS_LSB+:ROB_T_FAULT_ADDRESS_WIDTH]<=wb_address[w];values[r]<=wb_value[w];
+            rob[r][ROB_T_DONE_LSB+:ROB_T_DONE_WIDTH]<=1;rob[r][ROB_T_FAULT_LSB+:ROB_T_FAULT_WIDTH]<=wb_fault[w];
+            if(!ROB_WRITE_TREE) begin rob[r][ROB_T_FAULT_ADDRESS_LSB+:ROB_T_FAULT_ADDRESS_WIDTH]<=wb_address[w];values[r]<=wb_value[w];end
           end
 end
         if(memory_complete && executing[2][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH]==narrow_1(r) && executing[2][ISSUE_T_OP_LSB+:ISSUE_T_OP_WIDTH]==OP_STORE) begin
-          rob[r][ROB_T_ADDRESS_LSB+:ROB_T_ADDRESS_WIDTH]<=memory_address;rob[r][ROB_T_WDATA_LSB+:ROB_T_WDATA_WIDTH]<=memory_data;rob[r][ROB_T_MASK_LSB+:ROB_T_MASK_WIDTH]<=memory_mask;
+          if(!ROB_WRITE_TREE) begin rob[r][ROB_T_ADDRESS_LSB+:ROB_T_ADDRESS_WIDTH]<=memory_address;rob[r][ROB_T_WDATA_LSB+:ROB_T_WDATA_WIDTH]<=memory_data;end
+          rob[r][ROB_T_MASK_LSB+:ROB_T_MASK_WIDTH]<=memory_mask;
           rob[r][ROB_T_EXITING_LSB+:ROB_T_EXITING_WIDTH]<=memory_exit;rob[r][ROB_T_STORE_SLOT_LSB+:ROB_T_STORE_SLOT_WIDTH]<=store_tail;
         end
-        if((redirect && (((narrow_1(r))<head)==(redirect_rid<head) ? (narrow_1(r))>redirect_rid:(narrow_1(r))<head)) || (flush_all && narrow_1(r)!=head)) rob[r][ROB_T_VALID_LSB+:ROB_T_VALID_WIDTH]<=0;
-        begin: loop_4
+        if(recovery_younger(narrow_1(r),controls) ||
+           (controls[REC_BITS-1] && narrow_1(r)!=controls[0+:RW])) rob[r][ROB_T_VALID_LSB+:ROB_T_VALID_WIDTH]<=0;
+        begin: loop_6
 integer lane;
 for(lane=0;lane<2;lane=lane+1)
           if(dispatch_valid[lane] && dispatch_rid[lane]==narrow_1(r)) begin
             rob[r][ROB_T_VALID_LSB+:ROB_T_VALID_WIDTH]<=1;rob[r][ROB_T_DONE_LSB+:ROB_T_DONE_WIDTH]<=dispatch_bank[lane]==3;rob[r][ROB_T_EXITING_LSB+:ROB_T_EXITING_WIDTH]<=0;
             rob[r][ROB_T_FAULT_LSB+:ROB_T_FAULT_WIDTH]<=fetch_fault[lane*4+:4]!=0 ? fetch_fault[lane*4+:4]:decoded[lane][DECODED_T_ILLEGAL_LSB+:DECODED_T_ILLEGAL_WIDTH] ? FAULT_ILLEGAL:FAULT_NONE;
-            rob[r][ROB_T_FAULT_ADDRESS_LSB+:ROB_T_FAULT_ADDRESS_WIDTH]<=fetch_pc[lane*32+:32];rob[r][ROB_T_ADDRESS_LSB+:ROB_T_ADDRESS_WIDTH]<=0;rob[r][ROB_T_WDATA_LSB+:ROB_T_WDATA_WIDTH]<=0;rob[r][ROB_T_MASK_LSB+:ROB_T_MASK_WIDTH]<=0;
+            if(!ROB_WRITE_TREE) begin
+              rob[r][ROB_T_FAULT_ADDRESS_LSB+:ROB_T_FAULT_ADDRESS_WIDTH]<=fetch_pc[lane*32+:32];rob[r][ROB_T_ADDRESS_LSB+:ROB_T_ADDRESS_WIDTH]<=0;rob[r][ROB_T_WDATA_LSB+:ROB_T_WDATA_WIDTH]<=0;
+            end
+            rob[r][ROB_T_MASK_LSB+:ROB_T_MASK_WIDTH]<=0;
           end
 end
+      end
+    end
+    if(ROB_WRITE_TREE) begin: distributed_data_write
+      wire [5:0] write_control;
+      wire [23:0] byte_control;
+      for(w=0;w<3;w=w+1) begin: completion_control
+        assign write_control[w]=wb_valid[w] && wb_rid[w]==narrow_1(r);
+      end
+      assign write_control[3]=memory_complete && executing[2][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH]==narrow_1(r) && executing[2][ISSUE_T_OP_LSB+:ISSUE_T_OP_WIDTH]==OP_STORE;
+      for(lane=0;lane<2;lane=lane+1) begin: allocation_control
+        assign write_control[4+lane]=dispatch_valid[lane] && dispatch_rid[lane]==narrow_1(r);
+      end
+      v2_distribution #(.WIDTH(6),.LEAVES(4)) tree (
+        .data_in(write_control),.data_out(byte_control));
+      for(bit_id=0;bit_id<32;bit_id=bit_id+1) begin: data_bit
+        wire [5:0] controls=byte_control[(bit_id/8)*6+:6];
+        always @(posedge clk) begin
+          if(!rst) begin
+            begin: loop_5
+integer w;
+for(w=0;w<3;w=w+1)
+              if(controls[w]) begin
+                rob[r][ROB_T_FAULT_ADDRESS_LSB+(bit_id)]<=wb_address[w][bit_id];values[r][bit_id]<=wb_value[w][bit_id];
+              end
+end
+            if(controls[3]) begin rob[r][ROB_T_ADDRESS_LSB+(bit_id)]<=memory_address[bit_id];rob[r][ROB_T_WDATA_LSB+(bit_id)]<=memory_data[bit_id];end
+            begin: loop_4
+integer lane;
+for(lane=0;lane<2;lane=lane+1)
+              if(controls[4+lane]) begin
+                rob[r][ROB_T_FAULT_ADDRESS_LSB+(bit_id)]<=fetch_pc[lane*32+bit_id];rob[r][ROB_T_ADDRESS_LSB+(bit_id)]<=0;rob[r][ROB_T_WDATA_LSB+(bit_id)]<=0;
+              end
+end
+          end
+        end
       end
     end
 
@@ -1050,13 +1121,22 @@ for(lane=0;lane<2;lane=lane+1)
 end
     end
   end
+  wire [8*76-1:0] architectural_commits;
+  v2_distribution #(.WIDTH(76),.LEAVES(COMMIT_TREE ? 8:1)) architectural_commit_tree (
+    .data_in({commit_valid,commit_rd,retirement_value[1],retirement_value[0]}),
+    .data_out(architectural_commits[0+:(COMMIT_TREE ? 8:1)*76]));
+  if(!COMMIT_TREE) begin: direct_architectural_commit
+    assign architectural_commits[76+:7*76]={7{architectural_commits[0+:76]}};
+  end
   for(r=0;r<32;r=r+1) begin: architectural_registers
+    wire [75:0] local_commit=architectural_commits[(r/4)*76+:76];
     wire [31:0] register_value;
     assign architectural[r]=register_value;
-    v2_arch_word #(.REGISTER(r)) word_register (.clk(clk),.rst(rst),.commit_valid(commit_valid),.commit_rd(commit_rd),
-      .commit_values({retirement_value[1],retirement_value[0]}),.value(register_value));
+    v2_arch_word #(.REGISTER(r),.CONTROL_TREE(COMMIT_TREE)) word_register (.clk(clk),.rst(rst),.commit_valid(local_commit[74+:2]),.commit_rd(local_commit[64+:10]),
+      .commit_values(local_commit[0+:64]),.value(register_value));
   end
   for(bank=0;bank<3;bank=bank+1) begin: issue_banks
+    wire [REC_BITS-1:0] controls=recovery_copies[(ROB_REC_GROUPS+bank)*REC_BITS+:REC_BITS];
     for(q=0;q<IQ_ENTRIES;q=q+1) begin: rows
       wire [1:0] prepare_lane;
       wire next_ready_a,next_ready_b;
@@ -1081,7 +1161,8 @@ end
       always @(posedge clk) begin
         if(rst) queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_VALID_LSB+:ISSUE_T_VALID_WIDTH]<=0;
         else begin
-          if((issue_fire[bank] && selected[bank]==narrow_3(q)) || (redirect && (((queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])<head)==(redirect_rid<head) ? (queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])>redirect_rid:(queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])<head)) || flush_all) queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_VALID_LSB+:ISSUE_T_VALID_WIDTH]<=0;
+          if((issue_fire[bank] && selected[bank]==narrow_3(q)) ||
+             recovery_younger(queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH],controls) || controls[REC_BITS-1]) queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_VALID_LSB+:ISSUE_T_VALID_WIDTH]<=0;
           begin: loop_2
 integer lane;
 for(lane=0;lane<2;lane=lane+1)
@@ -1112,10 +1193,12 @@ end
     end
   end
   for(cp=0;cp<CHECKPOINTS;cp=cp+1) begin: checkpoint_rows
+    wire [REC_BITS-1:0] controls=recovery_copies[(REC_LEAVES-1)*REC_BITS+:REC_BITS];
     always @(posedge clk) begin
       if(rst) begin checkpoint_valid[cp]<=0;checkpoint_owner[cp]<=0;end
       else begin
-        if((branch_fire && branch_checkpoint_q==narrow_5(cp)) || (redirect && (((checkpoint_owner[cp])<head)==(redirect_rid<head) ? (checkpoint_owner[cp])>redirect_rid:(checkpoint_owner[cp])<head)) || flush_all)
+        if((branch_fire && branch_checkpoint_q==narrow_5(cp)) ||
+           recovery_younger(checkpoint_owner[cp],controls) || controls[REC_BITS-1])
           checkpoint_valid[cp]<=0;
         if(save_checkpoint && free_checkpoint==narrow_5(cp)) begin
           checkpoint_valid[cp]<=1;checkpoint_owner[cp]<=dispatch_rid[save_after_lane];
@@ -1124,6 +1207,7 @@ end
     end
   end
   for(s=0;s<STORE_SLOTS;s=s+1) begin: store_rows
+    wire [REC_BITS-1:0] controls=recovery_copies[(ROB_REC_GROUPS+3+s/4)*REC_BITS+:REC_BITS];
     always @(posedge clk) begin
       if(rst) stores[s][STORE_T_VALID_LSB+:STORE_T_VALID_WIDTH]<=0;
       else begin
@@ -1135,7 +1219,8 @@ integer lane;
 for(lane=0;lane<2;lane=lane+1)
           if(narrow_7(commit_count)>lane && retirement_meta[lane][RETIRE_META_T_STORE_LSB+:RETIRE_META_T_STORE_WIDTH] && retirement_meta[lane][RETIRE_META_T_STORE_SLOT_LSB+:RETIRE_META_T_STORE_SLOT_WIDTH]==narrow_4(s)) stores[s][STORE_T_COMMITTED_LSB+:STORE_T_COMMITTED_WIDTH]<=1;
 end
-        if(!stores[s][STORE_T_COMMITTED_LSB+:STORE_T_COMMITTED_WIDTH] && ((redirect && (((stores[s][STORE_T_RID_LSB+:STORE_T_RID_WIDTH])<head)==(redirect_rid<head) ? (stores[s][STORE_T_RID_LSB+:STORE_T_RID_WIDTH])>redirect_rid:(stores[s][STORE_T_RID_LSB+:STORE_T_RID_WIDTH])<head)) || flush_all)) stores[s][STORE_T_VALID_LSB+:STORE_T_VALID_WIDTH]<=0;
+        if(!stores[s][STORE_T_COMMITTED_LSB+:STORE_T_COMMITTED_WIDTH] &&
+           (recovery_younger(stores[s][STORE_T_RID_LSB+:STORE_T_RID_WIDTH],controls) || controls[REC_BITS-1])) stores[s][STORE_T_VALID_LSB+:STORE_T_VALID_WIDTH]<=0;
         if(store_allocate && store_tail==narrow_4(s)) begin
           stores[s][STORE_T_VALID_LSB+:STORE_T_VALID_WIDTH]<=1;stores[s][STORE_T_COMMITTED_LSB+:STORE_T_COMMITTED_WIDTH]<=0;stores[s][STORE_T_ISSUED_LSB+:STORE_T_ISSUED_WIDTH]<=0;stores[s][STORE_T_DONE_LSB+:STORE_T_DONE_WIDTH]<=0;
           stores[s][STORE_T_RID_LSB+:STORE_T_RID_WIDTH]<=executing[2][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH];stores[s][STORE_T_ADDRESS_LSB+:STORE_T_ADDRESS_WIDTH]<=memory_address;stores[s][STORE_T_DATA_LSB+:STORE_T_DATA_WIDTH]<=memory_data;stores[s][STORE_T_MASK_LSB+:STORE_T_MASK_WIDTH]<=memory_mask;
@@ -1145,11 +1230,12 @@ end
     end
   end
   for(l=0;l<LOAD_SLOTS;l=l+1) begin: load_rows
+    wire [REC_BITS-1:0] controls=recovery_copies[(ROB_REC_GROUPS+3+STORE_REC_GROUPS+l/4)*REC_BITS+:REC_BITS];
     always @(posedge clk) begin
       if(rst) loads[l][LOAD_T_VALID_LSB+:LOAD_T_VALID_WIDTH]<=0;
       else begin
         if(cache_result_valid && cache_result_tag==narrow_6(l)) loads[l][LOAD_T_VALID_LSB+:LOAD_T_VALID_WIDTH]<=0;
-        if((redirect && (((loads[l][LOAD_T_RID_LSB+:LOAD_T_RID_WIDTH])<head)==(redirect_rid<head) ? (loads[l][LOAD_T_RID_LSB+:LOAD_T_RID_WIDTH])>redirect_rid:(loads[l][LOAD_T_RID_LSB+:LOAD_T_RID_WIDTH])<head)) || flush_all) loads[l][LOAD_T_CANCELED_LSB+:LOAD_T_CANCELED_WIDTH]<=1;
+        if(recovery_younger(loads[l][LOAD_T_RID_LSB+:LOAD_T_RID_WIDTH],controls) || controls[REC_BITS-1]) loads[l][LOAD_T_CANCELED_LSB+:LOAD_T_CANCELED_WIDTH]<=1;
         if(load_allocate && free_load==narrow_6(l)) begin
           loads[l][LOAD_T_VALID_LSB+:LOAD_T_VALID_WIDTH]<=1;loads[l][LOAD_T_CANCELED_LSB+:LOAD_T_CANCELED_WIDTH]<=0;loads[l][LOAD_T_RID_LSB+:LOAD_T_RID_WIDTH]<=executing[2][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH];
           loads[l][LOAD_T_ADDRESS_LSB+:LOAD_T_ADDRESS_WIDTH]<=memory_address;loads[l][LOAD_T_SIZE_LSB+:LOAD_T_SIZE_WIDTH]<=executing[2][ISSUE_T_SIZE_LSB+:ISSUE_T_SIZE_WIDTH];loads[l][LOAD_T_SIGN_EXTEND_LSB+:LOAD_T_SIGN_EXTEND_WIDTH]<=executing[2][ISSUE_T_SIGN_EXTEND_LSB+:ISSUE_T_SIGN_EXTEND_WIDTH];
@@ -1173,7 +1259,7 @@ module decoder (
   output reg [60:0] dec
 );
 
-  
+
   localparam OP_ADD=0, OP_SUB=1, OP_SLL=2, OP_SLT=3, OP_SLTU=4, OP_XOR=5, OP_SRL=6, OP_SRA=7, OP_OR=8, OP_AND=9, OP_LUI=10, OP_AUIPC=11, OP_JAL=12, OP_JALR=13, OP_BEQ=14, OP_BNE=15, OP_BLT=16, OP_BGE=17, OP_BLTU=18, OP_BGEU=19, OP_LOAD=20, OP_STORE=21, OP_MUL=22, OP_MULH=23, OP_MULHSU=24, OP_MULHU=25, OP_DIV=26, OP_DIVU=27, OP_REM=28, OP_REMU=29;
 
   localparam [3:0] FAULT_NONE=0, FAULT_ILLEGAL=1,
@@ -1347,7 +1433,7 @@ localparam integer FETCH_T_WIDTH=FETCH_T_PC_LSB+FETCH_T_PC_WIDTH;
       end
       default: dec[DECODED_T_ILLEGAL_LSB+:DECODED_T_ILLEGAL_WIDTH] = 1'b1;
     endcase
-    
+
     dec[DECODED_T_WRITES_RD_LSB+:DECODED_T_WRITES_RD_WIDTH] = dec[DECODED_T_WRITES_RD_LSB+:DECODED_T_WRITES_RD_WIDTH] && dec[DECODED_T_RD_LSB+:DECODED_T_RD_WIDTH] != 5'd0;
     if (dec[DECODED_T_ILLEGAL_LSB+:DECODED_T_ILLEGAL_WIDTH]) begin
       dec[DECODED_T_USES_RS1_LSB+:DECODED_T_USES_RS1_WIDTH] = 1'b0;
@@ -1550,7 +1636,7 @@ function automatic [STEP_W-1:0] narrow_1;
   begin narrow_1=value; end
 endfunction
 
-  
+
   localparam OP_ADD=0, OP_SUB=1, OP_SLL=2, OP_SLT=3, OP_SLTU=4, OP_XOR=5, OP_SRL=6, OP_SRA=7, OP_OR=8, OP_AND=9, OP_LUI=10, OP_AUIPC=11, OP_JAL=12, OP_JALR=13, OP_BEQ=14, OP_BNE=15, OP_BLT=16, OP_BGE=17, OP_BLTU=18, OP_BGEU=19, OP_LOAD=20, OP_STORE=21, OP_MUL=22, OP_MULH=23, OP_MULHSU=24, OP_MULHU=25, OP_DIV=26, OP_DIVU=27, OP_REM=28, OP_REMU=29;
 
   localparam [3:0] FAULT_NONE=0, FAULT_ILLEGAL=1,
@@ -1680,7 +1766,7 @@ wire  div_live;
   assign mul_ready2=!mul_remaining[2];
   assign mul_ready1=!mul_remaining[1] || mul_ready2;
   assign mul_ready0=!mul_remaining[0] || mul_ready1;
-  
+
   assign mul_ready=!rst && !kill && mul_ready0;
   assign div_ready=!rst && !kill && !div_live && (!div_result_live || grant_div);
   assign req_ready=!kill_mask[req_tag] &&
@@ -1746,7 +1832,7 @@ end
       cache_quotient_q<=0;cache_remainder_q<=0;
       out_valid_q<=0;out_result_q<=0;out_tag_q<=0;prefer_div_q<=1;
     end else begin
-      
+
       if(out_space) begin
         out_valid_q<=grant_div || grant_mul || grant_new_mul;
         if(grant_div) begin
@@ -1820,13 +1906,13 @@ endmodule
 
 (* keep_hierarchy=1 *)
 module v2_arch_word #(
-  parameter integer REGISTER=1
+  parameter integer REGISTER=1, CONTROL_TREE=0
 )(
   input wire clk,rst,
   input wire [1:0] commit_valid,
   input wire [9:0] commit_rd,
   input wire [63:0] commit_values,
-  output reg [31:0] value
+  output wire [31:0] value
 );
 function automatic [5-1:0] narrow_0;
   input [63:0] value;
@@ -1878,20 +1964,31 @@ localparam integer FETCH_T_INST_LSB=FETCH_T_PREDICTED_PC_LSB+FETCH_T_PREDICTED_P
 localparam integer FETCH_T_PC_LSB=FETCH_T_INST_LSB+FETCH_T_INST_WIDTH, FETCH_T_PC_WIDTH=32;
 localparam integer FETCH_T_WIDTH=FETCH_T_PC_LSB+FETCH_T_PC_WIDTH;
 
-  always @(posedge clk) begin
-    if(rst || REGISTER==0) value<=0;
-    else begin
-      if(commit_valid[0] && commit_rd[4:0]==narrow_0(REGISTER)) value<=commit_values[31:0];
-      if(commit_valid[1] && commit_rd[9:5]==narrow_0(REGISTER)) value<=commit_values[63:32];
+  generate
+    if(CONTROL_TREE) begin: distributed
+      wire [1:0] write_enable;
+      assign write_enable[0]=commit_valid[0] && commit_rd[4:0]==narrow_0(REGISTER);
+      assign write_enable[1]=commit_valid[1] && commit_rd[9:5]==narrow_0(REGISTER);
+      v2_priority_register #(.PORTS(2)) data_word (.clk(clk),.clear(rst || REGISTER==0),.enable(write_enable),.data(commit_values),.value(value));
+    end else begin: direct
+reg [31:0] stored;
+      assign value=stored;
+      always @(posedge clk) begin
+        if(rst || REGISTER==0) stored<=0;
+        else begin
+          if(commit_valid[0] && commit_rd[4:0]==narrow_0(REGISTER)) stored<=commit_values[31:0];
+          if(commit_valid[1] && commit_rd[9:5]==narrow_0(REGISTER)) stored<=commit_values[63:32];
+        end
+      end
     end
-  end
+  endgenerate
 endmodule
 
 
 
 (* keep_hierarchy=1 *)
 module v2_cache_read #(
-  parameter integer ENTRIES=64,WORD_BITS=32,INDEX_BITS=$clog2(ENTRIES)
+  parameter integer ENTRIES=64,WORD_BITS=32,INDEX_BITS=$clog2(ENTRIES),INDEX_GROUP=0
 )(
   input wire [INDEX_BITS-1:0] index,
   input wire [ENTRIES*WORD_BITS-1:0] words,
@@ -1943,7 +2040,7 @@ localparam integer FETCH_T_INST_LSB=FETCH_T_PREDICTED_PC_LSB+FETCH_T_PREDICTED_P
 localparam integer FETCH_T_PC_LSB=FETCH_T_INST_LSB+FETCH_T_INST_WIDTH, FETCH_T_PC_WIDTH=32;
 localparam integer FETCH_T_WIDTH=FETCH_T_PC_LSB+FETCH_T_PC_WIDTH;
 
-  v2_read #(.ENTRIES(ENTRIES),.WORD_BITS(WORD_BITS),.INDEX_BITS(INDEX_BITS)) read_word (
+  v2_read #(.ENTRIES(ENTRIES),.WORD_BITS(WORD_BITS),.INDEX_BITS(INDEX_BITS),.INDEX_GROUP(INDEX_GROUP)) read_word (
     .index(index),.words(words),.value(value));
 endmodule
 
@@ -1952,7 +2049,7 @@ endmodule
 module v2_dcache #(
   parameter integer CACHE_BYTES=2048, LINE_BYTES=64, MSHRS=4, LOAD_SLOTS=8, STORE_SLOTS=16,
   parameter integer CREDITS=64, RAM_BYTES=268435456,
-  parameter integer LT=$clog2(LOAD_SLOTS), ST=$clog2(STORE_SLOTS)
+  parameter integer LT=$clog2(LOAD_SLOTS), ST=$clog2(STORE_SLOTS), CACHE_TREE=0
 )(
   input wire  clk,
   input wire  rst,
@@ -2061,6 +2158,9 @@ localparam integer WRITE_BANKS=CACHE_BYTES/4>=128 ? 8:2;
 localparam integer BANK_WORDS=CACHE_BYTES/(4*WRITE_BANKS);
 localparam integer BANK_BITS=$clog2(WRITE_BANKS), BANK_WORD_BITS=$clog2(BANK_WORDS);
 localparam integer PENDING_BITS=37+BANK_WORD_BITS;
+localparam integer WRITE_GROUP_WORDS=CACHE_TREE ? 16:BANK_WORDS;
+localparam integer WRITE_GROUPS=(BANK_WORDS+WRITE_GROUP_WORDS-1)/WRITE_GROUP_WORDS;
+localparam integer WRITE_CONTROL_BITS=36+BANK_WORD_BITS;
 localparam integer DECODED_T_ILLEGAL_LSB=0, DECODED_T_ILLEGAL_WIDTH=1;
 localparam integer DECODED_T_LOAD_SIGNED_LSB=DECODED_T_ILLEGAL_LSB+DECODED_T_ILLEGAL_WIDTH, DECODED_T_LOAD_SIGNED_WIDTH=1;
 localparam integer DECODED_T_MEM_SIZE_LSB=DECODED_T_LOAD_SIGNED_LSB+DECODED_T_LOAD_SIGNED_WIDTH, DECODED_T_MEM_SIZE_WIDTH=2;
@@ -2105,6 +2205,7 @@ localparam integer OWNER_T_SLOT_LSB=OWNER_T_WORD_INDEX_LSB+OWNER_T_WORD_INDEX_WI
 localparam integer OWNER_T_TAG_LSB=OWNER_T_SLOT_LSB+OWNER_T_SLOT_WIDTH, OWNER_T_TAG_WIDTH=((ST-1)-(0)+1);
 localparam integer OWNER_T_WRITE_LSB=OWNER_T_TAG_LSB+OWNER_T_TAG_WIDTH, OWNER_T_WRITE_WIDTH=1;
 localparam integer OWNER_T_WIDTH=OWNER_T_WRITE_LSB+OWNER_T_WRITE_WIDTH;
+wire [WRITE_CONTROL_BITS*WRITE_GROUPS-1:0] distributed_writes [0:(WRITE_BANKS)-1];
 reg [MISS_T_WIDTH-1:0] misses [0:(MSHRS)-1];
 reg [WAITER_T_WIDTH-1:0] waiters [0:(LOAD_SLOTS)-1];
 reg [OWNER_T_WIDTH-1:0] owners [0:(CREDITS)-1];
@@ -2289,7 +2390,7 @@ end
   wire [31:0] read_word;
 
   for(bank=0;bank<WRITE_BANKS;bank=bank+1) begin: write_stages
-    v2_cache_read #(.ENTRIES(BANK_WORDS)) read_bank (
+    v2_cache_read #(.ENTRIES(BANK_WORDS),.INDEX_GROUP(CACHE_TREE ? 16:0)) read_bank (
       .index(data_read_address[BANK_WORD_BITS-1:0]),
       .words(data_words[bank*BANK_WORDS*32+:BANK_WORDS*32]),.value(bank_words[bank*32+:32]));
     wire select_bank=data_write_address[LB+WW-1:BANK_WORD_BITS]==narrow_5(bank);
@@ -2307,14 +2408,19 @@ end
     end
     assign pending_words[bank*PENDING_BITS+:PENDING_BITS]=
       {pending_valid[bank],pending_address[bank],pending_mask[bank],pending_data[bank]};
+    v2_distribution #(.WIDTH(WRITE_CONTROL_BITS),.LEAVES(WRITE_GROUPS)) write_tree (
+      .data_in({pending_mask[bank] & {4{pending_valid[bank]}},pending_address[bank],pending_data[bank]}),
+      .data_out(distributed_writes[bank]));
   end
   for(row=0;row<CACHE_BYTES/4;row=row+1) begin: data_rows
+    wire [WRITE_CONTROL_BITS-1:0] local_write=
+      distributed_writes[row/BANK_WORDS][((row%BANK_WORDS)/WRITE_GROUP_WORDS)*WRITE_CONTROL_BITS+:WRITE_CONTROL_BITS];
     assign data_words[row*32+:32]=data[row];
     for(byte_id=0;byte_id<4;byte_id=byte_id+1) begin: byte_write
       always @(posedge clk)
-        if(!rst && pending_valid[row/BANK_WORDS] && pending_mask[row/BANK_WORDS][byte_id] &&
-           pending_address[row/BANK_WORDS]==narrow_6(row%BANK_WORDS))
-          data[row][byte_id*8+:8]<=pending_data[row/BANK_WORDS][byte_id*8+:8];
+        if(!rst && local_write[32+BANK_WORD_BITS+byte_id] &&
+           local_write[32+:BANK_WORD_BITS]==narrow_6(row%BANK_WORDS))
+          data[row][byte_id*8+:8]<=local_write[byte_id*8+:8];
     end
   end
   v2_cache_read #(.ENTRIES(WRITE_BANKS)) read_data (
@@ -2420,10 +2526,142 @@ reg [WORDS-1:0] valid_next;
   end
 endmodule
 
+
+
+module v2_distribution #(
+  parameter integer WIDTH=1, LEAVES=2
+)(
+  input wire [WIDTH-1:0] data_in,
+  output wire [WIDTH*LEAVES-1:0] data_out
+);
+
+
+  localparam OP_ADD=0, OP_SUB=1, OP_SLL=2, OP_SLT=3, OP_SLTU=4, OP_XOR=5, OP_SRL=6, OP_SRA=7, OP_OR=8, OP_AND=9, OP_LUI=10, OP_AUIPC=11, OP_JAL=12, OP_JALR=13, OP_BEQ=14, OP_BNE=15, OP_BLT=16, OP_BGE=17, OP_BLTU=18, OP_BGEU=19, OP_LOAD=20, OP_STORE=21, OP_MUL=22, OP_MULH=23, OP_MULHSU=24, OP_MULHU=25, OP_DIV=26, OP_DIVU=27, OP_REM=28, OP_REMU=29;
+
+  localparam [3:0] FAULT_NONE=0, FAULT_ILLEGAL=1,
+    FAULT_FETCH_ALIGN=2, FAULT_FETCH_RANGE=3, FAULT_FETCH_BUS=4,
+    FAULT_TARGET_ALIGN=5, FAULT_LOAD_ALIGN=6, FAULT_LOAD_RANGE=7,
+    FAULT_STORE_ALIGN=8, FAULT_STORE_RANGE=9, FAULT_LOAD_BUS=10,
+    FAULT_STORE_BUS=11;
+  function automatic is_branch(input [5:0] op);
+    is_branch = op >= OP_JAL && op <= OP_BGEU;
+  endfunction
+  function automatic is_mdu(input [5:0] op);
+    is_mdu = op >= OP_MUL && op <= OP_REMU;
+  endfunction
+  function automatic is_alu(input [5:0] op);
+    is_alu = op <= OP_AUIPC;
+  endfunction
+
+localparam integer LEFT=LEAVES/2, RIGHT=LEAVES-LEFT;
+localparam integer DECODED_T_ILLEGAL_LSB=0, DECODED_T_ILLEGAL_WIDTH=1;
+localparam integer DECODED_T_LOAD_SIGNED_LSB=DECODED_T_ILLEGAL_LSB+DECODED_T_ILLEGAL_WIDTH, DECODED_T_LOAD_SIGNED_WIDTH=1;
+localparam integer DECODED_T_MEM_SIZE_LSB=DECODED_T_LOAD_SIGNED_LSB+DECODED_T_LOAD_SIGNED_WIDTH, DECODED_T_MEM_SIZE_WIDTH=2;
+localparam integer DECODED_T_IMM_LSB=DECODED_T_MEM_SIZE_LSB+DECODED_T_MEM_SIZE_WIDTH, DECODED_T_IMM_WIDTH=32;
+localparam integer DECODED_T_USE_IMM_LSB=DECODED_T_IMM_LSB+DECODED_T_IMM_WIDTH, DECODED_T_USE_IMM_WIDTH=1;
+localparam integer DECODED_T_WRITES_RD_LSB=DECODED_T_USE_IMM_LSB+DECODED_T_USE_IMM_WIDTH, DECODED_T_WRITES_RD_WIDTH=1;
+localparam integer DECODED_T_USES_RS2_LSB=DECODED_T_WRITES_RD_LSB+DECODED_T_WRITES_RD_WIDTH, DECODED_T_USES_RS2_WIDTH=1;
+localparam integer DECODED_T_USES_RS1_LSB=DECODED_T_USES_RS2_LSB+DECODED_T_USES_RS2_WIDTH, DECODED_T_USES_RS1_WIDTH=1;
+localparam integer DECODED_T_RD_LSB=DECODED_T_USES_RS1_LSB+DECODED_T_USES_RS1_WIDTH, DECODED_T_RD_WIDTH=5;
+localparam integer DECODED_T_RS2_LSB=DECODED_T_RD_LSB+DECODED_T_RD_WIDTH, DECODED_T_RS2_WIDTH=5;
+localparam integer DECODED_T_RS1_LSB=DECODED_T_RS2_LSB+DECODED_T_RS2_WIDTH, DECODED_T_RS1_WIDTH=5;
+localparam integer DECODED_T_OP_LSB=DECODED_T_RS1_LSB+DECODED_T_RS1_WIDTH, DECODED_T_OP_WIDTH=6;
+localparam integer DECODED_T_WIDTH=DECODED_T_OP_LSB+DECODED_T_OP_WIDTH;
+localparam integer FETCH_T_GSHARE_TAKEN_LSB=0, FETCH_T_GSHARE_TAKEN_WIDTH=1;
+localparam integer FETCH_T_BIMODAL_TAKEN_LSB=FETCH_T_GSHARE_TAKEN_LSB+FETCH_T_GSHARE_TAKEN_WIDTH, FETCH_T_BIMODAL_TAKEN_WIDTH=1;
+localparam integer FETCH_T_PREDICTED_TAKEN_LSB=FETCH_T_BIMODAL_TAKEN_LSB+FETCH_T_BIMODAL_TAKEN_WIDTH, FETCH_T_PREDICTED_TAKEN_WIDTH=1;
+localparam integer FETCH_T_RAS_COUNT_LSB=FETCH_T_PREDICTED_TAKEN_LSB+FETCH_T_PREDICTED_TAKEN_WIDTH, FETCH_T_RAS_COUNT_WIDTH=5;
+localparam integer FETCH_T_RAS_SNAPSHOT_LSB=FETCH_T_RAS_COUNT_LSB+FETCH_T_RAS_COUNT_WIDTH, FETCH_T_RAS_SNAPSHOT_WIDTH=512;
+localparam integer FETCH_T_HISTORY_LSB=FETCH_T_RAS_SNAPSHOT_LSB+FETCH_T_RAS_SNAPSHOT_WIDTH, FETCH_T_HISTORY_WIDTH=16;
+localparam integer FETCH_T_FAULT_ADDR_LSB=FETCH_T_HISTORY_LSB+FETCH_T_HISTORY_WIDTH, FETCH_T_FAULT_ADDR_WIDTH=32;
+localparam integer FETCH_T_FAULT_LSB=FETCH_T_FAULT_ADDR_LSB+FETCH_T_FAULT_ADDR_WIDTH, FETCH_T_FAULT_WIDTH=4;
+localparam integer FETCH_T_INST_VALID_LSB=FETCH_T_FAULT_LSB+FETCH_T_FAULT_WIDTH, FETCH_T_INST_VALID_WIDTH=1;
+localparam integer FETCH_T_PREDICTED_PC_LSB=FETCH_T_INST_VALID_LSB+FETCH_T_INST_VALID_WIDTH, FETCH_T_PREDICTED_PC_WIDTH=32;
+localparam integer FETCH_T_INST_LSB=FETCH_T_PREDICTED_PC_LSB+FETCH_T_PREDICTED_PC_WIDTH, FETCH_T_INST_WIDTH=32;
+localparam integer FETCH_T_PC_LSB=FETCH_T_INST_LSB+FETCH_T_INST_WIDTH, FETCH_T_PC_WIDTH=32;
+localparam integer FETCH_T_WIDTH=FETCH_T_PC_LSB+FETCH_T_PC_WIDTH;
+
+  generate
+    if(LEAVES==1) begin: leaf
+      assign data_out=data_in;
+    end else begin: branch
+
+      wire [WIDTH-1:0] inverted_left,inverted_right,left_value,right_value;
+      (* keep=1 *) v2_distribution_inverter #(.WIDTH(WIDTH)) left_first (
+        .data_in(data_in),.data_out(inverted_left));
+      (* keep=1 *) v2_distribution_inverter #(.WIDTH(WIDTH)) left_second (
+        .data_in(inverted_left),.data_out(left_value));
+      (* keep=1 *) v2_distribution_inverter #(.WIDTH(WIDTH)) right_first (
+        .data_in(data_in),.data_out(inverted_right));
+      (* keep=1 *) v2_distribution_inverter #(.WIDTH(WIDTH)) right_second (
+        .data_in(inverted_right),.data_out(right_value));
+      v2_distribution #(.WIDTH(WIDTH),.LEAVES(LEFT)) left_tree (
+        .data_in(left_value),.data_out(data_out[0+:WIDTH*LEFT]));
+      v2_distribution #(.WIDTH(WIDTH),.LEAVES(RIGHT)) right_tree (
+        .data_in(right_value),.data_out(data_out[WIDTH*LEFT+:WIDTH*RIGHT]));
+    end
+  endgenerate
+endmodule
+
+
+(* keep_hierarchy=1 *)
+module v2_distribution_inverter #(parameter integer WIDTH=1)(
+  input wire [WIDTH-1:0] data_in,
+  output wire [WIDTH-1:0] data_out
+);
+
+
+  localparam OP_ADD=0, OP_SUB=1, OP_SLL=2, OP_SLT=3, OP_SLTU=4, OP_XOR=5, OP_SRL=6, OP_SRA=7, OP_OR=8, OP_AND=9, OP_LUI=10, OP_AUIPC=11, OP_JAL=12, OP_JALR=13, OP_BEQ=14, OP_BNE=15, OP_BLT=16, OP_BGE=17, OP_BLTU=18, OP_BGEU=19, OP_LOAD=20, OP_STORE=21, OP_MUL=22, OP_MULH=23, OP_MULHSU=24, OP_MULHU=25, OP_DIV=26, OP_DIVU=27, OP_REM=28, OP_REMU=29;
+
+  localparam [3:0] FAULT_NONE=0, FAULT_ILLEGAL=1,
+    FAULT_FETCH_ALIGN=2, FAULT_FETCH_RANGE=3, FAULT_FETCH_BUS=4,
+    FAULT_TARGET_ALIGN=5, FAULT_LOAD_ALIGN=6, FAULT_LOAD_RANGE=7,
+    FAULT_STORE_ALIGN=8, FAULT_STORE_RANGE=9, FAULT_LOAD_BUS=10,
+    FAULT_STORE_BUS=11;
+  function automatic is_branch(input [5:0] op);
+    is_branch = op >= OP_JAL && op <= OP_BGEU;
+  endfunction
+  function automatic is_mdu(input [5:0] op);
+    is_mdu = op >= OP_MUL && op <= OP_REMU;
+  endfunction
+  function automatic is_alu(input [5:0] op);
+    is_alu = op <= OP_AUIPC;
+  endfunction
+
+localparam integer DECODED_T_ILLEGAL_LSB=0, DECODED_T_ILLEGAL_WIDTH=1;
+localparam integer DECODED_T_LOAD_SIGNED_LSB=DECODED_T_ILLEGAL_LSB+DECODED_T_ILLEGAL_WIDTH, DECODED_T_LOAD_SIGNED_WIDTH=1;
+localparam integer DECODED_T_MEM_SIZE_LSB=DECODED_T_LOAD_SIGNED_LSB+DECODED_T_LOAD_SIGNED_WIDTH, DECODED_T_MEM_SIZE_WIDTH=2;
+localparam integer DECODED_T_IMM_LSB=DECODED_T_MEM_SIZE_LSB+DECODED_T_MEM_SIZE_WIDTH, DECODED_T_IMM_WIDTH=32;
+localparam integer DECODED_T_USE_IMM_LSB=DECODED_T_IMM_LSB+DECODED_T_IMM_WIDTH, DECODED_T_USE_IMM_WIDTH=1;
+localparam integer DECODED_T_WRITES_RD_LSB=DECODED_T_USE_IMM_LSB+DECODED_T_USE_IMM_WIDTH, DECODED_T_WRITES_RD_WIDTH=1;
+localparam integer DECODED_T_USES_RS2_LSB=DECODED_T_WRITES_RD_LSB+DECODED_T_WRITES_RD_WIDTH, DECODED_T_USES_RS2_WIDTH=1;
+localparam integer DECODED_T_USES_RS1_LSB=DECODED_T_USES_RS2_LSB+DECODED_T_USES_RS2_WIDTH, DECODED_T_USES_RS1_WIDTH=1;
+localparam integer DECODED_T_RD_LSB=DECODED_T_USES_RS1_LSB+DECODED_T_USES_RS1_WIDTH, DECODED_T_RD_WIDTH=5;
+localparam integer DECODED_T_RS2_LSB=DECODED_T_RD_LSB+DECODED_T_RD_WIDTH, DECODED_T_RS2_WIDTH=5;
+localparam integer DECODED_T_RS1_LSB=DECODED_T_RS2_LSB+DECODED_T_RS2_WIDTH, DECODED_T_RS1_WIDTH=5;
+localparam integer DECODED_T_OP_LSB=DECODED_T_RS1_LSB+DECODED_T_RS1_WIDTH, DECODED_T_OP_WIDTH=6;
+localparam integer DECODED_T_WIDTH=DECODED_T_OP_LSB+DECODED_T_OP_WIDTH;
+localparam integer FETCH_T_GSHARE_TAKEN_LSB=0, FETCH_T_GSHARE_TAKEN_WIDTH=1;
+localparam integer FETCH_T_BIMODAL_TAKEN_LSB=FETCH_T_GSHARE_TAKEN_LSB+FETCH_T_GSHARE_TAKEN_WIDTH, FETCH_T_BIMODAL_TAKEN_WIDTH=1;
+localparam integer FETCH_T_PREDICTED_TAKEN_LSB=FETCH_T_BIMODAL_TAKEN_LSB+FETCH_T_BIMODAL_TAKEN_WIDTH, FETCH_T_PREDICTED_TAKEN_WIDTH=1;
+localparam integer FETCH_T_RAS_COUNT_LSB=FETCH_T_PREDICTED_TAKEN_LSB+FETCH_T_PREDICTED_TAKEN_WIDTH, FETCH_T_RAS_COUNT_WIDTH=5;
+localparam integer FETCH_T_RAS_SNAPSHOT_LSB=FETCH_T_RAS_COUNT_LSB+FETCH_T_RAS_COUNT_WIDTH, FETCH_T_RAS_SNAPSHOT_WIDTH=512;
+localparam integer FETCH_T_HISTORY_LSB=FETCH_T_RAS_SNAPSHOT_LSB+FETCH_T_RAS_SNAPSHOT_WIDTH, FETCH_T_HISTORY_WIDTH=16;
+localparam integer FETCH_T_FAULT_ADDR_LSB=FETCH_T_HISTORY_LSB+FETCH_T_HISTORY_WIDTH, FETCH_T_FAULT_ADDR_WIDTH=32;
+localparam integer FETCH_T_FAULT_LSB=FETCH_T_FAULT_ADDR_LSB+FETCH_T_FAULT_ADDR_WIDTH, FETCH_T_FAULT_WIDTH=4;
+localparam integer FETCH_T_INST_VALID_LSB=FETCH_T_FAULT_LSB+FETCH_T_FAULT_WIDTH, FETCH_T_INST_VALID_WIDTH=1;
+localparam integer FETCH_T_PREDICTED_PC_LSB=FETCH_T_INST_VALID_LSB+FETCH_T_INST_VALID_WIDTH, FETCH_T_PREDICTED_PC_WIDTH=32;
+localparam integer FETCH_T_INST_LSB=FETCH_T_PREDICTED_PC_LSB+FETCH_T_PREDICTED_PC_WIDTH, FETCH_T_INST_WIDTH=32;
+localparam integer FETCH_T_PC_LSB=FETCH_T_INST_LSB+FETCH_T_INST_WIDTH, FETCH_T_PC_WIDTH=32;
+localparam integer FETCH_T_WIDTH=FETCH_T_PC_LSB+FETCH_T_PC_WIDTH;
+
+  assign data_out=~data_in;
+endmodule
+
 module v2_frontend #(
   parameter integer CACHE_BYTES=1024, QUEUE_ENTRIES=8, BHT_ENTRIES=256, BTB_ENTRIES=32,
   parameter integer LOCAL_HISTORY_BITS=1, HISTORY_ENTRIES=64,
-  parameter integer RAM_BYTES=268435456, HB=(LOCAL_HISTORY_BITS>0 ? LOCAL_HISTORY_BITS:1)
+  parameter integer RAM_BYTES=268435456, HB=(LOCAL_HISTORY_BITS>0 ? LOCAL_HISTORY_BITS:1), CACHE_TREE=0
 )(
   input wire  clk,
   input wire  rst,
@@ -2500,7 +2738,7 @@ function automatic [HB-1:0] narrow_8;
   begin narrow_8=value; end
 endfunction
 
-  
+
   localparam OP_ADD=0, OP_SUB=1, OP_SLL=2, OP_SLT=3, OP_SLTU=4, OP_XOR=5, OP_SRL=6, OP_SRA=7, OP_OR=8, OP_AND=9, OP_LUI=10, OP_AUIPC=11, OP_JAL=12, OP_JALR=13, OP_BEQ=14, OP_BNE=15, OP_BLT=16, OP_BGE=17, OP_BLTU=18, OP_BGEU=19, OP_LOAD=20, OP_STORE=21, OP_MUL=22, OP_MULH=23, OP_MULHSU=24, OP_MULHU=25, OP_DIV=26, OP_DIVU=27, OP_REM=28, OP_REMU=29;
 
   localparam [3:0] FAULT_NONE=0, FAULT_ILLEGAL=1,
@@ -2629,8 +2867,8 @@ wire [TW-1:0] train_btb;
     assign even_words[row*64+:64]={even_target[row],even_data[row]};
     assign odd_words[row*64+:64]={odd_target[row],odd_data[row]};
   end
-  v2_read #(.ENTRIES(CACHE_BYTES/8),.WORD_BITS(64)) read_even (.index(even_index),.words(even_words),.value(even_read));
-  v2_read #(.ENTRIES(CACHE_BYTES/8),.WORD_BITS(64)) read_odd (.index(odd_index),.words(odd_words),.value(odd_read));
+  v2_read #(.ENTRIES(CACHE_BYTES/8),.WORD_BITS(64),.INDEX_GROUP(CACHE_TREE ? 16:0)) read_even (.index(even_index),.words(even_words),.value(even_read));
+  v2_read #(.ENTRIES(CACHE_BYTES/8),.WORD_BITS(64),.INDEX_GROUP(CACHE_TREE ? 16:0)) read_odd (.index(odd_index),.words(odd_words),.value(odd_read));
   assign fetch_inst[0]=pc[2] ? odd_read[31:0]:even_read[31:0];
   assign fetch_inst[1]=pc[2] ? even_read[31:0]:odd_read[31:0];
   assign fetch_target[0]=pc[2] ? odd_read[63:32]:even_read[63:32];
@@ -3033,10 +3271,244 @@ end
   end
 endmodule
 
+(* keep_hierarchy=1 *)
+module v2_prefix_adder #(parameter integer WIDTH=32)(
+  input wire [WIDTH-1:0] a,b,
+  input wire carry_in,
+  output wire [WIDTH-1:0] sum,
+  output wire carry_out
+);
+genvar bit_id,level;
+
+
+  localparam OP_ADD=0, OP_SUB=1, OP_SLL=2, OP_SLT=3, OP_SLTU=4, OP_XOR=5, OP_SRL=6, OP_SRA=7, OP_OR=8, OP_AND=9, OP_LUI=10, OP_AUIPC=11, OP_JAL=12, OP_JALR=13, OP_BEQ=14, OP_BNE=15, OP_BLT=16, OP_BGE=17, OP_BLTU=18, OP_BGEU=19, OP_LOAD=20, OP_STORE=21, OP_MUL=22, OP_MULH=23, OP_MULHSU=24, OP_MULHU=25, OP_DIV=26, OP_DIVU=27, OP_REM=28, OP_REMU=29;
+
+  localparam [3:0] FAULT_NONE=0, FAULT_ILLEGAL=1,
+    FAULT_FETCH_ALIGN=2, FAULT_FETCH_RANGE=3, FAULT_FETCH_BUS=4,
+    FAULT_TARGET_ALIGN=5, FAULT_LOAD_ALIGN=6, FAULT_LOAD_RANGE=7,
+    FAULT_STORE_ALIGN=8, FAULT_STORE_RANGE=9, FAULT_LOAD_BUS=10,
+    FAULT_STORE_BUS=11;
+  function automatic is_branch(input [5:0] op);
+    is_branch = op >= OP_JAL && op <= OP_BGEU;
+  endfunction
+  function automatic is_mdu(input [5:0] op);
+    is_mdu = op >= OP_MUL && op <= OP_REMU;
+  endfunction
+  function automatic is_alu(input [5:0] op);
+    is_alu = op <= OP_AUIPC;
+  endfunction
+
+localparam integer LEVELS=$clog2(WIDTH);
+localparam integer DECODED_T_ILLEGAL_LSB=0, DECODED_T_ILLEGAL_WIDTH=1;
+localparam integer DECODED_T_LOAD_SIGNED_LSB=DECODED_T_ILLEGAL_LSB+DECODED_T_ILLEGAL_WIDTH, DECODED_T_LOAD_SIGNED_WIDTH=1;
+localparam integer DECODED_T_MEM_SIZE_LSB=DECODED_T_LOAD_SIGNED_LSB+DECODED_T_LOAD_SIGNED_WIDTH, DECODED_T_MEM_SIZE_WIDTH=2;
+localparam integer DECODED_T_IMM_LSB=DECODED_T_MEM_SIZE_LSB+DECODED_T_MEM_SIZE_WIDTH, DECODED_T_IMM_WIDTH=32;
+localparam integer DECODED_T_USE_IMM_LSB=DECODED_T_IMM_LSB+DECODED_T_IMM_WIDTH, DECODED_T_USE_IMM_WIDTH=1;
+localparam integer DECODED_T_WRITES_RD_LSB=DECODED_T_USE_IMM_LSB+DECODED_T_USE_IMM_WIDTH, DECODED_T_WRITES_RD_WIDTH=1;
+localparam integer DECODED_T_USES_RS2_LSB=DECODED_T_WRITES_RD_LSB+DECODED_T_WRITES_RD_WIDTH, DECODED_T_USES_RS2_WIDTH=1;
+localparam integer DECODED_T_USES_RS1_LSB=DECODED_T_USES_RS2_LSB+DECODED_T_USES_RS2_WIDTH, DECODED_T_USES_RS1_WIDTH=1;
+localparam integer DECODED_T_RD_LSB=DECODED_T_USES_RS1_LSB+DECODED_T_USES_RS1_WIDTH, DECODED_T_RD_WIDTH=5;
+localparam integer DECODED_T_RS2_LSB=DECODED_T_RD_LSB+DECODED_T_RD_WIDTH, DECODED_T_RS2_WIDTH=5;
+localparam integer DECODED_T_RS1_LSB=DECODED_T_RS2_LSB+DECODED_T_RS2_WIDTH, DECODED_T_RS1_WIDTH=5;
+localparam integer DECODED_T_OP_LSB=DECODED_T_RS1_LSB+DECODED_T_RS1_WIDTH, DECODED_T_OP_WIDTH=6;
+localparam integer DECODED_T_WIDTH=DECODED_T_OP_LSB+DECODED_T_OP_WIDTH;
+localparam integer FETCH_T_GSHARE_TAKEN_LSB=0, FETCH_T_GSHARE_TAKEN_WIDTH=1;
+localparam integer FETCH_T_BIMODAL_TAKEN_LSB=FETCH_T_GSHARE_TAKEN_LSB+FETCH_T_GSHARE_TAKEN_WIDTH, FETCH_T_BIMODAL_TAKEN_WIDTH=1;
+localparam integer FETCH_T_PREDICTED_TAKEN_LSB=FETCH_T_BIMODAL_TAKEN_LSB+FETCH_T_BIMODAL_TAKEN_WIDTH, FETCH_T_PREDICTED_TAKEN_WIDTH=1;
+localparam integer FETCH_T_RAS_COUNT_LSB=FETCH_T_PREDICTED_TAKEN_LSB+FETCH_T_PREDICTED_TAKEN_WIDTH, FETCH_T_RAS_COUNT_WIDTH=5;
+localparam integer FETCH_T_RAS_SNAPSHOT_LSB=FETCH_T_RAS_COUNT_LSB+FETCH_T_RAS_COUNT_WIDTH, FETCH_T_RAS_SNAPSHOT_WIDTH=512;
+localparam integer FETCH_T_HISTORY_LSB=FETCH_T_RAS_SNAPSHOT_LSB+FETCH_T_RAS_SNAPSHOT_WIDTH, FETCH_T_HISTORY_WIDTH=16;
+localparam integer FETCH_T_FAULT_ADDR_LSB=FETCH_T_HISTORY_LSB+FETCH_T_HISTORY_WIDTH, FETCH_T_FAULT_ADDR_WIDTH=32;
+localparam integer FETCH_T_FAULT_LSB=FETCH_T_FAULT_ADDR_LSB+FETCH_T_FAULT_ADDR_WIDTH, FETCH_T_FAULT_WIDTH=4;
+localparam integer FETCH_T_INST_VALID_LSB=FETCH_T_FAULT_LSB+FETCH_T_FAULT_WIDTH, FETCH_T_INST_VALID_WIDTH=1;
+localparam integer FETCH_T_PREDICTED_PC_LSB=FETCH_T_INST_VALID_LSB+FETCH_T_INST_VALID_WIDTH, FETCH_T_PREDICTED_PC_WIDTH=32;
+localparam integer FETCH_T_INST_LSB=FETCH_T_PREDICTED_PC_LSB+FETCH_T_PREDICTED_PC_WIDTH, FETCH_T_INST_WIDTH=32;
+localparam integer FETCH_T_PC_LSB=FETCH_T_INST_LSB+FETCH_T_INST_WIDTH, FETCH_T_PC_WIDTH=32;
+localparam integer FETCH_T_WIDTH=FETCH_T_PC_LSB+FETCH_T_PC_WIDTH;
+
+  wire [WIDTH-1:0] initial_g;
+  wire [WIDTH-1:0] bit_propagates=a^b;
+  for(bit_id=0;bit_id<WIDTH;bit_id=bit_id+1) begin: initial_bit
+    if(bit_id==0) begin: first
+      assign initial_g[bit_id]=(a[bit_id]&b[bit_id]) | (bit_propagates[bit_id]&carry_in);
+    end else begin: later
+      assign initial_g[bit_id]=a[bit_id]&b[bit_id];
+    end
+  end
+  for(level=0;level<LEVELS;level=level+1) begin: prefix_level
+    wire [WIDTH-1:0] input_g,input_p,group_g,group_p;
+    if(level==0) begin: first_level
+      assign input_g=initial_g;
+      assign input_p=bit_propagates;
+    end else begin: later_level
+      assign input_g=prefix_level[level-1].group_g;
+      assign input_p=prefix_level[level-1].group_p;
+    end
+    for(bit_id=0;bit_id<WIDTH;bit_id=bit_id+1) begin: prefix_bit
+      if(bit_id>=(1<<level)) begin: composed
+        v2_prefix_node compose (
+          .high_g(input_g[bit_id]),.high_p(input_p[bit_id]),
+          .low_g(input_g[bit_id-(1<<level)]),.low_p(input_p[bit_id-(1<<level)]),
+          .group_g(group_g[bit_id]),.group_p(group_p[bit_id]));
+      end else begin: pass
+        assign group_g[bit_id]=input_g[bit_id];
+        assign group_p[bit_id]=input_p[bit_id];
+      end
+    end
+  end
+  for(bit_id=0;bit_id<WIDTH;bit_id=bit_id+1) begin: result_bit
+    if(bit_id==0) begin: first
+      assign sum[bit_id]=bit_propagates[bit_id]^carry_in;
+    end else begin: later
+      assign sum[bit_id]=bit_propagates[bit_id]^prefix_level[LEVELS-1].group_g[bit_id-1];
+    end
+  end
+  generate if(LEVELS==0) begin: single_bit
+    assign carry_out=initial_g[WIDTH-1];
+  end else begin: multi_bit
+    assign carry_out=prefix_level[LEVELS-1].group_g[WIDTH-1];
+  end endgenerate
+endmodule
+
+
+
+(* keep_hierarchy=1 *)
+module v2_prefix_node(
+  input wire high_g,high_p,low_g,low_p,
+  output wire group_g,group_p
+);
+
+
+  localparam OP_ADD=0, OP_SUB=1, OP_SLL=2, OP_SLT=3, OP_SLTU=4, OP_XOR=5, OP_SRL=6, OP_SRA=7, OP_OR=8, OP_AND=9, OP_LUI=10, OP_AUIPC=11, OP_JAL=12, OP_JALR=13, OP_BEQ=14, OP_BNE=15, OP_BLT=16, OP_BGE=17, OP_BLTU=18, OP_BGEU=19, OP_LOAD=20, OP_STORE=21, OP_MUL=22, OP_MULH=23, OP_MULHSU=24, OP_MULHU=25, OP_DIV=26, OP_DIVU=27, OP_REM=28, OP_REMU=29;
+
+  localparam [3:0] FAULT_NONE=0, FAULT_ILLEGAL=1,
+    FAULT_FETCH_ALIGN=2, FAULT_FETCH_RANGE=3, FAULT_FETCH_BUS=4,
+    FAULT_TARGET_ALIGN=5, FAULT_LOAD_ALIGN=6, FAULT_LOAD_RANGE=7,
+    FAULT_STORE_ALIGN=8, FAULT_STORE_RANGE=9, FAULT_LOAD_BUS=10,
+    FAULT_STORE_BUS=11;
+  function automatic is_branch(input [5:0] op);
+    is_branch = op >= OP_JAL && op <= OP_BGEU;
+  endfunction
+  function automatic is_mdu(input [5:0] op);
+    is_mdu = op >= OP_MUL && op <= OP_REMU;
+  endfunction
+  function automatic is_alu(input [5:0] op);
+    is_alu = op <= OP_AUIPC;
+  endfunction
+
+localparam integer DECODED_T_ILLEGAL_LSB=0, DECODED_T_ILLEGAL_WIDTH=1;
+localparam integer DECODED_T_LOAD_SIGNED_LSB=DECODED_T_ILLEGAL_LSB+DECODED_T_ILLEGAL_WIDTH, DECODED_T_LOAD_SIGNED_WIDTH=1;
+localparam integer DECODED_T_MEM_SIZE_LSB=DECODED_T_LOAD_SIGNED_LSB+DECODED_T_LOAD_SIGNED_WIDTH, DECODED_T_MEM_SIZE_WIDTH=2;
+localparam integer DECODED_T_IMM_LSB=DECODED_T_MEM_SIZE_LSB+DECODED_T_MEM_SIZE_WIDTH, DECODED_T_IMM_WIDTH=32;
+localparam integer DECODED_T_USE_IMM_LSB=DECODED_T_IMM_LSB+DECODED_T_IMM_WIDTH, DECODED_T_USE_IMM_WIDTH=1;
+localparam integer DECODED_T_WRITES_RD_LSB=DECODED_T_USE_IMM_LSB+DECODED_T_USE_IMM_WIDTH, DECODED_T_WRITES_RD_WIDTH=1;
+localparam integer DECODED_T_USES_RS2_LSB=DECODED_T_WRITES_RD_LSB+DECODED_T_WRITES_RD_WIDTH, DECODED_T_USES_RS2_WIDTH=1;
+localparam integer DECODED_T_USES_RS1_LSB=DECODED_T_USES_RS2_LSB+DECODED_T_USES_RS2_WIDTH, DECODED_T_USES_RS1_WIDTH=1;
+localparam integer DECODED_T_RD_LSB=DECODED_T_USES_RS1_LSB+DECODED_T_USES_RS1_WIDTH, DECODED_T_RD_WIDTH=5;
+localparam integer DECODED_T_RS2_LSB=DECODED_T_RD_LSB+DECODED_T_RD_WIDTH, DECODED_T_RS2_WIDTH=5;
+localparam integer DECODED_T_RS1_LSB=DECODED_T_RS2_LSB+DECODED_T_RS2_WIDTH, DECODED_T_RS1_WIDTH=5;
+localparam integer DECODED_T_OP_LSB=DECODED_T_RS1_LSB+DECODED_T_RS1_WIDTH, DECODED_T_OP_WIDTH=6;
+localparam integer DECODED_T_WIDTH=DECODED_T_OP_LSB+DECODED_T_OP_WIDTH;
+localparam integer FETCH_T_GSHARE_TAKEN_LSB=0, FETCH_T_GSHARE_TAKEN_WIDTH=1;
+localparam integer FETCH_T_BIMODAL_TAKEN_LSB=FETCH_T_GSHARE_TAKEN_LSB+FETCH_T_GSHARE_TAKEN_WIDTH, FETCH_T_BIMODAL_TAKEN_WIDTH=1;
+localparam integer FETCH_T_PREDICTED_TAKEN_LSB=FETCH_T_BIMODAL_TAKEN_LSB+FETCH_T_BIMODAL_TAKEN_WIDTH, FETCH_T_PREDICTED_TAKEN_WIDTH=1;
+localparam integer FETCH_T_RAS_COUNT_LSB=FETCH_T_PREDICTED_TAKEN_LSB+FETCH_T_PREDICTED_TAKEN_WIDTH, FETCH_T_RAS_COUNT_WIDTH=5;
+localparam integer FETCH_T_RAS_SNAPSHOT_LSB=FETCH_T_RAS_COUNT_LSB+FETCH_T_RAS_COUNT_WIDTH, FETCH_T_RAS_SNAPSHOT_WIDTH=512;
+localparam integer FETCH_T_HISTORY_LSB=FETCH_T_RAS_SNAPSHOT_LSB+FETCH_T_RAS_SNAPSHOT_WIDTH, FETCH_T_HISTORY_WIDTH=16;
+localparam integer FETCH_T_FAULT_ADDR_LSB=FETCH_T_HISTORY_LSB+FETCH_T_HISTORY_WIDTH, FETCH_T_FAULT_ADDR_WIDTH=32;
+localparam integer FETCH_T_FAULT_LSB=FETCH_T_FAULT_ADDR_LSB+FETCH_T_FAULT_ADDR_WIDTH, FETCH_T_FAULT_WIDTH=4;
+localparam integer FETCH_T_INST_VALID_LSB=FETCH_T_FAULT_LSB+FETCH_T_FAULT_WIDTH, FETCH_T_INST_VALID_WIDTH=1;
+localparam integer FETCH_T_PREDICTED_PC_LSB=FETCH_T_INST_VALID_LSB+FETCH_T_INST_VALID_WIDTH, FETCH_T_PREDICTED_PC_WIDTH=32;
+localparam integer FETCH_T_INST_LSB=FETCH_T_PREDICTED_PC_LSB+FETCH_T_PREDICTED_PC_WIDTH, FETCH_T_INST_WIDTH=32;
+localparam integer FETCH_T_PC_LSB=FETCH_T_INST_LSB+FETCH_T_INST_WIDTH, FETCH_T_PC_WIDTH=32;
+localparam integer FETCH_T_WIDTH=FETCH_T_PC_LSB+FETCH_T_PC_WIDTH;
+
+  assign group_g=high_g | (high_p & low_g);
+  assign group_p=high_p & low_p;
+endmodule
+
+
+
+(* keep_hierarchy=1 *)
+module v2_priority_register #(
+  parameter integer WORD_BITS=32, PORTS=2, GROUP_BITS=8,
+  parameter integer GROUPS=(WORD_BITS+GROUP_BITS-1)/GROUP_BITS
+)(
+  input wire clk,clear,
+  input wire [PORTS-1:0] enable,
+  input wire [PORTS*WORD_BITS-1:0] data,
+  output reg [WORD_BITS-1:0] value
+);
+genvar bit_id;
+
+
+  localparam OP_ADD=0, OP_SUB=1, OP_SLL=2, OP_SLT=3, OP_SLTU=4, OP_XOR=5, OP_SRL=6, OP_SRA=7, OP_OR=8, OP_AND=9, OP_LUI=10, OP_AUIPC=11, OP_JAL=12, OP_JALR=13, OP_BEQ=14, OP_BNE=15, OP_BLT=16, OP_BGE=17, OP_BLTU=18, OP_BGEU=19, OP_LOAD=20, OP_STORE=21, OP_MUL=22, OP_MULH=23, OP_MULHSU=24, OP_MULHU=25, OP_DIV=26, OP_DIVU=27, OP_REM=28, OP_REMU=29;
+
+  localparam [3:0] FAULT_NONE=0, FAULT_ILLEGAL=1,
+    FAULT_FETCH_ALIGN=2, FAULT_FETCH_RANGE=3, FAULT_FETCH_BUS=4,
+    FAULT_TARGET_ALIGN=5, FAULT_LOAD_ALIGN=6, FAULT_LOAD_RANGE=7,
+    FAULT_STORE_ALIGN=8, FAULT_STORE_RANGE=9, FAULT_LOAD_BUS=10,
+    FAULT_STORE_BUS=11;
+  function automatic is_branch(input [5:0] op);
+    is_branch = op >= OP_JAL && op <= OP_BGEU;
+  endfunction
+  function automatic is_mdu(input [5:0] op);
+    is_mdu = op >= OP_MUL && op <= OP_REMU;
+  endfunction
+  function automatic is_alu(input [5:0] op);
+    is_alu = op <= OP_AUIPC;
+  endfunction
+
+localparam integer DECODED_T_ILLEGAL_LSB=0, DECODED_T_ILLEGAL_WIDTH=1;
+localparam integer DECODED_T_LOAD_SIGNED_LSB=DECODED_T_ILLEGAL_LSB+DECODED_T_ILLEGAL_WIDTH, DECODED_T_LOAD_SIGNED_WIDTH=1;
+localparam integer DECODED_T_MEM_SIZE_LSB=DECODED_T_LOAD_SIGNED_LSB+DECODED_T_LOAD_SIGNED_WIDTH, DECODED_T_MEM_SIZE_WIDTH=2;
+localparam integer DECODED_T_IMM_LSB=DECODED_T_MEM_SIZE_LSB+DECODED_T_MEM_SIZE_WIDTH, DECODED_T_IMM_WIDTH=32;
+localparam integer DECODED_T_USE_IMM_LSB=DECODED_T_IMM_LSB+DECODED_T_IMM_WIDTH, DECODED_T_USE_IMM_WIDTH=1;
+localparam integer DECODED_T_WRITES_RD_LSB=DECODED_T_USE_IMM_LSB+DECODED_T_USE_IMM_WIDTH, DECODED_T_WRITES_RD_WIDTH=1;
+localparam integer DECODED_T_USES_RS2_LSB=DECODED_T_WRITES_RD_LSB+DECODED_T_WRITES_RD_WIDTH, DECODED_T_USES_RS2_WIDTH=1;
+localparam integer DECODED_T_USES_RS1_LSB=DECODED_T_USES_RS2_LSB+DECODED_T_USES_RS2_WIDTH, DECODED_T_USES_RS1_WIDTH=1;
+localparam integer DECODED_T_RD_LSB=DECODED_T_USES_RS1_LSB+DECODED_T_USES_RS1_WIDTH, DECODED_T_RD_WIDTH=5;
+localparam integer DECODED_T_RS2_LSB=DECODED_T_RD_LSB+DECODED_T_RD_WIDTH, DECODED_T_RS2_WIDTH=5;
+localparam integer DECODED_T_RS1_LSB=DECODED_T_RS2_LSB+DECODED_T_RS2_WIDTH, DECODED_T_RS1_WIDTH=5;
+localparam integer DECODED_T_OP_LSB=DECODED_T_RS1_LSB+DECODED_T_RS1_WIDTH, DECODED_T_OP_WIDTH=6;
+localparam integer DECODED_T_WIDTH=DECODED_T_OP_LSB+DECODED_T_OP_WIDTH;
+localparam integer FETCH_T_GSHARE_TAKEN_LSB=0, FETCH_T_GSHARE_TAKEN_WIDTH=1;
+localparam integer FETCH_T_BIMODAL_TAKEN_LSB=FETCH_T_GSHARE_TAKEN_LSB+FETCH_T_GSHARE_TAKEN_WIDTH, FETCH_T_BIMODAL_TAKEN_WIDTH=1;
+localparam integer FETCH_T_PREDICTED_TAKEN_LSB=FETCH_T_BIMODAL_TAKEN_LSB+FETCH_T_BIMODAL_TAKEN_WIDTH, FETCH_T_PREDICTED_TAKEN_WIDTH=1;
+localparam integer FETCH_T_RAS_COUNT_LSB=FETCH_T_PREDICTED_TAKEN_LSB+FETCH_T_PREDICTED_TAKEN_WIDTH, FETCH_T_RAS_COUNT_WIDTH=5;
+localparam integer FETCH_T_RAS_SNAPSHOT_LSB=FETCH_T_RAS_COUNT_LSB+FETCH_T_RAS_COUNT_WIDTH, FETCH_T_RAS_SNAPSHOT_WIDTH=512;
+localparam integer FETCH_T_HISTORY_LSB=FETCH_T_RAS_SNAPSHOT_LSB+FETCH_T_RAS_SNAPSHOT_WIDTH, FETCH_T_HISTORY_WIDTH=16;
+localparam integer FETCH_T_FAULT_ADDR_LSB=FETCH_T_HISTORY_LSB+FETCH_T_HISTORY_WIDTH, FETCH_T_FAULT_ADDR_WIDTH=32;
+localparam integer FETCH_T_FAULT_LSB=FETCH_T_FAULT_ADDR_LSB+FETCH_T_FAULT_ADDR_WIDTH, FETCH_T_FAULT_WIDTH=4;
+localparam integer FETCH_T_INST_VALID_LSB=FETCH_T_FAULT_LSB+FETCH_T_FAULT_WIDTH, FETCH_T_INST_VALID_WIDTH=1;
+localparam integer FETCH_T_PREDICTED_PC_LSB=FETCH_T_INST_VALID_LSB+FETCH_T_INST_VALID_WIDTH, FETCH_T_PREDICTED_PC_WIDTH=32;
+localparam integer FETCH_T_INST_LSB=FETCH_T_PREDICTED_PC_LSB+FETCH_T_PREDICTED_PC_WIDTH, FETCH_T_INST_WIDTH=32;
+localparam integer FETCH_T_PC_LSB=FETCH_T_INST_LSB+FETCH_T_INST_WIDTH, FETCH_T_PC_WIDTH=32;
+localparam integer FETCH_T_WIDTH=FETCH_T_PC_LSB+FETCH_T_PC_WIDTH;
+
+  wire [(PORTS+1)*GROUPS-1:0] controls;
+  v2_distribution #(.WIDTH(PORTS+1),.LEAVES(GROUPS)) control_tree (
+    .data_in({clear,enable}),.data_out(controls));
+  for(bit_id=0;bit_id<WORD_BITS;bit_id=bit_id+1) begin: bit_register
+    wire [PORTS:0] local_control=controls[(bit_id/GROUP_BITS)*(PORTS+1)+:PORTS+1];
+    always @(posedge clk) begin
+      if(local_control[PORTS]) value[bit_id]<=0;
+      else begin
+
+        begin: loop_0
+integer port_id;
+for(port_id=0;port_id<PORTS;port_id=port_id+1)
+          if(local_control[port_id]) value[bit_id]<=data[port_id*WORD_BITS+bit_id];
+end
+      end
+    end
+  end
+endmodule
+
 
 
 module v2_read #(
-  parameter integer ENTRIES=8, WORD_BITS=32, INDEX_BITS=$clog2(ENTRIES)
+  parameter integer ENTRIES=8, WORD_BITS=32, INDEX_BITS=$clog2(ENTRIES), INDEX_GROUP=0
 )(
   input wire [INDEX_BITS-1:0] index,
   input wire [ENTRIES*WORD_BITS-1:0] words,
@@ -3067,6 +3539,8 @@ endfunction
   endfunction
 
 localparam integer LEAVES=2**$clog2(ENTRIES);
+localparam integer GROUP_SIZE=INDEX_GROUP>0 ? INDEX_GROUP:ENTRIES;
+localparam integer INDEX_COPIES=(ENTRIES+GROUP_SIZE-1)/GROUP_SIZE;
 localparam integer DECODED_T_ILLEGAL_LSB=0, DECODED_T_ILLEGAL_WIDTH=1;
 localparam integer DECODED_T_LOAD_SIGNED_LSB=DECODED_T_ILLEGAL_LSB+DECODED_T_ILLEGAL_WIDTH, DECODED_T_LOAD_SIGNED_WIDTH=1;
 localparam integer DECODED_T_MEM_SIZE_LSB=DECODED_T_LOAD_SIGNED_LSB+DECODED_T_LOAD_SIGNED_WIDTH, DECODED_T_MEM_SIZE_WIDTH=2;
@@ -3094,11 +3568,14 @@ localparam integer FETCH_T_INST_LSB=FETCH_T_PREDICTED_PC_LSB+FETCH_T_PREDICTED_P
 localparam integer FETCH_T_PC_LSB=FETCH_T_INST_LSB+FETCH_T_INST_WIDTH, FETCH_T_PC_WIDTH=32;
 localparam integer FETCH_T_WIDTH=FETCH_T_PC_LSB+FETCH_T_PC_WIDTH;
 
+  wire [INDEX_BITS*INDEX_COPIES-1:0] local_indices;
+  v2_distribution #(.WIDTH(INDEX_BITS),.LEAVES(INDEX_COPIES)) index_tree (
+    .data_in(index),.data_out(local_indices));
   for(n=1;n<2*LEAVES;n=n+1) begin: node
     wire [WORD_BITS-1:0] word_value;
     if(n>=LEAVES) begin: leaf
       if(n-LEAVES<ENTRIES) begin: used
-        wire selected=index==narrow_0(n-LEAVES);
+        wire selected=local_indices[((n-LEAVES)/GROUP_SIZE)*INDEX_BITS+:INDEX_BITS]==narrow_0(n-LEAVES);
         v2_read_mask #(.WORD_BITS(WORD_BITS)) mask_word (
           .selected(selected),.word(words[(n-LEAVES)*WORD_BITS+:WORD_BITS]),.value(word_value));
       end else begin: padding
@@ -3124,7 +3601,7 @@ endmodule
 
 module v2_rename #(
   parameter integer SLOT_BITS=5, CHECKPOINTS=4,
-  parameter integer CHECKPOINT_BITS=$clog2(CHECKPOINTS)
+  parameter integer CHECKPOINT_BITS=$clog2(CHECKPOINTS), COMMIT_TREE=0
 )(
   input wire  clk,
   input wire  rst,
@@ -3178,6 +3655,8 @@ endfunction
     is_alu = op <= OP_AUIPC;
   endfunction
 
+localparam integer COMMIT_BITS=12+2*SLOT_BITS;
+localparam integer COMMIT_GROUPS=4*(CHECKPOINTS+1);
 localparam integer DECODED_T_ILLEGAL_LSB=0, DECODED_T_ILLEGAL_WIDTH=1;
 localparam integer DECODED_T_LOAD_SIGNED_LSB=DECODED_T_ILLEGAL_LSB+DECODED_T_ILLEGAL_WIDTH, DECODED_T_LOAD_SIGNED_WIDTH=1;
 localparam integer DECODED_T_MEM_SIZE_LSB=DECODED_T_LOAD_SIGNED_LSB+DECODED_T_LOAD_SIGNED_WIDTH, DECODED_T_MEM_SIZE_WIDTH=2;
@@ -3212,6 +3691,14 @@ reg [SLOT_BITS-1:0] tag_q [0:(32)-1];
   reg [SLOT_BITS-1:0] save_tag [0:(32)-1];
 reg [31:0] checkpoint_pending [0:(CHECKPOINTS)-1];
 reg [SLOT_BITS-1:0] checkpoint_tag [0:(CHECKPOINTS)*(32)-1];
+
+  wire [COMMIT_BITS*COMMIT_GROUPS-1:0] commit_controls;
+  generate if(COMMIT_TREE) begin: distributed_commit
+    v2_distribution #(.WIDTH(COMMIT_BITS),.LEAVES(COMMIT_GROUPS)) tree (
+      .data_in({commit_valid,commit_rd,commit_slot}),.data_out(commit_controls));
+  end else begin: direct_commit
+    assign commit_controls={COMMIT_GROUPS{{commit_valid,commit_rd,commit_slot}}};
+  end endgenerate
 
   always @* begin
     pending_next=pending_q;
@@ -3255,9 +3742,10 @@ for(r=1;r<32;r=r+1)
       begin: loop_2
 integer c;
 for(c=0;c<2;c=c+1)
-        if (commit_valid[c] && commit_rd[c*5+:5]==narrow_1(r)) begin
-          if (tag_next[r]==commit_slot[c*SLOT_BITS+:SLOT_BITS]) pending_next[r]=0;
-          if (save_tag[r]==commit_slot[c*SLOT_BITS+:SLOT_BITS]) save_pending[r]=0;
+        if (commit_controls[(r/8)*COMMIT_BITS+2*SLOT_BITS+10+c] &&
+            commit_controls[(r/8)*COMMIT_BITS+2*SLOT_BITS+c*5+:5]==narrow_1(r)) begin
+          if (tag_next[r]==commit_controls[(r/8)*COMMIT_BITS+c*SLOT_BITS+:SLOT_BITS]) pending_next[r]=0;
+          if (save_tag[r]==commit_controls[(r/8)*COMMIT_BITS+c*SLOT_BITS+:SLOT_BITS]) save_pending[r]=0;
         end
 end
 end
@@ -3288,18 +3776,27 @@ for(r=0;r<32;r=r+1) tag_q[r]<=tag_next[r];
 end
   end
   for(cp=0;cp<CHECKPOINTS;cp=cp+1) begin: snapshot
+    wire save_pulse=save_valid && save_index==narrow_2(cp) && !restore_valid;
+    wire [31:0] save_enables;
+    if(COMMIT_TREE) begin: distributed_save
+      v2_distribution #(.WIDTH(1),.LEAVES(32)) tree (
+        .data_in(save_pulse),.data_out(save_enables));
+    end else begin: direct_save
+      assign save_enables={32{save_pulse}};
+    end
     for(r=0;r<32;r=r+1) begin: regmap
+      wire [COMMIT_BITS-1:0] local_commit=commit_controls[((cp+1)*4+r/8)*COMMIT_BITS+:COMMIT_BITS];
       always @(posedge clk) begin
         if (rst) checkpoint_pending[cp][r]<=0;
         else begin
           begin: loop_0
 integer c;
 for(c=0;c<2;c=c+1)
-            if (commit_valid[c] && commit_rd[c*5+:5]==narrow_1(r) &&
-                checkpoint_tag[(cp)*(32)+(r)]==commit_slot[c*SLOT_BITS+:SLOT_BITS])
+            if (local_commit[2*SLOT_BITS+10+c] && local_commit[2*SLOT_BITS+c*5+:5]==narrow_1(r) &&
+                checkpoint_tag[(cp)*(32)+(r)]==local_commit[c*SLOT_BITS+:SLOT_BITS])
               checkpoint_pending[cp][r]<=0;
 end
-          if (save_valid && save_index==narrow_2(cp) && !restore_valid) begin
+          if (save_enables[r]) begin
             checkpoint_pending[cp][r]<=save_pending[r];
             checkpoint_tag[(cp)*(32)+(r)]<=save_tag[r];
           end
@@ -3313,14 +3810,14 @@ endmodule
 
 (* keep_hierarchy=1 *)
 module v2_retire_read #(
-  parameter integer ENTRIES=32, WORD_BITS=32, LANE=0
+  parameter integer ENTRIES=32, WORD_BITS=32, LANE=0, CONTROL_TREE=0
 )(
   input wire clk,rst,
   input wire [1:0] advance,
   input wire [ENTRIES*WORD_BITS-1:0] words,
   output wire [WORD_BITS-1:0] value
 );
-genvar n;
+genvar n,row;
 
 
   localparam OP_ADD=0, OP_SUB=1, OP_SLL=2, OP_SLT=3, OP_SLTU=4, OP_XOR=5, OP_SRL=6, OP_SRA=7, OP_OR=8, OP_AND=9, OP_LUI=10, OP_AUIPC=11, OP_JAL=12, OP_JALR=13, OP_BEQ=14, OP_BNE=15, OP_BLT=16, OP_BGE=17, OP_BLTU=18, OP_BGEU=19, OP_LOAD=20, OP_STORE=21, OP_MUL=22, OP_MULH=23, OP_MULHSU=24, OP_MULHU=25, OP_DIV=26, OP_DIVU=27, OP_REM=28, OP_REMU=29;
@@ -3367,6 +3864,21 @@ localparam integer FETCH_T_INST_LSB=FETCH_T_PREDICTED_PC_LSB+FETCH_T_PREDICTED_P
 localparam integer FETCH_T_PC_LSB=FETCH_T_INST_LSB+FETCH_T_INST_WIDTH, FETCH_T_PC_WIDTH=32;
 localparam integer FETCH_T_WIDTH=FETCH_T_PC_LSB+FETCH_T_PC_WIDTH;
 reg [ENTRIES-1:0] selected;
+  generate if(CONTROL_TREE) begin: distributed_advance
+    wire [2*((ENTRIES+7)/8)-1:0] advances;
+    v2_distribution #(.WIDTH(2),.LEAVES((ENTRIES+7)/8)) tree (
+      .data_in(advance),.data_out(advances));
+    for(row=0;row<ENTRIES;row=row+1) begin: head_bit
+      always @(posedge clk) begin
+        if(rst) selected[row]<=(row==LANE);
+        else case(advances[(row/8)*2+:2])
+          1:selected[row]<=selected[(row+ENTRIES-1)%ENTRIES];
+          2:selected[row]<=selected[(row+ENTRIES-2)%ENTRIES];
+          default:;
+        endcase
+      end
+    end
+  end else begin: direct_advance
   always @(posedge clk) begin
     if(rst) selected<= {{(ENTRIES-1){1'b0}},1'b1} << LANE;
     else case(advance)
@@ -3375,6 +3887,7 @@ reg [ENTRIES-1:0] selected;
       default:;
     endcase
   end
+  end endgenerate
   for(n=1;n<2*ENTRIES;n=n+1) begin: node
     wire [WORD_BITS-1:0] word_value;
     if(n>=ENTRIES) begin: leaf

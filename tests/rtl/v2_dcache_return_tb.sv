@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 // Check the return-port contract every cycle against published waiter/word
 // state, with concurrent misses, response errors and consumer backpressure.
-module v2_dcache_return_tb;
+module v2_dcache_return_tb #(parameter integer CACHE_TREE=0,CACHE_BYTES=512);
   reg clk=0,rst=1,load_valid=0,result_ready=0,mem_req_ready=0,mem_rsp_valid=0,mem_rsp_error=0;
   always #5 clk=~clk;
   reg [31:0] load_address=0,mem_rsp_data=0;
@@ -9,7 +9,7 @@ module v2_dcache_return_tb;
   wire load_ready,load_hit,result_valid,result_error,mem_req_valid,mem_req_write,mem_rsp_ready,idle;
   wire [2:0] result_tag;
   wire [31:0] load_data,result_data,mem_req_addr;
-  v2_dcache #(.CACHE_BYTES(512),.LINE_BYTES(16),.MSHRS(4),.LOAD_SLOTS(8),
+  v2_dcache #(.CACHE_BYTES(CACHE_BYTES),.LINE_BYTES(16),.MSHRS(4),.LOAD_SLOTS(8),.CACHE_TREE(CACHE_TREE),
     .STORE_SLOTS(4),.CREDITS(16),.RAM_BYTES(16384)) dut (
     .clk(clk),.rst(rst),.load_valid(load_valid),.load_address(load_address),.load_tag(load_tag),
     .load_ready(load_ready),.load_hit(load_hit),.load_data(load_data),
@@ -38,8 +38,8 @@ module v2_dcache_return_tb;
     begin
       expected_valid=0;expected_error=0;chosen=0;
       for(r=0;r<8;r=r+1) begin
-        // This configuration has 32 physical lines and four words per line.
-        physical=dut.waiters[r][dut.WAITER_T_PHYSICAL_LSB+:5];
+        // A physical line is 16 bytes for both tested cache capacities.
+        physical=dut.waiters[r][dut.WAITER_T_PHYSICAL_LSB+:$clog2(CACHE_BYTES/16)];
         word_index=dut.waiters[r][dut.WAITER_T_WORD_INDEX_LSB+:2];
         if(!expected_valid && dut.waiters[r][dut.WAITER_T_VALID_LSB] &&
            (dut.waiters[r][dut.WAITER_T_ERROR_LSB] || dut.word_valid[physical][word_index])) begin

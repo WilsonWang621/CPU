@@ -10,8 +10,9 @@ sys.path.insert(0,str(ROOT/'scripts'))
 from build import read_sources
 p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('--out',type=Path,required=True)
+p.add_argument('--filelist',type=Path,default=ROOT/'verilog/filelist.f')
 a=p.parse_args()
-sources=read_sources(ROOT/'verilog/filelist.f')
+sources=read_sources(a.filelist)
 contents={p.name:p.read_bytes() for p in sources}
 if len(contents)!=len(sources):raise ValueError('duplicate basenames')
 hashes={n:hashlib.sha256(v).hexdigest() for n,v in contents.items()}

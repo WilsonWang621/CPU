@@ -4,9 +4,18 @@
 核心为 [`verilog/area_v2_core.v`](verilog/area_v2_core.v)。采用独立发射队列、树形仲裁、ROB 槽号重命名、
 分支检查点和非阻塞缓存，支持 AXI4-Lite、256 MiB 地址空间和退出响应处理。
 
-## 双发射最终基准
+## 双发射 400 MHz 优化进展
 
-2026-10-03，固定 v42，结束本条双发射优化路线。原样 `make synth`：
+2026-10-15 已同步官方 `302f0cf` 的 ABC buffering / cell sizing 更新。
+新版默认流程对冻结 v42 测得 **302.69 MHz、35,006.83 μm²**；同一份 RTL 的正确性为 19/19、IPC 为 1.113846。
+加入保留层次的恢复、ROB、Cache 分发树，以及两级乘法和前缀加法的冻结候选测得
+**389.50 MHz、35,702.54 μm²、IPC 1.113846**；单元套件已通过，完整 CPU 正确性仍在运行。
+400 MHz 目标尚未完成，候选尚未替换默认核心。详见[阶段 7 报告](reports/frequency-stage7.md)与
+[上游同步记录](reports/upstream-sync-2026-10-15.md)。
+
+## 双发射旧流程基准
+
+2026-10-03 固定的 v42，更新前的原样 `make synth`：
 
 | 指标 | 结果 |
 | --- | ---: |
@@ -16,8 +25,8 @@
 | 正确性 / 性能 | **19/19 / 6/6** |
 | 完整 RTL 定向检查 | 通过 |
 
-**未达到 300 MHz。** 历史 368.27 MHz 来自额外物理缓冲流程，不能作为默认综合成绩。
-最终证据见 [阶段 6 报告](reports/frequency-stage6.md) 和
+该旧流程未达到 300 MHz。历史 368.27 MHz 来自额外物理缓冲流程，不能作为默认综合成绩。
+旧流程证据见 [阶段 6 报告](reports/frequency-stage6.md) 和
 [固定基准](reports/data/2026-10-02/timing-stage6/final-baseline.json)。
 
 单发射 Chisel 实现位于独立目录 [single-issue-chisel](single-issue-chisel/README.md)。最终默认 v109：原样综合 **342.13 MHz**、总面积 **17,942.62 μm²（含 SRAM）**、延迟 20 的几何平均 IPC **0.84602**，正确性 **19/19**，满足 Tier2。阶段 5 将取指队列头部预存与逐 bank 返回归属匹配、局部发射就绪组合，相对 v94 的 332.14 MHz 提升 **3.01%**，六项性能周期不变；400/500 MHz 仍未达到。参考方法、参数/性能对照及未采用尝试见该目录的 `reports/stage1` 至 `stage5`。
@@ -37,16 +46,16 @@ make verify-rtl
 make run SIM=build/area-v2-verilog/sim PROGRAM=tests/rtl/high_address.data EXPECTED=0x40100 LATENCY=20
 ```
 
-`make verify-rtl` 用 Icarus Verilog 检查 Verilog-2005 编译，并运行 AXI 背压与 M 扩展测试。
+`make verify-rtl` 用 Icarus Verilog 检查 Verilog-2005 编译，并验证分发树、算术、AXI 背压、M 扩展、恢复、缓存和退休路径。
 结构化源描述保存在 `verilog/area_v2/`，工程内的 `make export-verilog` 确定性地展开到交付 Verilog；输入和输出都有 SHA-256。
 
 ## 后续手动综合
 
 ```sh
-# 原始课程映射，可用于对照
+# 最新官方默认综合，已包含 ABC 缓冲与尺寸优化
 make synth
 
-# 完整频率实现：冻结 RTL、直接时序映射、尺寸优化、真实缓冲树、原课程 STA 约束
+# 旧流程网表后处理诊断，不作为默认评分结果
 make synth-stage1
 ```
 

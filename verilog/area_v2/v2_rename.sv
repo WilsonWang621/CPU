@@ -3,7 +3,7 @@
 // restore never revives a stale mapping to a younger owner of the same slot.
 module v2_rename #(
   parameter integer SLOT_BITS=5, CHECKPOINTS=4,
-  parameter integer CHECKPOINT_BITS=$clog2(CHECKPOINTS)
+  parameter integer CHECKPOINT_BITS=$clog2(CHECKPOINTS), COMMIT_TREE=0
 )(
   input logic clk,rst,
   input logic [1:0] dispatch_valid,
@@ -25,6 +25,15 @@ module v2_rename #(
   logic [SLOT_BITS-1:0] tag_q [32],tag_next [32],save_tag [32];
   logic [31:0] checkpoint_pending [CHECKPOINTS];
   logic [SLOT_BITS-1:0] checkpoint_tag [CHECKPOINTS][32];
+  localparam integer COMMIT_BITS=12+2*SLOT_BITS;
+  localparam integer COMMIT_GROUPS=4*(CHECKPOINTS+1);
+  wire [COMMIT_BITS*COMMIT_GROUPS-1:0] commit_controls;
+  generate if(COMMIT_TREE) begin: distributed_commit
+    v2_distribution #(.WIDTH(COMMIT_BITS),.LEAVES(COMMIT_GROUPS)) tree (
+      .data_in({commit_valid,commit_rd,commit_slot}),.data_out(commit_controls));
+  end else begin: direct_commit
+    assign commit_controls={COMMIT_GROUPS{{commit_valid,commit_rd,commit_slot}}};
+  end endgenerate
 
   always_comb begin
     pending_next=pending_q;
@@ -51,9 +60,10 @@ module v2_rename #(
     // the same edge. This one-cycle exclusion also simplifies external tags.
     for (integer r=1;r<32;r=r+1)
       for (integer c=0;c<2;c=c+1)
-        if (commit_valid[c] && commit_rd[c*5+:5]==5'(r)) begin
-          if (tag_next[r]==commit_slot[c*SLOT_BITS+:SLOT_BITS]) pending_next[r]=0;
-          if (save_tag[r]==commit_slot[c*SLOT_BITS+:SLOT_BITS]) save_pending[r]=0;
+        if (commit_controls[(r/8)*COMMIT_BITS+2*SLOT_BITS+10+c] &&
+            commit_controls[(r/8)*COMMIT_BITS+2*SLOT_BITS+c*5+:5]==5'(r)) begin
+          if (tag_next[r]==commit_controls[(r/8)*COMMIT_BITS+c*SLOT_BITS+:SLOT_BITS]) pending_next[r]=0;
+          if (save_tag[r]==commit_controls[(r/8)*COMMIT_BITS+c*SLOT_BITS+:SLOT_BITS]) save_pending[r]=0;
         end
     pending_next[0]=0;save_pending[0]=0;
   end
@@ -81,15 +91,24 @@ module v2_rename #(
     for (integer r=0;r<32;r=r+1) tag_q[r]<=tag_next[r];
   end
   for (genvar cp=0;cp<CHECKPOINTS;cp=cp+1) begin: snapshot
+    wire save_pulse=save_valid && save_index==CHECKPOINT_BITS'(cp) && !restore_valid;
+    wire [31:0] save_enables;
+    if(COMMIT_TREE) begin: distributed_save
+      v2_distribution #(.WIDTH(1),.LEAVES(32)) tree (
+        .data_in(save_pulse),.data_out(save_enables));
+    end else begin: direct_save
+      assign save_enables={32{save_pulse}};
+    end
     for (genvar r=0;r<32;r=r+1) begin: regmap
+      wire [COMMIT_BITS-1:0] local_commit=commit_controls[((cp+1)*4+r/8)*COMMIT_BITS+:COMMIT_BITS];
       always_ff @(posedge clk) begin
         if (rst) checkpoint_pending[cp][r]<=0;
         else begin
           for (integer c=0;c<2;c=c+1)
-            if (commit_valid[c] && commit_rd[c*5+:5]==5'(r) &&
-                checkpoint_tag[cp][r]==commit_slot[c*SLOT_BITS+:SLOT_BITS])
+            if (local_commit[2*SLOT_BITS+10+c] && local_commit[2*SLOT_BITS+c*5+:5]==5'(r) &&
+                checkpoint_tag[cp][r]==local_commit[c*SLOT_BITS+:SLOT_BITS])
               checkpoint_pending[cp][r]<=0;
-          if (save_valid && save_index==CHECKPOINT_BITS'(cp) && !restore_valid) begin
+          if (save_enables[r]) begin
             checkpoint_pending[cp][r]<=save_pending[r];
             checkpoint_tag[cp][r]<=save_tag[r];
           end

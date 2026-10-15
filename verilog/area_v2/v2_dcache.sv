@@ -3,7 +3,7 @@
 module v2_dcache #(
   parameter integer CACHE_BYTES=2048, LINE_BYTES=64, MSHRS=4, LOAD_SLOTS=8, STORE_SLOTS=16,
   parameter integer CREDITS=64, RAM_BYTES=268435456,
-  parameter integer LT=$clog2(LOAD_SLOTS), ST=$clog2(STORE_SLOTS)
+  parameter integer LT=$clog2(LOAD_SLOTS), ST=$clog2(STORE_SLOTS), CACHE_TREE=0
 )(
   input logic clk,rst,
   input logic load_valid,
@@ -42,6 +42,10 @@ module v2_dcache #(
   localparam integer BANK_WORDS=CACHE_BYTES/(4*WRITE_BANKS);
   localparam integer BANK_BITS=$clog2(WRITE_BANKS), BANK_WORD_BITS=$clog2(BANK_WORDS);
   localparam integer PENDING_BITS=37+BANK_WORD_BITS;
+  localparam integer WRITE_GROUP_WORDS=CACHE_TREE ? 16:BANK_WORDS;
+  localparam integer WRITE_GROUPS=(BANK_WORDS+WRITE_GROUP_WORDS-1)/WRITE_GROUP_WORDS;
+  localparam integer WRITE_CONTROL_BITS=36+BANK_WORD_BITS;
+  logic [WRITE_CONTROL_BITS*WRITE_GROUPS-1:0] distributed_writes [WRITE_BANKS];
   typedef struct packed {
     logic valid;
     logic [LB-1:0] physical;
@@ -200,7 +204,7 @@ module v2_dcache #(
   // BANK_WORDS storage rows. Forward this pending byte write on every read,
   // preserving the original visibility at the capture edge.
   for(genvar bank=0;bank<WRITE_BANKS;bank=bank+1) begin: write_stages
-    v2_cache_read #(.ENTRIES(BANK_WORDS)) read_bank (
+    v2_cache_read #(.ENTRIES(BANK_WORDS),.INDEX_GROUP(CACHE_TREE ? 16:0)) read_bank (
       .index(data_read_address[BANK_WORD_BITS-1:0]),
       .words(data_words[bank*BANK_WORDS*32+:BANK_WORDS*32]),.value(bank_words[bank*32+:32]));
     wire select_bank=data_write_address[LB+WW-1:BANK_WORD_BITS]==BANK_BITS'(bank);
@@ -218,14 +222,19 @@ module v2_dcache #(
     end
     assign pending_words[bank*PENDING_BITS+:PENDING_BITS]=
       {pending_valid[bank],pending_address[bank],pending_mask[bank],pending_data[bank]};
+    v2_distribution #(.WIDTH(WRITE_CONTROL_BITS),.LEAVES(WRITE_GROUPS)) write_tree (
+      .data_in({pending_mask[bank] & {4{pending_valid[bank]}},pending_address[bank],pending_data[bank]}),
+      .data_out(distributed_writes[bank]));
   end
   for(genvar row=0;row<CACHE_BYTES/4;row=row+1) begin: data_rows
+    wire [WRITE_CONTROL_BITS-1:0] local_write=
+      distributed_writes[row/BANK_WORDS][((row%BANK_WORDS)/WRITE_GROUP_WORDS)*WRITE_CONTROL_BITS+:WRITE_CONTROL_BITS];
     assign data_words[row*32+:32]=data[row];
     for(genvar byte_id=0;byte_id<4;byte_id=byte_id+1) begin: byte_write
       always_ff @(posedge clk)
-        if(!rst && pending_valid[row/BANK_WORDS] && pending_mask[row/BANK_WORDS][byte_id] &&
-           pending_address[row/BANK_WORDS]==BANK_WORD_BITS'(row%BANK_WORDS))
-          data[row][byte_id*8+:8]<=pending_data[row/BANK_WORDS][byte_id*8+:8];
+        if(!rst && local_write[32+BANK_WORD_BITS+byte_id] &&
+           local_write[32+:BANK_WORD_BITS]==BANK_WORD_BITS'(row%BANK_WORDS))
+          data[row][byte_id*8+:8]<=local_write[byte_id*8+:8];
     end
   end
   v2_cache_read #(.ENTRIES(WRITE_BANKS)) read_data (

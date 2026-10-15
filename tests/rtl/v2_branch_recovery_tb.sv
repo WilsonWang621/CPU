@@ -1,14 +1,15 @@
 `timescale 1ns/1ps
 // Recovery may trail execution by one edge. Younger branches and stores must
 // be canceled even when the resolving branch retires in the recovery cycle.
-module v2_branch_recovery_tb;
+module v2_branch_recovery_tb #(parameter integer CONTROL_TREE=0, REGISTER_REDIRECT=0, ROB_WRITE_TREE=0, COMMIT_TREE=0);
   reg clk=0,rst=1;
   always #5 clk=~clk;
   wire request_valid,request_write;
   cpu_top #(.ROB_ENTRIES(8),.IQ_ENTRIES(2),.LOAD_SLOTS(2),.STORE_SLOTS(4),
     .CHECKPOINTS(2),.ICACHE_BYTES(128),.DCACHE_BYTES(256),.D_MSHRS(2),
     .FETCH_QUEUE_ENTRIES(2),.BHT_ENTRIES(8),.BTB_ENTRIES(2),.HISTORY_ENTRIES(2),
-    .MAX_MEM_OUTSTANDING(4),.RAM_BYTES(4096)) dut (
+    .MAX_MEM_OUTSTANDING(4),.RAM_BYTES(4096),.CONTROL_TREE(CONTROL_TREE),
+    .REGISTER_REDIRECT(REGISTER_REDIRECT),.ROB_WRITE_TREE(ROB_WRITE_TREE),.COMMIT_TREE(COMMIT_TREE)) dut (
     .clk(clk),.rst(rst),.mem_req_valid(request_valid),.mem_req_write(request_write),
     .mem_req_ready(1'b0),.mem_rsp_valid(1'b0),.mem_rsp_rdata(32'b0),.mem_rsp_error(1'b0));
   task check_recovery(input integer branch_slot, input bit correct_prediction,
@@ -65,6 +66,9 @@ module v2_branch_recovery_tb;
       dut.balanced_selection[2].prepared_selection.grant_valid=1;
       dut.balanced_selection[2].prepared_selection.grant_index=0;
       dut.queue[4][dut.ISSUE_T_A_LSB+:32]=32'h100;
+`ifdef V2_PREPARED_ADDRESS_TEST
+      dut.prepared_address[0]=32'h100;
+`endif
       dut.queue[4][dut.ISSUE_T_B_LSB+:32]=32'hdeadbeef;
       dut.queue[4][dut.ISSUE_T_SIZE_LSB+:2]=2;
       #1;

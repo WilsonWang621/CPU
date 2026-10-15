@@ -2,7 +2,8 @@
 module student_top #(
   parameter integer ROB_BITS=5, IQ_ENTRIES=4, LOAD_SLOTS=8, STORE_SLOTS=16,
   parameter integer CHECKPOINTS=3, ISSUE_WIDTH=2, COMMIT_WIDTH=2,
-  parameter integer IC_INDEX_BITS=5, DC_INDEX_BITS=4, DC_LINE_BITS=6
+  parameter integer IC_INDEX_BITS=5, DC_INDEX_BITS=4, DC_LINE_BITS=6,
+  parameter integer CONTROL_TREE=0, ROB_WRITE_TREE=0, CACHE_TREE=0, COMMIT_TREE=0, REGISTER_REDIRECT=0
 ) (
   input wire clock, reset,
   output wire [31:0] araddr,
@@ -34,7 +35,9 @@ module student_top #(
   cpu_top #(.ROB_ENTRIES(1<<ROB_BITS),.IQ_ENTRIES(IQ_ENTRIES),.LOAD_SLOTS(LOAD_SLOTS),
     .STORE_SLOTS(STORE_SLOTS),.CHECKPOINTS(CHECKPOINTS),.INTEGER_PORTS(ISSUE_WIDTH),.COMMIT_WIDTH(COMMIT_WIDTH),
     .ICACHE_BYTES(32*(1<<IC_INDEX_BITS)),.DCACHE_BYTES(2*(1<<DC_LINE_BITS)*(1<<DC_INDEX_BITS)),
-    .DCACHE_LINE_BYTES(1<<DC_LINE_BITS),.MAX_MEM_OUTSTANDING(16),.RAM_BYTES(268435456)) core (
+    .DCACHE_LINE_BYTES(1<<DC_LINE_BITS),.MAX_MEM_OUTSTANDING(16),.RAM_BYTES(268435456),
+    .CONTROL_TREE(CONTROL_TREE),.ROB_WRITE_TREE(ROB_WRITE_TREE),.CACHE_TREE(CACHE_TREE),
+    .COMMIT_TREE(COMMIT_TREE),.REGISTER_REDIRECT(REGISTER_REDIRECT)) core (
     .clk(clock),.rst(reset),.mem_req_valid(request_valid),.mem_req_write(request_write),
     .mem_req_addr(request_addr),.mem_req_wdata(request_data),.mem_req_wstrb(request_mask),.mem_req_ready(request_ready),
     .mem_rsp_valid(response_valid),.mem_rsp_ready(core_response_ready),.mem_rsp_rdata(response_data),.mem_rsp_error(response_error),

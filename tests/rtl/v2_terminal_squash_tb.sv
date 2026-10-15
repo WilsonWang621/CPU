@@ -39,6 +39,9 @@ module v2_terminal_squash_tb;
       dut.balanced_selection[2].prepared_selection.grant_valid=1;
       dut.balanced_selection[2].prepared_selection.grant_index=0;
       dut.queue[4][dut.ISSUE_T_A_LSB+:32]=32'h100;
+`ifdef V2_PREPARED_ADDRESS_TEST
+      dut.prepared_address[0]=32'h100;
+`endif
       dut.queue[4][dut.ISSUE_T_B_LSB+:32]=32'hdeadbeef;
       dut.queue[4][dut.ISSUE_T_SIZE_LSB+:2]=2;
       #1;

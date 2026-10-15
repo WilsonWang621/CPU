@@ -1,13 +1,13 @@
 `timescale 1ns/1ps
-module retire_read_case #(parameter ENTRIES=32, BITS=32)(output reg done=0);
+module retire_read_case #(parameter ENTRIES=32, BITS=32, CONTROL_TREE=0)(output reg done=0);
   reg clk=0,rst=1;
   reg [1:0] advance=0;
   reg [ENTRIES*BITS-1:0] words=0;
   wire [BITS-1:0] lane0,lane1;
   integer head=0,wraps=0,dual=0;
   always #5 clk=~clk;
-  v2_retire_read #(.ENTRIES(ENTRIES),.WORD_BITS(BITS),.LANE(0)) a (.clk(clk),.rst(rst),.advance(advance),.words(words),.value(lane0));
-  v2_retire_read #(.ENTRIES(ENTRIES),.WORD_BITS(BITS),.LANE(1)) b (.clk(clk),.rst(rst),.advance(advance),.words(words),.value(lane1));
+  v2_retire_read #(.ENTRIES(ENTRIES),.WORD_BITS(BITS),.LANE(0),.CONTROL_TREE(CONTROL_TREE)) a (.clk(clk),.rst(rst),.advance(advance),.words(words),.value(lane0));
+  v2_retire_read #(.ENTRIES(ENTRIES),.WORD_BITS(BITS),.LANE(1),.CONTROL_TREE(CONTROL_TREE)) b (.clk(clk),.rst(rst),.advance(advance),.words(words),.value(lane1));
   initial begin
     for(integer cycle=0;cycle<20000;cycle=cycle+1) begin
       @(negedge clk);
@@ -27,10 +27,10 @@ module retire_read_case #(parameter ENTRIES=32, BITS=32)(output reg done=0);
     done=1;
   end
 endmodule
-module v2_retire_read_tb;
+module v2_retire_read_tb #(parameter integer CONTROL_TREE=0);
   wire a,b,c;
-  retire_read_case #(.ENTRIES(8),.BITS(16)) x(a);
-  retire_read_case #(.ENTRIES(32),.BITS(32)) y(b);
-  retire_read_case #(.ENTRIES(64),.BITS(20)) z(c);
+  retire_read_case #(.ENTRIES(8),.BITS(16),.CONTROL_TREE(CONTROL_TREE)) x(a);
+  retire_read_case #(.ENTRIES(32),.BITS(32),.CONTROL_TREE(CONTROL_TREE)) y(b);
+  retire_read_case #(.ENTRIES(64),.BITS(20),.CONTROL_TREE(CONTROL_TREE)) z(c);
   initial begin wait(a && b && c);$finish;end
 endmodule

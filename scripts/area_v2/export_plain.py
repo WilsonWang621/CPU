@@ -280,8 +280,15 @@ def lower(source, package):
     # Classify declarations by actual procedural assignments. Other outputs
     # and continuous-assignment nets are wires, as required by Verilog.
     assigned=set()
-    lhs=re.compile(r'\b(\w+)\s*(?:\[[^;]+?\]\s*)*(?:<=|=(?!=))')
-    for m in lhs.finditer(s):
+    # Parse subscripts rather than spanning them with a regex: a condition
+    # such as if(control[p]) value[b]<=x must identify value as the LHS.
+    for m in re.finditer(r'\b(\w+)\b',s):
+        pos=m.end()
+        while pos<len(s) and s[pos].isspace():pos+=1
+        while pos<len(s) and s[pos]=='[':
+            _,pos=brackets(s,pos)
+            while pos<len(s) and s[pos].isspace():pos+=1
+        if not re.match(r'<=|=(?!=)',s[pos:pos+2]):continue
         prefix=s[max(0,s.rfind(';',0,m.start())+1):m.start()]
         if not re.search(r'\b(assign|parameter|localparam)\b',prefix):assigned.add(m.group(1))
     assigned.discard('fetch_fault')  # frontend output, never a procedural core destination
@@ -302,7 +309,7 @@ def lower(source, package):
     s=re.sub(r'function automatic.*?endfunction',lambda m:m.group(0).replace('input wire','input').replace('input reg','input').replace('function automatic reg','function automatic'),s,flags=re.S)
     s=re.sub(r'\n\s*\n\s*\n','\n\n',s)
     assert not re.search(r'\b(typedef|import|package|struct|return|logic)\b',s)
-    return plain_control(s)
+    return re.sub(r'[ \t]+(?=\n|$)', '', plain_control(s))
 
 
 def main():

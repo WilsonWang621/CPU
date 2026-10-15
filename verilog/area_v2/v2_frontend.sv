@@ -1,7 +1,7 @@
 module v2_frontend #(
   parameter integer CACHE_BYTES=1024, QUEUE_ENTRIES=8, BHT_ENTRIES=256, BTB_ENTRIES=32,
   parameter integer LOCAL_HISTORY_BITS=1, HISTORY_ENTRIES=64,
-  parameter integer RAM_BYTES=268435456, HB=(LOCAL_HISTORY_BITS>0 ? LOCAL_HISTORY_BITS:1)
+  parameter integer RAM_BYTES=268435456, HB=(LOCAL_HISTORY_BITS>0 ? LOCAL_HISTORY_BITS:1), CACHE_TREE=0
 )(
   input logic clk,rst,stop,redirect,
   input logic [31:0] redirect_pc,
@@ -87,8 +87,8 @@ module v2_frontend #(
     assign even_words[row*64+:64]={even_target[row],even_data[row]};
     assign odd_words[row*64+:64]={odd_target[row],odd_data[row]};
   end
-  v2_read #(.ENTRIES(CACHE_BYTES/8),.WORD_BITS(64)) read_even (.index(even_index),.words(even_words),.value(even_read));
-  v2_read #(.ENTRIES(CACHE_BYTES/8),.WORD_BITS(64)) read_odd (.index(odd_index),.words(odd_words),.value(odd_read));
+  v2_read #(.ENTRIES(CACHE_BYTES/8),.WORD_BITS(64),.INDEX_GROUP(CACHE_TREE ? 16:0)) read_even (.index(even_index),.words(even_words),.value(even_read));
+  v2_read #(.ENTRIES(CACHE_BYTES/8),.WORD_BITS(64),.INDEX_GROUP(CACHE_TREE ? 16:0)) read_odd (.index(odd_index),.words(odd_words),.value(odd_read));
   assign fetch_inst[0]=pc[2] ? odd_read[31:0]:even_read[31:0];
   assign fetch_inst[1]=pc[2] ? even_read[31:0]:odd_read[31:0];
   assign fetch_target[0]=pc[2] ? odd_read[63:32]:even_read[63:32];

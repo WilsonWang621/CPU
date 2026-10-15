@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-module v2_rename_prepare_tb;
+module v2_rename_prepare_tb #(parameter integer COMMIT_TREE=0);
   reg clk=0;
   always #5 clk=~clk;
   reg rst=1;
@@ -10,7 +10,7 @@ module v2_rename_prepare_tb;
   wire [19:0] source_slot;
   reg save_valid=0,save_prepare=0,save_after_lane=0,restore_valid=0;
   reg [1:0] save_index=0,restore_index=0;
-  v2_rename dut(.clk(clk),.rst(rst),.dispatch_valid(dispatch_valid),.prepare_valid(prepare_valid),
+  v2_rename #(.COMMIT_TREE(COMMIT_TREE)) dut(.clk(clk),.rst(rst),.dispatch_valid(dispatch_valid),.prepare_valid(prepare_valid),
     .dispatch_rd(dispatch_rd),.dispatch_slot(dispatch_slot),.source_register(source_register),
     .source_pending(source_pending),.source_slot(source_slot),.commit_valid(commit_valid),
     .commit_rd(commit_rd),.commit_slot(commit_slot),.save_valid(save_valid),

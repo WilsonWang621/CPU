@@ -3,7 +3,8 @@ module cpu_top #(
   parameter integer CHECKPOINTS=3, RENAME_WIDTH=2, COMMIT_WIDTH=2, INTEGER_PORTS=2,
   parameter integer ICACHE_BYTES=1024, DCACHE_BYTES=2048, DCACHE_LINE_BYTES=64, D_MSHRS=4,
   parameter integer FETCH_QUEUE_ENTRIES=8, BHT_ENTRIES=256, BTB_ENTRIES=32, LOCAL_HISTORY_BITS=1, HISTORY_ENTRIES=64,
-  parameter integer MAX_MEM_OUTSTANDING=64, RAM_BYTES=268435456
+  parameter integer MAX_MEM_OUTSTANDING=64, RAM_BYTES=268435456,
+  parameter integer CONTROL_TREE=0, ROB_WRITE_TREE=0, CACHE_TREE=0, COMMIT_TREE=0, REGISTER_REDIRECT=0
 ) (
   input logic clk, rst,
   output logic mem_req_valid, mem_req_write,
@@ -166,7 +167,7 @@ module cpu_top #(
   logic [3:0] wb_fault [3];
   logic [31:0] alu_result[2],branch_value,branch_next;
   logic branch_taken,branch_bad,branch_fire,branch_capture;
-  logic branch_pending,branch_bad_q,branch_taken_q;
+  logic branch_pending,branch_bad_q,branch_taken_q,branch_recovery_q;
   logic [31:0] branch_next_q,branch_pc_q;
   logic [29:0] branch_prediction_q;
   logic [HB-1:0] branch_history_q;
@@ -188,6 +189,27 @@ module cpu_top #(
   logic [ST-1:0] store_send_slot;
   logic [ST:0] squashed_stores;
   logic exit_send,exit_accept;
+  // Give each small consumer group its own copy of recovery controls. The
+  // ordering comparison is unchanged and all copies arrive in the same cycle.
+  localparam integer REC_BITS=2*RW+3;
+  localparam integer ROB_REC_GROUPS=(ROB_ENTRIES+3)/4;
+  localparam integer STORE_REC_GROUPS=(STORE_SLOTS+3)/4;
+  localparam integer LOAD_REC_GROUPS=(LOAD_SLOTS+3)/4;
+  localparam integer REC_LEAVES=ROB_REC_GROUPS+3+STORE_REC_GROUPS+LOAD_REC_GROUPS+1;
+  wire [REC_BITS-1:0] recovery_control={flush_all,redirect,(redirect_rid<head),redirect_rid,head};
+  wire [REC_BITS*REC_LEAVES-1:0] recovery_copies;
+  generate
+    if(CONTROL_TREE) begin: distributed_recovery
+      v2_distribution #(.WIDTH(REC_BITS),.LEAVES(REC_LEAVES)) tree (
+        .data_in(recovery_control),.data_out(recovery_copies));
+    end else begin: direct_recovery
+      assign recovery_copies={REC_LEAVES{recovery_control}};
+    end
+  endgenerate
+  function automatic logic recovery_younger(input rid_t rid,input logic [REC_BITS-1:0] controls);
+    return controls[2*RW+1] &&
+      ((rid<controls[0+:RW])==controls[2*RW] ? rid>controls[RW+:RW]:rid<controls[0+:RW]);
+  endfunction
   function automatic rid_t age(input rid_t rid);
     return rid-head;
   endfunction
@@ -235,9 +257,9 @@ module cpu_top #(
     assign commit_rid[lane]=head+rid_t'(lane);
     wire [RETIRE_META_BITS-1:0] meta_word;
     assign retirement_meta[lane]=meta_word;
-    v2_retire_read #(.ENTRIES(ROB_ENTRIES),.WORD_BITS(RETIRE_META_BITS),.LANE(lane)) read_metadata (
+    v2_retire_read #(.ENTRIES(ROB_ENTRIES),.WORD_BITS(RETIRE_META_BITS),.LANE(lane),.CONTROL_TREE(COMMIT_TREE)) read_metadata (
       .clk,.rst,.advance(commit_count),.words(retirement_words),.value(meta_word));
-    v2_retire_read #(.ENTRIES(ROB_ENTRIES),.LANE(lane)) read_value (
+    v2_retire_read #(.ENTRIES(ROB_ENTRIES),.LANE(lane),.CONTROL_TREE(COMMIT_TREE)) read_value (
       .clk,.rst,.advance(commit_count),.words(result_words),.value(retirement_value[lane]));
   end
   for(genvar row=0;row<32;row=row+1) begin: architectural_read_words
@@ -253,7 +275,7 @@ module cpu_top #(
   end
   v2_frontend #(.CACHE_BYTES(ICACHE_BYTES),.QUEUE_ENTRIES(FETCH_QUEUE_ENTRIES),
     .BHT_ENTRIES(BHT_ENTRIES),.BTB_ENTRIES(BTB_ENTRIES),.LOCAL_HISTORY_BITS(LOCAL_HISTORY_BITS),
-    .HISTORY_ENTRIES(HISTORY_ENTRIES),.RAM_BYTES(RAM_BYTES)) frontend (
+    .HISTORY_ENTRIES(HISTORY_ENTRIES),.RAM_BYTES(RAM_BYTES),.CACHE_TREE(CACHE_TREE)) frontend (
     .clk,.rst,.stop(stop_frontend),.redirect,.redirect_pc,.pop_count,
     .packet_valid(fetch_valid),.packet_pc(fetch_pc),.packet_inst(fetch_inst),.packet_prediction(fetch_prediction),
     .packet_fault(fetch_fault),.packet_inst_valid(fetch_iv),.packet_history(fetch_history),.train_history(branch_history_q),.train_valid,.train_taken,.train_op,.train_pc,.train_target,
@@ -262,7 +284,7 @@ module cpu_top #(
     .mem_rsp_error(client_rsp_error[0]),.idle(frontend_idle),.miss_count(icache_miss_count));
   assign client_req_write[0]=0;assign client_req_data[31:0]=0;assign client_req_mask[3:0]=0;
   v2_dcache #(.CACHE_BYTES(DCACHE_BYTES),.LINE_BYTES(DCACHE_LINE_BYTES),.MSHRS(D_MSHRS),.LOAD_SLOTS(LOAD_SLOTS),.STORE_SLOTS(STORE_SLOTS),
-    .CREDITS(MAX_MEM_OUTSTANDING),.RAM_BYTES(RAM_BYTES)) dcache (
+    .CREDITS(MAX_MEM_OUTSTANDING),.RAM_BYTES(RAM_BYTES),.CACHE_TREE(CACHE_TREE)) dcache (
     .clk,.rst,.load_valid(cache_load_valid),.load_address(cache_load_address),.load_tag(cache_load_tag),
     .load_ready(cache_load_ready),.load_hit(cache_load_hit),.load_data(cache_load_data),
     .result_valid(cache_result_valid),.result_ready(1'b1),.result_tag(cache_result_tag),
@@ -289,7 +311,7 @@ module cpu_top #(
     assign commit_slot[d*RW+:RW]=commit_rid[d];
     assign dispatch_order[d*(RW+1)+:(RW+1)]={tail_generation,tail}+(RW+1)'(d);
   end
-  v2_rename #(.SLOT_BITS(RW),.CHECKPOINTS(CHECKPOINTS)) rename_maps (
+  v2_rename #(.SLOT_BITS(RW),.CHECKPOINTS(CHECKPOINTS),.COMMIT_TREE(COMMIT_TREE)) rename_maps (
     .clk,.rst,.dispatch_valid(rename_valid),.prepare_valid(rename_prepare),.dispatch_rd(rename_rd),.dispatch_slot(rename_slot),
     .source_register,.source_pending,.source_slot,.commit_valid,.commit_rd,.commit_slot,
     .save_valid(save_checkpoint),.save_after_lane,.save_index(free_checkpoint),
@@ -325,7 +347,9 @@ module cpu_top #(
       for(genvar q=0;q<IQ_ENTRIES;q=q+1) begin: next_row
         wire lane0=dispatch_valid[0] && dispatch_bank[0]==2 && dispatch_index[0]==QW'(q);
         wire lane1=dispatch_valid[1] && dispatch_bank[1]==2 && dispatch_index[1]==QW'(q);
-        wire removed=(issue_fire[2] && selected[2]==QW'(q)) || younger(queue[2][q].rid) || flush_all;
+        wire [REC_BITS-1:0] controls=recovery_copies[(ROB_REC_GROUPS+2)*REC_BITS+:REC_BITS];
+        wire removed=(issue_fire[2] && selected[2]==QW'(q)) ||
+          recovery_younger(queue[2][q].rid,controls) || controls[REC_BITS-1];
         assign next_candidates[q]=(queue[2][q].valid && !removed) || lane0 || lane1;
         assign next_owners[q*(RW+1)+:(RW+1)]=lane1 ? dispatch_order[(RW+1)+:(RW+1)]:
           lane0 ? dispatch_order[0+:(RW+1)]:select_owner[2][q*(RW+1)+:(RW+1)];
@@ -390,8 +414,11 @@ module cpu_top #(
   assign branch_capture=select_valid[0] && is_branch(executing[0].op) &&
                         !flush_all && !mdu_result_valid && !younger(executing[0].rid);
   always_ff @(posedge clk) begin
-    if(rst) branch_pending<=0;
-    else branch_pending<=branch_capture;
+    if(rst) begin branch_pending<=0;branch_recovery_q<=0;end
+    else begin
+      branch_pending<=branch_capture;
+      branch_recovery_q<=branch_capture && !branch_bad && branch_next!={executing[0].prediction,2'b0};
+    end
     branch_bad_q<=branch_bad;branch_taken_q<=branch_taken;
     branch_next_q<=branch_next;branch_pc_q<=execute_pc[0];
     branch_prediction_q<=executing[0].prediction;
@@ -401,7 +428,10 @@ module cpu_top #(
     branch_op_q<=executing[0].op;
   end
   assign branch_fire=branch_pending && !flush_all;
-  assign redirect=branch_fire && !branch_bad_q && branch_next_q!={branch_prediction_q,2'b0};
+  // Compare at the existing execution-to-recovery edge. Publication remains
+  // in the same recovery cycle; no additional pipeline stage is introduced.
+  assign redirect=REGISTER_REDIRECT ? (branch_recovery_q && !flush_all):
+    (branch_fire && !branch_bad_q && branch_next_q!={branch_prediction_q,2'b0});
   assign redirect_pc=branch_next_q;
   assign redirect_rid=branch_rid_q;
   assign redirect_checkpoint=branch_checkpoint_q;
@@ -617,6 +647,7 @@ module cpu_top #(
     end
   end
   for(genvar r=0;r<ROB_ENTRIES;r=r+1) begin: rob_rows
+    wire [REC_BITS-1:0] controls=recovery_copies[(r/4)*REC_BITS+:REC_BITS];
     always_ff @(posedge clk) begin
       if(rst) begin rob[r].valid<=0;rob[r].done<=0;end
       else begin
@@ -624,19 +655,54 @@ module cpu_top #(
           if(int'(commit_count)>lane && commit_rid[lane]==rid_t'(r)) rob[r].valid<=0;
         for(integer w=0;w<3;w=w+1)
           if(wb_valid[w] && wb_rid[w]==rid_t'(r)) begin
-            rob[r].done<=1;rob[r].fault<=wb_fault[w];rob[r].fault_address<=wb_address[w];values[r]<=wb_value[w];
+            rob[r].done<=1;rob[r].fault<=wb_fault[w];
+            if(!ROB_WRITE_TREE) begin rob[r].fault_address<=wb_address[w];values[r]<=wb_value[w];end
           end
         if(memory_complete && executing[2].rid==rid_t'(r) && executing[2].op==OP_STORE) begin
-          rob[r].address<=memory_address;rob[r].wdata<=memory_data;rob[r].mask<=memory_mask;
+          if(!ROB_WRITE_TREE) begin rob[r].address<=memory_address;rob[r].wdata<=memory_data;end
+          rob[r].mask<=memory_mask;
           rob[r].exiting<=memory_exit;rob[r].store_slot<=store_tail;
         end
-        if(younger(rid_t'(r)) || (flush_all && rid_t'(r)!=head)) rob[r].valid<=0;
+        if(recovery_younger(rid_t'(r),controls) ||
+           (controls[REC_BITS-1] && rid_t'(r)!=controls[0+:RW])) rob[r].valid<=0;
         for(integer lane=0;lane<2;lane=lane+1)
           if(dispatch_valid[lane] && dispatch_rid[lane]==rid_t'(r)) begin
             rob[r].valid<=1;rob[r].done<=dispatch_bank[lane]==3;rob[r].exiting<=0;
             rob[r].fault<=fetch_fault[lane*4+:4]!=0 ? fetch_fault[lane*4+:4]:decoded[lane].illegal ? FAULT_ILLEGAL:FAULT_NONE;
-            rob[r].fault_address<=fetch_pc[lane*32+:32];rob[r].address<=0;rob[r].wdata<=0;rob[r].mask<=0;
+            if(!ROB_WRITE_TREE) begin
+              rob[r].fault_address<=fetch_pc[lane*32+:32];rob[r].address<=0;rob[r].wdata<=0;
+            end
+            rob[r].mask<=0;
           end
+      end
+    end
+    if(ROB_WRITE_TREE) begin: distributed_data_write
+      wire [5:0] write_control;
+      wire [23:0] byte_control;
+      for(genvar w=0;w<3;w=w+1) begin: completion_control
+        assign write_control[w]=wb_valid[w] && wb_rid[w]==rid_t'(r);
+      end
+      assign write_control[3]=memory_complete && executing[2].rid==rid_t'(r) && executing[2].op==OP_STORE;
+      for(genvar lane=0;lane<2;lane=lane+1) begin: allocation_control
+        assign write_control[4+lane]=dispatch_valid[lane] && dispatch_rid[lane]==rid_t'(r);
+      end
+      v2_distribution #(.WIDTH(6),.LEAVES(4)) tree (
+        .data_in(write_control),.data_out(byte_control));
+      for(genvar bit_id=0;bit_id<32;bit_id=bit_id+1) begin: data_bit
+        wire [5:0] controls=byte_control[(bit_id/8)*6+:6];
+        always_ff @(posedge clk) begin
+          if(!rst) begin
+            for(integer w=0;w<3;w=w+1)
+              if(controls[w]) begin
+                rob[r].fault_address[bit_id]<=wb_address[w][bit_id];values[r][bit_id]<=wb_value[w][bit_id];
+              end
+            if(controls[3]) begin rob[r].address[bit_id]<=memory_address[bit_id];rob[r].wdata[bit_id]<=memory_data[bit_id];end
+            for(integer lane=0;lane<2;lane=lane+1)
+              if(controls[4+lane]) begin
+                rob[r].fault_address[bit_id]<=fetch_pc[lane*32+bit_id];rob[r].address[bit_id]<=0;rob[r].wdata[bit_id]<=0;
+              end
+          end
+        end
       end
     end
     // A live (including retiring) ROB row is never prepared. The allocator
@@ -650,14 +716,23 @@ module cpu_top #(
           end
     end
   end
+  wire [8*76-1:0] architectural_commits;
+  v2_distribution #(.WIDTH(76),.LEAVES(COMMIT_TREE ? 8:1)) architectural_commit_tree (
+    .data_in({commit_valid,commit_rd,retirement_value[1],retirement_value[0]}),
+    .data_out(architectural_commits[0+:(COMMIT_TREE ? 8:1)*76]));
+  if(!COMMIT_TREE) begin: direct_architectural_commit
+    assign architectural_commits[76+:7*76]={7{architectural_commits[0+:76]}};
+  end
   for(genvar r=0;r<32;r=r+1) begin: architectural_registers
+    wire [75:0] local_commit=architectural_commits[(r/4)*76+:76];
     wire [31:0] register_value;
     assign architectural[r]=register_value;
-    v2_arch_word #(.REGISTER(r)) word_register (
-      .clk,.rst,.commit_valid,.commit_rd,
-      .commit_values({retirement_value[1],retirement_value[0]}),.value(register_value));
+    v2_arch_word #(.REGISTER(r),.CONTROL_TREE(COMMIT_TREE)) word_register (
+      .clk,.rst,.commit_valid(local_commit[74+:2]),.commit_rd(local_commit[64+:10]),
+      .commit_values(local_commit[0+:64]),.value(register_value));
   end
   for(genvar bank=0;bank<3;bank=bank+1) begin: issue_banks
+    wire [REC_BITS-1:0] controls=recovery_copies[(ROB_REC_GROUPS+bank)*REC_BITS+:REC_BITS];
     for(genvar q=0;q<IQ_ENTRIES;q=q+1) begin: rows
       wire [1:0] prepare_lane;
       wire next_ready_a,next_ready_b;
@@ -684,7 +759,8 @@ module cpu_top #(
       always_ff @(posedge clk) begin
         if(rst) queue[bank][q].valid<=0;
         else begin
-          if((issue_fire[bank] && selected[bank]==QW'(q)) || younger(queue[bank][q].rid) || flush_all) queue[bank][q].valid<=0;
+          if((issue_fire[bank] && selected[bank]==QW'(q)) ||
+             recovery_younger(queue[bank][q].rid,controls) || controls[REC_BITS-1]) queue[bank][q].valid<=0;
           for(integer lane=0;lane<2;lane=lane+1)
             if(dispatch_valid[lane] && dispatch_bank[lane]==2'(bank) && dispatch_index[lane]==QW'(q))
               queue[bank][q].valid<=1;
@@ -710,10 +786,12 @@ module cpu_top #(
     end
   end
   for(genvar cp=0;cp<CHECKPOINTS;cp=cp+1) begin: checkpoint_rows
+    wire [REC_BITS-1:0] controls=recovery_copies[(REC_LEAVES-1)*REC_BITS+:REC_BITS];
     always_ff @(posedge clk) begin
       if(rst) begin checkpoint_valid[cp]<=0;checkpoint_owner[cp]<=0;end
       else begin
-        if((branch_fire && branch_checkpoint_q==CPW'(cp)) || younger(checkpoint_owner[cp]) || flush_all)
+        if((branch_fire && branch_checkpoint_q==CPW'(cp)) ||
+           recovery_younger(checkpoint_owner[cp],controls) || controls[REC_BITS-1])
           checkpoint_valid[cp]<=0;
         if(save_checkpoint && free_checkpoint==CPW'(cp)) begin
           checkpoint_valid[cp]<=1;checkpoint_owner[cp]<=dispatch_rid[save_after_lane];
@@ -722,6 +800,7 @@ module cpu_top #(
     end
   end
   for(genvar s=0;s<STORE_SLOTS;s=s+1) begin: store_rows
+    wire [REC_BITS-1:0] controls=recovery_copies[(ROB_REC_GROUPS+3+s/4)*REC_BITS+:REC_BITS];
     always_ff @(posedge clk) begin
       if(rst) stores[s].valid<=0;
       else begin
@@ -730,7 +809,8 @@ module cpu_top #(
         if(cache_store_done && cache_store_done_tag==ST'(s)) stores[s].done<=1;
         for(integer lane=0;lane<2;lane=lane+1)
           if(int'(commit_count)>lane && retirement_meta[lane].store && retirement_meta[lane].store_slot==ST'(s)) stores[s].committed<=1;
-        if(!stores[s].committed && (younger(stores[s].rid) || flush_all)) stores[s].valid<=0;
+        if(!stores[s].committed &&
+           (recovery_younger(stores[s].rid,controls) || controls[REC_BITS-1])) stores[s].valid<=0;
         if(store_allocate && store_tail==ST'(s)) begin
           stores[s].valid<=1;stores[s].committed<=0;stores[s].issued<=0;stores[s].done<=0;
           stores[s].rid<=executing[2].rid;stores[s].address<=memory_address;stores[s].data<=memory_data;stores[s].mask<=memory_mask;
@@ -740,11 +820,12 @@ module cpu_top #(
     end
   end
   for(genvar l=0;l<LOAD_SLOTS;l=l+1) begin: load_rows
+    wire [REC_BITS-1:0] controls=recovery_copies[(ROB_REC_GROUPS+3+STORE_REC_GROUPS+l/4)*REC_BITS+:REC_BITS];
     always_ff @(posedge clk) begin
       if(rst) loads[l].valid<=0;
       else begin
         if(cache_result_valid && cache_result_tag==LT'(l)) loads[l].valid<=0;
-        if(younger(loads[l].rid) || flush_all) loads[l].canceled<=1;
+        if(recovery_younger(loads[l].rid,controls) || controls[REC_BITS-1]) loads[l].canceled<=1;
         if(load_allocate && free_load==LT'(l)) begin
           loads[l].valid<=1;loads[l].canceled<=0;loads[l].rid<=executing[2].rid;
           loads[l].address<=memory_address;loads[l].size<=executing[2].size;loads[l].sign_extend<=executing[2].sign_extend;
