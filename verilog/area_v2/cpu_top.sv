@@ -182,6 +182,8 @@ module cpu_top #(
   logic [255:0] mdu_kill;
   logic memory_allowed,memory_complete,store_allocate,load_allocate;
   logic [31:0] memory_address,memory_data,load_word,load_result;
+  logic [31:0] prepared_address [IQ_ENTRIES];
+  wire [IQ_ENTRIES*32-1:0] prepared_address_words;
   logic [3:0] memory_mask,memory_fault;
   logic memory_exit,forward_match,forward_full;
   logic [ST-1:0] forward_slot;
@@ -443,7 +445,13 @@ module cpu_top #(
   assign mdu_valid=select_valid[0] && is_mdu(executing[0].op) && !flush_all &&
                    !mdu_result_valid && !younger(executing[0].rid);
   assign mdu_result_ready=!flush_all;
-  assign memory_address=executing[2].a+executing[2].imm;
+
+  for(genvar q=0;q<IQ_ENTRIES;q=q+1) begin: memory_address_words
+    assign prepared_address_words[q*32+:32]=prepared_address[q];
+  end
+  v2_iq_read #(.ENTRIES(IQ_ENTRIES),.WORD_BITS(32)) read_memory_address (
+    .index(selected[2]),.words(prepared_address_words),.value(memory_address));
+
   assign memory_data=executing[2].b<<(8*memory_address[1:0]);
   assign memory_mask=(executing[2].size==0 ? 4'b0001:executing[2].size==1 ? 4'b0011:4'b1111)<<memory_address[1:0];
   assign memory_exit=executing[2].op==OP_STORE && memory_address==32'h80000000 && executing[2].size==2;
@@ -755,6 +763,17 @@ module cpu_top #(
       always_ff @(posedge clk) begin
         queue[bank][q].ready_a<=next_ready_a;queue[bank][q].a<=next_value_a;
         queue[bank][q].ready_b<=next_ready_b;queue[bank][q].b<=next_value_b;
+      end
+
+      if(bank==2) begin: address_prepare
+        wire [31:0] address_immediate=queue[bank][q].valid ? queue[bank][q].imm:
+          (prepare_lane[1] ? dispatch_payload[1].imm:dispatch_payload[0].imm);
+        wire [31:0] address_sum;
+        v2_prefix_adder #(.WIDTH(32)) effective_address_add (.a(next_value_a),.b(address_immediate),.carry_in(1'b0),.sum(address_sum),.carry_out());
+        wire address_update=(!queue[bank][q].valid && |prepare_lane) ||
+                            (queue[bank][q].valid && !queue[bank][q].ready_a);
+        always_ff @(posedge clk)
+          if(address_update) prepared_address[q]<=address_sum;
       end
       always_ff @(posedge clk) begin
         if(rst) queue[bank][q].valid<=0;

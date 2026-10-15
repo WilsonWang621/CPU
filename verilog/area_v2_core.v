@@ -54,20 +54,27 @@ localparam integer FETCH_T_INST_LSB=FETCH_T_PREDICTED_PC_LSB+FETCH_T_PREDICTED_P
 localparam integer FETCH_T_PC_LSB=FETCH_T_INST_LSB+FETCH_T_INST_WIDTH, FETCH_T_PC_WIDTH=32;
 localparam integer FETCH_T_WIDTH=FETCH_T_PC_LSB+FETCH_T_PC_WIDTH;
 
+  wire subtract=op==OP_SUB || op==OP_SLT || op==OP_SLTU;
+  wire [31:0] arithmetic_value,pc_value;
+  wire no_borrow;
+  v2_prefix_adder #(.WIDTH(32)) add_operands (
+    .a(a),.b(b^{32{subtract}}),.carry_in(subtract),.sum(arithmetic_value),.carry_out(no_borrow));
+  v2_prefix_adder #(.WIDTH(32)) add_pc (
+    .a(pc),.b(imm),.carry_in(1'b0),.sum(pc_value),.carry_out());
   always @* begin
     case (op)
-      OP_ADD:   result = a + b;
-      OP_SUB:   result = a - b;
+      OP_ADD:   result = arithmetic_value;
+      OP_SUB:   result = arithmetic_value;
       OP_SLL:   result = a << b[4:0];
-      OP_SLT:   result = {31'b0, $signed(a) < $signed(b)};
-      OP_SLTU:  result = {31'b0, a < b};
+      OP_SLT:   result = {31'b0, a[31]!=b[31] ? a[31]:!no_borrow};
+      OP_SLTU:  result = {31'b0, !no_borrow};
       OP_XOR:   result = a ^ b;
       OP_SRL:   result = a >> b[4:0];
       OP_SRA:   result = $signed(a) >>> b[4:0];
       OP_OR:    result = a | b;
       OP_AND:   result = a & b;
       OP_LUI:   result = imm;
-      OP_AUIPC: result = pc + imm;
+      OP_AUIPC: result = pc_value;
       default:  result = 32'b0;
     endcase
   end
@@ -550,6 +557,8 @@ wire [31:0] memory_address;
   wire [31:0] memory_data;
   wire [31:0] load_word;
   wire [31:0] load_result;
+reg [31:0] prepared_address [0:(IQ_ENTRIES)-1];
+  wire [IQ_ENTRIES*32-1:0] prepared_address_words;
 wire [3:0] memory_mask;
   reg [3:0] memory_fault;
 wire  memory_exit;
@@ -808,7 +817,13 @@ end
   assign mdu_valid=select_valid[0] && is_mdu(executing[0][ISSUE_T_OP_LSB+:ISSUE_T_OP_WIDTH]) && !flush_all &&
                    !mdu_result_valid && !(redirect && (((executing[0][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])<head)==(redirect_rid<head) ? (executing[0][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])>redirect_rid:(executing[0][ISSUE_T_RID_LSB+:ISSUE_T_RID_WIDTH])<head));
   assign mdu_result_ready=!flush_all;
-  assign memory_address=executing[2][ISSUE_T_A_LSB+:ISSUE_T_A_WIDTH]+executing[2][ISSUE_T_IMM_LSB+:ISSUE_T_IMM_WIDTH];
+
+  for(q=0;q<IQ_ENTRIES;q=q+1) begin: memory_address_words
+    assign prepared_address_words[q*32+:32]=prepared_address[q];
+  end
+  v2_iq_read #(.ENTRIES(IQ_ENTRIES),.WORD_BITS(32)) read_memory_address (
+    .index(selected[2]),.words(prepared_address_words),.value(memory_address));
+
   assign memory_data=executing[2][ISSUE_T_B_LSB+:ISSUE_T_B_WIDTH]<<(8*memory_address[1:0]);
   assign memory_mask=(executing[2][ISSUE_T_SIZE_LSB+:ISSUE_T_SIZE_WIDTH]==0 ? 4'b0001:executing[2][ISSUE_T_SIZE_LSB+:ISSUE_T_SIZE_WIDTH]==1 ? 4'b0011:4'b1111)<<memory_address[1:0];
   assign memory_exit=executing[2][ISSUE_T_OP_LSB+:ISSUE_T_OP_WIDTH]==OP_STORE && memory_address==32'h80000000 && executing[2][ISSUE_T_SIZE_LSB+:ISSUE_T_SIZE_WIDTH]==2;
@@ -1157,6 +1172,17 @@ end
       always @(posedge clk) begin
         queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_READY_A_LSB+:ISSUE_T_READY_A_WIDTH]<=next_ready_a;queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_A_LSB+:ISSUE_T_A_WIDTH]<=next_value_a;
         queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_READY_B_LSB+:ISSUE_T_READY_B_WIDTH]<=next_ready_b;queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_B_LSB+:ISSUE_T_B_WIDTH]<=next_value_b;
+      end
+
+      if(bank==2) begin: address_prepare
+        wire [31:0] address_immediate=queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_VALID_LSB+:ISSUE_T_VALID_WIDTH] ? queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_IMM_LSB+:ISSUE_T_IMM_WIDTH]:
+          (prepare_lane[1] ? dispatch_payload[1][ISSUE_T_IMM_LSB+:ISSUE_T_IMM_WIDTH]:dispatch_payload[0][ISSUE_T_IMM_LSB+:ISSUE_T_IMM_WIDTH]);
+        wire [31:0] address_sum;
+        v2_prefix_adder #(.WIDTH(32)) effective_address_add (.a(next_value_a),.b(address_immediate),.carry_in(1'b0),.sum(address_sum),.carry_out());
+        wire address_update=(!queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_VALID_LSB+:ISSUE_T_VALID_WIDTH] && |prepare_lane) ||
+                            (queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_VALID_LSB+:ISSUE_T_VALID_WIDTH] && !queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_READY_A_LSB+:ISSUE_T_READY_A_WIDTH]);
+        always @(posedge clk)
+          if(address_update) prepared_address[q]<=address_sum;
       end
       always @(posedge clk) begin
         if(rst) queue[(bank)*(IQ_ENTRIES)+(q)][ISSUE_T_VALID_LSB+:ISSUE_T_VALID_WIDTH]<=0;
@@ -1606,7 +1632,7 @@ end
 endmodule
 
 module muldiv #(
-  parameter integer DIV_STEP_BITS=4
+  parameter integer DIV_STEP_BITS=2
 )(
   input wire  clk,
   input wire  rst,
@@ -1690,19 +1716,18 @@ wire  mul_ready0;
   wire  mul_ready2;
 wire [1:0] mul_head;
 reg [7:0] mul_tag_q [0:(3)-1];
-reg [31:0] mul_result_q [0:(3)-1];
+wire [31:0] mul_result_q [0:(3)-1];
 wire [31:0] mul_computed;
   wire [31:0] correction_a;
   wire [31:0] correction_b;
-wire [63:0] product;
 wire  grant_new_mul;
 reg  div_busy_q;
   reg  div_done_q;
 reg [7:0] div_tag_q;
-reg [31:0] quotient_q;
-  reg [31:0] divisor_q;
-  reg [31:0] div_result_q;
-reg [32:0] remainder_q;
+wire [31:0] quotient_q;
+  wire [31:0] divisor_q;
+  wire [31:0] div_result_q;
+wire [32:0] remainder_q;
 reg [STEP_W-1:0] step_q;
 reg  quotient_negative_q;
   reg  remainder_negative_q;
@@ -1710,18 +1735,18 @@ reg  quotient_negative_q;
 reg [31:0] quotient_next;
 reg [32:0] remainder_next;
   reg [32:0] shifted;
-reg [31:0] div_a_q;
-  reg [31:0] div_b_q;
+wire [31:0] div_a_q;
+  wire [31:0] div_b_q;
   wire [31:0] completed_quotient;
   wire [31:0] completed_remainder;
 reg  div_signed_q;
 reg  cache_valid_q;
   reg  cache_signed_q;
   wire  cache_hit;
-reg [31:0] cache_a_q;
-  reg [31:0] cache_b_q;
-  reg [31:0] cache_quotient_q;
-  reg [31:0] cache_remainder_q;
+wire [31:0] cache_a_q;
+  wire [31:0] cache_b_q;
+  wire [31:0] cache_quotient_q;
+  wire [31:0] cache_remainder_q;
 reg  shortcut;
 reg [31:0] shortcut_quotient;
   reg [31:0] shortcut_remainder;
@@ -1731,7 +1756,7 @@ reg  out_valid_q;
   wire  out_space;
   wire  grant_mul;
   wire  grant_div;
-reg [31:0] out_result_q;
+wire [31:0] out_result_q;
 reg [7:0] out_tag_q;
 wire  request_mul;
   wire  request_div;
@@ -1742,14 +1767,46 @@ wire [31:0] a_magnitude;
   wire [31:0] b_magnitude;
 wire  div_live;
   wire  div_result_live;
-
+reg  pipeline_valid_q;
+  reg  pipeline_low_q;
+reg [7:0] pipeline_tag_q;
+  wire pipeline_live=pipeline_valid_q && !kill_mask[pipeline_tag_q];
+  wire pipeline_ready=!pipeline_live || mul_ready0;
+  wire pipeline_consume=pipeline_live && mul_ready0;
+  wire pipeline_accept=req_valid && req_ready && request_mul;
+  wire [31:0] pp00_q,pp01_q,pp10_q,pp11_q,pcorr_a_q,pcorr_b_q;
+  wire [17:0] product_middle={2'b0,pp00_q[31:16]}+{2'b0,pp01_q[15:0]}+{2'b0,pp10_q[15:0]};
+  wire [31:0] term0=pp11_q,term1={16'b0,pp01_q[31:16]},term2={16'b0,pp10_q[31:16]};
+  wire [31:0] term3={30'b0,product_middle[17:16]}+32'd2;
+  wire [31:0] term4=~pcorr_a_q,term5=~pcorr_b_q;
+  wire [31:0] sum0=term0^term1^term2;
+  wire [31:0] carry0=((term0&term1)|(term0&term2)|(term1&term2))<<1;
+  wire [31:0] sum1=term3^term4^term5;
+  wire [31:0] carry1=((term3&term4)|(term3&term5)|(term4&term5))<<1;
+  wire [31:0] sum2=sum0^carry0^sum1;
+  wire [31:0] carry2=((sum0&carry0)|(sum0&sum1)|(carry0&sum1))<<1;
+  wire [31:0] sum3=sum2^carry2^carry1;
+  wire [31:0] carry3=((sum2&carry2)|(sum2&carry1)|(carry2&carry1))<<1;
+  wire [31:0] product_high;
+  v2_prefix_adder #(.WIDTH(32)) product_final_add (.a(sum3),.b(carry3),.carry_in(1'b0),.sum(product_high),.carry_out());
+  always @(posedge clk) begin
+    if(rst || kill) begin pipeline_valid_q<=0;pipeline_low_q<=0;pipeline_tag_q<=0;end
+    else if(pipeline_ready) begin
+      pipeline_valid_q<=pipeline_accept;
+      if(pipeline_accept) begin pipeline_low_q<=req_op==OP_MUL;pipeline_tag_q<=req_tag;end
+    end
+  end
   assign request_mul=req_op>=OP_MUL && req_op<=OP_MULHU;
   assign request_div=req_op>=OP_DIV && req_op<=OP_REMU;
   assign signed_divide=req_op==OP_DIV || req_op==OP_REM;
   assign a_negative=signed_divide && req_a[31];
   assign b_negative=signed_divide && req_b[31];
-  assign a_magnitude=a_negative ? (~req_a+32'd1) : req_a;
-  assign b_magnitude=b_negative ? (~req_b+32'd1) : req_b;
+  wire [31:0] negated_a;
+  v2_prefix_adder #(.WIDTH(32)) negate_a (.a(~req_a),.b(32'd0),.carry_in(1'b1),.sum(negated_a),.carry_out());
+  assign a_magnitude=a_negative ? negated_a:req_a;
+  wire [31:0] negated_b;
+  v2_prefix_adder #(.WIDTH(32)) negate_b (.a(~req_b),.b(32'd0),.carry_in(1'b1),.sum(negated_b),.carry_out());
+  assign b_magnitude=b_negative ? negated_b:req_b;
   assign div_live=div_busy_q && !kill_mask[div_tag_q];
   assign div_result_live=div_done_q && !kill_mask[div_tag_q];
   assign rsp_valid=out_valid_q && !kill_mask[out_tag_q] && !kill && !rst;
@@ -1767,16 +1824,16 @@ wire  div_live;
   assign mul_ready1=!mul_remaining[1] || mul_ready2;
   assign mul_ready0=!mul_remaining[0] || mul_ready1;
 
-  assign mul_ready=!rst && !kill && mul_ready0;
+  assign mul_ready=!rst && !kill && pipeline_ready;
   assign div_ready=!rst && !kill && !div_live && (!div_result_live || grant_div);
   assign req_ready=!kill_mask[req_tag] &&
     ((request_mul && mul_ready) || (request_div && div_ready));
 
-  assign grant_new_mul=out_space && !grant_mul && !grant_div && req_valid && req_ready && request_mul;
-  assign product=req_a*req_b;
+  assign grant_new_mul=out_space && !grant_mul && !grant_div && pipeline_consume;
+
   assign correction_a=req_a[31] && (req_op==OP_MULH || req_op==OP_MULHSU) ? req_b:32'd0;
   assign correction_b=req_b[31] && req_op==OP_MULH ? req_a:32'd0;
-  assign mul_computed=req_op==OP_MUL ? product[31:0] : product[63:32]-correction_a-correction_b;
+  assign mul_computed=pipeline_low_q ? {product_middle[15:0],pp00_q[15:0]}:product_high;
   assign cache_hit=cache_valid_q && cache_a_q==req_a && cache_b_q==req_b && cache_signed_q==signed_divide;
   assign completed_quotient=quotient_negative_q ? (~quotient_next+32'd1) : quotient_next;
   assign completed_remainder=remainder_negative_q ? (~remainder_next[31:0]+32'd1) : remainder_next[31:0];
@@ -1821,81 +1878,118 @@ end
       begin: loop_0
 integer stage;
 for(stage=0;stage<3;stage=stage+1) begin
-        mul_tag_q[stage]<=0;mul_result_q[stage]<=0;
+        mul_tag_q[stage]<=0;
       end
 end
-      div_busy_q<=0;div_done_q<=0;div_tag_q<=0;div_result_q<=0;
-      quotient_q<=0;divisor_q<=0;remainder_q<=0;step_q<=0;
+      div_busy_q<=0;div_done_q<=0;div_tag_q<=0;
+      step_q<=0;
       quotient_negative_q<=0;remainder_negative_q<=0;remainder_operation_q<=0;
-      div_a_q<=0;div_b_q<=0;div_signed_q<=0;
-      cache_valid_q<=0;cache_signed_q<=0;cache_a_q<=0;cache_b_q<=0;
-      cache_quotient_q<=0;cache_remainder_q<=0;
-      out_valid_q<=0;out_result_q<=0;out_tag_q<=0;prefer_div_q<=1;
+      div_signed_q<=0;
+      cache_valid_q<=0;cache_signed_q<=0;
+      out_valid_q<=0;out_tag_q<=0;prefer_div_q<=1;
     end else begin
 
       if(out_space) begin
         out_valid_q<=grant_div || grant_mul || grant_new_mul;
         if(grant_div) begin
-          out_result_q<=div_result_q;out_tag_q<=div_tag_q;prefer_div_q<=0;
+          out_tag_q<=div_tag_q;prefer_div_q<=0;
         end else if(grant_mul) begin
-          out_result_q<=mul_result_q[mul_head];out_tag_q<=mul_tag_q[mul_head];prefer_div_q<=1;
+          out_tag_q<=mul_tag_q[mul_head];prefer_div_q<=1;
         end else if(grant_new_mul) begin
-          out_result_q<=mul_computed;out_tag_q<=req_tag;prefer_div_q<=1;
+          out_tag_q<=pipeline_tag_q;prefer_div_q<=1;
         end
       end
 
       if(mul_ready2) begin
         mul_valid_q[2]<=mul_remaining[1];
         if(mul_remaining[1]) begin
-          mul_tag_q[2]<=mul_tag_q[1];mul_result_q[2]<=mul_result_q[1];
+          mul_tag_q[2]<=mul_tag_q[1];
         end
       end
       if(mul_ready1) begin
         mul_valid_q[1]<=mul_remaining[0];
         if(mul_remaining[0]) begin
-          mul_tag_q[1]<=mul_tag_q[0];mul_result_q[1]<=mul_result_q[0];
+          mul_tag_q[1]<=mul_tag_q[0];
         end
       end
       if(mul_ready0) begin
-        mul_valid_q[0]<=req_valid && req_ready && request_mul && !grant_new_mul;
-        if(req_valid && req_ready && request_mul && !grant_new_mul) begin
-          mul_tag_q[0]<=req_tag;mul_result_q[0]<=mul_computed;
+        mul_valid_q[0]<=pipeline_consume && !grant_new_mul;
+        if(pipeline_consume && !grant_new_mul) begin
+          mul_tag_q[0]<=pipeline_tag_q;
         end
       end
 
       if(kill_mask[div_tag_q]) begin div_busy_q<=0;div_done_q<=0;end
       if(grant_div) div_done_q<=0;
       if(div_live) begin
-        quotient_q<=quotient_next;remainder_q<=remainder_next;
         step_q<=step_q+1'b1;
         if(step_q==narrow_1(DIV_STEPS-1)) begin
           div_busy_q<=0;div_done_q<=1;
-          div_result_q<=remainder_operation_q ? completed_remainder:completed_quotient;
 
-          cache_valid_q<=1;cache_a_q<=div_a_q;cache_b_q<=div_b_q;cache_signed_q<=div_signed_q;
-          cache_quotient_q<=completed_quotient;cache_remainder_q<=completed_remainder;
+          cache_valid_q<=1;cache_signed_q<=div_signed_q;
         end
       end
       if(req_valid && req_ready && request_div) begin
         div_tag_q<=req_tag;
-        div_a_q<=req_a;div_b_q<=req_b;div_signed_q<=signed_divide;
+        div_signed_q<=signed_divide;
         quotient_negative_q<=a_negative^b_negative;remainder_negative_q<=a_negative;
         remainder_operation_q<=req_op==OP_REM || req_op==OP_REMU;
         div_busy_q<=0;div_done_q<=1;
-        if(cache_hit)
-          div_result_q<=(req_op==OP_REM || req_op==OP_REMU) ? cache_remainder_q:cache_quotient_q;
-        else if(shortcut) begin
-          div_result_q<=(req_op==OP_REM || req_op==OP_REMU) ? shortcut_remainder:shortcut_quotient;
-          cache_valid_q<=1;cache_a_q<=req_a;cache_b_q<=req_b;cache_signed_q<=signed_divide;
-          cache_quotient_q<=shortcut_quotient;cache_remainder_q<=shortcut_remainder;
+        if(cache_hit) begin
+
+        end else if(shortcut) begin
+          cache_valid_q<=1;cache_signed_q<=signed_divide;
         end else begin
           div_busy_q<=1;div_done_q<=0;step_q<=narrow_1(leading_steps);
-          quotient_q<=a_magnitude<<(leading_steps*DIV_STEP_BITS);
-          divisor_q<=b_magnitude;remainder_q<=0;
         end
       end
     end
   end
+
+  v2_priority_register #(.PORTS(1)) stage_pp00_q (.clk(clk),.clear(rst || kill),.enable(pipeline_accept),.data({16'b0,req_a[15:0]}*{16'b0,req_b[15:0]}),.value(pp00_q));
+  v2_priority_register #(.PORTS(1)) stage_pp01_q (.clk(clk),.clear(rst || kill),.enable(pipeline_accept),.data({16'b0,req_a[15:0]}*{16'b0,req_b[31:16]}),.value(pp01_q));
+  v2_priority_register #(.PORTS(1)) stage_pp10_q (.clk(clk),.clear(rst || kill),.enable(pipeline_accept),.data({16'b0,req_a[31:16]}*{16'b0,req_b[15:0]}),.value(pp10_q));
+  v2_priority_register #(.PORTS(1)) stage_pp11_q (.clk(clk),.clear(rst || kill),.enable(pipeline_accept),.data({16'b0,req_a[31:16]}*{16'b0,req_b[31:16]}),.value(pp11_q));
+  v2_priority_register #(.PORTS(1)) stage_pcorr_a_q (.clk(clk),.clear(rst || kill),.enable(pipeline_accept),.data(correction_a),.value(pcorr_a_q));
+  v2_priority_register #(.PORTS(1)) stage_pcorr_b_q (.clk(clk),.clear(rst || kill),.enable(pipeline_accept),.data(correction_b),.value(pcorr_b_q));
+
+  wire data_clear=rst || kill;
+  wire accept_div=req_valid && req_ready && request_div;
+  wire finish_div=div_live && step_q==narrow_1(DIV_STEPS-1);
+  wire start_div=accept_div && !cache_hit && !shortcut;
+  wire save_shortcut=accept_div && !cache_hit && shortcut;
+  wire accept_mul=pipeline_consume && !grant_new_mul;
+  wire [31:0] fresh_div_result=cache_hit ?
+    ((req_op==OP_REM || req_op==OP_REMU) ? cache_remainder_q:cache_quotient_q):
+    ((req_op==OP_REM || req_op==OP_REMU) ? shortcut_remainder:shortcut_quotient);
+  v2_priority_register #(.WORD_BITS(32),.PORTS(3)) data_out_result_q (.clk(clk),.clear(data_clear),.enable({grant_div,grant_mul,grant_new_mul}),
+    .data({div_result_q,mul_result_q[mul_head],mul_computed}),.value(out_result_q));
+  v2_priority_register #(.WORD_BITS(32),.PORTS(2)) data_div_result_q (.clk(clk),.clear(data_clear),.enable({accept_div && (cache_hit || shortcut),finish_div}),
+    .data({fresh_div_result,remainder_operation_q ? completed_remainder:completed_quotient}),.value(div_result_q));
+  v2_priority_register #(.WORD_BITS(32),.PORTS(2)) data_quotient_q (.clk(clk),.clear(data_clear),.enable({start_div,div_live}),
+    .data({a_magnitude<<(leading_steps*DIV_STEP_BITS),quotient_next}),.value(quotient_q));
+  v2_priority_register #(.WORD_BITS(33),.PORTS(2)) data_remainder_q (.clk(clk),.clear(data_clear),.enable({start_div,div_live}),
+    .data({33'd0,remainder_next}),.value(remainder_q));
+  v2_priority_register #(.WORD_BITS(32),.PORTS(1)) data_divisor_q (.clk(clk),.clear(data_clear),.enable({start_div}),
+    .data({b_magnitude}),.value(divisor_q));
+  v2_priority_register #(.WORD_BITS(32),.PORTS(1)) data_div_a_q (.clk(clk),.clear(data_clear),.enable({accept_div}),
+    .data({req_a}),.value(div_a_q));
+  v2_priority_register #(.WORD_BITS(32),.PORTS(1)) data_div_b_q (.clk(clk),.clear(data_clear),.enable({accept_div}),
+    .data({req_b}),.value(div_b_q));
+  v2_priority_register #(.WORD_BITS(32),.PORTS(2)) data_cache_a_q (.clk(clk),.clear(data_clear),.enable({save_shortcut,finish_div}),
+    .data({req_a,div_a_q}),.value(cache_a_q));
+  v2_priority_register #(.WORD_BITS(32),.PORTS(2)) data_cache_b_q (.clk(clk),.clear(data_clear),.enable({save_shortcut,finish_div}),
+    .data({req_b,div_b_q}),.value(cache_b_q));
+  v2_priority_register #(.WORD_BITS(32),.PORTS(2)) data_cache_quotient_q (.clk(clk),.clear(data_clear),.enable({save_shortcut,finish_div}),
+    .data({shortcut_quotient,completed_quotient}),.value(cache_quotient_q));
+  v2_priority_register #(.WORD_BITS(32),.PORTS(2)) data_cache_remainder_q (.clk(clk),.clear(data_clear),.enable({save_shortcut,finish_div}),
+    .data({shortcut_remainder,completed_remainder}),.value(cache_remainder_q));
+  v2_priority_register #(.WORD_BITS(32),.PORTS(1)) data_mul_result_0 (.clk(clk),.clear(data_clear),.enable({mul_ready0 && accept_mul}),
+    .data({mul_computed}),.value(mul_result_q[0]));
+  v2_priority_register #(.WORD_BITS(32),.PORTS(1)) data_mul_result_1 (.clk(clk),.clear(data_clear),.enable({mul_ready1 && mul_remaining[0]}),
+    .data({mul_result_q[0]}),.value(mul_result_q[1]));
+  v2_priority_register #(.WORD_BITS(32),.PORTS(1)) data_mul_result_2 (.clk(clk),.clear(data_clear),.enable({mul_ready2 && mul_remaining[1]}),
+    .data({mul_result_q[1]}),.value(mul_result_q[2]));
 
   initial begin
     if(DIV_STEP_BITS!=2 && DIV_STEP_BITS!=4) $fatal(1,"DIV_STEP_BITS must be 2 or 4");

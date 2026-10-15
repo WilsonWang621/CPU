@@ -4,14 +4,19 @@
 核心为 [`verilog/area_v2_core.v`](verilog/area_v2_core.v)。采用独立发射队列、树形仲裁、ROB 槽号重命名、
 分支检查点和非阻塞缓存，支持 AXI4-Lite、256 MiB 地址空间和退出响应处理。
 
-## 双发射 400 MHz 优化进展
+## 双发射 500 MHz 优化进展
 
 2026-10-15 已同步官方 `302f0cf` 的 ABC buffering / cell sizing 更新。
 新版默认流程对冻结 v42 测得 **302.69 MHz、35,006.83 μm²**；同一份 RTL 的正确性为 19/19、IPC 为 1.113846。
-加入保留层次的恢复、ROB、Cache 分发树，以及两级乘法和前缀加法的冻结候选测得
-**389.50 MHz、35,702.54 μm²、IPC 1.113846**；单元套件已通过，完整 CPU 正确性仍在运行。
-400 MHz 目标尚未完成，候选尚未替换默认核心。详见[阶段 7 报告](reports/frequency-stage7.md)与
+加入保留层次的恢复、ROB、Cache 分发树、两级乘法，以及 ALU、有效地址和除法输入取负的前缀加法器后，
+冻结候选 `address-mul2-prefix-v4` 测得 **433.90 MHz、35,569.24 μm²、IPC 1.113846**。
+六项性能和两份 MDU 测试通过；CPU 正确性在上轮暂停前完成 9 项，尚无 19/19 结论。
+当前目标已从 400 MHz 提高到 **500 MHz**，面积和 IPC 门槛保持 Tier3 要求；500 MHz 尚未达到。
+根目录默认源码正在整理，整理后的版本需要重新构建、验证和综合，不能直接继承冻结候选的成绩。
+详见[阶段 7 报告](reports/frequency-stage7.md)、[433.90 MHz 冻结证据](reports/data/2026-10-15/timing-stage7/address-mul2-prefix-v4/identity.json)与
 [上游同步记录](reports/upstream-sync-2026-10-15.md)。
+
+500 MHz 写回唤醒优化及整理后测量见[阶段 8 报告](reports/frequency-stage8.md)。
 
 ## 双发射旧流程基准
 

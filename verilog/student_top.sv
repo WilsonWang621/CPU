@@ -3,7 +3,7 @@ module student_top #(
   parameter integer ROB_BITS=5, IQ_ENTRIES=4, LOAD_SLOTS=8, STORE_SLOTS=16,
   parameter integer CHECKPOINTS=3, ISSUE_WIDTH=2, COMMIT_WIDTH=2,
   parameter integer IC_INDEX_BITS=5, DC_INDEX_BITS=4, DC_LINE_BITS=6,
-  parameter integer CONTROL_TREE=0, ROB_WRITE_TREE=0, CACHE_TREE=0, COMMIT_TREE=0, REGISTER_REDIRECT=0
+  parameter integer CONTROL_TREE=1, ROB_WRITE_TREE=1, CACHE_TREE=1, COMMIT_TREE=1, REGISTER_REDIRECT=1
 ) (
   input wire clock, reset,
   output wire [31:0] araddr,

@@ -3,8 +3,9 @@ set -eu
 out=${1:-build/area-v2/unit}
 rtl=${2:-verilog/area_v2_core.v}
 top=${3:-verilog/student_top.sv}
-prepared_define=
-if [ "${4:-}" = prepared-address ]; then prepared_define=-DV2_PREPARED_ADDRESS_TEST; fi
+prepared_define=-DV2_PREPARED_ADDRESS_TEST
+# Older frozen cores form the effective address at issue instead.
+if [ "${4:-}" = direct-address ]; then prepared_define=; fi
 mkdir -p "$out"
 iverilog $prepared_define -g2005 -s student_top -o "$out/plain-parser" "$rtl" verilog/pararisc_axi_adapter.sv "$top"
 iverilog $prepared_define -g2012 -s v2_distribution_tb -o "$out/distribution" tests/rtl/v2_distribution_tb.sv "$rtl"
