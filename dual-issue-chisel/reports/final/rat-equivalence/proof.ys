@@ -1,0 +1,8 @@
+read_json "/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/final-rat-proof/gold-correspondence.json"
+read_json "/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/final-rat-proof/gate-correspondence.json"
+equiv_make gold gate equiv
+hierarchy -top equiv
+opt_clean
+equiv_simple -seq 1
+equiv_induct -seq 2
+equiv_status -assert

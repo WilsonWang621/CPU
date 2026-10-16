@@ -1,0 +1,11 @@
+read_verilog -sv "/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/rtl/student_top.sv"
+hierarchy -top v2_rename
+proc
+memory_map
+setattr -mod -unset keep_hierarchy
+setattr -mod -unset keep
+setattr -unset keep
+flatten
+opt
+rename v2_rename gate
+write_json "/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/final-rat-proof/gate.json"
