@@ -6,6 +6,7 @@ unpacked registers, so read-only observation arrays reconstruct their names.
 The stimulus, reference arithmetic, architectural model and checks are kept.
 """
 from pathlib import Path
+import argparse
 import hashlib
 import json
 import re
@@ -54,6 +55,20 @@ def return_bench(text):
     return text.replace("  reg [31:0] responses", "\n".join(obs) + "\n  reg [31:0] responses")
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--associativity", action="store_true", help="Check 1/2/4-way caches and the AXI adapter")
+    parser.add_argument("--generate", action="store_true", help="Generate the associativity test modules first")
+    args = parser.parse_args()
+    if args.generate:
+        assert args.associativity, "Use make verify-units for the original module suite"
+        from check_parameters import command
+        commands = []
+        for ways in [1, 2, 4]:
+            commands += [f"run --module frontend --cache-bytes 256 --queue-entries 4 --bht-entries 16 --btb-entries 4 --history-entries 4 --ways {ways} --out build/frontend-ways{ways}",
+                         f"run --module dcache --cache-bytes 512 --line-bytes 16 --mshrs 4 --load-slots 8 --store-slots 4 --credits 16 --ram-bytes 16384 --ways {ways} --out build/dcache-return-ways{ways}",
+                         f"run --module dcache --cache-bytes 2048 --line-bytes 16 --mshrs 2 --load-slots 4 --store-slots 4 --credits 8 --ways {ways} --out build/dcache-write-ways{ways}"]
+        commands += ["run --module axi-adapter --out build/axi-unit"]
+        command(["sbt", "-batch", *commands], PROJECT / "build/units-generate.log", PROJECT)
     out = PROJECT / "build/unit-results"
     out.mkdir(parents=True, exist_ok=True)
     cases = [
@@ -66,6 +81,17 @@ def main():
          lambda s: without_parameters(s, "v2_dcache").replace("CACHE_BYTES=512", "CACHE_BYTES=2048")),
         ("dcache-return", "dcache-return", "v2_dcache_return_tb", "v2_dcache_return_tb.sv", return_bench),
     ]
+    if args.associativity:
+        cases = []
+        for ways in [1, 2, 4]:
+            cases.extend([
+                (f"frontend-ways{ways}", f"frontend-ways{ways}", "v2_frontend_prepare_tb", "v2_frontend_prepare_tb.sv", frontend_bench),
+                (f"frontend-targets-ways{ways}", f"frontend-ways{ways}", "v2_frontend_target_tb", "v2_frontend_prepare_tb.sv", frontend_bench),
+                (f"dcache-return-ways{ways}", f"dcache-return-ways{ways}", "v2_dcache_return_tb", "v2_dcache_return_tb.sv", return_bench),
+                (f"dcache-write-ways{ways}", f"dcache-write-ways{ways}", "v2_dcache_write_tb", "v2_dcache_write_tb.sv",
+                 lambda s: without_parameters(s, "v2_dcache").replace("CACHE_BYTES=512", "CACHE_BYTES=2048")),
+            ])
+        cases.append(("axi", "axi-unit", "pararisc_axi_adapter_tb", "pararisc_axi_adapter_tb.sv", lambda s: s))
     results = []
     sha = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
     for name, directory, top, bench_name, adapt in cases:
@@ -84,9 +110,14 @@ def main():
             subprocess.run(["vvp", str(binary)], stdout=f, stderr=subprocess.STDOUT, check=True)
         assert "PASS" in log.read_text(), f"No PASS marker for {name}"
         results.append({"case": name, "status": "passed", "testbench_sha256": sha(original),
+                        "generated_directory": directory, "testbench": str(original.relative_to(ROOT)),
                         "adapted_testbench_sha256": sha(bench), "generated_rtl_sha256": sha(rtl[0]), "log_sha256": sha(log)})
         print(log.read_text().strip(), flush=True)
-    (out / "results.json").write_text(json.dumps(results, indent=2) + "\n")
+    payload = {
+        "cases": results,
+        "source_sha256": {str(p.relative_to(PROJECT)): sha(p) for p in sorted((PROJECT / "src/main/scala").rglob("*.scala"))},
+    } if args.associativity else results
+    (out / ("associativity-results.json" if args.associativity else "results.json")).write_text(json.dumps(payload, indent=2) + "\n")
 
 if __name__ == "__main__":
     main()

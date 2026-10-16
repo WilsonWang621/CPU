@@ -62,6 +62,7 @@ class ArchitectureProbe(p: Config) extends Logic {
         assert(seenOutOfOrder, "No younger instruction executed past the older outstanding load")
         assert(nextRetiredPC + (retired << 2) === 48.U, "Missing or extra retirement")
         assert(maximumIssue === p.issueWidth.U, "Stimulus did not exercise the configured maximum issue width")
+        printf(p"Architecture probe: PASS ooo=${seenOutOfOrder} max_issue=${maximumIssue} retired_bytes=${nextRetiredPC + (retired << 2)}\n")
       }
     }
   }
