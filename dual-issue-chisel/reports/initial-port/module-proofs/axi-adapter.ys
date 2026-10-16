@@ -1,0 +1,22 @@
+read_verilog -sv "/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_axi_adapter.sv"
+hierarchy -top pararisc_axi_adapter
+proc
+memory_map
+setattr -mod -unset keep_hierarchy
+flatten
+opt
+rename pararisc_axi_adapter gold
+design -stash gold
+read_verilog -sv "/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv"
+hierarchy -auto-top
+proc
+memory_map
+setattr -mod -unset keep_hierarchy
+flatten
+opt
+rename -top gate
+design -copy-from gold -as gold gold
+miter -equiv -make_assert -flatten gold gate miter
+hierarchy -top miter
+opt_clean
+sat -verify -prove-asserts -seq 8 -set-init-zero -show-inputs -show-outputs

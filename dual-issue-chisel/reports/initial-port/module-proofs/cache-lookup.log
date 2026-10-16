@@ -1,0 +1,718 @@
+
+-- Executing script file `/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/module-proofs/cache-lookup.ys' --
+
+1. Executing Verilog-2005 frontend: /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v
+Parsing SystemVerilog input from `/home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v' to AST representation.
+Generating RTLIL representation for module `\alu'.
+Generating RTLIL representation for module `\branch_unit'.
+Generating RTLIL representation for module `\cpu_top'.
+Warning: Replacing memory \loads with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:1347
+Warning: Replacing memory \stores with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:1324
+Warning: Replacing memory \checkpoint_owner with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:1310
+Warning: Replacing memory \prepared_address with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:1271
+Warning: Replacing memory \queue with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:1244
+Warning: Replacing memory \values with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:1136
+Warning: Replacing memory \rob with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:1124
+Warning: Replacing memory \dispatch_payload with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:1026
+Warning: Replacing memory \dispatch_index with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:989
+Warning: Replacing memory \dispatch_bank with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:989
+Warning: Replacing memory \dispatch_rid with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:989
+Warning: Replacing memory \wb_address with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:926
+Warning: Replacing memory \wb_fault with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:926
+Warning: Replacing memory \wb_value with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:926
+Warning: Replacing memory \wb_rid with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:926
+Warning: Replacing memory \occupancy with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:823, /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:818
+Warning: Replacing memory \free_queue with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:818
+Generating RTLIL representation for module `\decoder'.
+Generating RTLIL representation for module `\memory_controller'.
+Generating RTLIL representation for module `\muldiv'.
+Warning: Replacing memory \mul_tag_q with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:1967
+Generating RTLIL representation for module `\v2_arch_word'.
+Generating RTLIL representation for module `\v2_cache_lookup'.
+Generating RTLIL representation for module `\v2_cache_read'.
+Generating RTLIL representation for module `\v2_cache_tag_match'.
+Generating RTLIL representation for module `\v2_circular_grant'.
+Generating RTLIL representation for module `\v2_dcache'.
+Warning: Replacing memory \tags with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:2966
+Warning: Replacing memory \word_valid with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:2962
+Warning: Replacing memory \waiters with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:2947
+Warning: Replacing memory \waiter_next with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:2936
+Warning: Replacing memory \misses with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:2918
+Warning: Replacing memory \data with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:2880
+Warning: Replacing memory \pending_mask with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:2862
+Warning: Replacing memory \pending_data with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:2861
+Warning: Replacing memory \pending_address with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:2860
+Generating RTLIL representation for module `\v2_distribution'.
+Generating RTLIL representation for module `\v2_distribution_inverter'.
+Generating RTLIL representation for module `\v2_frontend'.
+Warning: Replacing memory \local_history with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:3505
+Warning: Replacing memory \tags with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:3497
+Warning: Replacing memory \failed_words with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:3495
+Warning: Replacing memory \valid_words with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:3495
+Warning: Replacing memory \fifo with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:3479
+Warning: Replacing memory \even_target with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:3469
+Warning: Replacing memory \even_data with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:3469
+Warning: Replacing memory \odd_target with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:3468
+Warning: Replacing memory \odd_data with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:3468
+Warning: Replacing memory \prediction with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:3363
+Warning: Replacing memory \incoming with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:3393
+Generating RTLIL representation for module `\v2_grant_read'.
+Generating RTLIL representation for module `\v2_increment'.
+Generating RTLIL representation for module `\v2_inc_join'.
+Generating RTLIL representation for module `\v2_iq_read'.
+Generating RTLIL representation for module `\v2_operand'.
+Generating RTLIL representation for module `\v2_order_compare'.
+Generating RTLIL representation for module `\v2_parallel_select'.
+Generating RTLIL representation for module `\v2_prefix_adder'.
+Generating RTLIL representation for module `\v2_prefix_node'.
+Generating RTLIL representation for module `\v2_priority_mux'.
+Generating RTLIL representation for module `\v2_priority_register'.
+Generating RTLIL representation for module `\v2_read'.
+Generating RTLIL representation for module `\v2_read_mask'.
+Generating RTLIL representation for module `\v2_registered_grant'.
+Generating RTLIL representation for module `\v2_rename'.
+Warning: Replacing memory \checkpoint_tag with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:4621
+Warning: Replacing memory \checkpoint_pending with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:4610
+Warning: Replacing memory \tag_q with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:4595
+Warning: Replacing memory \save_tag with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:4568, /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:4532
+Warning: Replacing memory \tag_next with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:4546, /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:4527
+Generating RTLIL representation for module `\v2_retire_read'.
+Generating RTLIL representation for module `\v2_select'.
+Successfully finished Verilog frontend.
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+
+2.1. Analyzing design hierarchy..
+Top module:  \v2_cache_lookup
+Used module:     \v2_cache_tag_match
+Used module:     \v2_distribution
+Used module:         \v2_distribution_inverter
+Parameter \WIDTH = 1
+Parameter \LEAVES = 1
+
+2.2. Executing AST frontend in derive mode using pre-parsed AST for module `\v2_distribution'.
+Parameter \WIDTH = 1
+Parameter \LEAVES = 1
+Generating RTLIL representation for module `$paramod$06c0a3be3569885136f66c9c3a1b8f6e6d64d1f5\v2_distribution'.
+Parameter \WIDTH = 1
+Parameter \LEAVES = 1
+Found cached RTLIL representation for module `$paramod$06c0a3be3569885136f66c9c3a1b8f6e6d64d1f5\v2_distribution'.
+Parameter \WIDTH = 1
+
+2.3. Executing AST frontend in derive mode using pre-parsed AST for module `\v2_distribution_inverter'.
+Parameter \WIDTH = 1
+Generating RTLIL representation for module `$paramod\v2_distribution_inverter\WIDTH=s32'00000000000000000000000000000001'.
+Parameter \WIDTH = 1
+Found cached RTLIL representation for module `$paramod\v2_distribution_inverter\WIDTH=s32'00000000000000000000000000000001'.
+Parameter \WIDTH = 1
+Found cached RTLIL representation for module `$paramod\v2_distribution_inverter\WIDTH=s32'00000000000000000000000000000001'.
+Parameter \WIDTH = 1
+Found cached RTLIL representation for module `$paramod\v2_distribution_inverter\WIDTH=s32'00000000000000000000000000000001'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+
+2.4. Executing AST frontend in derive mode using pre-parsed AST for module `\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Generating RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \TAG_BITS = 18
+Parameter \WORDS = 16
+Found cached RTLIL representation for module `$paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match'.
+Parameter \WIDTH = 26
+Parameter \LEAVES = 8
+
+2.5. Executing AST frontend in derive mode using pre-parsed AST for module `\v2_distribution'.
+Parameter \WIDTH = 26
+Parameter \LEAVES = 8
+Generating RTLIL representation for module `$paramod$8c8be752d19285ad3080fc9c6c415d5e540e245c\v2_distribution'.
+
+2.6. Analyzing design hierarchy..
+Top module:  \v2_cache_lookup
+Used module:     $paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match
+Used module:     $paramod$8c8be752d19285ad3080fc9c6c415d5e540e245c\v2_distribution
+Used module:         \v2_distribution
+Used module:             $paramod$06c0a3be3569885136f66c9c3a1b8f6e6d64d1f5\v2_distribution
+Used module:             $paramod\v2_distribution_inverter\WIDTH=s32'00000000000000000000000000000001
+Used module:         \v2_distribution_inverter
+Parameter \WIDTH = 26
+Parameter \LEAVES = 4
+
+2.7. Executing AST frontend in derive mode using pre-parsed AST for module `\v2_distribution'.
+Parameter \WIDTH = 26
+Parameter \LEAVES = 4
+Generating RTLIL representation for module `$paramod$a4c8c3c6dedfdaaab580c8d68b14798b7131bc98\v2_distribution'.
+Parameter \WIDTH = 26
+Parameter \LEAVES = 4
+Found cached RTLIL representation for module `$paramod$a4c8c3c6dedfdaaab580c8d68b14798b7131bc98\v2_distribution'.
+Parameter \WIDTH = 26
+
+2.8. Executing AST frontend in derive mode using pre-parsed AST for module `\v2_distribution_inverter'.
+Parameter \WIDTH = 26
+Generating RTLIL representation for module `$paramod\v2_distribution_inverter\WIDTH=s32'00000000000000000000000000011010'.
+Parameter \WIDTH = 26
+Found cached RTLIL representation for module `$paramod\v2_distribution_inverter\WIDTH=s32'00000000000000000000000000011010'.
+Parameter \WIDTH = 26
+Found cached RTLIL representation for module `$paramod\v2_distribution_inverter\WIDTH=s32'00000000000000000000000000011010'.
+Parameter \WIDTH = 26
+Found cached RTLIL representation for module `$paramod\v2_distribution_inverter\WIDTH=s32'00000000000000000000000000011010'.
+
+2.9. Analyzing design hierarchy..
+Top module:  \v2_cache_lookup
+Used module:     $paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match
+Used module:     $paramod$8c8be752d19285ad3080fc9c6c415d5e540e245c\v2_distribution
+Used module:         $paramod$a4c8c3c6dedfdaaab580c8d68b14798b7131bc98\v2_distribution
+Used module:             \v2_distribution
+Used module:                 $paramod$06c0a3be3569885136f66c9c3a1b8f6e6d64d1f5\v2_distribution
+Used module:                 $paramod\v2_distribution_inverter\WIDTH=s32'00000000000000000000000000000001
+Used module:             \v2_distribution_inverter
+Used module:         $paramod\v2_distribution_inverter\WIDTH=s32'00000000000000000000000000011010
+Parameter \WIDTH = 26
+Parameter \LEAVES = 2
+
+2.10. Executing AST frontend in derive mode using pre-parsed AST for module `\v2_distribution'.
+Parameter \WIDTH = 26
+Parameter \LEAVES = 2
+Generating RTLIL representation for module `$paramod$8af3931f2d22fd38fe4f5c04325b1e0dc7327e71\v2_distribution'.
+Parameter \WIDTH = 26
+Parameter \LEAVES = 2
+Found cached RTLIL representation for module `$paramod$8af3931f2d22fd38fe4f5c04325b1e0dc7327e71\v2_distribution'.
+Parameter \WIDTH = 26
+Found cached RTLIL representation for module `$paramod\v2_distribution_inverter\WIDTH=s32'00000000000000000000000000011010'.
+Parameter \WIDTH = 26
+Found cached RTLIL representation for module `$paramod\v2_distribution_inverter\WIDTH=s32'00000000000000000000000000011010'.
+Parameter \WIDTH = 26
+Found cached RTLIL representation for module `$paramod\v2_distribution_inverter\WIDTH=s32'00000000000000000000000000011010'.
+Parameter \WIDTH = 26
+Found cached RTLIL representation for module `$paramod\v2_distribution_inverter\WIDTH=s32'00000000000000000000000000011010'.
+
+2.11. Analyzing design hierarchy..
+Top module:  \v2_cache_lookup
+Used module:     $paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match
+Used module:     $paramod$8c8be752d19285ad3080fc9c6c415d5e540e245c\v2_distribution
+Used module:         $paramod$a4c8c3c6dedfdaaab580c8d68b14798b7131bc98\v2_distribution
+Used module:             $paramod$8af3931f2d22fd38fe4f5c04325b1e0dc7327e71\v2_distribution
+Used module:                 \v2_distribution
+Used module:                     $paramod$06c0a3be3569885136f66c9c3a1b8f6e6d64d1f5\v2_distribution
+Used module:                     $paramod\v2_distribution_inverter\WIDTH=s32'00000000000000000000000000000001
+Used module:                 \v2_distribution_inverter
+Used module:             $paramod\v2_distribution_inverter\WIDTH=s32'00000000000000000000000000011010
+Parameter \WIDTH = 26
+Parameter \LEAVES = 1
+
+2.12. Executing AST frontend in derive mode using pre-parsed AST for module `\v2_distribution'.
+Parameter \WIDTH = 26
+Parameter \LEAVES = 1
+Generating RTLIL representation for module `$paramod$d960582e58d55190c4e13c34f0cf6f9b4aca99b3\v2_distribution'.
+Parameter \WIDTH = 26
+Parameter \LEAVES = 1
+Found cached RTLIL representation for module `$paramod$d960582e58d55190c4e13c34f0cf6f9b4aca99b3\v2_distribution'.
+Parameter \WIDTH = 26
+Found cached RTLIL representation for module `$paramod\v2_distribution_inverter\WIDTH=s32'00000000000000000000000000011010'.
+Parameter \WIDTH = 26
+Found cached RTLIL representation for module `$paramod\v2_distribution_inverter\WIDTH=s32'00000000000000000000000000011010'.
+Parameter \WIDTH = 26
+Found cached RTLIL representation for module `$paramod\v2_distribution_inverter\WIDTH=s32'00000000000000000000000000011010'.
+Parameter \WIDTH = 26
+Found cached RTLIL representation for module `$paramod\v2_distribution_inverter\WIDTH=s32'00000000000000000000000000011010'.
+
+2.13. Analyzing design hierarchy..
+Top module:  \v2_cache_lookup
+Used module:     $paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match
+Used module:     $paramod$8c8be752d19285ad3080fc9c6c415d5e540e245c\v2_distribution
+Used module:         $paramod$a4c8c3c6dedfdaaab580c8d68b14798b7131bc98\v2_distribution
+Used module:             $paramod$8af3931f2d22fd38fe4f5c04325b1e0dc7327e71\v2_distribution
+Used module:                 $paramod$d960582e58d55190c4e13c34f0cf6f9b4aca99b3\v2_distribution
+Used module:                 $paramod\v2_distribution_inverter\WIDTH=s32'00000000000000000000000000011010
+
+2.14. Analyzing design hierarchy..
+Top module:  \v2_cache_lookup
+Used module:     $paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match
+Used module:     $paramod$8c8be752d19285ad3080fc9c6c415d5e540e245c\v2_distribution
+Used module:         $paramod$a4c8c3c6dedfdaaab580c8d68b14798b7131bc98\v2_distribution
+Used module:             $paramod$8af3931f2d22fd38fe4f5c04325b1e0dc7327e71\v2_distribution
+Used module:                 $paramod$d960582e58d55190c4e13c34f0cf6f9b4aca99b3\v2_distribution
+Used module:                 $paramod\v2_distribution_inverter\WIDTH=s32'00000000000000000000000000011010
+Removing unused module `$paramod\v2_distribution_inverter\WIDTH=s32'00000000000000000000000000000001'.
+Removing unused module `$paramod$06c0a3be3569885136f66c9c3a1b8f6e6d64d1f5\v2_distribution'.
+Removing unused module `\v2_select'.
+Removing unused module `\v2_retire_read'.
+Removing unused module `\v2_rename'.
+Removing unused module `\v2_registered_grant'.
+Removing unused module `\v2_read_mask'.
+Removing unused module `\v2_read'.
+Removing unused module `\v2_priority_register'.
+Removing unused module `\v2_priority_mux'.
+Removing unused module `\v2_prefix_node'.
+Removing unused module `\v2_prefix_adder'.
+Removing unused module `\v2_parallel_select'.
+Removing unused module `\v2_order_compare'.
+Removing unused module `\v2_operand'.
+Removing unused module `\v2_iq_read'.
+Removing unused module `\v2_inc_join'.
+Removing unused module `\v2_increment'.
+Removing unused module `\v2_grant_read'.
+Removing unused module `\v2_frontend'.
+Removing unused module `\v2_distribution_inverter'.
+Removing unused module `\v2_distribution'.
+Removing unused module `\v2_dcache'.
+Removing unused module `\v2_circular_grant'.
+Removing unused module `\v2_cache_tag_match'.
+Removing unused module `\v2_cache_read'.
+Removing unused module `\v2_arch_word'.
+Removing unused module `\muldiv'.
+Removing unused module `\memory_controller'.
+Removing unused module `\decoder'.
+Removing unused module `\cpu_top'.
+Removing unused module `\branch_unit'.
+Removing unused module `\alu'.
+Removed 33 unused modules.
+
+3. Executing PROC pass (convert processes to netlists).
+
+3.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Removed a total of 0 dead cases.
+
+3.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 0 assignments to connections.
+
+3.4. Executing PROC_INIT pass (extract init attributes).
+
+3.5. Executing PROC_ARST pass (detect async resets in processes).
+
+3.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+
+3.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+
+3.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+
+3.9. Executing PROC_DFF pass (convert process syncs to FFs).
+
+3.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+3.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod\v2_distribution_inverter\WIDTH=s32'00000000000000000000000000011010.
+Optimizing module $paramod$a4c8c3c6dedfdaaab580c8d68b14798b7131bc98\v2_distribution.
+Optimizing module $paramod$8c8be752d19285ad3080fc9c6c415d5e540e245c\v2_distribution.
+Optimizing module $paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match.
+Optimizing module $paramod$d960582e58d55190c4e13c34f0cf6f9b4aca99b3\v2_distribution.
+Optimizing module $paramod$8af3931f2d22fd38fe4f5c04325b1e0dc7327e71\v2_distribution.
+Optimizing module v2_cache_lookup.
+<suppressed ~2 debug messages>
+
+4. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+5. Executing FLATTEN pass (flatten design).
+Deleting now unused module $paramod\v2_distribution_inverter\WIDTH=s32'00000000000000000000000000011010.
+Deleting now unused module $paramod$a4c8c3c6dedfdaaab580c8d68b14798b7131bc98\v2_distribution.
+Deleting now unused module $paramod$8c8be752d19285ad3080fc9c6c415d5e540e245c\v2_distribution.
+Deleting now unused module $paramod$2e4038ed9ce45aa0c9f402e6f47f5098ba880ad9\v2_cache_tag_match.
+Deleting now unused module $paramod$d960582e58d55190c4e13c34f0cf6f9b4aca99b3\v2_distribution.
+Deleting now unused module $paramod$8af3931f2d22fd38fe4f5c04325b1e0dc7327e71\v2_distribution.
+<suppressed ~51 debug messages>
+
+6. Executing OPT pass (performing simple optimizations).
+
+6.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module v2_cache_lookup.
+
+6.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\v2_cache_lookup'.
+Computing hashes of 300 cells of `\v2_cache_lookup'.
+Finding duplicate cells in `\v2_cache_lookup'.
+Computing hashes of 277 cells of `\v2_cache_lookup'.
+Finding duplicate cells in `\v2_cache_lookup'.
+Computing hashes of 270 cells of `\v2_cache_lookup'.
+Finding duplicate cells in `\v2_cache_lookup'.
+Computing hashes of 267 cells of `\v2_cache_lookup'.
+Finding duplicate cells in `\v2_cache_lookup'.
+Computing hashes of 264 cells of `\v2_cache_lookup'.
+Finding duplicate cells in `\v2_cache_lookup'.
+Computing hashes of 263 cells of `\v2_cache_lookup'.
+Finding duplicate cells in `\v2_cache_lookup'.
+Computing hashes of 262 cells of `\v2_cache_lookup'.
+Finding duplicate cells in `\v2_cache_lookup'.
+<suppressed ~114 debug messages>
+Removed a total of 38 cells.
+
+6.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \v2_cache_lookup..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~2 debug messages>
+
+6.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \v2_cache_lookup.
+Performed a total of 0 changes.
+
+6.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\v2_cache_lookup'.
+Computing hashes of 262 cells of `\v2_cache_lookup'.
+Finding duplicate cells in `\v2_cache_lookup'.
+Removed a total of 0 cells.
+
+6.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+6.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \v2_cache_lookup..
+Removed 0 unused cells and 129 unused wires.
+<suppressed ~1 debug messages>
+
+6.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module v2_cache_lookup.
+
+6.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+6.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \v2_cache_lookup..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~2 debug messages>
+
+6.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \v2_cache_lookup.
+Performed a total of 0 changes.
+
+6.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\v2_cache_lookup'.
+Computing hashes of 262 cells of `\v2_cache_lookup'.
+Finding duplicate cells in `\v2_cache_lookup'.
+Removed a total of 0 cells.
+
+6.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+6.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \v2_cache_lookup..
+
+6.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module v2_cache_lookup.
+
+6.16. Finished fast OPT passes. (There is nothing left to do.)
+Renaming module \v2_cache_lookup to \gold.
+
+7. Executing Verilog-2005 frontend: /home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/cache-lookup/v2_cache_lookup.sv
+Parsing SystemVerilog input from `/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/cache-lookup/v2_cache_lookup.sv' to AST representation.
+Generating RTLIL representation for module `\v2_distribution_inverter'.
+Generating RTLIL representation for module `\v2_distribution'.
+Generating RTLIL representation for module `\v2_distribution_2'.
+Generating RTLIL representation for module `\v2_distribution_6'.
+Generating RTLIL representation for module `\v2_distribution_14'.
+Generating RTLIL representation for module `\v2_cache_tag_match'.
+Generating RTLIL representation for module `\v2_cache_lookup'.
+Successfully finished Verilog frontend.
+
+8. Executing HIERARCHY pass (managing design hierarchy).
+
+8.1. Finding top of design hierarchy..
+root of   4 design levels: v2_cache_lookup     
+root of   0 design levels: v2_cache_tag_match  
+root of   3 design levels: v2_distribution_14  
+root of   2 design levels: v2_distribution_6   
+root of   1 design levels: v2_distribution_2   
+root of   0 design levels: v2_distribution     
+root of   0 design levels: v2_distribution_inverter
+Automatically selected v2_cache_lookup as design top module.
+
+8.2. Analyzing design hierarchy..
+Top module:  \v2_cache_lookup
+Used module:     \v2_cache_tag_match
+Used module:     \v2_distribution_14
+Used module:         \v2_distribution_6
+Used module:             \v2_distribution_2
+Used module:                 \v2_distribution
+Used module:                 \v2_distribution_inverter
+
+8.3. Analyzing design hierarchy..
+Top module:  \v2_cache_lookup
+Used module:     \v2_cache_tag_match
+Used module:     \v2_distribution_14
+Used module:         \v2_distribution_6
+Used module:             \v2_distribution_2
+Used module:                 \v2_distribution
+Used module:                 \v2_distribution_inverter
+Removed 0 unused modules.
+
+9. Executing PROC pass (convert processes to netlists).
+
+9.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+9.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Removed a total of 0 dead cases.
+
+9.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 0 assignments to connections.
+
+9.4. Executing PROC_INIT pass (extract init attributes).
+
+9.5. Executing PROC_ARST pass (detect async resets in processes).
+
+9.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+
+9.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+
+9.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+
+9.9. Executing PROC_DFF pass (convert process syncs to FFs).
+
+9.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+9.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+9.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module v2_cache_lookup.
+Optimizing module v2_cache_tag_match.
+Optimizing module v2_distribution_14.
+Optimizing module v2_distribution_6.
+Optimizing module v2_distribution_2.
+Optimizing module v2_distribution.
+Optimizing module v2_distribution_inverter.
+
+10. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+11. Executing FLATTEN pass (flatten design).
+Deleting now unused module v2_cache_tag_match.
+Deleting now unused module v2_distribution_14.
+Deleting now unused module v2_distribution_6.
+Deleting now unused module v2_distribution_2.
+Deleting now unused module v2_distribution.
+Deleting now unused module v2_distribution_inverter.
+<suppressed ~51 debug messages>
+
+12. Executing OPT pass (performing simple optimizations).
+
+12.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module v2_cache_lookup.
+
+12.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\v2_cache_lookup'.
+Computing hashes of 358 cells of `\v2_cache_lookup'.
+Finding duplicate cells in `\v2_cache_lookup'.
+Computing hashes of 335 cells of `\v2_cache_lookup'.
+Finding duplicate cells in `\v2_cache_lookup'.
+Computing hashes of 327 cells of `\v2_cache_lookup'.
+Finding duplicate cells in `\v2_cache_lookup'.
+Computing hashes of 324 cells of `\v2_cache_lookup'.
+Finding duplicate cells in `\v2_cache_lookup'.
+Computing hashes of 321 cells of `\v2_cache_lookup'.
+Finding duplicate cells in `\v2_cache_lookup'.
+Computing hashes of 320 cells of `\v2_cache_lookup'.
+Finding duplicate cells in `\v2_cache_lookup'.
+Computing hashes of 319 cells of `\v2_cache_lookup'.
+Finding duplicate cells in `\v2_cache_lookup'.
+<suppressed ~117 debug messages>
+Removed a total of 39 cells.
+
+12.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \v2_cache_lookup..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~2 debug messages>
+
+12.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \v2_cache_lookup.
+Performed a total of 0 changes.
+
+12.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\v2_cache_lookup'.
+Computing hashes of 319 cells of `\v2_cache_lookup'.
+Finding duplicate cells in `\v2_cache_lookup'.
+Removed a total of 0 cells.
+
+12.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+12.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \v2_cache_lookup..
+Removed 0 unused cells and 160 unused wires.
+<suppressed ~1 debug messages>
+
+12.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module v2_cache_lookup.
+
+12.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+12.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \v2_cache_lookup..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~2 debug messages>
+
+12.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \v2_cache_lookup.
+Performed a total of 0 changes.
+
+12.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\v2_cache_lookup'.
+Computing hashes of 319 cells of `\v2_cache_lookup'.
+Finding duplicate cells in `\v2_cache_lookup'.
+Removed a total of 0 cells.
+
+12.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+12.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \v2_cache_lookup..
+
+12.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module v2_cache_lookup.
+
+12.16. Finished fast OPT passes. (There is nothing left to do.)
+Renaming module v2_cache_lookup to gate.
+
+13. Executing MITER pass (creating miter circuit).
+Creating miter cell "miter" with gold cell "gold" and gate cell "gate".
+
+13.1. Executing FLATTEN pass (flatten design).
+<suppressed ~2 debug messages>
+
+13.2. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+14. Executing HIERARCHY pass (managing design hierarchy).
+
+14.1. Analyzing design hierarchy..
+Top module:  \miter
+
+14.2. Analyzing design hierarchy..
+Top module:  \miter
+Removing unused module `\gold'.
+Removing unused module `\gate'.
+Removed 2 unused modules.
+Module miter directly or indirectly contains formal properties -> setting "keep" attribute.
+
+15. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+
+16. Executing SAT pass (solving SAT problems in the circuit).
+Using SAT solver `minisat`.
+
+Setting up SAT problem:
+Final constraint equation: { } = { }
+Imported 588 cells to SAT database.
+Import proof for assert: $auto$miter.cc:268:create_miter_equiv$30011 when 1'1.
+Import show expression: \in_address
+Import show expression: \in_tags
+Import show expression: \in_valid
+Import show expression: \in_word_valid
+Import show expression: \trigger
+
+Solving problem with 23121 variables and 63677 clauses..
+SAT proof finished - no model found: SUCCESS!
+
+                  /$$$$$$      /$$$$$$$$     /$$$$$$$    
+                 /$$__  $$    | $$_____/    | $$__  $$   
+                | $$  \ $$    | $$          | $$  \ $$   
+                | $$  | $$    | $$$$$       | $$  | $$   
+                | $$  | $$    | $$__/       | $$  | $$   
+                | $$/$$ $$    | $$          | $$  | $$   
+                |  $$$$$$/ /$$| $$$$$$$$ /$$| $$$$$$$//$$
+                 \____ $$$|__/|________/|__/|_______/|__/
+                       \__/                              
+

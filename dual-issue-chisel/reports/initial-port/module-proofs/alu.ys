@@ -1,0 +1,22 @@
+read_verilog -sv "/home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v"
+hierarchy -top alu
+proc
+memory_map
+setattr -mod -unset keep_hierarchy
+flatten
+opt
+rename alu gold
+design -stash gold
+read_verilog -sv "/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/alu/alu.sv"
+hierarchy -auto-top
+proc
+memory_map
+setattr -mod -unset keep_hierarchy
+flatten
+opt
+rename -top gate
+design -copy-from gold -as gold gold
+miter -equiv -make_assert -flatten gold gate miter
+hierarchy -top miter
+opt_clean
+sat -verify -prove-asserts  -show-inputs -show-outputs

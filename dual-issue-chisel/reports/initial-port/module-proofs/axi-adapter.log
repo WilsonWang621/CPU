@@ -1,0 +1,626 @@
+
+-- Executing script file `/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/module-proofs/axi-adapter.ys' --
+
+1. Executing Verilog-2005 frontend: /home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_axi_adapter.sv
+Parsing SystemVerilog input from `/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_axi_adapter.sv' to AST representation.
+Generating RTLIL representation for module `\pararisc_axi_adapter'.
+Successfully finished Verilog frontend.
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+
+2.1. Analyzing design hierarchy..
+Top module:  \pararisc_axi_adapter
+
+2.2. Analyzing design hierarchy..
+Top module:  \pararisc_axi_adapter
+Removed 0 unused modules.
+
+3. Executing PROC pass (convert processes to netlists).
+
+3.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 2 switch rules as full_case in process $proc$/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_axi_adapter.sv:55$51 in module pararisc_axi_adapter.
+Removed a total of 0 dead cases.
+
+3.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 3 assignments to connections.
+
+3.4. Executing PROC_INIT pass (extract init attributes).
+
+3.5. Executing PROC_ARST pass (detect async resets in processes).
+
+3.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~8 debug messages>
+
+3.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_axi_adapter.sv:55$51'.
+     1/14: $2$lookahead\directions$50[15:0]$62
+     2/14: $2$bitselwrite$pos$/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_axi_adapter.sv:73$1[3:0]$61
+     3/14: $1$lookahead\directions$50[15:0]$55
+     4/14: $1$bitselwrite$pos$/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_axi_adapter.sv:73$1[3:0]$54
+     5/14: $0\count[4:0]
+     6/14: $0\tail[3:0]
+     7/14: $0\head[3:0]
+     8/14: $0\mask[3:0]
+     9/14: $0\data[31:0]
+    10/14: $0\address[31:0]
+    11/14: $0\w_sent[0:0]
+    12/14: $0\aw_sent[0:0]
+    13/14: $0\writing[0:0]
+    14/14: $0\pending[0:0]
+
+3.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+
+3.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\pararisc_axi_adapter.\pending' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_axi_adapter.sv:55$51'.
+  created $dff cell `$procdff$164' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\writing' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_axi_adapter.sv:55$51'.
+  created $dff cell `$procdff$165' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\aw_sent' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_axi_adapter.sv:55$51'.
+  created $dff cell `$procdff$166' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\w_sent' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_axi_adapter.sv:55$51'.
+  created $dff cell `$procdff$167' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\address' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_axi_adapter.sv:55$51'.
+  created $dff cell `$procdff$168' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\data' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_axi_adapter.sv:55$51'.
+  created $dff cell `$procdff$169' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\mask' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_axi_adapter.sv:55$51'.
+  created $dff cell `$procdff$170' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\directions' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_axi_adapter.sv:55$51'.
+  created $dff cell `$procdff$171' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\head' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_axi_adapter.sv:55$51'.
+  created $dff cell `$procdff$172' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\tail' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_axi_adapter.sv:55$51'.
+  created $dff cell `$procdff$173' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\count' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_axi_adapter.sv:55$51'.
+  created $dff cell `$procdff$174' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.$bitselwrite$pos$/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_axi_adapter.sv:73$1' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_axi_adapter.sv:55$51'.
+  created $dff cell `$procdff$175' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.$lookahead\directions$50' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_axi_adapter.sv:55$51'.
+  created $dff cell `$procdff$176' with positive edge clock.
+
+3.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+3.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 8 empty switches in `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_axi_adapter.sv:55$51'.
+Removing empty process `pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_axi_adapter.sv:55$51'.
+Cleaned up 8 empty switches.
+
+3.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pararisc_axi_adapter.
+<suppressed ~3 debug messages>
+
+4. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+5. Executing FLATTEN pass (flatten design).
+
+6. Executing OPT pass (performing simple optimizations).
+
+6.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pararisc_axi_adapter.
+
+6.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pararisc_axi_adapter'.
+Computing hashes of 110 cells of `\pararisc_axi_adapter'.
+Finding duplicate cells in `\pararisc_axi_adapter'.
+Computing hashes of 100 cells of `\pararisc_axi_adapter'.
+Finding duplicate cells in `\pararisc_axi_adapter'.
+Computing hashes of 98 cells of `\pararisc_axi_adapter'.
+Finding duplicate cells in `\pararisc_axi_adapter'.
+<suppressed ~36 debug messages>
+Removed a total of 12 cells.
+
+6.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pararisc_axi_adapter..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+      Replacing known input bits on port A of cell $procmux$156: \pending -> 1'0
+      Replacing known input bits on port A of cell $procmux$154: \pending -> 1'1
+  Analyzing evaluation results.
+    dead port 1/2 on $mux $procmux$87.
+    dead port 2/2 on $mux $procmux$87.
+    dead port 1/2 on $mux $procmux$81.
+    dead port 2/2 on $mux $procmux$81.
+    dead port 1/2 on $mux $procmux$78.
+    dead port 2/2 on $mux $procmux$78.
+    dead port 1/2 on $mux $procmux$75.
+Removed 7 multiplexer ports.
+<suppressed ~50 debug messages>
+
+6.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pararisc_axi_adapter.
+Performed a total of 0 changes.
+
+6.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pararisc_axi_adapter'.
+Computing hashes of 94 cells of `\pararisc_axi_adapter'.
+Finding duplicate cells in `\pararisc_axi_adapter'.
+Removed a total of 0 cells.
+
+6.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding SRST signal on $procdff$167 ($dff) from module pararisc_axi_adapter (D = $procmux$128_Y, Q = \w_sent, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$177 ($sdff) from module pararisc_axi_adapter (D = $procmux$126_Y, Q = \w_sent).
+Adding SRST signal on $procdff$168 ($dff) from module pararisc_axi_adapter (D = $procmux$119_Y, Q = \address, rval = 0).
+Adding EN signal on $auto$ff.cc:337:slice$185 ($sdff) from module pararisc_axi_adapter (D = { \req_addr [31:2] 2'00 }, Q = \address).
+Adding SRST signal on $procdff$169 ($dff) from module pararisc_axi_adapter (D = $procmux$113_Y, Q = \data, rval = 0).
+Adding EN signal on $auto$ff.cc:337:slice$187 ($sdff) from module pararisc_axi_adapter (D = \req_data, Q = \data).
+Adding SRST signal on $procdff$170 ($dff) from module pararisc_axi_adapter (D = $procmux$107_Y, Q = \mask, rval = 4'0000).
+Adding EN signal on $auto$ff.cc:337:slice$189 ($sdff) from module pararisc_axi_adapter (D = \req_mask, Q = \mask).
+Adding SRST signal on $procdff$171 ($dff) from module pararisc_axi_adapter (D = $2$lookahead\directions$50[15:0]$62, Q = \directions, rval = 16'0000000000000000).
+Adding SRST signal on $procdff$172 ($dff) from module pararisc_axi_adapter (D = $procmux$101_Y, Q = \head, rval = 4'0000).
+Adding EN signal on $auto$ff.cc:337:slice$192 ($sdff) from module pararisc_axi_adapter (D = $add$/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_axi_adapter.sv:66$58_Y, Q = \head).
+Adding SRST signal on $procdff$173 ($dff) from module pararisc_axi_adapter (D = $procmux$96_Y, Q = \tail, rval = 4'0000).
+Adding EN signal on $auto$ff.cc:337:slice$194 ($sdff) from module pararisc_axi_adapter (D = $add$/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_axi_adapter.sv:73$70_Y, Q = \tail).
+Adding SRST signal on $procdff$165 ($dff) from module pararisc_axi_adapter (D = $procmux$149_Y, Q = \writing, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$196 ($sdff) from module pararisc_axi_adapter (D = \req_write, Q = \writing).
+Adding SRST signal on $procdff$174 ($dff) from module pararisc_axi_adapter (D = $procmux$89_Y, Q = \count, rval = 5'00000).
+Adding EN signal on $auto$ff.cc:337:slice$198 ($sdff) from module pararisc_axi_adapter (D = $procmux$89_Y, Q = \count).
+Adding SRST signal on $procdff$166 ($dff) from module pararisc_axi_adapter (D = $procmux$140_Y, Q = \aw_sent, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$202 ($sdff) from module pararisc_axi_adapter (D = $procmux$138_Y, Q = \aw_sent).
+Adding SRST signal on $procdff$164 ($dff) from module pararisc_axi_adapter (D = $procmux$159_Y, Q = \pending, rval = 1'0).
+Setting constant 1-bit at position 0 on $procdff$176 ($dff) from module pararisc_axi_adapter.
+Setting constant 1-bit at position 1 on $procdff$176 ($dff) from module pararisc_axi_adapter.
+Setting constant 1-bit at position 2 on $procdff$176 ($dff) from module pararisc_axi_adapter.
+Setting constant 1-bit at position 3 on $procdff$176 ($dff) from module pararisc_axi_adapter.
+Setting constant 1-bit at position 4 on $procdff$176 ($dff) from module pararisc_axi_adapter.
+Setting constant 1-bit at position 5 on $procdff$176 ($dff) from module pararisc_axi_adapter.
+Setting constant 1-bit at position 6 on $procdff$176 ($dff) from module pararisc_axi_adapter.
+Setting constant 1-bit at position 7 on $procdff$176 ($dff) from module pararisc_axi_adapter.
+Setting constant 1-bit at position 8 on $procdff$176 ($dff) from module pararisc_axi_adapter.
+Setting constant 1-bit at position 9 on $procdff$176 ($dff) from module pararisc_axi_adapter.
+Setting constant 1-bit at position 10 on $procdff$176 ($dff) from module pararisc_axi_adapter.
+Setting constant 1-bit at position 11 on $procdff$176 ($dff) from module pararisc_axi_adapter.
+Setting constant 1-bit at position 12 on $procdff$176 ($dff) from module pararisc_axi_adapter.
+Setting constant 1-bit at position 13 on $procdff$176 ($dff) from module pararisc_axi_adapter.
+Setting constant 1-bit at position 14 on $procdff$176 ($dff) from module pararisc_axi_adapter.
+Setting constant 1-bit at position 15 on $procdff$176 ($dff) from module pararisc_axi_adapter.
+Setting constant 1-bit at position 0 on $procdff$175 ($dff) from module pararisc_axi_adapter.
+Setting constant 1-bit at position 1 on $procdff$175 ($dff) from module pararisc_axi_adapter.
+Setting constant 1-bit at position 2 on $procdff$175 ($dff) from module pararisc_axi_adapter.
+Setting constant 1-bit at position 3 on $procdff$175 ($dff) from module pararisc_axi_adapter.
+Setting constant 0-bit at position 0 on $auto$ff.cc:337:slice$186 ($sdffe) from module pararisc_axi_adapter.
+Setting constant 0-bit at position 1 on $auto$ff.cc:337:slice$186 ($sdffe) from module pararisc_axi_adapter.
+
+6.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pararisc_axi_adapter..
+Removed 21 unused cells and 102 unused wires.
+<suppressed ~22 debug messages>
+
+6.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pararisc_axi_adapter.
+<suppressed ~3 debug messages>
+
+6.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+6.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pararisc_axi_adapter..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~22 debug messages>
+
+6.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pararisc_axi_adapter.
+Performed a total of 0 changes.
+
+6.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pararisc_axi_adapter'.
+Computing hashes of 78 cells of `\pararisc_axi_adapter'.
+Finding duplicate cells in `\pararisc_axi_adapter'.
+Computing hashes of 77 cells of `\pararisc_axi_adapter'.
+Finding duplicate cells in `\pararisc_axi_adapter'.
+<suppressed ~3 debug messages>
+Removed a total of 1 cells.
+
+6.13. Executing OPT_DFF pass (perform DFF optimizations).
+Adding EN signal on $auto$ff.cc:337:slice$191 ($sdff) from module pararisc_axi_adapter (D = $or$/home/wangwenxuan/ACM/ParaRisc/verilog/pararisc_axi_adapter.sv:73$69_Y, Q = \directions).
+
+6.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pararisc_axi_adapter..
+Removed 1 unused cells and 2 unused wires.
+<suppressed ~2 debug messages>
+
+6.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pararisc_axi_adapter.
+
+6.16. Rerunning OPT passes. (Maybe there is more to do..)
+
+6.17. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pararisc_axi_adapter..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~20 debug messages>
+
+6.18. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pararisc_axi_adapter.
+Performed a total of 0 changes.
+
+6.19. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pararisc_axi_adapter'.
+Computing hashes of 76 cells of `\pararisc_axi_adapter'.
+Finding duplicate cells in `\pararisc_axi_adapter'.
+Removed a total of 0 cells.
+
+6.20. Executing OPT_DFF pass (perform DFF optimizations).
+
+6.21. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pararisc_axi_adapter..
+
+6.22. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pararisc_axi_adapter.
+
+6.23. Finished fast OPT passes. (There is nothing left to do.)
+Renaming module \pararisc_axi_adapter to \gold.
+
+7. Executing Verilog-2005 frontend: /home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv
+Parsing SystemVerilog input from `/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv' to AST representation.
+Generating RTLIL representation for module `\pararisc_axi_adapter'.
+Successfully finished Verilog frontend.
+
+8. Executing HIERARCHY pass (managing design hierarchy).
+
+8.1. Finding top of design hierarchy..
+root of   0 design levels: pararisc_axi_adapter
+Automatically selected pararisc_axi_adapter as design top module.
+
+8.2. Analyzing design hierarchy..
+Top module:  \pararisc_axi_adapter
+
+8.3. Analyzing design hierarchy..
+Top module:  \pararisc_axi_adapter
+Removed 0 unused modules.
+
+9. Executing PROC pass (convert processes to netlists).
+
+9.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+9.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 2 switch rules as full_case in process $proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242 in module pararisc_axi_adapter.
+Marked 1 switch rules as full_case in process $proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:67$233 in module pararisc_axi_adapter.
+Removed a total of 0 dead cases.
+
+9.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 1 redundant assignment.
+Promoted 3 assignments to connections.
+
+9.4. Executing PROC_INIT pass (extract init attributes).
+
+9.5. Executing PROC_ARST pass (detect async resets in processes).
+
+9.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~22 debug messages>
+
+9.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242'.
+     1/24: $0\pending[0:0]
+     2/24: $0\directions_0[0:0]
+     3/24: $0\directions_1[0:0]
+     4/24: $0\directions_2[0:0]
+     5/24: $0\directions_3[0:0]
+     6/24: $0\directions_4[0:0]
+     7/24: $0\directions_5[0:0]
+     8/24: $0\directions_6[0:0]
+     9/24: $0\directions_7[0:0]
+    10/24: $0\directions_8[0:0]
+    11/24: $0\directions_9[0:0]
+    12/24: $0\directions_10[0:0]
+    13/24: $0\directions_11[0:0]
+    14/24: $0\directions_12[0:0]
+    15/24: $0\directions_13[0:0]
+    16/24: $0\directions_14[0:0]
+    17/24: $0\directions_15[0:0]
+    18/24: $0\count[4:0]
+    19/24: $0\tail[3:0]
+    20/24: $0\head[3:0]
+    21/24: $0\mask[3:0]
+    22/24: $0\data[31:0]
+    23/24: $0\address[31:0]
+    24/24: $0\writing[0:0]
+Creating decoders for process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:67$233'.
+     1/1: $1\casez_tmp[0:0]
+
+9.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\pararisc_axi_adapter.\casez_tmp' from process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:67$233'.
+
+9.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\pararisc_axi_adapter.\pending' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242'.
+  created $dff cell `$procdff$456' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\writing' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242'.
+  created $dff cell `$procdff$457' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\aw_sent' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242'.
+  created $dff cell `$procdff$458' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\w_sent' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242'.
+  created $dff cell `$procdff$459' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\address' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242'.
+  created $dff cell `$procdff$460' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\data' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242'.
+  created $dff cell `$procdff$461' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\mask' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242'.
+  created $dff cell `$procdff$462' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\head' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242'.
+  created $dff cell `$procdff$463' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\tail' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242'.
+  created $dff cell `$procdff$464' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\count' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242'.
+  created $dff cell `$procdff$465' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\directions_15' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242'.
+  created $dff cell `$procdff$466' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\directions_14' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242'.
+  created $dff cell `$procdff$467' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\directions_13' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242'.
+  created $dff cell `$procdff$468' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\directions_12' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242'.
+  created $dff cell `$procdff$469' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\directions_11' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242'.
+  created $dff cell `$procdff$470' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\directions_10' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242'.
+  created $dff cell `$procdff$471' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\directions_9' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242'.
+  created $dff cell `$procdff$472' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\directions_8' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242'.
+  created $dff cell `$procdff$473' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\directions_7' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242'.
+  created $dff cell `$procdff$474' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\directions_6' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242'.
+  created $dff cell `$procdff$475' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\directions_5' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242'.
+  created $dff cell `$procdff$476' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\directions_4' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242'.
+  created $dff cell `$procdff$477' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\directions_3' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242'.
+  created $dff cell `$procdff$478' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\directions_2' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242'.
+  created $dff cell `$procdff$479' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\directions_1' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242'.
+  created $dff cell `$procdff$480' with positive edge clock.
+Creating register for signal `\pararisc_axi_adapter.\directions_0' using process `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242'.
+  created $dff cell `$procdff$481' with positive edge clock.
+
+9.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+9.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 21 empty switches in `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242'.
+Removing empty process `pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:107$242'.
+Found and cleaned up 1 empty switch in `\pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:67$233'.
+Removing empty process `pararisc_axi_adapter.$proc$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:67$233'.
+Cleaned up 22 empty switches.
+
+9.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pararisc_axi_adapter.
+<suppressed ~3 debug messages>
+
+10. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+11. Executing FLATTEN pass (flatten design).
+
+12. Executing OPT pass (performing simple optimizations).
+
+12.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pararisc_axi_adapter.
+
+12.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pararisc_axi_adapter'.
+Computing hashes of 193 cells of `\pararisc_axi_adapter'.
+Finding duplicate cells in `\pararisc_axi_adapter'.
+Computing hashes of 183 cells of `\pararisc_axi_adapter'.
+Finding duplicate cells in `\pararisc_axi_adapter'.
+Computing hashes of 181 cells of `\pararisc_axi_adapter'.
+Finding duplicate cells in `\pararisc_axi_adapter'.
+<suppressed ~36 debug messages>
+Removed a total of 12 cells.
+
+12.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pararisc_axi_adapter..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~86 debug messages>
+
+12.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pararisc_axi_adapter.
+Performed a total of 0 changes.
+
+12.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pararisc_axi_adapter'.
+Computing hashes of 181 cells of `\pararisc_axi_adapter'.
+Finding duplicate cells in `\pararisc_axi_adapter'.
+Removed a total of 0 cells.
+
+12.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding SRST signal on $procdff$472 ($dff) from module pararisc_axi_adapter (D = $procmux$366_Y, Q = \directions_9, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$482 ($sdff) from module pararisc_axi_adapter (D = \req_write, Q = \directions_9).
+Adding SRST signal on $procdff$473 ($dff) from module pararisc_axi_adapter (D = $procmux$361_Y, Q = \directions_8, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$484 ($sdff) from module pararisc_axi_adapter (D = \req_write, Q = \directions_8).
+Adding SRST signal on $procdff$474 ($dff) from module pararisc_axi_adapter (D = $procmux$356_Y, Q = \directions_7, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$486 ($sdff) from module pararisc_axi_adapter (D = \req_write, Q = \directions_7).
+Adding SRST signal on $procdff$475 ($dff) from module pararisc_axi_adapter (D = $procmux$351_Y, Q = \directions_6, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$488 ($sdff) from module pararisc_axi_adapter (D = \req_write, Q = \directions_6).
+Adding SRST signal on $procdff$476 ($dff) from module pararisc_axi_adapter (D = $procmux$346_Y, Q = \directions_5, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$490 ($sdff) from module pararisc_axi_adapter (D = \req_write, Q = \directions_5).
+Adding SRST signal on $procdff$470 ($dff) from module pararisc_axi_adapter (D = $procmux$376_Y, Q = \directions_11, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$492 ($sdff) from module pararisc_axi_adapter (D = \req_write, Q = \directions_11).
+Adding SRST signal on $procdff$477 ($dff) from module pararisc_axi_adapter (D = $procmux$341_Y, Q = \directions_4, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$494 ($sdff) from module pararisc_axi_adapter (D = \req_write, Q = \directions_4).
+Adding SRST signal on $procdff$478 ($dff) from module pararisc_axi_adapter (D = $procmux$336_Y, Q = \directions_3, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$496 ($sdff) from module pararisc_axi_adapter (D = \req_write, Q = \directions_3).
+Adding SRST signal on $procdff$479 ($dff) from module pararisc_axi_adapter (D = $procmux$331_Y, Q = \directions_2, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$498 ($sdff) from module pararisc_axi_adapter (D = \req_write, Q = \directions_2).
+Adding SRST signal on $procdff$480 ($dff) from module pararisc_axi_adapter (D = $procmux$326_Y, Q = \directions_1, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$500 ($sdff) from module pararisc_axi_adapter (D = \req_write, Q = \directions_1).
+Adding SRST signal on $procdff$481 ($dff) from module pararisc_axi_adapter (D = $procmux$321_Y, Q = \directions_0, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$502 ($sdff) from module pararisc_axi_adapter (D = \req_write, Q = \directions_0).
+Adding SRST signal on $procdff$471 ($dff) from module pararisc_axi_adapter (D = $procmux$371_Y, Q = \directions_10, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$504 ($sdff) from module pararisc_axi_adapter (D = \req_write, Q = \directions_10).
+Adding SRST signal on $procdff$456 ($dff) from module pararisc_axi_adapter (D = $or$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:135$246_Y, Q = \pending, rval = 1'0).
+Adding SRST signal on $procdff$457 ($dff) from module pararisc_axi_adapter (D = $procmux$434_Y, Q = \writing, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$507 ($sdff) from module pararisc_axi_adapter (D = \req_write, Q = \writing).
+Adding SRST signal on $procdff$460 ($dff) from module pararisc_axi_adapter (D = $procmux$429_Y, Q = \address, rval = 0).
+Adding EN signal on $auto$ff.cc:337:slice$509 ($sdff) from module pararisc_axi_adapter (D = { \req_addr [31:2] 2'00 }, Q = \address).
+Adding SRST signal on $procdff$461 ($dff) from module pararisc_axi_adapter (D = $procmux$424_Y, Q = \data, rval = 0).
+Adding EN signal on $auto$ff.cc:337:slice$511 ($sdff) from module pararisc_axi_adapter (D = \req_data, Q = \data).
+Adding SRST signal on $procdff$462 ($dff) from module pararisc_axi_adapter (D = $procmux$419_Y, Q = \mask, rval = 4'0000).
+Adding EN signal on $auto$ff.cc:337:slice$513 ($sdff) from module pararisc_axi_adapter (D = \req_mask, Q = \mask).
+Adding SRST signal on $procdff$463 ($dff) from module pararisc_axi_adapter (D = $procmux$414_Y, Q = \head, rval = 4'0000).
+Adding EN signal on $auto$ff.cc:337:slice$515 ($sdff) from module pararisc_axi_adapter (D = $add$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:176$280_Y, Q = \head).
+Adding SRST signal on $procdff$464 ($dff) from module pararisc_axi_adapter (D = $procmux$409_Y, Q = \tail, rval = 4'0000).
+Adding EN signal on $auto$ff.cc:337:slice$517 ($sdff) from module pararisc_axi_adapter (D = $add$/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/axi-adapter/pararisc_axi_adapter.sv:141$247_Y, Q = \tail).
+Adding SRST signal on $procdff$465 ($dff) from module pararisc_axi_adapter (D = $procmux$404_Y, Q = \count, rval = 5'00000).
+Adding EN signal on $auto$ff.cc:337:slice$519 ($sdff) from module pararisc_axi_adapter (D = $procmux$402_Y, Q = \count).
+Adding SRST signal on $procdff$466 ($dff) from module pararisc_axi_adapter (D = $procmux$396_Y, Q = \directions_15, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$521 ($sdff) from module pararisc_axi_adapter (D = \req_write, Q = \directions_15).
+Adding SRST signal on $procdff$467 ($dff) from module pararisc_axi_adapter (D = $procmux$391_Y, Q = \directions_14, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$523 ($sdff) from module pararisc_axi_adapter (D = \req_write, Q = \directions_14).
+Adding SRST signal on $procdff$468 ($dff) from module pararisc_axi_adapter (D = $procmux$386_Y, Q = \directions_13, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$525 ($sdff) from module pararisc_axi_adapter (D = \req_write, Q = \directions_13).
+Adding SRST signal on $procdff$469 ($dff) from module pararisc_axi_adapter (D = $procmux$381_Y, Q = \directions_12, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$527 ($sdff) from module pararisc_axi_adapter (D = \req_write, Q = \directions_12).
+Setting constant 0-bit at position 0 on $auto$ff.cc:337:slice$510 ($sdffe) from module pararisc_axi_adapter.
+Setting constant 0-bit at position 1 on $auto$ff.cc:337:slice$510 ($sdffe) from module pararisc_axi_adapter.
+
+12.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pararisc_axi_adapter..
+Removed 48 unused cells and 151 unused wires.
+<suppressed ~49 debug messages>
+
+12.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pararisc_axi_adapter.
+
+12.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+12.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pararisc_axi_adapter..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~16 debug messages>
+
+12.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pararisc_axi_adapter.
+Performed a total of 0 changes.
+
+12.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pararisc_axi_adapter'.
+Computing hashes of 133 cells of `\pararisc_axi_adapter'.
+Finding duplicate cells in `\pararisc_axi_adapter'.
+Removed a total of 0 cells.
+
+12.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+12.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pararisc_axi_adapter..
+
+12.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pararisc_axi_adapter.
+
+12.16. Finished fast OPT passes. (There is nothing left to do.)
+Renaming module pararisc_axi_adapter to gate.
+
+13. Executing MITER pass (creating miter circuit).
+Creating miter cell "miter" with gold cell "gold" and gate cell "gate".
+
+13.1. Executing FLATTEN pass (flatten design).
+<suppressed ~2 debug messages>
+
+13.2. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+14. Executing HIERARCHY pass (managing design hierarchy).
+
+14.1. Analyzing design hierarchy..
+Top module:  \miter
+
+14.2. Analyzing design hierarchy..
+Top module:  \miter
+Removing unused module `\gold'.
+Removing unused module `\gate'.
+Removed 2 unused modules.
+Module miter directly or indirectly contains formal properties -> setting "keep" attribute.
+
+15. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+
+16. Executing SAT pass (solving SAT problems in the circuit).
+Using SAT solver `minisat`.
+
+Setting up time step 1:
+Final constraint equation: { } = { }
+Imported 227 cells to SAT database.
+Final init constraint equation: { \gold.pending \gold.address [31:2] \gold.aw_sent \gold.count \gold.writing \gold.tail \gold.head \gold.directions \gold.mask \gold.data \gold.w_sent \gate.pending \gate.writing \gate.aw_sent \gate.w_sent \gate.directions_12 \gate.data \gate.mask \gate.head \gate.tail \gate.count \gate.directions_15 \gate.directions_14 \gate.directions_13 \gate.directions_10 \gate.directions_0 \gate.directions_1 \gate.directions_2 \gate.directions_3 \gate.directions_4 \gate.address [31:2] \gate.directions_11 \gate.directions_5 \gate.directions_6 \gate.directions_7 \gate.directions_8 \gate.directions_9 } = 198'000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+Import proof for assert: $auto$miter.cc:268:create_miter_equiv$557 when 1'1.
+
+Setting up time step 2:
+Final constraint equation: { } = { }
+Imported 227 cells to SAT database.
+Import proof for assert: $auto$miter.cc:268:create_miter_equiv$557 when 1'1.
+
+Setting up time step 3:
+Final constraint equation: { } = { }
+Imported 227 cells to SAT database.
+Import proof for assert: $auto$miter.cc:268:create_miter_equiv$557 when 1'1.
+
+Setting up time step 4:
+Final constraint equation: { } = { }
+Imported 227 cells to SAT database.
+Import proof for assert: $auto$miter.cc:268:create_miter_equiv$557 when 1'1.
+
+Setting up time step 5:
+Final constraint equation: { } = { }
+Imported 227 cells to SAT database.
+Import proof for assert: $auto$miter.cc:268:create_miter_equiv$557 when 1'1.
+
+Setting up time step 6:
+Final constraint equation: { } = { }
+Imported 227 cells to SAT database.
+Import proof for assert: $auto$miter.cc:268:create_miter_equiv$557 when 1'1.
+
+Setting up time step 7:
+Final constraint equation: { } = { }
+Imported 227 cells to SAT database.
+Import proof for assert: $auto$miter.cc:268:create_miter_equiv$557 when 1'1.
+
+Setting up time step 8:
+Final constraint equation: { } = { }
+Imported 227 cells to SAT database.
+Import proof for assert: $auto$miter.cc:268:create_miter_equiv$557 when 1'1.
+Import show expression: \in_clock
+Import show expression: \in_reset
+Import show expression: \in_req_valid
+Import show expression: \in_req_write
+Import show expression: \in_req_addr
+Import show expression: \in_req_data
+Import show expression: \in_req_mask
+Import show expression: \in_resp_ready
+Import show expression: \in_arready
+Import show expression: \in_rdata
+Import show expression: \in_rresp
+Import show expression: \in_rvalid
+Import show expression: \in_awready
+Import show expression: \in_wready
+Import show expression: \in_bresp
+Import show expression: \in_bvalid
+Import show expression: \trigger
+
+Solving problem with 36654 variables and 99357 clauses..
+SAT proof finished - no model found: SUCCESS!
+
+                  /$$$$$$      /$$$$$$$$     /$$$$$$$    
+                 /$$__  $$    | $$_____/    | $$__  $$   
+                | $$  \ $$    | $$          | $$  \ $$   
+                | $$  | $$    | $$$$$       | $$  | $$   
+                | $$  | $$    | $$__/       | $$  | $$   
+                | $$/$$ $$    | $$          | $$  | $$   
+                |  $$$$$$/ /$$| $$$$$$$$ /$$| $$$$$$$//$$
+                 \____ $$$|__/|________/|__/|_______/|__/
+                       \__/                              
+
