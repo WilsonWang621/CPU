@@ -1,3 +1,2 @@
-area_v2_core.v
-pararisc_axi_adapter.sv
-student_top.sv
+# Default delivery is the native Chisel CPU, emitted before course evaluation.
+../dual-issue-chisel/rtl/student_top.sv
