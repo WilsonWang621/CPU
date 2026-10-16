@@ -1,0 +1,1 @@
+read_verilog -sv dual-issue-chisel/build/final-input-proof/rename_input_proof.sv; hierarchy -top rename_input_proof; proc; setattr -mod -unset keep_hierarchy; flatten; opt; sat -verify -prove correct 1 -show-inputs -show-outputs

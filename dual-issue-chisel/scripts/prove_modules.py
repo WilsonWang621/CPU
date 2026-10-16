@@ -41,6 +41,7 @@ def main():
     p.add_argument("--modules", default=",".join(CASES))
     p.add_argument("--yosys")
     p.add_argument("--rtl-prefix", default="", help="Prefix of generated module directories, e.g. v4-")
+    p.add_argument("--native-file", type=Path, help="Extract the named module directly from this complete generated CPU")
     args = p.parse_args()
     if not args.yosys:
         enter_appimage(DEFAULT_APPIMAGE)
@@ -50,7 +51,7 @@ def main():
     results = []
     for name in args.modules.split(","):
         top, params, cycles = CASES[name]
-        sources = sorted((PROJECT / "build" / (args.rtl_prefix + name)).glob("*.sv"))
+        sources = [args.native_file.resolve()] if args.native_file else sorted((PROJECT / "build" / (args.rtl_prefix + name)).glob("*.sv"))
         if len(sources) != 1:
             raise SystemExit(f"Generate {name} first: expected one SV file, found {sources}")
         gold = ROOT / "verilog" / ("pararisc_axi_adapter.sv" if name == "axi-adapter" else "area_v2_core.v")
@@ -59,7 +60,7 @@ def main():
             commands += ["chparam " + " ".join(f"-set {k} {v}" for k, v in params.items()) + f" {top}"]
         commands += [f"hierarchy -top {top}", "proc", "memory_map", "setattr -mod -unset keep_hierarchy",
                      "flatten", "opt", f"rename {top} gold", "design -stash gold",
-                     f'read_verilog -sv "{sources[0]}"', "hierarchy -auto-top", "proc", "memory_map",
+                     f'read_verilog -sv "{sources[0]}"', f"hierarchy -top {top}" if args.native_file else "hierarchy -auto-top", "proc", "memory_map",
                      "setattr -mod -unset keep_hierarchy", "flatten", "opt", "rename -top gate",
                      "design -copy-from gold -as gold gold", "miter -equiv -make_assert -flatten gold gate miter",
                      "hierarchy -top miter", "opt_clean"]

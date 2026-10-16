@@ -1,0 +1,1 @@
+read_verilog -sv dual-issue-chisel/build/final-class-proof/decode_class_proof.sv; hierarchy -top decode_class_proof; proc; setattr -mod -unset keep_hierarchy; flatten; opt; sat -verify -prove correct 1 -show-inputs -show-outputs
