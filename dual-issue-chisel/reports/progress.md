@@ -43,4 +43,6 @@ v13 最终原生二进制已通过延迟 20 的 **19/19 完整正确性**。直�
 
 最终双 CPU 正确性逐拍对照已完成前 **14 项**，其中最长的 π 用例通过 **6,548,409 周期**，与参考完全一致；截至该项的原始日志见 [部分对照结果](final/differential/correctness-through-pi.log)。其余五项仍在运行，该部分记录不作为完整 19 项验收。
 
+随后 qsort（799,114 周期）、queens（216,848 周期）和 statement（887 周期）也完成逐拍对照，累计 **17/19**。截至 statement 的结果见 [17 项部分对照](final/differential/correctness-through-statement.log)；superloop 和 tak 尚在运行。
+
 当前尚未完成目标；最终必须由同一冻结版本同时证明正确性、参考设计周期一致性、IPC、面积及 ≥500MHz。已完成检查的原始记录见 [初始验证归档](initial-port/sha256.json)，时序失败候选也明确保留。
