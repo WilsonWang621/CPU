@@ -1,0 +1,72 @@
+[
+  {
+    "module": "prefix-adder",
+    "status": "combinational-equivalent",
+    "cycles": 0,
+    "assumptions": [],
+    "original_parameters": {},
+    "original_sha256": "94b3f7083e789a30c5282fb88fcd9ee1c5c8f2d05e3e73db7498a87c028712af",
+    "chisel_rtl_sha256": "9ea7ed6c12f131da8d045ecae9484aea52fe75d4bf8e96e53a52e0feaf05e977",
+    "recipe_sha256": "f897ac11e0968a3aacb85b95fdfbb319562abbcbd1ccd9aceae38657a615de6e",
+    "log_sha256": "55ebd8fea5647933ce656c2b04d0c3a135ca4d8021935d60599a9437a0872d84"
+  },
+  {
+    "module": "alu",
+    "status": "combinational-equivalent",
+    "cycles": 0,
+    "assumptions": [],
+    "original_parameters": {},
+    "original_sha256": "94b3f7083e789a30c5282fb88fcd9ee1c5c8f2d05e3e73db7498a87c028712af",
+    "chisel_rtl_sha256": "9ea7ed6c12f131da8d045ecae9484aea52fe75d4bf8e96e53a52e0feaf05e977",
+    "recipe_sha256": "dac0679913441ed5cdb18797ae7906492510f367e96ecda26973b55c33cd7a63",
+    "log_sha256": "4aaf833f845b75e771e500be954c109a937f67813da6887d2d75ae6df94acec9"
+  },
+  {
+    "module": "branch-unit",
+    "status": "combinational-equivalent",
+    "cycles": 0,
+    "assumptions": [],
+    "original_parameters": {},
+    "original_sha256": "94b3f7083e789a30c5282fb88fcd9ee1c5c8f2d05e3e73db7498a87c028712af",
+    "chisel_rtl_sha256": "9ea7ed6c12f131da8d045ecae9484aea52fe75d4bf8e96e53a52e0feaf05e977",
+    "recipe_sha256": "3e1b821b921bba8c5f1fa59d71077b4d2e47b88dbfc5a9aadde8a1ea7c52c59d",
+    "log_sha256": "1e50c9ba7eb3b8d7ab884f483d08c8974c2bc5cfe4815543f7b013a3fe2281e9"
+  },
+  {
+    "module": "operand",
+    "status": "combinational-equivalent",
+    "cycles": 0,
+    "assumptions": [],
+    "original_parameters": {},
+    "original_sha256": "94b3f7083e789a30c5282fb88fcd9ee1c5c8f2d05e3e73db7498a87c028712af",
+    "chisel_rtl_sha256": "9ea7ed6c12f131da8d045ecae9484aea52fe75d4bf8e96e53a52e0feaf05e977",
+    "recipe_sha256": "7e124f39701b78274efcd61d8d2b20e0076fc4b865f85e3c83f45f7c8fb791a3",
+    "log_sha256": "58cf078464435acb0fc39f6094a23f1e3e1f706a083137241ec306c6738d9856"
+  },
+  {
+    "module": "axi-adapter",
+    "status": "bounded-equivalent",
+    "cycles": 8,
+    "assumptions": [],
+    "original_parameters": {},
+    "original_sha256": "d61a1c6b5bc43284fbc7aeeedaa4107be9fe4351c8cfb2608151b3bf20a35350",
+    "chisel_rtl_sha256": "9ea7ed6c12f131da8d045ecae9484aea52fe75d4bf8e96e53a52e0feaf05e977",
+    "recipe_sha256": "4ae80eff1520ea58060c59d076903466bcaa38bf6a0dde18b4a9fda58caad64c",
+    "log_sha256": "7b42499055856f4284de015eb6a8e2f440861620e326c5540ba3d2138ee7635b"
+  },
+  {
+    "module": "memory-controller",
+    "status": "bounded-equivalent",
+    "cycles": 8,
+    "assumptions": [
+      "s_rsp_ready == 2'b11 (both cache consumers always ready)"
+    ],
+    "original_parameters": {
+      "MAX_MEM_OUTSTANDING": 16
+    },
+    "original_sha256": "94b3f7083e789a30c5282fb88fcd9ee1c5c8f2d05e3e73db7498a87c028712af",
+    "chisel_rtl_sha256": "9ea7ed6c12f131da8d045ecae9484aea52fe75d4bf8e96e53a52e0feaf05e977",
+    "recipe_sha256": "6fdc0dc121db235f10f7b360db058c54480aaf9cbd95ebe044d3c03745719b52",
+    "log_sha256": "6f042e8eec8d152e2b83f0773f0ffa0dc245fb9bdcc812941621b428f1f269d0"
+  }
+]

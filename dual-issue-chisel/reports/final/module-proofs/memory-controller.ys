@@ -1,0 +1,26 @@
+read_verilog -sv "/home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v"
+chparam -set MAX_MEM_OUTSTANDING 16 memory_controller
+hierarchy -top memory_controller
+proc
+memory_map
+setattr -mod -unset keep_hierarchy
+flatten
+opt
+connect -set s_rsp_ready 2'b11
+delete -port w:s_rsp_ready
+opt
+rename memory_controller gold
+design -stash gold
+read_verilog -sv "/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/rtl/student_top.sv"
+hierarchy -top memory_controller
+proc
+memory_map
+setattr -mod -unset keep_hierarchy
+flatten
+opt
+rename -top gate
+design -copy-from gold -as gold gold
+miter -equiv -make_assert -flatten gold gate miter
+hierarchy -top miter
+opt_clean
+sat -verify -prove-asserts -set-assumes -seq 8 -set-init-zero -show-inputs -show-outputs

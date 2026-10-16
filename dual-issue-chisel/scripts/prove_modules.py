@@ -59,14 +59,21 @@ def main():
         if params:
             commands += ["chparam " + " ".join(f"-set {k} {v}" for k, v in params.items()) + f" {top}"]
         commands += [f"hierarchy -top {top}", "proc", "memory_map", "setattr -mod -unset keep_hierarchy",
-                     "flatten", "opt", f"rename {top} gold", "design -stash gold",
+                     "flatten", "opt"]
+        assumptions = []
+        if args.native_file and name == "memory-controller":
+            # Both cache consumers permanently accept responses. Whole-design
+            # firtool propagation removes this input from the delivered module.
+            # Specialize the reference to the identical integration constant.
+            commands += ["connect -set s_rsp_ready 2'b11", "delete -port w:s_rsp_ready", "opt"]
+            assumptions = ["s_rsp_ready == 2'b11 (both cache consumers always ready)"]
+        commands += [f"rename {top} gold", "design -stash gold",
                      f'read_verilog -sv "{sources[0]}"', f"hierarchy -top {top}" if args.native_file else "hierarchy -auto-top", "proc", "memory_map",
                      "setattr -mod -unset keep_hierarchy", "flatten", "opt", "rename -top gate",
                      "design -copy-from gold -as gold gold", "miter -equiv -make_assert -flatten gold gate miter",
                      "hierarchy -top miter", "opt_clean"]
         recipe = out / f"{name}.ys"
         log = out / f"{name}.log"
-        assumptions = []
         if name == "rename":
             # CHECKPOINTS=3 uses a two-bit address with one illegal encoding.
             # The CPU allocator only supplies 0..2. Avoid comparing undefined
