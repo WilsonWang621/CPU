@@ -53033,30 +53033,29 @@ module memory_controller(	// src/main/scala/tier3/Bus.scala:7:7
   assign idle = count == 5'h0 & ~request_valid & s_req_valid == 2'h0;	// src/main/scala/tier3/Bus.scala:7:7, :33:24, :36:{17,43,59}, :38:37, src/main/scala/tier3/Common.scala:49:57, :50:52
 endmodule
 
-(* keep_hierarchy = 1 *)
 module decoder(	// src/main/scala/tier3/Decode.scala:35:7
   input  [31:0] inst,	// src/main/scala/tier3/Common.scala:32:38
   output [60:0] dec	// src/main/scala/tier3/Common.scala:33:39
 );
 
-  wire lui = inst[6:0] == 7'h37;	// src/main/scala/tier3/Decode.scala:39:20, :40:20
-  wire auipc = inst[6:0] == 7'h17;	// src/main/scala/tier3/Decode.scala:39:20, :40:52
-  wire jal = inst[6:0] == 7'h6F;	// src/main/scala/tier3/Decode.scala:39:20, :41:20
-  wire jalr = inst[6:0] == 7'h67;	// src/main/scala/tier3/Decode.scala:39:20, :41:51
-  wire branch = inst[6:0] == 7'h63;	// src/main/scala/tier3/Decode.scala:39:20, :42:23
-  wire load = inst[6:0] == 7'h3;	// src/main/scala/tier3/Decode.scala:39:20, :42:54
-  wire store = inst[6:0] == 7'h23;	// src/main/scala/tier3/Decode.scala:39:20, :43:22
-  wire immediate = inst[6:0] == 7'h13;	// src/main/scala/tier3/Decode.scala:39:20, :43:58
-  wire register = inst[6:0] == 7'h33;	// src/main/scala/tier3/Decode.scala:39:20, :44:25
-  wire _d_imm_T = lui | auipc;	// src/main/scala/tier3/Decode.scala:40:{20,52}, :45:19
-  wire _illegal_T_10 = inst[14:12] == 3'h1;	// src/main/scala/tier3/Decode.scala:39:41, :46:18
-  wire _illegal_T_16 = inst[14:12] == 3'h5;	// src/main/scala/tier3/Decode.scala:39:41, :46:32
-  wire shift = _illegal_T_10 | _illegal_T_16;	// src/main/scala/tier3/Decode.scala:46:{18,26,32}
-  wire _illegal_T_9 = inst[14:12] == 3'h0;	// src/main/scala/tier3/Decode.scala:12:55, :39:41
-  wire _illegal_T_12 = inst[14:12] == 3'h2;	// src/main/scala/tier3/Decode.scala:12:55, :39:41
-  wire _illegal_T_5 = inst[14:12] == 3'h3;	// src/main/scala/tier3/Decode.scala:12:55, :39:41
-  wire _illegal_T_14 = inst[14:12] == 3'h4;	// src/main/scala/tier3/Decode.scala:12:55, :39:41
-  wire _branchOperation_T_4 = inst[14:12] == 3'h6;	// src/main/scala/tier3/Decode.scala:12:55, :39:41
+  wire lui = inst[6:0] == 7'h37;	// src/main/scala/tier3/Decode.scala:38:20, :39:20
+  wire auipc = inst[6:0] == 7'h17;	// src/main/scala/tier3/Decode.scala:38:20, :39:52
+  wire jal = inst[6:0] == 7'h6F;	// src/main/scala/tier3/Decode.scala:38:20, :40:20
+  wire jalr = inst[6:0] == 7'h67;	// src/main/scala/tier3/Decode.scala:38:20, :40:51
+  wire branch = inst[6:0] == 7'h63;	// src/main/scala/tier3/Decode.scala:38:20, :41:23
+  wire load = inst[6:0] == 7'h3;	// src/main/scala/tier3/Decode.scala:38:20, :41:54
+  wire store = inst[6:0] == 7'h23;	// src/main/scala/tier3/Decode.scala:38:20, :42:22
+  wire immediate = inst[6:0] == 7'h13;	// src/main/scala/tier3/Decode.scala:38:20, :42:58
+  wire register = inst[6:0] == 7'h33;	// src/main/scala/tier3/Decode.scala:38:20, :43:25
+  wire _d_imm_T = lui | auipc;	// src/main/scala/tier3/Decode.scala:39:{20,52}, :44:19
+  wire _illegal_T_10 = inst[14:12] == 3'h1;	// src/main/scala/tier3/Decode.scala:38:41, :45:18
+  wire _illegal_T_16 = inst[14:12] == 3'h5;	// src/main/scala/tier3/Decode.scala:38:41, :45:32
+  wire shift = _illegal_T_10 | _illegal_T_16;	// src/main/scala/tier3/Decode.scala:45:{18,26,32}
+  wire _illegal_T_9 = inst[14:12] == 3'h0;	// src/main/scala/tier3/Decode.scala:12:55, :38:41
+  wire _illegal_T_12 = inst[14:12] == 3'h2;	// src/main/scala/tier3/Decode.scala:12:55, :38:41
+  wire _illegal_T_5 = inst[14:12] == 3'h3;	// src/main/scala/tier3/Decode.scala:12:55, :38:41
+  wire _illegal_T_14 = inst[14:12] == 3'h4;	// src/main/scala/tier3/Decode.scala:12:55, :38:41
+  wire _branchOperation_T_4 = inst[14:12] == 3'h6;	// src/main/scala/tier3/Decode.scala:12:55, :38:41
   wire illegal =
     ~(_d_imm_T | jal | jalr | branch | load | store | immediate | register) | jalr
     & (|(inst[14:12])) | branch & (_illegal_T_12 | _illegal_T_5) | load
@@ -53064,8 +53063,8 @@ module decoder(	// src/main/scala/tier3/Decode.scala:35:7
     | store & inst[14:12] > 3'h2 | immediate
     & (_illegal_T_10 & (|(inst[31:25])) | _illegal_T_16 & (|(inst[31:25]))
        & inst[31:25] != 7'h20) | register & inst[31:25] != 7'h1 & (|(inst[31:25]))
-    & ~(inst[31:25] == 7'h20 & (_illegal_T_9 | _illegal_T_16));	// src/main/scala/tier3/Decode.scala:12:55, :39:{41,64}, :41:{20,51}, :42:{23,54}, :43:{22,58}, :44:25, :45:{19,83}, :46:{18,32}, :55:{24,38,49,54,66,81}, :56:{34,49,78,84}, :57:{17,33,39,59,74}, :58:{11,14,69}, :59:{12,18,39,56,69}
-  wire _d_imm_T_25 = jalr | load;	// src/main/scala/tier3/Decode.scala:41:51, :42:54, :70:34
+    & ~(inst[31:25] == 7'h20 & (_illegal_T_9 | _illegal_T_16));	// src/main/scala/tier3/Decode.scala:12:55, :38:{41,64}, :40:{20,51}, :41:{23,54}, :42:{22,58}, :43:25, :44:{19,83}, :45:{18,32}, :54:{24,38,49,54,66,81}, :55:{34,49,78,84}, :56:{17,33,39,59,74}, :57:{11,14,69}, :58:{12,18,39,56,69}
+  wire _d_imm_T_25 = jalr | load;	// src/main/scala/tier3/Decode.scala:40:51, :41:54, :69:34
   assign dec =
     {(lui ? 6'hA : 6'h0) | (auipc ? 6'hB : 6'h0) | (jal ? 6'hC : 6'h0)
        | (jalr ? 6'hD : 6'h0)
@@ -53110,7 +53109,7 @@ module decoder(	// src/main/scala/tier3/Decode.scala:35:7
        | (immediate & shift ? {27'h0, inst[24:20]} : 32'h0),
      load | store ? inst[13:12] : 2'h0,
      load & ~(inst[14]),
-     illegal};	// src/main/scala/chisel3/util/Mux.scala:30:73, src/main/scala/tier3/Common.scala:67:{49,54,76}, src/main/scala/tier3/Decode.scala:12:55, :35:7, :39:{41,64}, :40:{20,52}, :41:{20,51}, :42:{23,54}, :43:{22,58}, :44:25, :45:19, :46:{18,26,32}, :48:{50,55}, :49:58, :50:40, :55:24, :59:56, :65:{20,24}, :66:{16,39,61}, :67:{17,26,75}, :68:{26,46}, :69:{42,50,103}, :70:{25,34,51}, :72:{26,31}, :73:{25,35,49,59}, :74:{38,47,61}, :76:{19,33,36,57}, :77:{16,45}, :78:{20,26,40}, :79:{25,28,33}, :80:12
+     illegal};	// src/main/scala/chisel3/util/Mux.scala:30:73, src/main/scala/tier3/Common.scala:67:{49,54,76}, src/main/scala/tier3/Decode.scala:12:55, :35:7, :38:{41,64}, :39:{20,52}, :40:{20,51}, :41:{23,54}, :42:{22,58}, :43:25, :44:19, :45:{18,26,32}, :47:{50,55}, :48:58, :49:40, :54:24, :58:56, :64:{20,24}, :65:{16,39,61}, :66:{17,26,75}, :67:{26,46}, :68:{42,50,103}, :69:{25,34,51}, :71:{26,31}, :72:{25,35,49,59}, :73:{38,47,61}, :75:{19,33,36,57}, :76:{16,45}, :77:{20,26,40}, :78:{25,28,33}, :79:12
 endmodule
 
 (* keep_hierarchy = 1, keep = 1 *)
@@ -57610,7 +57609,7 @@ module v2_read_20(	// src/main/scala/tier3/LocalLogic.scala:107:7
     | _value_m_28_value | _value_m_29_value | _value_m_30_value | _value_m_31_value;	// src/main/scala/tier3/Common.scala:64:17, src/main/scala/tier3/LocalLogic.scala:104:19, :107:7
 endmodule
 
-module alu(	// src/main/scala/tier3/Decode.scala:83:7
+module alu(	// src/main/scala/tier3/Decode.scala:82:7
   input  [5:0]  op,	// src/main/scala/tier3/Common.scala:32:38
   input  [31:0] a,	// src/main/scala/tier3/Common.scala:32:38
                 b,	// src/main/scala/tier3/Common.scala:32:38
@@ -57622,16 +57621,16 @@ module alu(	// src/main/scala/tier3/Decode.scala:83:7
   wire [31:0] _pcValue_m_sum;	// src/main/scala/tier3/LocalLogic.scala:74:19
   wire [31:0] _m_sum;	// src/main/scala/tier3/LocalLogic.scala:74:19
   wire        _m_carry_out;	// src/main/scala/tier3/LocalLogic.scala:74:19
-  wire        _result_T_22 = op == 6'h1;	// src/main/scala/tier3/Decode.scala:86:21
-  wire        _result_T_24 = op == 6'h3;	// src/main/scala/tier3/Decode.scala:86:35
-  wire        _result_T_25 = op == 6'h4;	// src/main/scala/tier3/Decode.scala:86:49
-  wire        subtract = _result_T_22 | _result_T_24 | _result_T_25;	// src/main/scala/tier3/Decode.scala:86:{21,35,43,49}
-  wire [62:0] _result_T_1 = {31'h0, a} << b[4:0];	// src/main/scala/tier3/Decode.scala:90:{63,67}, :91:15
-  wire [31:0] _GEN = {27'h0, b[4:0]};	// src/main/scala/tier3/Decode.scala:90:67, :92:66
+  wire        _result_T_22 = op == 6'h1;	// src/main/scala/tier3/Decode.scala:85:21
+  wire        _result_T_24 = op == 6'h3;	// src/main/scala/tier3/Decode.scala:85:35
+  wire        _result_T_25 = op == 6'h4;	// src/main/scala/tier3/Decode.scala:85:49
+  wire        subtract = _result_T_22 | _result_T_24 | _result_T_25;	// src/main/scala/tier3/Decode.scala:85:{21,35,43,49}
+  wire [62:0] _result_T_1 = {31'h0, a} << b[4:0];	// src/main/scala/tier3/Decode.scala:89:{63,67}, :90:15
+  wire [31:0] _GEN = {27'h0, b[4:0]};	// src/main/scala/tier3/Decode.scala:89:67, :91:66
   v2_prefix_adder m (	// src/main/scala/tier3/LocalLogic.scala:74:19
     .a         (a),
-    .b         (b ^ {32{subtract}}),	// src/main/scala/tier3/Decode.scala:86:43, :87:{54,60}
-    .carry_in  (subtract),	// src/main/scala/tier3/Decode.scala:86:43
+    .b         (b ^ {32{subtract}}),	// src/main/scala/tier3/Decode.scala:85:43, :86:{54,60}
+    .carry_in  (subtract),	// src/main/scala/tier3/Decode.scala:85:43
     .sum       (_m_sum),
     .carry_out (_m_carry_out)
   );
@@ -57650,10 +57649,10 @@ module alu(	// src/main/scala/tier3/Decode.scala:83:7
     | (op == 6'h6 ? a >> _GEN : 32'h0)
     | (op == 6'h7 ? $signed($signed(a) >>> _GEN) : 32'h0) | (op == 6'h8 ? a | b : 32'h0)
     | (op == 6'h9 ? a & b : 32'h0) | (op == 6'hA ? imm : 32'h0)
-    | (op == 6'hB ? _pcValue_m_sum : 32'h0);	// src/main/scala/chisel3/util/Mux.scala:30:73, src/main/scala/tier3/Decode.scala:12:55, :83:7, :86:{21,35,49}, :87:60, :90:{63,74}, :91:{15,30,32,37,42,55}, :92:{16,50,66}, :93:{22,51,67}, src/main/scala/tier3/LocalLogic.scala:74:19
+    | (op == 6'hB ? _pcValue_m_sum : 32'h0);	// src/main/scala/chisel3/util/Mux.scala:30:73, src/main/scala/tier3/Decode.scala:12:55, :82:7, :85:{21,35,49}, :86:60, :89:{63,74}, :90:{15,30,32,37,42,55}, :91:{16,50,66}, :92:{22,51,67}, src/main/scala/tier3/LocalLogic.scala:74:19
 endmodule
 
-module branch_unit(	// src/main/scala/tier3/Decode.scala:95:7
+module branch_unit(	// src/main/scala/tier3/Decode.scala:94:7
   input  [5:0]  op,	// src/main/scala/tier3/Common.scala:32:38
   input  [31:0] a,	// src/main/scala/tier3/Common.scala:32:38
                 b,	// src/main/scala/tier3/Common.scala:32:38
@@ -57665,17 +57664,17 @@ module branch_unit(	// src/main/scala/tier3/Decode.scala:95:7
                 misaligned	// src/main/scala/tier3/Common.scala:35:37
 );
 
-  wire [31:0] _result_T = pc + 32'h4;	// src/main/scala/tier3/Decode.scala:99:16
-  wire        _taken_T_19 = op == 6'hD;	// src/main/scala/tier3/Decode.scala:100:23
-  wire [31:0] target = _taken_T_19 ? a + imm & 32'hFFFFFFFE : pc + imm;	// src/main/scala/tier3/Decode.scala:100:{19,23,36,43,69}
+  wire [31:0] _result_T = pc + 32'h4;	// src/main/scala/tier3/Decode.scala:98:16
+  wire        _taken_T_19 = op == 6'hD;	// src/main/scala/tier3/Decode.scala:99:23
+  wire [31:0] target = _taken_T_19 ? a + imm & 32'hFFFFFFFE : pc + imm;	// src/main/scala/tier3/Decode.scala:99:{19,23,36,43,69}
   wire        _taken_T_32 =
     op == 6'hC | _taken_T_19 | op == 6'hE & a == b | op == 6'hF & a != b | op == 6'h10
     & $signed(a) < $signed(b) | op == 6'h11 & $signed(a) >= $signed(b) | op == 6'h12
-    & a < b | op == 6'h13 & a >= b;	// src/main/scala/chisel3/util/Mux.scala:30:73, src/main/scala/tier3/Decode.scala:12:55, :100:23, :101:{73,91}, :102:{22,52,77,94}
-  assign result = _result_T;	// src/main/scala/tier3/Decode.scala:95:7, :99:16
-  assign next_pc = _taken_T_32 ? target : _result_T;	// src/main/scala/chisel3/util/Mux.scala:30:73, src/main/scala/tier3/Decode.scala:95:7, :99:16, :100:19, :103:17
-  assign taken = _taken_T_32;	// src/main/scala/chisel3/util/Mux.scala:30:73, src/main/scala/tier3/Decode.scala:95:7
-  assign misaligned = _taken_T_32 & (|(target[1:0]));	// src/main/scala/chisel3/util/Mux.scala:30:73, src/main/scala/tier3/Decode.scala:95:7, :100:19, :103:{62,71,78}
+    & a < b | op == 6'h13 & a >= b;	// src/main/scala/chisel3/util/Mux.scala:30:73, src/main/scala/tier3/Decode.scala:12:55, :99:23, :100:{73,91}, :101:{22,52,77,94}
+  assign result = _result_T;	// src/main/scala/tier3/Decode.scala:94:7, :98:16
+  assign next_pc = _taken_T_32 ? target : _result_T;	// src/main/scala/chisel3/util/Mux.scala:30:73, src/main/scala/tier3/Decode.scala:94:7, :98:16, :99:19, :102:17
+  assign taken = _taken_T_32;	// src/main/scala/chisel3/util/Mux.scala:30:73, src/main/scala/tier3/Decode.scala:94:7
+  assign misaligned = _taken_T_32 & (|(target[1:0]));	// src/main/scala/chisel3/util/Mux.scala:30:73, src/main/scala/tier3/Decode.scala:94:7, :99:19, :102:{62,71,78}
 endmodule
 
 (* keep_hierarchy = 1 *)

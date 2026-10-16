@@ -1,0 +1,84 @@
+{
+  "candidate": "v12",
+  "complete": false,
+  "frequency_mhz": 496.1240310077519,
+  "area_um2": 35924.216040008076,
+  "meets_frequency": false,
+  "meets_area": true,
+  "source_sha256": {
+    "src/main/scala/tier3/Attributes.scala": "259347537e1d49cf92647ee8c6b810b3d377848a01ec6312a538107aaee9fd41",
+    "src/main/scala/tier3/Bus.scala": "ddba554f9ff4a0cadeff01fe5262833e3bcfdef9287d4b031cfaf886071186c9",
+    "src/main/scala/tier3/Common.scala": "729bb519c72a424b50c1be7038aaec5676ce87318d3f94c1d377afa52e105eef",
+    "src/main/scala/tier3/Core.scala": "82eef12255658e9041995ad17686fdc6f6aa570f6d7615e194ca07ac133d2606",
+    "src/main/scala/tier3/DCache.scala": "d787903e323a96f2f9d1d4fdecfa2ae9328886d4af53b800fbdbcab06e787ee9",
+    "src/main/scala/tier3/Decode.scala": "299d1769fc5da8fdebb0379763cd15654a2ffd0ef33200a0c60f0e1ece0f7389",
+    "src/main/scala/tier3/Frontend.scala": "91851cc8853a01c65c8919cca4dc495950c7953906bbcb6ee88273434cc0d37a",
+    "src/main/scala/tier3/Generate.scala": "37a0e7011041a6e59ba2a6b0146489a27eb275eea389ed3436e1fd7fe13af1e7",
+    "src/main/scala/tier3/LocalLogic.scala": "1b580cf97bd10354e3304920c453d03441b1e3dab2cf48ff52d631cbfb2e8a74",
+    "src/main/scala/tier3/MulDiv.scala": "f8064a5e59e26030703353c683d6d3d8ee947d0fe2869c841084c58d61b9ea30",
+    "src/main/scala/tier3/Rename.scala": "1dea8bb2b2ce37f0256d8b7538c9842f805a85821995df96a578d95e885adb91",
+    "src/main/scala/tier3/RenameInputProof.scala": "0265063b3c99d7d3ec4cb9ab12d59cf4904b90bcc203f03445c4f4cf03209e2d",
+    "src/main/scala/tier3/Select.scala": "84f78dfcc3d7fc22ebe70ba2cd867283d08f7a4cc519f03a410dafa69e6fbaad",
+    "src/main/scala/tier3/Top.scala": "61c263b6abcd0322676539d62c50eb3e99c4003073f62f5e76729fd5214ae42b"
+  },
+  "generated_rtl_sha256": "f159c0812c5313bc19e549384721a9b626c466c8593d6c68f01b4f26d6844579",
+  "firtool_optimization": true,
+  "tools": {
+    "yosys": "Yosys 0.63 (git sha1 70a11c6bf, g++ 13.3.0-6ubuntu2~24.04.1 -fPIC -O3)",
+    "opensta": "3.1.0"
+  },
+  "inputs": [
+    {
+      "path": "/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/v12-rtl/student_top.sv",
+      "sha256": "f159c0812c5313bc19e549384721a9b626c466c8593d6c68f01b4f26d6844579"
+    },
+    {
+      "path": "/home/wangwenxuan/ACM/ParaRisc/scripts/ram/sram_fakeram.sv",
+      "sha256": "c0a2389d5c3211fbd2fbca22a2e2e86edc38eafa9260407d72a55841274098cc"
+    }
+  ],
+  "libraries": [
+    {
+      "path": "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_AO_RVT_TT_nldm_211120.lib",
+      "sha256": "b1ece108c0a2acd8d01c05cee6daee2834425037b1d9aad625d6f1dd640f1940"
+    },
+    {
+      "path": "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_INVBUF_RVT_TT_nldm_220122.lib",
+      "sha256": "a4ceb32e418e1aac8667e28fbd8e9e46baf520180be4db075598a4d7c681a56e"
+    },
+    {
+      "path": "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_OA_RVT_TT_nldm_211120.lib",
+      "sha256": "6529c6c72465cd133dfbfb03952327ab2774bb6aa4be866d78fd7bc6c58c9f6f"
+    },
+    {
+      "path": "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_SEQ_RVT_TT_nldm_220123.lib",
+      "sha256": "57a0b403485b99ebd676942af4673ac086b86c7c75fbdc3e5c0038501dd22ba3"
+    },
+    {
+      "path": "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib",
+      "sha256": "fa92e6ab1481810602811b1eea54bc016a341f11fb5188d7512c026599adf038"
+    }
+  ],
+  "abc_constraints": {
+    "driving_cell": "INVx1_ASAP7_75t_R",
+    "output_load_ff": 5.0
+  },
+  "timing_constraints": {
+    "clock_port": "clock",
+    "clock_period_ns": 2.0,
+    "input_delay_ns": 0.2,
+    "output_delay_ns": 0.2,
+    "input_transition_ns": 0.05,
+    "clock_transition_ns": 0.05,
+    "clock_uncertainty_ns": 0.05,
+    "output_load_ff": 5.0,
+    "reset_value": 0,
+    "clock_model": "ideal",
+    "interconnect": "no_parasitics",
+    "frequency_resolution_ns": 0.001,
+    "minimum_period_ns": 2.015625,
+    "estimated_fmax_mhz": 496.1240310077519,
+    "worst_setup_slack_ns": -0.015192,
+    "timing_analyzed": true
+  }
+}

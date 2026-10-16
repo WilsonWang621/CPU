@@ -34,7 +34,6 @@ class DecodeClassProof extends Logic {
 
 class Decoder extends Logic {
   override def desiredName = "decoder"
-  keepHierarchy()
   val inst = in(32); val dec = out((new Decoded).getWidth)
   val opcode = inst(6, 0); val f3 = inst(14, 12); val f7 = inst(31, 25)
   val lui = opcode === "h37".U; val auipc = opcode === "h17".U
