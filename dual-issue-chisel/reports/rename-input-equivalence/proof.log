@@ -1,0 +1,169 @@
+
+-- Running command `read_verilog -sv dual-issue-chisel/build/v12-input-proof/rename_input_proof.sv; hierarchy -top rename_input_proof; proc; setattr -mod -unset keep_hierarchy; flatten; opt; sat -verify -prove correct 1 -show-inputs -show-outputs' --
+
+1. Executing Verilog-2005 frontend: dual-issue-chisel/build/v12-input-proof/rename_input_proof.sv
+Parsing SystemVerilog input from `dual-issue-chisel/build/v12-input-proof/rename_input_proof.sv' to AST representation.
+Generating RTLIL representation for module `\decoder'.
+Generating RTLIL representation for module `\rename_input_proof'.
+Successfully finished Verilog frontend.
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+
+2.1. Analyzing design hierarchy..
+Top module:  \rename_input_proof
+Used module:     \decoder
+
+2.2. Analyzing design hierarchy..
+Top module:  \rename_input_proof
+Used module:     \decoder
+Removed 0 unused modules.
+
+3. Executing PROC pass (convert processes to netlists).
+
+3.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Removed a total of 0 dead cases.
+
+3.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 0 assignments to connections.
+
+3.4. Executing PROC_INIT pass (extract init attributes).
+
+3.5. Executing PROC_ARST pass (detect async resets in processes).
+
+3.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+
+3.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+
+3.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+
+3.9. Executing PROC_DFF pass (convert process syncs to FFs).
+
+3.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+3.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module rename_input_proof.
+Optimizing module decoder.
+<suppressed ~1 debug messages>
+
+4. Executing FLATTEN pass (flatten design).
+Deleting now unused module decoder.
+<suppressed ~2 debug messages>
+
+5. Executing OPT pass (performing simple optimizations).
+
+5.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module rename_input_proof.
+
+5.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\rename_input_proof'.
+Computing hashes of 1047 cells of `\rename_input_proof'.
+Finding duplicate cells in `\rename_input_proof'.
+Computing hashes of 843 cells of `\rename_input_proof'.
+Finding duplicate cells in `\rename_input_proof'.
+Computing hashes of 719 cells of `\rename_input_proof'.
+Finding duplicate cells in `\rename_input_proof'.
+<suppressed ~984 debug messages>
+Removed a total of 328 cells.
+
+5.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \rename_input_proof..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 1/2 on $mux $flatten\decoders_m.$ternary$dual-issue-chisel/build/v12-input-proof/rename_input_proof.sv:77$66.
+    dead port 2/2 on $mux $flatten\decoders_m.$ternary$dual-issue-chisel/build/v12-input-proof/rename_input_proof.sv:77$66.
+    dead port 1/2 on $mux $flatten\decoders_m_1.$ternary$dual-issue-chisel/build/v12-input-proof/rename_input_proof.sv:77$66.
+    dead port 2/2 on $mux $flatten\decoders_m_1.$ternary$dual-issue-chisel/build/v12-input-proof/rename_input_proof.sv:77$66.
+Removed 4 multiplexer ports.
+<suppressed ~150 debug messages>
+
+5.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \rename_input_proof.
+Performed a total of 0 changes.
+
+5.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\rename_input_proof'.
+Computing hashes of 717 cells of `\rename_input_proof'.
+Finding duplicate cells in `\rename_input_proof'.
+Computing hashes of 709 cells of `\rename_input_proof'.
+Finding duplicate cells in `\rename_input_proof'.
+Computing hashes of 707 cells of `\rename_input_proof'.
+Finding duplicate cells in `\rename_input_proof'.
+<suppressed ~30 debug messages>
+Removed a total of 10 cells.
+
+5.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+5.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \rename_input_proof..
+Removed 180 unused cells and 571 unused wires.
+<suppressed ~187 debug messages>
+
+5.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module rename_input_proof.
+
+5.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+5.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \rename_input_proof..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~4 debug messages>
+
+5.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \rename_input_proof.
+Performed a total of 0 changes.
+
+5.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\rename_input_proof'.
+Computing hashes of 527 cells of `\rename_input_proof'.
+Finding duplicate cells in `\rename_input_proof'.
+Removed a total of 0 cells.
+
+5.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+5.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \rename_input_proof..
+
+5.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module rename_input_proof.
+
+5.16. Finished fast OPT passes. (There is nothing left to do.)
+
+6. Executing SAT pass (solving SAT problems in the circuit).
+Using SAT solver `minisat`.
+
+Setting up SAT problem:
+Final constraint equation: { } = { }
+Imported 527 cells to SAT database.
+Import proof-constraint: \correct = 1'1
+Final proof equation: \correct = 1'1
+Import show expression: \source_register
+Import show expression: \publish
+Import show expression: \reserve
+Import show expression: \instructions
+Import show expression: \correct
+
+Solving problem with 3159 variables and 8673 clauses..
+SAT proof finished - no model found: SUCCESS!
+
+                  /$$$$$$      /$$$$$$$$     /$$$$$$$    
+                 /$$__  $$    | $$_____/    | $$__  $$   
+                | $$  \ $$    | $$          | $$  \ $$   
+                | $$  | $$    | $$$$$       | $$  | $$   
+                | $$  | $$    | $$__/       | $$  | $$   
+                | $$/$$ $$    | $$          | $$  | $$   
+                |  $$$$$$/ /$$| $$$$$$$$ /$$| $$$$$$$//$$
+                 \____ $$$|__/|________/|__/|_______/|__/
+                       \__/                              
+

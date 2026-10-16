@@ -142,7 +142,10 @@ class Core(p: Config = Config()) extends ClockedLogic {
   val occupancy = (0 until 3).map(b => PopCount(queue(b).map(_.valid)))
   val rename_maps = Module(new Rename(rw, p.checkpoints, p.commitTree)); connectClock(rename_maps)
   rename_maps.dispatch_valid := rename_valid.asUInt; rename_maps.prepare_valid := rename_prepare.asUInt
-  rename_maps.dispatch_rd := pack(rename_rd); rename_maps.dispatch_slot := pack(dispatch_rid)
+  // RAT publication/lookup already carries rename_valid/rename_prepare. Its
+  // register comparison can use the raw destination while the ROB continues
+  // to capture rename_rd. RenameInputProof checks all write/bypass controls.
+  rename_maps.dispatch_rd := pack(decoded.map(_.rd)); rename_maps.dispatch_slot := pack(dispatch_rid)
   rename_maps.source_register := pack(source_register)
   rename_maps.commit_valid := commit_valid.asUInt; rename_maps.commit_rd := pack(commit_rd); rename_maps.commit_slot := pack(commit_rid)
   rename_maps.save_valid := save_checkpoint; rename_maps.save_after_lane := save_after_lane; rename_maps.save_index := free_checkpoint

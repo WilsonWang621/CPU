@@ -24,6 +24,7 @@ object Generate extends App {
     case "core" => new Core(p)
     case "decoder" => new Decoder
     case "decode-class-proof" => new DecodeClassProof
+    case "rename-input-proof" => new RenameInputProof
     case "alu" => new Alu
     case "branch-unit" => new BranchUnit
     case "rename" => new Rename(n("--slot-bits", 5), n("--checkpoints", 3), n("--tree", 1) != 0)
