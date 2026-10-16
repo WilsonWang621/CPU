@@ -17,6 +17,10 @@
 | [9](dual-issue/frequency-stage9.md) | 487.85 MHz 默认输入独立复验 |
 | [10](dual-issue/frequency-stage10.md) | 503.69 MHz 最终默认实现完整验收 |
 
+## 双发射 Chisel
+
+[最终验收报告](../dual-issue-chisel/reports/final/report.md)：原生双发射 Chisel **502.70 MHz、35930.97 μm²、IPC 1.222171 / 1.113846、19/19 正确性**；全部正确性和两组性能与参考 Verilog 逐周期 AXI 对照通过。[迁移记录](../dual-issue-chisel/reports/progress.md)保留各候选和证明边界。
+
 ## 单发射 Chisel
 
 单发射源码、生成器和数据归档集中在[独立工程](../single-issue-chisel/README.md)，避免混用两条实现路线的参数与成绩。

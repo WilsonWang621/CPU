@@ -4,7 +4,7 @@
 
 保留双分派、双整数发射、独立访存端口、双提交、32 项 ROB、三组各 4 项 IQ、3 个分支检查点、8 个 Load 槽、16 个 Store 槽、1 KiB I-cache、2 KiB D-cache。同步复位、空闲行预准备、访存选择提前一拍、缓存返回选择、取消响应排空和分支恢复的时钟边界均对应原设计。前缀节点、局部掩码、字节控制及反相器分发树继续使用 `keep_hierarchy`，面积和延迟均计入官方综合。
 
-当前**尚未完成 Tier3 / 500MHz 验收**。初始完整候选已通过 19/19 正确性、两组性能、高地址、定向单元，以及两组性能的整机逐拍对照。已完成综合的候选尚未同时满足频率与面积；迁移与优化中的版本分别冻结，详见[验收进度](reports/progress.md)。Verilog 参考版的 503.69MHz 不代表本工程的实测频率。
+最终 v13 **已通过 Tier3 / ≥500MHz 验收**：官方默认路径 **502.70 MHz、35930.97 μm²**，延迟 10 / 20 的 IPC 几何平均为 **1.222171 / 1.113846**，完整正确性 **19/19**。最终两个完整 CPU 的 19 项正确性和两组共 12 项性能逐拍 AXI 对照全部通过，周期逐项相同。当前 Scala 再生成 RTL 与综合及仿真交付输入逐字节一致；原始证据、精确值和证明范围见[最终验收报告](reports/final/report.md)，历史候选见[验收进度](reports/progress.md)。
 
 在本目录执行：
 
@@ -32,7 +32,7 @@ APPIMAGE_EXTRACT_AND_RUN=1 make synth
 | `memory_controller.sv`, `pararisc_axi_adapter.sv` | `Bus.scala` |
 | `student_top.sv` | `Top.scala` |
 
-`Generate.scala` 支持 `--module` 单独生成各模块，供 SAT 和原测试台核对。`scripts/prove_modules.py` 将生成 RTL 与当前根目录交付 Verilog 比较，记录输入 SHA-256、Yosys 配方及日志；组合等价证明穷尽全部输入，时序检查明确标记为有界检查。三检查点 RAT 的形式检查约束索引在 0..2，符合实际分配器接口。
+`Generate.scala` 支持 `--module` 单独生成各模块，供 SAT 和原测试台核对。`scripts/prove_modules.py` 将生成 RTL 与当前根目录交付 Verilog 比较，记录输入 SHA-256、Yosys 配方及日志；组合等价证明穷尽全部输入，时序检查明确标记为有界检查。最终三检查点 RAT 使用 `scripts/prove_rename.py` 对 764 位状态及 24 位输出做归纳等价证明，合法索引 0..2 保持不变，未用编码 3 在两边均映射为 0。仲裁器的整机提取证明显式采用两缓存始终接收响应的连接常量。
 
 整机逐拍对照使用两个完整 CPU，共享课程 AXI 返回，并检查请求有效、传输数据以及 R/B 接收时刻；AXI 无效时的负载不参与比较。在根目录执行：
 
@@ -46,3 +46,11 @@ make test SIM=dual-issue-chisel/build/differential/sim/sim LATENCY=20 MAX_CYCLES
 ```
 
 该对照文件仅用于验证，独立交付和综合始终使用 `rtl/filelist.f`。
+
+核对最终归档与当前源码：
+
+```sh
+python3 scripts/audit_acceptance.py
+```
+
+`make verify-units` 可重跑原 RTL 的独立模型检查；形式证明支持 `python3 scripts/prove_modules.py --native-file rtl/student_top.sv --modules decoder,alu,branch-unit,operand,axi-adapter,memory-controller`，需提供可执行 Yosys（`--yosys`）或使用课程 AppImage 环境。完整 RAT 证明使用 `python3 scripts/prove_rename.py`；参数见脚本 `--help`。

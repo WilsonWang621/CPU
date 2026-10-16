@@ -1,0 +1,112 @@
+{
+  "accepted": true,
+  "candidate": "v13",
+  "native_rtl_sha256": "9ea7ed6c12f131da8d045ecae9484aea52fe75d4bf8e96e53a52e0feaf05e977",
+  "frequency_mhz": 502.70004909180165,
+  "area_um2": 35930.96658000839,
+  "correctness": {
+    "latency": 20,
+    "passed": 19,
+    "failed": 0,
+    "cycles": {
+      "add_to_100": 368,
+      "array_test1": 423,
+      "array_test2": 474,
+      "basicopt1": 115361,
+      "bulgarian": 174931,
+      "expr": 535,
+      "gcd": 377,
+      "hanoi": 3976,
+      "lvalue2": 301,
+      "magic": 353953,
+      "manyarguments": 287,
+      "multiarray": 1668,
+      "naive": 289,
+      "pi": 6548409,
+      "qsort": 799114,
+      "queens": 216848,
+      "statement_test": 887,
+      "superloop": 399247,
+      "tak": 1033758
+    }
+  },
+  "performance": {
+    "10": {
+      "geomean_ipc": 1.2221711020297619,
+      "benchmarks": {
+        "median": {
+          "instructions": 6961,
+          "cycles": 6615
+        },
+        "multiply": {
+          "instructions": 21722,
+          "cycles": 16794
+        },
+        "qsort": {
+          "instructions": 139900,
+          "cycles": 127719
+        },
+        "rsort": {
+          "instructions": 195719,
+          "cycles": 120418
+        },
+        "towers": {
+          "instructions": 5278,
+          "cycles": 4804
+        },
+        "vvadd": {
+          "instructions": 4524,
+          "cycles": 3614
+        }
+      }
+    },
+    "20": {
+      "geomean_ipc": 1.1138460959843028,
+      "benchmarks": {
+        "median": {
+          "instructions": 6961,
+          "cycles": 7233
+        },
+        "multiply": {
+          "instructions": 21722,
+          "cycles": 17029
+        },
+        "qsort": {
+          "instructions": 139900,
+          "cycles": 134993
+        },
+        "rsort": {
+          "instructions": 195719,
+          "cycles": 134501
+        },
+        "towers": {
+          "instructions": 5278,
+          "cycles": 5255
+        },
+        "vvadd": {
+          "instructions": 4524,
+          "cycles": 4405
+        }
+      }
+    }
+  },
+  "reference_cycle_and_axi_identity": {
+    "correctness": 19,
+    "performance": 12,
+    "passed": true
+  },
+  "high_address": {
+    "cycles": 116,
+    "result": 262400
+  },
+  "gates": {
+    "frequency_ge_500MHz": true,
+    "area_le_36000um2": true,
+    "ipc_ge_1_0985_both_latencies": true,
+    "correctness_19_of_19": true,
+    "default_path_remeasurement_matches": true,
+    "regeneration_byte_identical": true
+  },
+  "timing_scope": "Official ASAP7 RVT TT synthesis/STA, ideal clock, no interconnect parasitics",
+  "equivalence_scope": "Cycle AXI regression on listed programs plus scoped component SAT/induction; no whole-CPU formal equivalence claim"
+}

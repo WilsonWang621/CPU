@@ -1,5 +1,7 @@
 # 双发射 Chisel 迁移验收进度
 
+**最终状态：v13 已通过完整验收，502.70 MHz、35930.97 μm²、正确性 19/19，全部正确性与两组性能逐拍对照通过。** 见[最终报告](final/report.md)。以下记录按实际进展保留当时状态。
+
 参考为 `d134aa1` 的默认双发射 ROB32 Verilog；配置和输入 SHA-256 见 [初始输入](initial-port/v1-inputs.json)。CPU、缓存和总线均已有完整原生 Chisel 实现，未使用 Verilog CPU BlackBox。
 
 | 检查 | 已有证据 |
@@ -45,4 +47,4 @@ v13 最终原生二进制已通过延迟 20 的 **19/19 完整正确性**。直�
 
 随后 qsort（799,114 周期）、queens（216,848 周期）和 statement（887 周期）也完成逐拍对照，累计 **17/19**。截至 statement 的结果见 [17 项部分对照](final/differential/correctness-through-statement.log)；superloop 和 tak 尚在运行。
 
-当前尚未完成目标；最终必须由同一冻结版本同时证明正确性、参考设计周期一致性、IPC、面积及 ≥500MHz。已完成检查的原始记录见 [初始验证归档](initial-port/sha256.json)，时序失败候选也明确保留。
+最终 v13 双 CPU 正确性对照已完成 **19/19**，加上两组共十二项性能，全部逐拍 AXI 对照和周期核对通过。验收审计已确认当前源码、生成 RTL、原生/对照二进制、默认综合及全部日志绑定同一最终版本，**Tier3 / ≥500MHz 目标完成**。完整结果见[最终验收报告](final/report.md)与[机器可读验收](final/acceptance.json)。上文保留各阶段的当时状态，失败候选和初始验证分别归档。
