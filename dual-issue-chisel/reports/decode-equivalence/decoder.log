@@ -1,0 +1,496 @@
+
+-- Executing script file `/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/v9-module-proofs/decoder.ys' --
+
+1. Executing Verilog-2005 frontend: /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v
+Parsing SystemVerilog input from `/home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v' to AST representation.
+Generating RTLIL representation for module `\alu'.
+Generating RTLIL representation for module `\branch_unit'.
+Generating RTLIL representation for module `\cpu_top'.
+Warning: Replacing memory \loads with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:1347
+Warning: Replacing memory \stores with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:1324
+Warning: Replacing memory \checkpoint_owner with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:1310
+Warning: Replacing memory \prepared_address with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:1271
+Warning: Replacing memory \queue with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:1244
+Warning: Replacing memory \values with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:1136
+Warning: Replacing memory \rob with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:1124
+Warning: Replacing memory \dispatch_payload with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:1026
+Warning: Replacing memory \dispatch_index with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:989
+Warning: Replacing memory \dispatch_bank with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:989
+Warning: Replacing memory \dispatch_rid with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:989
+Warning: Replacing memory \wb_address with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:926
+Warning: Replacing memory \wb_fault with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:926
+Warning: Replacing memory \wb_value with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:926
+Warning: Replacing memory \wb_rid with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:926
+Warning: Replacing memory \occupancy with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:823, /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:818
+Warning: Replacing memory \free_queue with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:818
+Generating RTLIL representation for module `\decoder'.
+Generating RTLIL representation for module `\memory_controller'.
+Generating RTLIL representation for module `\muldiv'.
+Warning: Replacing memory \mul_tag_q with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:1967
+Generating RTLIL representation for module `\v2_arch_word'.
+Generating RTLIL representation for module `\v2_cache_lookup'.
+Generating RTLIL representation for module `\v2_cache_read'.
+Generating RTLIL representation for module `\v2_cache_tag_match'.
+Generating RTLIL representation for module `\v2_circular_grant'.
+Generating RTLIL representation for module `\v2_dcache'.
+Warning: Replacing memory \tags with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:2966
+Warning: Replacing memory \word_valid with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:2962
+Warning: Replacing memory \waiters with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:2947
+Warning: Replacing memory \waiter_next with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:2936
+Warning: Replacing memory \misses with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:2918
+Warning: Replacing memory \data with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:2880
+Warning: Replacing memory \pending_mask with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:2862
+Warning: Replacing memory \pending_data with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:2861
+Warning: Replacing memory \pending_address with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:2860
+Generating RTLIL representation for module `\v2_distribution'.
+Generating RTLIL representation for module `\v2_distribution_inverter'.
+Generating RTLIL representation for module `\v2_frontend'.
+Warning: Replacing memory \local_history with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:3505
+Warning: Replacing memory \tags with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:3497
+Warning: Replacing memory \failed_words with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:3495
+Warning: Replacing memory \valid_words with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:3495
+Warning: Replacing memory \fifo with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:3479
+Warning: Replacing memory \even_target with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:3469
+Warning: Replacing memory \even_data with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:3469
+Warning: Replacing memory \odd_target with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:3468
+Warning: Replacing memory \odd_data with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:3468
+Warning: Replacing memory \prediction with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:3363
+Warning: Replacing memory \incoming with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:3393
+Generating RTLIL representation for module `\v2_grant_read'.
+Generating RTLIL representation for module `\v2_increment'.
+Generating RTLIL representation for module `\v2_inc_join'.
+Generating RTLIL representation for module `\v2_iq_read'.
+Generating RTLIL representation for module `\v2_operand'.
+Generating RTLIL representation for module `\v2_order_compare'.
+Generating RTLIL representation for module `\v2_parallel_select'.
+Generating RTLIL representation for module `\v2_prefix_adder'.
+Generating RTLIL representation for module `\v2_prefix_node'.
+Generating RTLIL representation for module `\v2_priority_mux'.
+Generating RTLIL representation for module `\v2_priority_register'.
+Generating RTLIL representation for module `\v2_read'.
+Generating RTLIL representation for module `\v2_read_mask'.
+Generating RTLIL representation for module `\v2_registered_grant'.
+Generating RTLIL representation for module `\v2_rename'.
+Warning: Replacing memory \checkpoint_tag with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:4621
+Warning: Replacing memory \checkpoint_pending with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:4610
+Warning: Replacing memory \tag_q with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:4595
+Warning: Replacing memory \save_tag with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:4568, /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:4532
+Warning: Replacing memory \tag_next with list of registers. See /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:4546, /home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:4527
+Generating RTLIL representation for module `\v2_retire_read'.
+Generating RTLIL representation for module `\v2_select'.
+Successfully finished Verilog frontend.
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+
+2.1. Analyzing design hierarchy..
+Top module:  \decoder
+
+2.2. Analyzing design hierarchy..
+Top module:  \decoder
+Removing unused module `\v2_select'.
+Removing unused module `\v2_retire_read'.
+Removing unused module `\v2_rename'.
+Removing unused module `\v2_registered_grant'.
+Removing unused module `\v2_read_mask'.
+Removing unused module `\v2_read'.
+Removing unused module `\v2_priority_register'.
+Removing unused module `\v2_priority_mux'.
+Removing unused module `\v2_prefix_node'.
+Removing unused module `\v2_prefix_adder'.
+Removing unused module `\v2_parallel_select'.
+Removing unused module `\v2_order_compare'.
+Removing unused module `\v2_operand'.
+Removing unused module `\v2_iq_read'.
+Removing unused module `\v2_inc_join'.
+Removing unused module `\v2_increment'.
+Removing unused module `\v2_grant_read'.
+Removing unused module `\v2_frontend'.
+Removing unused module `\v2_distribution_inverter'.
+Removing unused module `\v2_distribution'.
+Removing unused module `\v2_dcache'.
+Removing unused module `\v2_circular_grant'.
+Removing unused module `\v2_cache_tag_match'.
+Removing unused module `\v2_cache_read'.
+Removing unused module `\v2_cache_lookup'.
+Removing unused module `\v2_arch_word'.
+Removing unused module `\muldiv'.
+Removing unused module `\memory_controller'.
+Removing unused module `\cpu_top'.
+Removing unused module `\branch_unit'.
+Removing unused module `\alu'.
+Removed 31 unused modules.
+
+3. Executing PROC pass (convert processes to netlists).
+
+3.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Removed 3 dead cases from process $proc$/home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:1419$6595 in module decoder.
+Marked 9 switch rules as full_case in process $proc$/home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:1419$6595 in module decoder.
+Removed a total of 3 dead cases.
+
+3.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 6 assignments to connections.
+
+3.4. Executing PROC_INIT pass (extract init attributes).
+
+3.5. Executing PROC_ARST pass (detect async resets in processes).
+
+3.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 1 switch.
+<suppressed ~8 debug messages>
+
+3.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\decoder.$proc$/home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:1419$6595'.
+     1/25: $16\dec[39:36] [3]
+     2/25: $16\dec[39:36] [0]
+     3/25: $16\dec[39:36] [1]
+     4/25: $16\dec[39:36] [2]
+     5/25: $1\dec[39:0] [39]
+     6/25: $14\dec[0:0]
+     7/25: { $13\dec[60:55] $12\dec[0:0] }
+     8/25: $11\dec[60:55]
+     9/25: $10\dec[0:0]
+    10/25: $1\dec[39:0] [35:4]
+    11/25: $8\dec[35:4]
+    12/25: $7\dec[0:0]
+    13/25: $1\dec[39:0] [37]
+    14/25: $1\dec[39:0] [36]
+    15/25: $9\dec[60:55]
+    16/25: $5\dec[0:0]
+    17/25: $3\dec[0:0]
+    18/25: $6\dec[0:0]
+    19/25: $15\dec[60:55]
+    20/25: $4\dec[60:55]
+    21/25: $1\dec[39:0] [38]
+    22/25: $1\dec[39:0] [0]
+    23/25: $1\dec[39:0] [1]
+    24/25: $2\dec[60:55]
+    25/25: $1\dec[39:0] [3:2]
+
+3.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\decoder.\dec' from process `\decoder.$proc$/home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:1419$6595'.
+
+3.9. Executing PROC_DFF pass (convert process syncs to FFs).
+
+3.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+3.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 9 empty switches in `\decoder.$proc$/home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:1419$6595'.
+Removing empty process `decoder.$proc$/home/wangwenxuan/ACM/ParaRisc/verilog/area_v2_core.v:1419$6595'.
+Cleaned up 9 empty switches.
+
+3.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module decoder.
+<suppressed ~15 debug messages>
+
+4. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+Mapping memory $auto$proc_rom.cc:155:do_switch$29797 in module \decoder:
+  created 8 $dff cells and 0 static cells of width 7.
+  read interface: 0 $dff and 7 $mux cells.
+  write interface: 0 write mux blocks.
+
+5. Executing FLATTEN pass (flatten design).
+
+6. Executing OPT pass (performing simple optimizations).
+
+6.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module decoder.
+
+6.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\decoder'.
+Computing hashes of 195 cells of `\decoder'.
+Finding duplicate cells in `\decoder'.
+Computing hashes of 86 cells of `\decoder'.
+Finding duplicate cells in `\decoder'.
+Computing hashes of 83 cells of `\decoder'.
+Finding duplicate cells in `\decoder'.
+<suppressed ~336 debug messages>
+Removed a total of 112 cells.
+
+6.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \decoder..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 2/2 on $mux $procmux$29940.
+    dead port 2/2 on $mux $procmux$29875.
+    dead port 2/2 on $mux $procmux$29925.
+    dead port 2/2 on $mux $procmux$29978.
+    dead port 2/2 on $mux $procmux$29916.
+    dead port 2/2 on $mux $procmux$29852.
+    dead port 2/2 on $mux $procmux$29846.
+    dead port 2/2 on $mux $procmux$29840.
+    dead port 2/2 on $mux $procmux$29963.
+    dead port 2/2 on $mux $procmux$29838.
+    dead port 1/2 on $mux $procmux$29833.
+    dead port 2/2 on $mux $procmux$29833.
+    dead port 1/2 on $mux $procmux$29831.
+    dead port 2/2 on $mux $procmux$29831.
+    dead port 1/2 on $mux $procmux$29961.
+    dead port 1/9 on $pmux $procmux$29821.
+    dead port 2/9 on $pmux $procmux$29821.
+    dead port 3/9 on $pmux $procmux$29821.
+    dead port 4/9 on $pmux $procmux$29821.
+    dead port 5/9 on $pmux $procmux$29821.
+    dead port 6/9 on $pmux $procmux$29821.
+    dead port 7/9 on $pmux $procmux$29821.
+    dead port 8/9 on $pmux $procmux$29821.
+    dead port 9/9 on $pmux $procmux$29821.
+    dead port 2/2 on $mux $procmux$29948.
+    dead port 2/2 on $mux $procmux$29888.
+Removed 26 multiplexer ports.
+<suppressed ~76 debug messages>
+
+6.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \decoder.
+    New ctrl vector for $pmux cell $procmux$29879: { $auto$opt_reduce.cc:137:opt_pmux$30039 $procmux$29976_CMP $procmux$29974_CMP }
+    New ctrl vector for $pmux cell $procmux$29856: { $procmux$30010_CTRL $procmux$30009_CMP $procmux$30007_CMP $auto$opt_reduce.cc:137:opt_pmux$30041 $procmux$30015_CMP $procmux$30004_CMP }
+    New ctrl vector for $pmux cell $procmux$29986: { $auto$opt_reduce.cc:137:opt_pmux$30043 $procmux$30008_CMP $procmux$30007_CMP $procmux$30016_CMP $procmux$30015_CMP $procmux$30004_CMP $procmux$30003_CMP }
+    New ctrl vector for $pmux cell $procmux$29933: $auto$opt_reduce.cc:137:opt_pmux$30045
+    New ctrl vector for $pmux cell $procmux$29981: $auto$opt_reduce.cc:137:opt_pmux$30047
+    New ctrl vector for $pmux cell $procmux$29900: $auto$opt_reduce.cc:137:opt_pmux$30049
+    New ctrl vector for $pmux cell $procmux$30014: $auto$opt_reduce.cc:137:opt_pmux$30051
+    New ctrl vector for $pmux cell $procmux$29813: $auto$opt_reduce.cc:137:opt_pmux$30053
+    New ctrl vector for $pmux cell $procmux$29891: $auto$opt_reduce.cc:137:opt_pmux$30055
+    New ctrl vector for $pmux cell $procmux$29866: { $auto$opt_reduce.cc:137:opt_pmux$30059 $auto$opt_reduce.cc:137:opt_pmux$30057 }
+    New input vector for $reduce_or cell $auto$opt_reduce.cc:131:opt_pmux$30042: { $procmux$30010_CMP $procmux$30009_CMP }
+    New input vector for $reduce_or cell $auto$opt_reduce.cc:131:opt_pmux$30054: { $procmux$30016_CMP $procmux$30010_CMP $procmux$30009_CMP $procmux$30008_CMP $procmux$30004_CMP $procmux$30003_CMP }
+  Optimizing cells in module \decoder.
+Performed a total of 12 changes.
+
+6.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\decoder'.
+Computing hashes of 78 cells of `\decoder'.
+Finding duplicate cells in `\decoder'.
+Computing hashes of 76 cells of `\decoder'.
+Finding duplicate cells in `\decoder'.
+<suppressed ~6 debug messages>
+Removed a total of 2 cells.
+
+6.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+6.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \decoder..
+Removed 0 unused cells and 165 unused wires.
+<suppressed ~1 debug messages>
+
+6.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module decoder.
+
+6.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+6.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \decoder..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~61 debug messages>
+
+6.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \decoder.
+Performed a total of 0 changes.
+
+6.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\decoder'.
+Computing hashes of 76 cells of `\decoder'.
+Finding duplicate cells in `\decoder'.
+Removed a total of 0 cells.
+
+6.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+6.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \decoder..
+
+6.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module decoder.
+
+6.16. Finished fast OPT passes. (There is nothing left to do.)
+Renaming module \decoder to \gold.
+
+7. Executing Verilog-2005 frontend: /home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/v9-decoder/decoder.sv
+Parsing SystemVerilog input from `/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/v9-decoder/decoder.sv' to AST representation.
+Generating RTLIL representation for module `\decoder'.
+Successfully finished Verilog frontend.
+
+8. Executing HIERARCHY pass (managing design hierarchy).
+
+8.1. Finding top of design hierarchy..
+root of   0 design levels: decoder             
+Automatically selected decoder as design top module.
+
+8.2. Analyzing design hierarchy..
+Top module:  \decoder
+
+8.3. Analyzing design hierarchy..
+Top module:  \decoder
+Removed 0 unused modules.
+
+9. Executing PROC pass (convert processes to netlists).
+
+9.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+9.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Removed a total of 0 dead cases.
+
+9.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 0 assignments to connections.
+
+9.4. Executing PROC_INIT pass (extract init attributes).
+
+9.5. Executing PROC_ARST pass (detect async resets in processes).
+
+9.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+
+9.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+
+9.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+
+9.9. Executing PROC_DFF pass (convert process syncs to FFs).
+
+9.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+9.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+9.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module decoder.
+<suppressed ~1 debug messages>
+
+10. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+11. Executing FLATTEN pass (flatten design).
+
+12. Executing OPT pass (performing simple optimizations).
+
+12.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module decoder.
+
+12.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\decoder'.
+Computing hashes of 170 cells of `\decoder'.
+Finding duplicate cells in `\decoder'.
+Computing hashes of 161 cells of `\decoder'.
+Finding duplicate cells in `\decoder'.
+Computing hashes of 160 cells of `\decoder'.
+Finding duplicate cells in `\decoder'.
+<suppressed ~30 debug messages>
+Removed a total of 10 cells.
+
+12.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \decoder..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~75 debug messages>
+
+12.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \decoder.
+Performed a total of 0 changes.
+
+12.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\decoder'.
+Computing hashes of 160 cells of `\decoder'.
+Finding duplicate cells in `\decoder'.
+Computing hashes of 156 cells of `\decoder'.
+Finding duplicate cells in `\decoder'.
+Computing hashes of 155 cells of `\decoder'.
+Finding duplicate cells in `\decoder'.
+<suppressed ~15 debug messages>
+Removed a total of 5 cells.
+
+12.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+12.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \decoder..
+Removed 0 unused cells and 43 unused wires.
+<suppressed ~1 debug messages>
+
+12.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module decoder.
+
+12.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+12.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \decoder..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~67 debug messages>
+
+12.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \decoder.
+Performed a total of 0 changes.
+
+12.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\decoder'.
+Computing hashes of 155 cells of `\decoder'.
+Finding duplicate cells in `\decoder'.
+Removed a total of 0 cells.
+
+12.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+12.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \decoder..
+
+12.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module decoder.
+
+12.16. Finished fast OPT passes. (There is nothing left to do.)
+Renaming module decoder to gate.
+
+13. Executing MITER pass (creating miter circuit).
+Creating miter cell "miter" with gold cell "gold" and gate cell "gate".
+
+13.1. Executing FLATTEN pass (flatten design).
+<suppressed ~2 debug messages>
+
+13.2. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+14. Executing HIERARCHY pass (managing design hierarchy).
+
+14.1. Analyzing design hierarchy..
+Top module:  \miter
+
+14.2. Analyzing design hierarchy..
+Top module:  \miter
+Removing unused module `\gold'.
+Removing unused module `\gate'.
+Removed 2 unused modules.
+Module miter directly or indirectly contains formal properties -> setting "keep" attribute.
+
+15. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+
+16. Executing SAT pass (solving SAT problems in the circuit).
+Using SAT solver `minisat`.
+
+Setting up SAT problem:
+Final constraint equation: { } = { }
+Imported 236 cells to SAT database.
+Import proof for assert: $auto$miter.cc:241:create_miter_equiv$30231 when 1'1.
+Import show expression: \in_inst
+Import show expression: \trigger
+
+Solving problem with 6209 variables and 16535 clauses..
+SAT proof finished - no model found: SUCCESS!
+
+                  /$$$$$$      /$$$$$$$$     /$$$$$$$    
+                 /$$__  $$    | $$_____/    | $$__  $$   
+                | $$  \ $$    | $$          | $$  \ $$   
+                | $$  | $$    | $$$$$       | $$  | $$   
+                | $$  | $$    | $$__/       | $$  | $$   
+                | $$/$$ $$    | $$          | $$  | $$   
+                |  $$$$$$/ /$$| $$$$$$$$ /$$| $$$$$$$//$$
+                 \____ $$$|__/|________/|__/|_______/|__/
+                       \__/                              
+

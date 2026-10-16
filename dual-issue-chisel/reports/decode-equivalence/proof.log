@@ -1,0 +1,164 @@
+
+-- Running command `read_verilog -sv dual-issue-chisel/build/v10-class-proof/decode_class_proof.sv; hierarchy -top decode_class_proof; proc; setattr -mod -unset keep_hierarchy; flatten; opt; sat -verify -prove correct 1 -show-inputs -show-outputs' --
+
+1. Executing Verilog-2005 frontend: dual-issue-chisel/build/v10-class-proof/decode_class_proof.sv
+Parsing SystemVerilog input from `dual-issue-chisel/build/v10-class-proof/decode_class_proof.sv' to AST representation.
+Generating RTLIL representation for module `\decoder'.
+Generating RTLIL representation for module `\decode_class_proof'.
+Successfully finished Verilog frontend.
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+
+2.1. Analyzing design hierarchy..
+Top module:  \decode_class_proof
+Used module:     \decoder
+
+2.2. Analyzing design hierarchy..
+Top module:  \decode_class_proof
+Used module:     \decoder
+Removed 0 unused modules.
+
+3. Executing PROC pass (convert processes to netlists).
+
+3.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Removed a total of 0 dead cases.
+
+3.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 0 assignments to connections.
+
+3.4. Executing PROC_INIT pass (extract init attributes).
+
+3.5. Executing PROC_ARST pass (detect async resets in processes).
+
+3.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+
+3.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+
+3.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+
+3.9. Executing PROC_DFF pass (convert process syncs to FFs).
+
+3.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+3.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module decode_class_proof.
+Optimizing module decoder.
+<suppressed ~1 debug messages>
+
+4. Executing FLATTEN pass (flatten design).
+Deleting now unused module decoder.
+<suppressed ~1 debug messages>
+
+5. Executing OPT pass (performing simple optimizations).
+
+5.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module decode_class_proof.
+
+5.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\decode_class_proof'.
+Computing hashes of 200 cells of `\decode_class_proof'.
+Finding duplicate cells in `\decode_class_proof'.
+Computing hashes of 184 cells of `\decode_class_proof'.
+Finding duplicate cells in `\decode_class_proof'.
+Computing hashes of 182 cells of `\decode_class_proof'.
+Finding duplicate cells in `\decode_class_proof'.
+<suppressed ~54 debug messages>
+Removed a total of 18 cells.
+
+5.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \decode_class_proof..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 1/2 on $mux $flatten\d.$ternary$dual-issue-chisel/build/v10-class-proof/decode_class_proof.sv:76$66.
+    dead port 2/2 on $mux $flatten\d.$ternary$dual-issue-chisel/build/v10-class-proof/decode_class_proof.sv:76$66.
+Removed 2 multiplexer ports.
+<suppressed ~73 debug messages>
+
+5.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \decode_class_proof.
+Performed a total of 0 changes.
+
+5.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\decode_class_proof'.
+Computing hashes of 181 cells of `\decode_class_proof'.
+Finding duplicate cells in `\decode_class_proof'.
+Computing hashes of 177 cells of `\decode_class_proof'.
+Finding duplicate cells in `\decode_class_proof'.
+Computing hashes of 176 cells of `\decode_class_proof'.
+Finding duplicate cells in `\decode_class_proof'.
+<suppressed ~15 debug messages>
+Removed a total of 5 cells.
+
+5.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+5.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \decode_class_proof..
+Removed 80 unused cells and 125 unused wires.
+<suppressed ~84 debug messages>
+
+5.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module decode_class_proof.
+
+5.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+5.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \decode_class_proof..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~53 debug messages>
+
+5.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \decode_class_proof.
+Performed a total of 0 changes.
+
+5.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\decode_class_proof'.
+Computing hashes of 96 cells of `\decode_class_proof'.
+Finding duplicate cells in `\decode_class_proof'.
+Removed a total of 0 cells.
+
+5.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+5.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \decode_class_proof..
+
+5.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module decode_class_proof.
+
+5.16. Finished fast OPT passes. (There is nothing left to do.)
+
+6. Executing SAT pass (solving SAT problems in the circuit).
+Using SAT solver `minisat`.
+
+Setting up SAT problem:
+Final constraint equation: { } = { }
+Imported 96 cells to SAT database.
+Import proof-constraint: \correct = 1'1
+Final proof equation: \correct = 1'1
+Import show expression: \inst
+Import show expression: \correct
+
+Solving problem with 1953 variables and 5097 clauses..
+SAT proof finished - no model found: SUCCESS!
+
+                  /$$$$$$      /$$$$$$$$     /$$$$$$$    
+                 /$$__  $$    | $$_____/    | $$__  $$   
+                | $$  \ $$    | $$          | $$  \ $$   
+                | $$  | $$    | $$$$$       | $$  | $$   
+                | $$  | $$    | $$__/       | $$  | $$   
+                | $$/$$ $$    | $$          | $$  | $$   
+                |  $$$$$$/ /$$| $$$$$$$$ /$$| $$$$$$$//$$
+                 \____ $$$|__/|________/|__/|_______/|__/
+                       \__/                              
+
