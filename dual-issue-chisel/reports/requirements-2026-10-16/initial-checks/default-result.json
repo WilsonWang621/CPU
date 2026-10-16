@@ -1,0 +1,85 @@
+{
+  "profile": "default",
+  "arguments": [],
+  "config": {
+    "robEntries": 32,
+    "iqEntries": 4,
+    "loadSlots": 8,
+    "storeSlots": 16,
+    "checkpoints": 3,
+    "renameWidth": 2,
+    "commitWidth": 2,
+    "integerPorts": 2,
+    "issueWidth": 3,
+    "prfEntries": 32,
+    "icacheWays": 1,
+    "dcacheWays": 2,
+    "icacheBytes": 1024,
+    "dcacheBytes": 2048,
+    "dcacheLineBytes": 64,
+    "dMshrs": 4,
+    "fetchQueueEntries": 8,
+    "bhtEntries": 256,
+    "btbEntries": 32,
+    "localHistoryBits": 1,
+    "historyEntries": 64,
+    "maxMemOutstanding": 16,
+    "ramBytes": 268435456,
+    "controlTree": true,
+    "robWriteTree": true,
+    "cacheTree": true,
+    "commitTree": true,
+    "registerRedirect": true
+  },
+  "rtl_sha256": "47be40fda5f2efa7384113e6b8deb1e908c1c825f78a56b36ce2c6d9907a3b0e",
+  "sim_sha256": "0592c770e993640a361c469032247f3254d2c93b4f54868beedbdc8d4486470e",
+  "latency": 10,
+  "geomean_ipc": 1.2221711020297619,
+  "performance": {
+    "median": {
+      "instructions": 6961,
+      "cycles": 6615
+    },
+    "multiply": {
+      "instructions": 21722,
+      "cycles": 16794
+    },
+    "qsort": {
+      "instructions": 139900,
+      "cycles": 127719
+    },
+    "rsort": {
+      "instructions": 195719,
+      "cycles": 120418
+    },
+    "towers": {
+      "instructions": 5278,
+      "cycles": 4804
+    },
+    "vvadd": {
+      "instructions": 4524,
+      "cycles": 3614
+    }
+  },
+  "checks": {
+    "rv32im_86_named_checks": true,
+    "upper_RAM_instruction_address": true,
+    "official_basicopt": true
+  },
+  "source_sha256": {
+    "src/main/scala/tier3/Attributes.scala": "259347537e1d49cf92647ee8c6b810b3d377848a01ec6312a538107aaee9fd41",
+    "src/main/scala/tier3/Bus.scala": "ddba554f9ff4a0cadeff01fe5262833e3bcfdef9287d4b031cfaf886071186c9",
+    "src/main/scala/tier3/Common.scala": "c0437eebc0f5373b9fcfa67ac33cb5868dac2e7ba1745f1df40f7e5c04156ad8",
+    "src/main/scala/tier3/Core.scala": "2ee367cd0e6f984f56a5ccbcf04dc7b2d50cc615cc474db3b499306c0762e275",
+    "src/main/scala/tier3/DCache.scala": "8042c0d19bc2bb43e7640c4f1246d98afaeb3dd42bc623179df7bbb002181fec",
+    "src/main/scala/tier3/Decode.scala": "f4922deceac80b99c7f6e1d524499616c7515429630f3309050090ee9a7c1f0f",
+    "src/main/scala/tier3/Frontend.scala": "934f964c6dcff823950854913a2b287adedfa51383dd844386faf55b8b5016da",
+    "src/main/scala/tier3/Generate.scala": "8d0963f57fe75a1cebce3478cf432d36d748f10a126c932ee41e1b07d491ece3",
+    "src/main/scala/tier3/LocalLogic.scala": "b1ab49cd4c39ea955d23663682c3cb3db84f90f468425d374918010806645d72",
+    "src/main/scala/tier3/MulDiv.scala": "f8064a5e59e26030703353c683d6d3d8ee947d0fe2869c841084c58d61b9ea30",
+    "src/main/scala/tier3/Rename.scala": "1dea8bb2b2ce37f0256d8b7538c9842f805a85821995df96a578d95e885adb91",
+    "src/main/scala/tier3/RenameInputProof.scala": "0265063b3c99d7d3ec4cb9ab12d59cf4904b90bcc203f03445c4f4cf03209e2d",
+    "src/main/scala/tier3/Select.scala": "84f78dfcc3d7fc22ebe70ba2cd867283d08f7a4cc519f03a410dafa69e6fbaad",
+    "src/main/scala/tier3/Top.scala": "be792634ee785c5e4d0472a1e64c8f0e7534ccb0ef36f2b705aea2381ea14b1a"
+  }
+}

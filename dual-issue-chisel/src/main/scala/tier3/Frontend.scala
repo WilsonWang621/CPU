@@ -15,14 +15,17 @@ class FetchPacket(hb: Int) extends Bundle {
   */
 class Frontend(cacheBytes: Int = 1024, queueEntries: Int = 8, bhtEntries: Int = 256,
   btbEntries: Int = 32, localHistoryBits: Int = 1, historyEntries: Int = 64,
-  ramBytes: Int = 268435456, cacheTree: Boolean = true) extends ClockedLogic {
+  ramBytes: Int = 268435456, cacheTree: Boolean = true, ways: Int = 1) extends ClockedLogic {
   override def desiredName = "v2_frontend"
   val cb = log2Ceil(cacheBytes); val lines = cacheBytes / 32; val lb = log2Ceil(lines)
+  val sets = lines / ways; val setBits = log2Ceil(sets); val wayBits = log2Ceil(ways)
   val qw = log2Ceil(queueEntries); val bw = log2Ceil(bhtEntries); val tw = log2Ceil(btbEntries)
   val hi = log2Ceil(historyEntries); val hb = localHistoryBits max 1
   require(localHistoryBits >= 0 && localHistoryBits < bw)
   require(historyEntries >= 2 && isPow2(historyEntries) && cacheBytes >= 64 && isPow2(cacheBytes))
   require(queueEntries >= 2 && isPow2(queueEntries))
+  require(Set(1, 2, 4)(ways) && cacheBytes >= 64 * ways)
+  require(bhtEntries >= 2 && isPow2(bhtEntries) && btbEntries >= 2 && isPow2(btbEntries))
   val stop = inBool(); val redirect = inBool(); val redirect_pc = in(32); val pop_count = in(2)
   val packet_valid = out(2); val packet_pc = out(64); val packet_inst = out(64); val packet_prediction = out(64)
   val packet_fault = out(8); val packet_inst_valid = out(2); val packet_history = out(2 * hb)
@@ -35,10 +38,13 @@ class Frontend(cacheBytes: Int = 1024, queueEntries: Int = 8, bhtEntries: Int = 
   val head = reg(qw); val tail = reg(qw); val count = reg(qw + 1); val pc = reg(32); val blocked = flag()
   val even_data = regs(cacheBytes / 8, 32); val odd_data = regs(cacheBytes / 8, 32)
   val even_target = regs(cacheBytes / 8, 32); val odd_target = regs(cacheBytes / 8, 32)
-  val tags = regs(lines, 32 - cb); val tag_valid = flags(lines)
+  val tags = regs(lines, 27 - setBits); val tag_valid = flags(lines)
   val valid_words = withClock(clk) { Reg(Vec(lines, Vec(8, Bool()))) }
   val failed_words = withClock(clk) { Reg(Vec(lines, Vec(8, Bool()))) }
   val busy = flag(); val fill_line = reg(32); val critical = reg(3); val issued = reg(4); val returned = reg(4)
+  val fetchPhysical = if (ways == 1) None else Some(Wire(UInt(lb.W)))
+  val fillPhysical = if (ways == 1) None else Some(reg(lb))
+  val replacement = if (ways == 1) None else Some(regs(sets, wayBits))
   val bht = regs(bhtEntries, 2); val bht_valid = flags(bhtEntries)
   val btb_tag = regs(btbEntries, 30 - tw); val btb_target = regs(btbEntries, 30); val btb_valid = flags(btbEntries)
   val local_history = regs(historyEntries, hb); val missCount = reg(64)
@@ -46,14 +52,27 @@ class Frontend(cacheBytes: Int = 1024, queueEntries: Int = 8, bhtEntries: Int = 
   val nextPair = Module(new Increment(29)); nextPair.value := pc(31, 3)
   val sequentialPc = Seq(Cat(nextWord.result, pc(1, 0)), Cat(nextPair.result, pc(2, 0)))
   val fetchPc = Seq(pc, sequentialPc(0))
-  val evenIndex = Mux(pc(2), fetchPc(1)(cb - 1, 3), pc(cb - 1, 3))
-  val oddIndex = pc(cb - 1, 3)
+  val evenIndex = if (ways == 1) Mux(pc(2), fetchPc(1)(cb - 1, 3), pc(cb - 1, 3))
+    else Cat(fetchPhysical.get, Mux(pc(2), fetchPc(1)(4, 3), pc(4, 3)))
+  val oddIndex = if (ways == 1) pc(cb - 1, 3) else Cat(fetchPhysical.get, pc(4, 3))
   val evenRead = Read((0 until cacheBytes / 8).map(r => Cat(even_target(r), even_data(r))), evenIndex, if (cacheTree) 16 else 0)
   val oddRead = Read((0 until cacheBytes / 8).map(r => Cat(odd_target(r), odd_data(r))), oddIndex, if (cacheTree) 16 else 0)
   val fetchInst = Seq(Mux(pc(2), oddRead(31, 0), evenRead(31, 0)), Mux(pc(2), evenRead(31, 0), oddRead(31, 0)))
   val fetchTarget = Seq(Mux(pc(2), oddRead(63, 32), evenRead(63, 32)), Mux(pc(2), evenRead(63, 32), oddRead(63, 32)))
-  val fetchLine = pc(cb - 1, 5)
-  val lineHit = (0 until lines).map(r => fetchLine === r.U(lb.W) && tag_valid(r) && tags(r) === pc(31, cb)).reduce(_ | _)
+  val fetchLine = if (ways == 1) pc(cb - 1, 5) else fetchPhysical.get
+  val lineHit = if (ways == 1) {
+    (0 until lines).map(r => fetchLine === r.U(lb.W) && tag_valid(r) && tags(r) === pc(31, cb)).reduce(_ | _)
+  } else {
+    val set = pc(5 + setBits - 1, 5)
+    val hits = VecInit((0 until ways).map { way =>
+      val line = Cat(set, way.U(wayBits.W))
+      tag_valid(line) && tags(line) === pc(31, 5 + setBits)
+    }).asUInt
+    val invalid = VecInit((0 until ways).map(way => !tag_valid(Cat(set, way.U(wayBits.W))))).asUInt
+    val victim = Mux(invalid.orR, PriorityEncoder(invalid), replacement.get(set))
+    fetchPhysical.get := Cat(set, Mux(hits.orR, PriorityEncoder(hits), victim))
+    hits.orR
+  }
   val trainBht = Wire(UInt(bw.W))
   trainBht := (if (localHistoryBits == 0) train_pc(bw + 1, 2)
     else (train_pc(bw + 1, 2) << localHistoryBits) | train_history.pad(bw))
@@ -129,6 +148,7 @@ class Frontend(cacheBytes: Int = 1024, queueEntries: Int = 8, bhtEntries: Int = 
     when(allocate) {
       busy := true.B; fill_line := Cat(pc(31, 5), 0.U(5.W)); critical := pc(4, 2)
       issued := 0.U; returned := 0.U; missCount := missCount + 1.U
+      fillPhysical.foreach(_ := fetchLine)
     }
     when(mem_req_valid && mem_req_ready) { issued := issued + 1.U }
     when(mem_rsp_valid) { returned := returned + 1.U; when(returned === 7.U) { busy := false.B } }
@@ -142,7 +162,8 @@ class Frontend(cacheBytes: Int = 1024, queueEntries: Int = 8, bhtEntries: Int = 
     }
   }
   for (r <- 0 until cacheBytes / 8) {
-    when(!rst && mem_rsp_valid && !mem_rsp_error && returnAddress(cb - 1, 3) === r.U((cb - 3).W)) {
+    val physicalAddress = if (ways == 1) returnAddress(cb - 1, 3) else Cat(fillPhysical.get, returnAddress(4, 3))
+    when(!rst && mem_rsp_valid && !mem_rsp_error && physicalAddress === r.U((cb - 3).W)) {
       when(returnAddress(2)) { odd_data(r) := mem_rsp_data; odd_target(r) := fillTarget }
         .otherwise { even_data(r) := mem_rsp_data; even_target(r) := fillTarget }
     }
@@ -156,10 +177,18 @@ class Frontend(cacheBytes: Int = 1024, queueEntries: Int = 8, bhtEntries: Int = 
     when(rst) { tag_valid(r) := false.B }.otherwise {
       when(allocate && fetchLine === r.U(lb.W)) {
         for (w <- 0 until 8) { valid_words(r)(w) := false.B; failed_words(r)(w) := false.B }
-        tag_valid(r) := true.B; tags(r) := pc(31, cb)
+        tag_valid(r) := true.B; tags(r) := pc(31, 5 + setBits)
       }
-      when(mem_rsp_valid && fill_line(cb - 1, 5) === r.U(lb.W)) {
+      val filledLine = if (ways == 1) fill_line(cb - 1, 5) else fillPhysical.get
+      when(mem_rsp_valid && filledLine === r.U(lb.W)) {
         valid_words(r)(returnWord) := !mem_rsp_error; failed_words(r)(returnWord) := mem_rsp_error
+      }
+    }
+  }
+  replacement.foreach { next =>
+    for (s <- 0 until sets) {
+      when(rst) { next(s) := 0.U }.elsewhen(allocate && pc(5 + setBits - 1, 5) === s.U(setBits.W)) {
+        next(s) := fetchLine(wayBits - 1, 0) + 1.U
       }
     }
   }

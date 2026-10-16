@@ -11,6 +11,7 @@ import chisel3.experimental.{annotate, ChiselAnnotation}
 case class Config(
   robEntries: Int = 32, iqEntries: Int = 4, loadSlots: Int = 8, storeSlots: Int = 16,
   checkpoints: Int = 3, renameWidth: Int = 2, commitWidth: Int = 2, integerPorts: Int = 2,
+  issueWidth: Int = 3, prfEntries: Int = 32, icacheWays: Int = 1, dcacheWays: Int = 2,
   icacheBytes: Int = 1024, dcacheBytes: Int = 2048, dcacheLineBytes: Int = 64,
   dMshrs: Int = 4, fetchQueueEntries: Int = 8, bhtEntries: Int = 256,
   btbEntries: Int = 32, localHistoryBits: Int = 1, historyEntries: Int = 64,
@@ -18,11 +19,23 @@ case class Config(
   controlTree: Boolean = true, robWriteTree: Boolean = true, cacheTree: Boolean = true,
   commitTree: Boolean = true, registerRedirect: Boolean = true
 ) {
-  require(robEntries >= 4 && isPow2(robEntries))
+  require(robEntries >= 4 && robEntries <= 256 && isPow2(robEntries), "ROB must be a power of two in 4..256 (MDU tags are 8 bits)")
+  require(prfEntries >= 4 && prfEntries <= 256 && isPow2(prfEntries), "Speculative PRF must be a power of two in 4..256")
   require(iqEntries >= 2 && isPow2(iqEntries))
   require(loadSlots >= 2 && isPow2(loadSlots))
   require(storeSlots >= 2 && isPow2(storeSlots))
-  require(checkpoints >= 2 && renameWidth == 2 && commitWidth == 2 && integerPorts == 2)
+  require(checkpoints >= 2 && checkpoints <= robEntries)
+  require(Set(1, 2)(renameWidth) && Set(1, 2)(commitWidth) && Set(1, 2)(integerPorts))
+  require(issueWidth >= 1 && issueWidth <= integerPorts + 1, "Issue width counts both integer ports and the LSU")
+  require(Set(1, 2, 4)(icacheWays) && Set(1, 2, 4)(dcacheWays))
+  require(isPow2(icacheBytes) && icacheBytes >= 64 * icacheWays)
+  require(isPow2(dcacheLineBytes) && dcacheLineBytes >= 16)
+  require(isPow2(dcacheBytes) && dcacheBytes >= 2 * dcacheWays * dcacheLineBytes)
+  require(isPow2(dMshrs) && dMshrs >= 2 && isPow2(maxMemOutstanding) && maxMemOutstanding >= 2)
+  require(isPow2(fetchQueueEntries) && fetchQueueEntries >= 2)
+  require(isPow2(bhtEntries) && bhtEntries >= 2 && isPow2(btbEntries) && btbEntries >= 2)
+  require(isPow2(historyEntries) && historyEntries >= 2 && localHistoryBits >= 0 && localHistoryBits < log2Ceil(bhtEntries))
+  require(ramBytes == 268435456, "The course top-level memory map is 256 MiB")
   val rw = log2Ceil(robEntries); val qw = log2Ceil(iqEntries)
   val lt = log2Ceil(loadSlots); val st = log2Ceil(storeSlots)
   val cpw = log2Ceil(checkpoints); val hb = localHistoryBits max 1

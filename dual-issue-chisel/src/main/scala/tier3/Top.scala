@@ -11,7 +11,7 @@ class StudentTop(p: Config = Config()) extends Logic {
   val wdata = out(32); val wstrb = out(4); val wvalid = outBool(); val wready = inBool()
   val bresp = in(2); val bvalid = inBool(); val bready = outBool()
   val core = Module(new Core(p)); core.clk := clock; core.rst := reset
-  val bridge = Module(new AxiAdapter); bridge.clock := clock; bridge.reset := reset
+  val bridge = Module(new AxiAdapter(p.maxMemOutstanding)); bridge.clock := clock; bridge.reset := reset
   bridge.req_valid := core.mem_req_valid; bridge.req_write := core.mem_req_write
   bridge.req_addr := core.mem_req_addr; bridge.req_data := core.mem_req_wdata; bridge.req_mask := core.mem_req_wstrb
   core.mem_req_ready := bridge.req_ready; core.mem_rsp_valid := bridge.resp_valid

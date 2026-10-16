@@ -18,12 +18,14 @@ class CacheOwner(st: Int, mb: Int, ww: Int) extends Bundle {
 
 class DCache(cacheBytes: Int = 2048, lineBytes: Int = 64, mshrs: Int = 4,
   loadSlots: Int = 8, storeSlots: Int = 16, credits: Int = 16, ramBytes: Int = 268435456,
-  cacheTree: Boolean = true) extends ClockedLogic {
+  cacheTree: Boolean = true, ways: Int = 2) extends ClockedLogic {
   override def desiredName = "v2_dcache"
   require(lineBytes >= 16 && isPow2(lineBytes) && cacheBytes >= 4 * lineBytes && isPow2(cacheBytes))
   require(mshrs >= 2 && isPow2(mshrs) && credits >= 2 && isPow2(credits))
+  require(Set(1, 2, 4)(ways) && cacheBytes >= 2 * ways * lineBytes)
   val offset = log2Ceil(lineBytes); val words = lineBytes / 4; val ww = offset - 2
-  val sets = cacheBytes / (2 * lineBytes); val sb = log2Ceil(sets); val lb = sb + 1; val lines = 2 * sets
+  val sets = cacheBytes / (ways * lineBytes); val sb = log2Ceil(sets); val wayBits = log2Ceil(ways)
+  val lb = sb + wayBits; val lines = ways * sets
   val rb = log2Ceil(ramBytes); val tb = rb - sb - offset; val mb = log2Ceil(mshrs); val fw = log2Ceil(credits)
   val lt = log2Ceil(loadSlots); val st = log2Ceil(storeSlots)
   val writeBanks = if (cacheBytes / 4 >= 128) 8 else 2
@@ -49,6 +51,7 @@ class DCache(cacheBytes: Int = 2048, lineBytes: Int = 64, mshrs: Int = 4,
   val tags = regs(lines, tb); val tag_valid = flags(lines)
   val word_valid = withClock(clk) { Reg(Vec(lines, Vec(words, Bool()))) }
   val replacement = flags(sets); val round_robin = reg(mb); val missCount = reg(64)
+  val replacementWay = if (ways == 2) None else Some(regs(sets, wayBits max 1))
   val return_pending = flag(); val resultTag = reg(lt); val resultError = flag(); val return_address = reg(lb + ww)
   val pending_valid = flags(writeBanks); val pending_address = regs(writeBanks, bankWordBits)
   val pending_data = regs(writeBanks, 32); val pending_mask = regs(writeBanks, 4)
@@ -57,15 +60,17 @@ class DCache(cacheBytes: Int = 2048, lineBytes: Int = 64, mshrs: Int = 4,
   val allocate = Wire(Bool()); val loadAccept = Wire(Bool()); val storeAccept = Wire(Bool())
   val loadSet = load_address(sb + offset - 1, offset); val storeSet = store_address(sb + offset - 1, offset)
   val loadWord = load_address(offset - 1, 2); val storeWord = store_address(offset - 1, 2)
-  val storeMatches = VecInit((0 until 2).map { way =>
-    val line = Cat(storeSet, way.U(1.W))
+  def physicalLine(set: UInt, way: UInt): UInt = if (ways == 1) set else Cat(set, way(wayBits - 1, 0))
+  val storeMatches = VecInit((0 until ways).map { way =>
+    val line = physicalLine(storeSet, way.U((wayBits max 1).W))
     tag_valid(line) && tags(line) === store_address(rb - 1, sb + offset)
   }).asUInt
-  val lookup = Module(new CacheLookup(sets, tb, words))
+  val lookup = Module(new CacheLookup(sets, tb, words, ways))
   lookup.address := load_address(rb - 1, 2); lookup.tags := pack((0 until lines).map(tags(_)))
   lookup.valid := tag_valid.asUInt; lookup.word_valid := pack((0 until lines).map(word_valid(_).asUInt))
   val loadTagHit = lookup.match_bits.orR; val storeTagHit = storeMatches.orR
-  val loadLine = Cat(loadSet, !lookup.match_bits(0)); val storeLine = Cat(storeSet, !storeMatches(0))
+  val loadLine = if (ways == 2) Cat(loadSet, !lookup.match_bits(0)) else physicalLine(loadSet, PriorityEncoder(lookup.match_bits).pad(1))
+  val storeLine = if (ways == 2) Cat(storeSet, !storeMatches(0)) else physicalLine(storeSet, PriorityEncoder(storeMatches).pad(1))
   load_hit := lookup.hit
   mem_req_valid := !rst && out_valid && count < credits.U
   mem_req_write := out_owner.write; mem_req_addr := out_address; mem_req_data := out_data; mem_req_mask := out_mask
@@ -87,13 +92,28 @@ class DCache(cacheBytes: Int = 2048, lineBytes: Int = 64, mshrs: Int = 4,
   val releaseMiss = (0 until mshrs).map(m => misses(m).valid && misses(m).returned === words.U &&
     !(0 until loadSlots).map(w => waiters(w).valid && waiters(w).physical === misses(m).physical).reduce(_ | _))
   selectedLine := loadLine; victimValid := loadTagHit
-  val way0 = Cat(loadSet, 0.U(1.W)); val way1 = Cat(loadSet, 1.U(1.W))
-  val replacementLine = Cat(loadSet, replacement(loadSet)); val alternateLine = Cat(loadSet, !replacement(loadSet))
-  when(!loadTagHit) {
-    when(!tag_valid(way0) && !locked(way0)) { selectedLine := way0; victimValid := true.B }
-      .elsewhen(!tag_valid(way1) && !locked(way1)) { selectedLine := way1; victimValid := true.B }
-      .elsewhen(!locked(replacementLine)) { selectedLine := replacementLine; victimValid := true.B }
-      .elsewhen(!locked(alternateLine)) { selectedLine := alternateLine; victimValid := true.B }
+  if (ways == 2) {
+    val way0 = Cat(loadSet, 0.U(1.W)); val way1 = Cat(loadSet, 1.U(1.W))
+    val replacementLine = Cat(loadSet, replacement(loadSet)); val alternateLine = Cat(loadSet, !replacement(loadSet))
+    when(!loadTagHit) {
+      when(!tag_valid(way0) && !locked(way0)) { selectedLine := way0; victimValid := true.B }
+        .elsewhen(!tag_valid(way1) && !locked(way1)) { selectedLine := way1; victimValid := true.B }
+        .elsewhen(!locked(replacementLine)) { selectedLine := replacementLine; victimValid := true.B }
+        .elsewhen(!locked(alternateLine)) { selectedLine := alternateLine; victimValid := true.B }
+    }
+  } else {
+    val candidates = (0 until ways).map(w => physicalLine(loadSet, w.U((wayBits max 1).W)))
+    val invalid = VecInit(candidates.map(line => !tag_valid(line) && !locked(line))).asUInt
+    val rotating = (0 until ways).map { step =>
+      val way = (replacementWay.get(loadSet) + step.U)((wayBits max 1) - 1, 0)
+      val line = physicalLine(loadSet, way)
+      !locked(line) -> line
+    }
+    when(!loadTagHit) {
+      victimValid := invalid.orR || rotating.map(_._1).reduce(_ | _)
+      selectedLine := Mux(invalid.orR, physicalLine(loadSet, PriorityEncoder(invalid).pad(1)),
+        PriorityMux(rotating :+ (true.B -> candidates.head)))
+    }
   }
   load_ready := !rst && !result_valid && (load_hit || (!waiters(load_tag).valid && (mergeValid || (freeValid && victimValid))))
   loadAccept := load_valid && load_ready
@@ -231,9 +251,16 @@ class DCache(cacheBytes: Int = 2048, lineBytes: Int = 64, mshrs: Int = 4,
     }
   }
   for (s <- 0 until sets) {
-    when(rst) { replacement(s) := false.B }.otherwise {
-      when(loadAccept && loadSet === s.U(sb.W)) { replacement(s) := !selectedLine(0) }
-      when(storeAccept && storeTagHit && storeSet === s.U(sb.W)) { replacement(s) := !storeLine(0) }
+    if (ways == 2) {
+      when(rst) { replacement(s) := false.B }.otherwise {
+        when(loadAccept && loadSet === s.U(sb.W)) { replacement(s) := !selectedLine(0) }
+        when(storeAccept && storeTagHit && storeSet === s.U(sb.W)) { replacement(s) := !storeLine(0) }
+      }
+    } else {
+      when(rst) { replacementWay.get(s) := 0.U }.otherwise {
+        when(loadAccept && loadSet === s.U(sb.W)) { replacementWay.get(s) := (if (ways == 1) 0.U else selectedLine(wayBits - 1, 0) + 1.U) }
+        when(storeAccept && storeTagHit && storeSet === s.U(sb.W)) { replacementWay.get(s) := (if (ways == 1) 0.U else storeLine(wayBits - 1, 0) + 1.U) }
+      }
     }
   }
 }

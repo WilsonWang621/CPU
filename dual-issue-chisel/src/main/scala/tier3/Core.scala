@@ -21,7 +21,18 @@ class Core(p: Config = Config()) extends ClockedLogic {
   val cycle_count = out(64); val retired_count = out(64); val branch_miss_count = out(64)
   val load_replay_count = out(64); val icache_miss_count = out(64); val dcache_miss_count = out(64)
   val rob = withClock(clk) { Reg(Vec(p.robEntries, new RobEntry(p))) }
-  val values = withClock(clk) { Reg(Vec(p.robEntries, Vec(4, UInt(8.W)))) }
+  val values = withClock(clk) { Reg(Vec(p.prfEntries, Vec(4, UInt(8.W)))) }
+  // The equal-capacity specialization keeps the measured ROB-indexed result
+  // file. Other capacities use independently allocated physical value slots.
+  // The committed 32-word ARF is separate from this speculative PRF.
+  val prfOwner = if (p.prfEntries == p.robEntries) None else Some(regs(p.robEntries, log2Ceil(p.prfEntries)))
+  val physicalAllocation = prfOwner.map { owners =>
+    val used = (0 until p.robEntries).map(r => Mux(rob(r).valid, UIntToOH(owners(r), p.prfEntries), 0.U(p.prfEntries.W))).reduce(_ | _)
+    val free = ~used
+    val first = PriorityEncoder(free)
+    val second = PriorityEncoder(free & ~UIntToOH(first, p.prfEntries))
+    (Seq(first, second), Seq(free.orR, PopCount(free) >= 2.U))
+  }
   val queue = withClock(clk) { Reg(Vec(3, Vec(p.iqEntries, new IssueEntry(p)))) }
   val stores = withClock(clk) { Reg(Vec(p.storeSlots, new StoreEntry(p))) }
   val loads = withClock(clk) { Reg(Vec(p.loadSlots, new LoadEntry(p))) }
@@ -86,8 +97,12 @@ class Core(p: Config = Config()) extends ClockedLogic {
     m.advance := commit_count; m.words := pack(retirementWords); m.value.asTypeOf(new RetireMeta(p))
   }
   val retirement_value = (0 until 2).map { l =>
-    val m = Module(new RetireRead(p.robEntries, 32, l, p.commitTree)); connectClock(m)
-    m.advance := commit_count; m.words := pack((0 until p.robEntries).map(values(_).asUInt)); m.value
+    if (prfOwner.isEmpty) {
+      val m = Module(new RetireRead(p.robEntries, 32, l, p.commitTree)); connectClock(m)
+      m.advance := commit_count; m.words := pack((0 until p.robEntries).map(values(_).asUInt)); m.value
+    } else {
+      Read(values.map(_.asUInt).toSeq, Read(prfOwner.get.toSeq, commit_rid(l)))
+    }
   }
   val architecturalControls = Cat(commit_valid.asUInt, pack(commit_rd), retirement_value(1), retirement_value(0))
   val architecturalCommits = if (p.commitTree) Distribution(architecturalControls, 8) else Distribution(architecturalControls, 1) match {
@@ -99,9 +114,9 @@ class Core(p: Config = Config()) extends ClockedLogic {
     m.commit_valid := cc(75, 74); m.commit_rd := cc(73, 64); m.commit_values := cc(63, 0); m.value
   }
   val frontend = Module(new Frontend(p.icacheBytes, p.fetchQueueEntries, p.bhtEntries, p.btbEntries,
-    p.localHistoryBits, p.historyEntries, p.ramBytes, p.cacheTree)); connectClock(frontend)
+    p.localHistoryBits, p.historyEntries, p.ramBytes, p.cacheTree, p.icacheWays)); connectClock(frontend)
   val dcache = Module(new DCache(p.dcacheBytes, p.dcacheLineBytes, p.dMshrs, p.loadSlots, p.storeSlots,
-    p.maxMemOutstanding, p.ramBytes, p.cacheTree)); connectClock(dcache)
+    p.maxMemOutstanding, p.ramBytes, p.cacheTree, p.dcacheWays)); connectClock(dcache)
   val memory_bus = Module(new MemoryController(p.maxMemOutstanding)); connectClock(memory_bus)
   frontend.stop := flush_all; frontend.redirect := redirect; frontend.redirect_pc := branch_next_q; frontend.pop_count := dispatch_count
   frontend.train_history := branch_history_q; frontend.train_valid := branch_fire && !branch_bad_q
@@ -150,7 +165,11 @@ class Core(p: Config = Config()) extends ClockedLogic {
   rename_maps.commit_valid := commit_valid.asUInt; rename_maps.commit_rd := pack(commit_rd); rename_maps.commit_slot := pack(commit_rid)
   rename_maps.save_valid := save_checkpoint; rename_maps.save_after_lane := save_after_lane; rename_maps.save_index := free_checkpoint
   rename_maps.restore_valid := redirect; rename_maps.restore_index := branch_checkpoint_q
-  val source_result = (0 until 4).map(s => Read((0 until p.robEntries).map(values(_).asUInt), word(rename_maps.source_slot, s, rw)))
+  val source_result = (0 until 4).map { s =>
+    val source = word(rename_maps.source_slot, s, rw)
+    if (prfOwner.isEmpty) Read((0 until p.robEntries).map(values(_).asUInt), source)
+    else Read(values.map(_.asUInt).toSeq, Read(prfOwner.get.toSeq, source))
+  }
   val source_status = (0 until 4).map(s => Read((0 until p.robEntries).map(r => Cat(rob(r).valid, rob(r).done, rob(r).fault)), word(rename_maps.source_slot, s, rw)))
   val source_architectural = source_register.map(r => Read(architectural, r))
   val alu_result = (0 until 2).map { i =>
@@ -211,7 +230,22 @@ class Core(p: Config = Config()) extends ClockedLogic {
       read.value
     }
     executing(b) := pack(slices).asTypeOf(new IssueEntry(p))
-    select_valid(b) := selected_valid(b) && (if (b == 2) executing(b).ready_a && executing(b).ready_b else true.B)
+    if (p.issueWidth == 3 && p.integerPorts == 2) {
+      select_valid(b) := selected_valid(b) && (if (b == 2) executing(b).ready_a && executing(b).ready_b else true.B)
+    }
+  }
+  if (p.issueWidth != 3 || p.integerPorts != 2) {
+    val eligible = (0 until 3).map { b =>
+      selected_valid(b) && !younger(executing(b).rid) && (if (b == 0) !mdu.rsp_valid && (!isMdu(executing(0).op) || mdu.req_ready)
+        else if (b == 1) (p.integerPorts == 2).B else executing(b).ready_a && executing(b).ready_b && !dcache.result_valid)
+    }
+    for (b <- 0 until 3) {
+      val older = (0 until 3).filter(_ != b).map { other =>
+        eligible(other) && (age(executing(other).rid) < age(executing(b).rid) ||
+          (age(executing(other).rid) === age(executing(b).rid) && (other < b).B))
+      }
+      select_valid(b) := eligible(b) && PopCount(older) < p.issueWidth.U
+    }
   }
   val addressRead = Module(new GrantRead(p.iqEntries, 32))
   addressRead.grant := memoryAddressGrant; addressRead.words := pack(prepared_address)
@@ -283,9 +317,10 @@ class Core(p: Config = Config()) extends ClockedLogic {
     val meta = retirement_meta(lane)
     val can = !blockedRetirement && state === run && rob_count > lane.U && meta.done && meta.fault === 0.U && !meta.exiting &&
       (if (lane == 0) true.B else !redirect || redirect_rid =/= head) && (!committedStore || !meta.store)
-    commit_valid(lane) := can && meta.rd =/= 0.U; commit_rd(lane) := Mux(can, meta.rd, 0.U)
-    blockedRetirement = !can; committedStore = committedStore || (can && meta.store)
-    can
+    val allowed = if (lane < p.commitWidth) can else false.B
+    commit_valid(lane) := allowed && meta.rd =/= 0.U; commit_rd(lane) := Mux(allowed, meta.rd, 0.U)
+    blockedRetirement = !allowed; committedStore = committedStore || (allowed && meta.store)
+    allowed
   }
   commit_count := PopCount(retireLanes)
   var blockedDispatch: Bool = false.B
@@ -305,7 +340,12 @@ class Core(p: Config = Config()) extends ClockedLogic {
       .elsewhen(usedBanks(0) || !free_queue_valid(0)) { bankChoice := 1.U }
       .elsewhen(usedBanks(1) || !free_queue_valid(1)) { bankChoice := 0.U }
       .otherwise { bankChoice := (occupancy(1) < occupancy(0) || (occupancy(1) === occupancy(0) && steer)).asUInt }
-    val hasInput = !blockedDispatch && frontend.packet_valid(lane) && (rob_count +& lane.U) < p.robEntries.U
+    if (p.integerPorts == 1) { when(!memoryClass) { bankChoice := 0.U } }
+    val hasInput = if (lane >= p.renameWidth) false.B else if (physicalAllocation.isEmpty) {
+      !blockedDispatch && frontend.packet_valid(lane) && (rob_count +& lane.U) < p.robEntries.U
+    } else {
+      !blockedDispatch && frontend.packet_valid(lane) && (rob_count +& lane.U) < p.robEntries.U && physicalAllocation.get._2(lane)
+    }
     val faulting = word(frontend.packet_fault, lane, 4) =/= 0.U || d.illegal
     val bankAvailable = !usedBanks(bankChoice) && free_queue_valid(bankChoice) && (!branchClass || (checkpoint_available && !saving))
     val prepare = hasInput && (faulting || bankAvailable)
@@ -419,7 +459,7 @@ class Core(p: Config = Config()) extends ClockedLogic {
           row.done := true.B; row.fault := wb_fault(w)
           if (!p.robWriteTree) {
             writeBytes(row.fault_address, wb_address(w))
-            writeBytes(values(r), if (w == 2) loadValueCopies(2 * r / p.robEntries) else wb_value(w))
+            if (prfOwner.isEmpty) writeBytes(values(r), if (w == 2) loadValueCopies(2 * r / p.robEntries) else wb_value(w))
           }
         }
       }
@@ -450,7 +490,7 @@ class Core(p: Config = Config()) extends ClockedLogic {
           for (w <- 0 until 3) {
             when(c(w)) {
               row.fault_address(byte) := word(wb_address(w), byte, 8)
-              values(r)(byte) := word(if (w == 2) loadValueCopies(2 * r / p.robEntries) else wb_value(w), byte, 8)
+              if (prfOwner.isEmpty) values(r)(byte) := word(if (w == 2) loadValueCopies(2 * r / p.robEntries) else wb_value(w), byte, 8)
             }
           }
           when(c(3)) { row.address(byte) := word(memory_address, byte, 8); row.wdata(byte) := word(memory_data, byte, 8) }
@@ -466,6 +506,22 @@ class Core(p: Config = Config()) extends ClockedLogic {
           row.pc := word(frontend.packet_pc, l, 32); row.inst := word(frontend.packet_inst, l, 32); row.iv := frontend.packet_inst_valid(l)
           row.rd := rename_rd(l); row.store := decoded(l).op === STORE
         }
+      }
+    }
+  }
+  prfOwner.foreach { owners =>
+    for (r <- 0 until p.robEntries; lane <- 0 until 2) {
+      when(!rst && dispatch_valid(lane) && dispatch_rid(lane) === r.U(rw.W)) {
+        owners(r) := physicalAllocation.get._1(lane)
+      }
+    }
+    for (physical <- 0 until p.prfEntries; w <- 0 until 3) {
+      when(!rst && wb_valid(w) && owners(wb_rid(w)) === physical.U) { writeBytes(values(physical), wb_value(w)) }
+    }
+    withClockAndReset(clk, rst) {
+      when(!rst && PopCount(rob.map(_.valid)) > p.prfEntries.U) { stop("Speculative PRF overallocated") }
+      for (a <- 0 until p.robEntries; b <- a + 1 until p.robEntries) {
+        when(!rst && rob(a).valid && rob(b).valid && owners(a) === owners(b)) { stop("PRF slot has two live owners") }
       }
     }
   }

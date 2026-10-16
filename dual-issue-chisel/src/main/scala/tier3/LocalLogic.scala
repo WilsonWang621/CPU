@@ -237,24 +237,25 @@ class CacheTagMatch(tagBits: Int = 18, words: Int = 16) extends Logic {
   match_bits := selected && valid && tag === request_tag
   hit := match_bits && word_valid(word_index)
 }
-class CacheLookup(sets: Int = 16, tagBits: Int = 18, words: Int = 16) extends Logic {
+class CacheLookup(sets: Int = 16, tagBits: Int = 18, words: Int = 16, ways: Int = 2) extends Logic {
   override def desiredName = "v2_cache_lookup"
   keepHierarchy()
   val sb = log2Ceil(sets); val ww = log2Ceil(words)
   val address = in(tagBits + sb + ww)
-  val tags = in(2 * sets * tagBits); val valid = in(2 * sets); val word_valid = in(2 * sets * words)
-  val match_bits = out(2); val hit = outBool()
-  val addresses = Distribution(address, (2 * sets + 3) / 4)
-  val matches = (0 until 2 * sets).map { line =>
+  require(Set(1, 2, 4)(ways) && sets >= 2 && isPow2(sets))
+  val tags = in(ways * sets * tagBits); val valid = in(ways * sets); val word_valid = in(ways * sets * words)
+  val match_bits = out(ways); val hit = outBool()
+  val addresses = Distribution(address, (ways * sets + 3) / 4)
+  val matches = (0 until ways * sets).map { line =>
     val localAddress = addresses(line / 4)
     val m = Module(new CacheTagMatch(tagBits, words))
-    m.selected := localAddress(ww + sb - 1, ww) === (line / 2).U(sb.W)
+    m.selected := localAddress(ww + sb - 1, ww) === (line / ways).U(sb.W)
     m.valid := valid(line); m.tag := word(tags, line, tagBits)
     m.request_tag := localAddress(tagBits + sb + ww - 1, sb + ww)
     m.word_valid := word(word_valid, line, words); m.word_index := localAddress(ww - 1, 0)
     m
   }
-  match_bits := VecInit((0 until 2).map(way => (0 until sets).map(s => matches(2 * s + way).match_bits).reduce(_ | _))).asUInt
-  val wayHits = (0 until 2).map(way => (0 until sets).map(s => matches(2 * s + way).hit).reduce(_ | _))
-  hit := Mux(match_bits(0), wayHits(0), wayHits(1))
+  match_bits := VecInit((0 until ways).map(way => (0 until sets).map(s => matches(ways * s + way).match_bits).reduce(_ | _))).asUInt
+  val wayHits = (0 until ways).map(way => (0 until sets).map(s => matches(ways * s + way).hit).reduce(_ | _))
+  hit := (if (ways == 2) Mux(match_bits(0), wayHits(0), wayHits(1)) else VecInit(wayHits)(PriorityEncoder(match_bits)))
 }
