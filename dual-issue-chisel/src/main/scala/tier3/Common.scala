@@ -30,7 +30,7 @@ case class Config(
   require(Set(1, 2, 4)(icacheWays) && Set(1, 2, 4)(dcacheWays))
   require(isPow2(icacheBytes) && icacheBytes >= 64 * icacheWays)
   require(isPow2(dcacheLineBytes) && dcacheLineBytes >= 16)
-  require(isPow2(dcacheBytes) && dcacheBytes >= 2 * dcacheWays * dcacheLineBytes)
+  require(isPow2(dcacheBytes) && dcacheBytes >= (4 max (2 * dcacheWays)) * dcacheLineBytes)
   require(isPow2(dMshrs) && dMshrs >= 2 && isPow2(maxMemOutstanding) && maxMemOutstanding >= 2)
   require(isPow2(fetchQueueEntries) && fetchQueueEntries >= 2)
   require(isPow2(bhtEntries) && bhtEntries >= 2 && isPow2(btbEntries) && btbEntries >= 2)
