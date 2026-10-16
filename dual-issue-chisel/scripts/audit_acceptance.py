@@ -85,7 +85,10 @@ def main():
 
     manifest = load(FINAL / "differential/input-manifest.json")
     assert manifest["inputs_sha256"]["dual-issue-chisel/rtl/student_top.sv"] == rtl_hash
-    reference = load(INITIAL / "v1-inputs.json")["reference_sha256"]
+    initial_inputs = load(INITIAL / "v1-inputs.json")
+    reference = initial_inputs["reference_sha256"]
+    for name in ["build.sbt", "project/build.properties", "rtl/filelist.f"]:
+        assert sha(PROJECT / name) == initial_inputs["native_sha256"]["dual-issue-chisel/" + name]
     for name, digest in reference.items():
         assert sha(ROOT / name) == digest == manifest["inputs_sha256"][name]
     native = correctness(FINAL / "final-correctness-lat20.log")
@@ -101,7 +104,14 @@ def main():
     assert "PASS cycles=116 result=262400 expected=262400" in (FINAL / "final-high-address.log").read_text()
     decoder = load(FINAL / "combinational-proofs/decoder.json")
     assert decoder["chisel_rtl_sha256"] == rtl_hash
+    assert decoder["original_sha256"] == reference["verilog/area_v2_core.v"]
     assert decoder["status"] == "combinational-equivalent"
+    for name in ["prefix-adder", "alu", "branch-unit", "operand", "axi-adapter", "memory-controller"]:
+        proof = load(FINAL / f"module-proofs/{name}.json")
+        assert proof["chisel_rtl_sha256"] == rtl_hash
+        cycles = 8 if name in ["axi-adapter", "memory-controller"] else 0
+        assert proof["cycles"] == cycles
+        assert proof["status"] == ("bounded-equivalent" if cycles else "combinational-equivalent")
     for name in ["decode_class_proof", "rename_input_proof"]:
         proof = load(FINAL / f"combinational-proofs/{name}.json")
         assert proof["status"] == "combinational-proof-passed"
@@ -114,11 +124,19 @@ def main():
     binaries = load(FINAL / "simulator-receipt.json")
     assert binaries["native_sha256"] == receipt["native_simulator_sha256"]
     assert binaries["native_rtl_sha256"] == rtl_hash
+    assert binaries["differential_sources_sha256"]["student_top.sv"] == sha(FINAL / "differential/student_top.sv")
+    for name, digest in manifest["sources_sha256"].items():
+        assert binaries["differential_sources_sha256"][name] == digest
     for name, digest in binaries["official_tools_sha256"].items():
         assert sha(ROOT / name) == digest, f"Official tool changed: {name}"
     inventory = load(FINAL / "synthesis/distribution-inventory.json")
     assert inventory["instances"] == 2016 and inventory["inverter_bits"] == 16008
-    for name, digest in load(FINAL / "sha256.json").items():
+    archive_hashes = load(FINAL / "sha256.json")
+    assert set(archive_hashes) == {
+        str(p.relative_to(FINAL)) for p in FINAL.rglob("*")
+        if p.is_file() and p.name != "sha256.json"
+    }, "Archive file list changed"
+    for name, digest in archive_hashes.items():
         assert sha(FINAL / name) == digest, f"Archive changed: {name}"
     result = {
         "accepted": True, "candidate": "v13", "native_rtl_sha256": rtl_hash,
@@ -136,6 +154,8 @@ def main():
     }
     if args.write:
         (FINAL / "acceptance.json").write_text(json.dumps(result, indent=2) + "\n")
+    else:
+        assert load(FINAL / "acceptance.json") == result, "Acceptance summary differs from raw evidence"
     print(json.dumps({k: result[k] for k in ["accepted", "frequency_mhz", "area_um2", "gates"]}, indent=2))
 
 
