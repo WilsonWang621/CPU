@@ -1,6 +1,6 @@
 # AXI4-Lite 与内存接口
 
-顶层 [student_top](../verilog/student_top.sv) 使用 `clock` 和同步高有效 `reset`，作为 32 位地址、32 位数据的 AXI4-Lite Master。
+默认顶层 [StudentTop](../dual-issue-chisel/src/main/scala/tier3/Top.scala) 使用 `clock` 和同步高有效 `reset`，作为 32 位地址、32 位数据的 AXI4-Lite Master。
 
 | 通道 | Master 输出 | Master 输入 |
 | --- | --- | --- |
@@ -16,4 +16,4 @@
 
 程序通过向 `0x80000000` 写入一个 32 位结果结束，`wstrb` 为 `4'hf`。顶层在核心结束后继续接收退出写响应，排空总线事务。完整程序和 MMIO 约定见[课程说明](../README-ZH.md)。
 
-[适配器](../verilog/pararisc_axi_adapter.sv)最多跟踪 16 笔请求，以方向 FIFO 恢复核心响应顺序；R 与 B 通道按队首方向接受返回。响应码 `00` 为成功，其余值在当前适配器中转为内部错误。独立背压、读写返回和顺序行为由 [AXI 单元用例](../tests/rtl/pararisc_axi_adapter_tb.sv)覆盖，可运行 `make verify-rtl`。
+[原生适配器](../dual-issue-chisel/src/main/scala/tier3/Bus.scala)默认最多跟踪 16 笔请求，以方向 FIFO 恢复核心响应顺序；R 与 B 通道按队首方向接受返回。响应码 `00` 为成功，其余值转为内部错误。独立背压、读写返回和顺序行为由 [AXI 单元用例](../tests/rtl/pararisc_axi_adapter_tb.sv)覆盖，可运行 `python3 dual-issue-chisel/scripts/verify_units.py --associativity --generate`；旧 Verilog 参考模块的检查仍使用 `make verify-rtl`。

@@ -1,6 +1,6 @@
 # 版本报告索引
 
-当前默认结果见[双发射阶段 10](dual-issue/frequency-stage10.md)：503.69 MHz、35,900.33 μm²、延迟 20 IPC 1.113846、19/19 正确性。旧阶段保留当时的配置、流程和实测结果。
+当前默认课程入口使用原生 Chisel，测量为 502.70 MHz、35,930.97 μm²，延迟 10 / 20 IPC 为 1.222171 / 1.113846。完整要求、默认入口和参数验证见[最新报告](../dual-issue-chisel/reports/requirements-2026-10-16/report.md)及[14 组参数实验](../dual-issue-chisel/reports/requirements-2026-10-16/parameter-sensitivity.md)。旧阶段保留各自的配置、流程和实测结果。
 
 ## 双发射 Verilog
 

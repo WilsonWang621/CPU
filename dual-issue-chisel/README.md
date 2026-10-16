@@ -1,10 +1,10 @@
 # 双发射 Chisel 实现
 
-以根目录最终双发射 Verilog（`d134aa1`，默认 ROB32 版本）逐模块迁移的原生 Chisel 工程。CPU、缓存、译码、乘除法及 AXI 适配器均由 Scala/Chisel 生成；构建不读取或嵌入 Verilog 参考 CPU。生成器使用已缓存的 Chisel 6.5.0、Scala 2.13.12、sbt 1.10.2 和 firtool 1.62.0。
+以保留的双发射 Verilog 参考实现（`d134aa1`，ROB32 版本）逐模块迁移的原生 Chisel 工程。CPU、缓存、译码、乘除法及 AXI 适配器均由 Scala/Chisel 生成；构建不读取或嵌入 Verilog 参考 CPU。生成器使用已缓存的 Chisel 6.5.0、Scala 2.13.12、sbt 1.10.2 和 firtool 1.62.0。根目录课程默认 filelist 现在直接选择本工程的生成 RTL。
 
 保留双分派、双整数发射、独立访存端口、双提交、32 项 ROB、三组各 4 项 IQ、3 个分支检查点、8 个 Load 槽、16 个 Store 槽、1 KiB I-cache、2 KiB D-cache。同步复位、空闲行预准备、访存选择提前一拍、缓存返回选择、取消响应排空和分支恢复的时钟边界均对应原设计。前缀节点、局部掩码、字节控制及反相器分发树继续使用 `keep_hierarchy`，面积和延迟均计入官方综合。
 
-最终 v13 **已通过 Tier3 / ≥500MHz 验收**：官方默认路径 **502.70 MHz、35930.97 μm²**，延迟 10 / 20 的 IPC 几何平均为 **1.222171 / 1.113846**，完整正确性 **19/19**。最终两个完整 CPU 的 19 项正确性和两组共 12 项性能逐拍 AXI 对照全部通过，周期逐项相同。当前 Scala 再生成 RTL 与综合及仿真交付输入逐字节一致；原始证据、精确值和证明范围见[最终验收报告](reports/final/report.md)，历史候选见[验收进度](reports/progress.md)。
+默认电路的官方测量为 **502.70 MHz、35930.97 μm²**，延迟 10 / 20 的 IPC 几何平均为 **1.222171 / 1.113846**。最新工作补齐真实发射宽度、独立 PRF 和缓存相联度参数，见[课程要求与架构权衡](reports/requirements-2026-10-16/report.md)及[14 组参数敏感度](reports/requirements-2026-10-16/parameter-sensitivity.md)。当前默认 RTL 与冻结 v13 的全部硬件 token 一致，并已按当前输入重新综合。v13 的完整双 CPU 逐拍 AXI 对照和组件证明保留在[历史验收报告](reports/final/report.md)，候选探索见[验收进度](reports/progress.md)。
 
 在本目录执行：
 
@@ -47,10 +47,12 @@ make test SIM=dual-issue-chisel/build/differential/sim/sim LATENCY=20 MAX_CYCLES
 
 该对照文件仅用于验证，独立交付和综合始终使用 `rtl/filelist.f`。
 
-核对最终归档与当前源码：
+核对最新完整要求归档与当前源码：
 
 ```sh
-python3 scripts/audit_acceptance.py
+python3 scripts/audit_requirements.py
 ```
 
 `make verify-units` 可重跑原 RTL 的独立模型检查；形式证明支持 `python3 scripts/prove_modules.py --native-file rtl/student_top.sv --modules decoder,alu,branch-unit,operand,axi-adapter,memory-controller`，需提供可执行 Yosys（`--yosys`）或使用课程 AppImage 环境。完整 RAT 证明使用 `python3 scripts/prove_rename.py`；参数见脚本 `--help`。
+
+参数矩阵由 `scripts/parameter_profiles.json` 固定，执行 `python3 scripts/requirements_programs.py` 后使用 `python3 scripts/check_parameters.py --generate --full-correctness`。`--issue-width` 计全部新发射指令，默认 3（两个整数端口及一个 LSU）；`--integer-ports` 控制整数端口数。`--prf` 独立于 `--rob`，表示推测值槽数，另有固定 32 字 committed ARF。两缓存分别支持 1/2/4 路及容量配置。完整复现命令和参数含义见上述最新报告。

@@ -1,6 +1,8 @@
 # 默认双发射架构
 
-默认交付由三个文件组成：[核心](../verilog/area_v2_core.v)、[AXI 适配器](../verilog/pararisc_axi_adapter.sv)及[顶层](../verilog/student_top.sv)。[结构化源描述](../verilog/area_v2/)按模块维护，导出器将记录布局和多维队列展开为普通 Verilog。
+默认课程 filelist 选择[原生 Chisel 生成的完整 CPU](../dual-issue-chisel/rtl/student_top.sv)，可编辑模块位于[Scala 源码](../dual-issue-chisel/src/main/scala/tier3/)，当前要求验证见[报告](../dual-issue-chisel/reports/requirements-2026-10-16/report.md)。
+
+Verilog 参考实现保留为三个文件：[核心](../verilog/area_v2_core.v)、[AXI 适配器](../verilog/pararisc_axi_adapter.sv)及[顶层](../verilog/student_top.sv)，通过 `FILELIST=verilog/reference_filelist.f` 选择。[结构化源描述](../verilog/area_v2/)继续按模块维护，用于参考和等价检查。
 
 | 模块 | 职责 |
 | --- | --- |

@@ -4,7 +4,7 @@ RV32IM CPU 工程。提供设计与周期行为一致的双发射 Verilog 和[�
 
 ## 当前默认版本
 
-默认顶层为 [verilog/student_top.sv](verilog/student_top.sv)，交付核心为 [verilog/area_v2_core.v](verilog/area_v2_core.v)，使用 [verilog/filelist.f](verilog/filelist.f)。
+默认课程入口 [verilog/filelist.f](verilog/filelist.f) 选择由原生 Chisel 生成的 [student_top.sv](dual-issue-chisel/rtl/student_top.sv)。根目录的 `make build/test/perf/synth` 使用该配置。旧 Verilog CPU 保留为参考，可通过 `FILELIST=verilog/reference_filelist.f` 构建。
 
 | 指标 | 双发射 Verilog | 双发射 Chisel |
 | --- | ---: | ---: |
@@ -16,7 +16,7 @@ RV32IM CPU 工程。提供设计与周期行为一致的双发射 Verilog 和[�
 
 配置为 32 项 ROB、双分派/双提交、两个整数端口及独立访存端口、三组 4 项 IQ、三个分支检查点、8 个 Load 槽和 16 个 Store 槽，I-cache 1 KiB、D-cache 2 KiB。两种双发射实现均已完成本地 Tier3 和 ≥500 MHz 目标验收。Chisel 版本的 19 项正确性和两组共 12 项性能已与参考 Verilog 做完整 CPU 逐周期 AXI 对照，周期逐项一致。
 
-实测条件、精确值及输入哈希见 [最终验收报告](reports/dual-issue/frequency-stage10.md)，原始证据见 [最终测量归档](reports/data/2026-10-16/timing-stage10/clean-default/)。Chisel 的精确结果、冻结源码和哈希绑定见[双发射 Chisel 最终验收](dual-issue-chisel/reports/final/report.md)。双发射频率均为课程官方 ASAP7 RVT TT 综合/STA 的理想时钟、无布线寄生估计。单发射最终版本为 v109：342.13 MHz、17,942.62 μm²、延迟 20 IPC 0.84602、正确性 19/19，满足 Tier2。
+实测条件、精确值及输入哈希见 [Verilog 最终验收报告](reports/dual-issue/frequency-stage10.md)，原始证据见 [最终测量归档](reports/data/2026-10-16/timing-stage10/clean-default/)。Chisel 的最新源码复核、独立 PRF/发射宽度/缓存相联度参数和验证见[课程要求与架构权衡](dual-issue-chisel/reports/requirements-2026-10-16/report.md)及[14 组参数敏感度](dual-issue-chisel/reports/requirements-2026-10-16/parameter-sensitivity.md)；[v13 历史验收](dual-issue-chisel/reports/final/report.md)保留此前逐拍对照和形式证明。双发射频率均为课程官方 ASAP7 RVT TT 综合/STA 的理想时钟、无布线寄生估计。单发射最终版本为 v109：342.13 MHz、17,942.62 μm²、延迟 20 IPC 0.84602、正确性 19/19，满足 Tier2。
 
 ## 编译与验证
 
@@ -32,7 +32,7 @@ make run SIM=build/default/sim PROGRAM=tests/rtl/high_address.data EXPECTED=0x40
 make synth
 ```
 
-AppImage 所在环境无法使用 FUSE 时，在编译或综合命令前加 `APPIMAGE_EXTRACT_AND_RUN=1`。结构化源描述位于 [verilog/area_v2/](verilog/area_v2/)，`make export-verilog` 确定性地生成交付 Verilog 及 SHA-256 清单。
+AppImage 所在环境无法使用 FUSE 时，在编译或综合命令前加 `APPIMAGE_EXTRACT_AND_RUN=1`。默认 RTL 使用 `make -C dual-issue-chisel generate` 从 Scala 生成。Verilog 参考实现的结构化源描述位于 [verilog/area_v2/](verilog/area_v2/)，`make export-verilog` 继续生成参考核心及 SHA-256 清单。
 
 双发射 Chisel 的源码与生成 RTL 位于 [dual-issue-chisel/](dual-issue-chisel/README.md)，在仓库根目录执行：
 
@@ -43,7 +43,7 @@ make -C dual-issue-chisel test
 make -C dual-issue-chisel perf LATENCY=10
 make -C dual-issue-chisel perf LATENCY=20
 APPIMAGE_EXTRACT_AND_RUN=1 make -C dual-issue-chisel synth
-python3 dual-issue-chisel/scripts/audit_acceptance.py
+python3 dual-issue-chisel/scripts/audit_requirements.py
 ```
 
 生成使用 Chisel 6.5.0、Scala 2.13.12、sbt 1.10.2、firtool 1.62.0。已提交的 `dual-issue-chisel/rtl/filelist.f` 可直接使用课程工具编译和综合。
@@ -54,8 +54,8 @@ python3 dual-issue-chisel/scripts/audit_acceptance.py
 
 | 目录 / 入口 | 内容 |
 | --- | --- |
-| [verilog/](verilog/) | 当前双发射 RTL、顶层、AXI 适配器及 filelist |
-| [dual-issue-chisel/](dual-issue-chisel/) | 原生双发射 Chisel、生成 RTL、等价验证及 Tier3 / 500 MHz 验收证据 |
+| [verilog/](verilog/) | 默认课程 filelist，以及独立保留的 Verilog 参考实现 |
+| [dual-issue-chisel/](dual-issue-chisel/) | 默认原生 Chisel、生成 RTL、参数矩阵、等价验证及 Tier3 / 500 MHz 验收证据 |
 | [single-issue-chisel/](single-issue-chisel/) | 独立单发射 Chisel 工程、冻结基准及报告 |
 | [scripts/](scripts/) | 课程工具；`area_v2/` 为导出与定向验证工具 |
 | [tests/rtl/](tests/rtl/) | 当前 RTL 单元与高地址用例 |
