@@ -1,5 +1,7 @@
 # 课程要求复核（2026-10-16）
 
+本文保留本轮开始时的缺项与修复计划。当前证据和结论见[要求验收及架构权衡](report.md)与[参数敏感度](parameter-sensitivity.md)。
+
 依据 [README-ZH.md](https://github.com/ACMClassCourse-2025/RISC-V-CPU-2026/blob/302f0cf3cccdaa5de084a2120e0d950c663e4cf5/README-ZH.md) 及其链接的 AXI/SRAM 规范。官方 main 固定为 `302f0cf3cccdaa5de084a2120e0d950c663e4cf5`；原文和哈希见 [upstream/](upstream/) 与 [upstream.json](upstream.json)。本次开始时的本地提交为 `23dcde5`。
 
 **此前 v13 证明的是默认配置的功能、性能和参考周期一致性，不能据此宣称已满足全部作业要求。** 参数化和参数敏感度报告存在缺项，本次修复和实验在下表单独追踪。

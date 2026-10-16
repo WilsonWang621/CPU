@@ -1,0 +1,6 @@
+read_verilog -sv -D SYNTHESIS "/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/rtl/student_top.sv"
+read_verilog -sv -noblackbox -D SYNTHESIS "/home/wangwenxuan/ACM/ParaRisc/scripts/ram/sram_fakeram.sv"
+hierarchy -top student_top
+proc
+memory_collect
+write_json "/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/requirements-entry/synth/opt/elaborated.json"

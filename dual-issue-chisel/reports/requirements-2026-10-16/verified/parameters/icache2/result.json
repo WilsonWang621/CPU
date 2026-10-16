@@ -1,0 +1,148 @@
+{
+  "profile": "icache2",
+  "arguments": [
+    "--icache-ways",
+    "2"
+  ],
+  "config": {
+    "robEntries": 32,
+    "iqEntries": 4,
+    "loadSlots": 8,
+    "storeSlots": 16,
+    "checkpoints": 3,
+    "renameWidth": 2,
+    "commitWidth": 2,
+    "integerPorts": 2,
+    "issueWidth": 3,
+    "prfEntries": 32,
+    "icacheWays": 2,
+    "dcacheWays": 2,
+    "icacheBytes": 1024,
+    "dcacheBytes": 2048,
+    "dcacheLineBytes": 64,
+    "dMshrs": 4,
+    "fetchQueueEntries": 8,
+    "bhtEntries": 256,
+    "btbEntries": 32,
+    "localHistoryBits": 1,
+    "historyEntries": 64,
+    "maxMemOutstanding": 16,
+    "ramBytes": 268435456,
+    "controlTree": true,
+    "robWriteTree": true,
+    "cacheTree": true,
+    "commitTree": true,
+    "registerRedirect": true
+  },
+  "rtl_sha256": "0748d3bcdb3e68276ac21b65b0fabcd7a304e4236293fdab7e67f58b6a51f57e",
+  "sim_sha256": "e7a119b9a9e57fe62ed131c49299a9d2eb01e59d0b051af4e0f70819a23b1c8e",
+  "latency": 10,
+  "geomean_ipc": 1.2221711020297619,
+  "performance": {
+    "median": {
+      "instructions": 6961,
+      "cycles": 6615
+    },
+    "multiply": {
+      "instructions": 21722,
+      "cycles": 16794
+    },
+    "qsort": {
+      "instructions": 139900,
+      "cycles": 127719
+    },
+    "rsort": {
+      "instructions": 195719,
+      "cycles": 120418
+    },
+    "towers": {
+      "instructions": 5278,
+      "cycles": 4804
+    },
+    "vvadd": {
+      "instructions": 4524,
+      "cycles": 3614
+    }
+  },
+  "performance_by_latency": {
+    "10": {
+      "geomean_ipc": 1.2221711020297619,
+      "benchmarks": {
+        "median": {
+          "instructions": 6961,
+          "cycles": 6615
+        },
+        "multiply": {
+          "instructions": 21722,
+          "cycles": 16794
+        },
+        "qsort": {
+          "instructions": 139900,
+          "cycles": 127719
+        },
+        "rsort": {
+          "instructions": 195719,
+          "cycles": 120418
+        },
+        "towers": {
+          "instructions": 5278,
+          "cycles": 4804
+        },
+        "vvadd": {
+          "instructions": 4524,
+          "cycles": 3614
+        }
+      }
+    }
+  },
+  "correctness_lat20": {
+    "add_to_100": 368,
+    "array_test1": 423,
+    "array_test2": 474,
+    "basicopt1": 115361,
+    "bulgarian": 174904,
+    "expr": 535,
+    "gcd": 377,
+    "hanoi": 3976,
+    "lvalue2": 301,
+    "magic": 353953,
+    "manyarguments": 287,
+    "multiarray": 1668,
+    "naive": 289,
+    "pi": 6548409,
+    "qsort": 799114,
+    "queens": 216848,
+    "statement_test": 887,
+    "superloop": 399247,
+    "tak": 1033758
+  },
+  "checks": {
+    "rv32im_86_named_checks": true,
+    "upper_RAM_instruction_address": true,
+    "official_basicopt": true
+  },
+  "source_sha256": {
+    "src/main/scala/tier3/ArchitectureProbe.scala": "a6205ab761be1ce4985b3421eb230916375a1732f3415a4e28521478e3654aab",
+    "src/main/scala/tier3/Attributes.scala": "259347537e1d49cf92647ee8c6b810b3d377848a01ec6312a538107aaee9fd41",
+    "src/main/scala/tier3/Bus.scala": "ddba554f9ff4a0cadeff01fe5262833e3bcfdef9287d4b031cfaf886071186c9",
+    "src/main/scala/tier3/Common.scala": "95ace316d448a7d15b6b1e92bedd0acdb903d508061522e2ea4c05951ff7d58f",
+    "src/main/scala/tier3/Core.scala": "2ee367cd0e6f984f56a5ccbcf04dc7b2d50cc615cc474db3b499306c0762e275",
+    "src/main/scala/tier3/DCache.scala": "8042c0d19bc2bb43e7640c4f1246d98afaeb3dd42bc623179df7bbb002181fec",
+    "src/main/scala/tier3/Decode.scala": "f4922deceac80b99c7f6e1d524499616c7515429630f3309050090ee9a7c1f0f",
+    "src/main/scala/tier3/Frontend.scala": "934f964c6dcff823950854913a2b287adedfa51383dd844386faf55b8b5016da",
+    "src/main/scala/tier3/Generate.scala": "022f051b65dd79917a1a9ec0e796237fe5632e066106d28efb33d6924cffd488",
+    "src/main/scala/tier3/LocalLogic.scala": "b1ab49cd4c39ea955d23663682c3cb3db84f90f468425d374918010806645d72",
+    "src/main/scala/tier3/MulDiv.scala": "f8064a5e59e26030703353c683d6d3d8ee947d0fe2869c841084c58d61b9ea30",
+    "src/main/scala/tier3/Rename.scala": "1dea8bb2b2ce37f0256d8b7538c9842f805a85821995df96a578d95e885adb91",
+    "src/main/scala/tier3/RenameInputProof.scala": "0265063b3c99d7d3ec4cb9ab12d59cf4904b90bcc203f03445c4f4cf03209e2d",
+    "src/main/scala/tier3/Select.scala": "84f78dfcc3d7fc22ebe70ba2cd867283d08f7a4cc519f03a410dafa69e6fbaad",
+    "src/main/scala/tier3/Top.scala": "be792634ee785c5e4d0472a1e64c8f0e7534ccb0ef36f2b705aea2381ea14b1a"
+  },
+  "logs_sha256": {
+    "basicopt.log": "0e5de7a63670ac67b4a04f9b26f9dce0c3b0984d1ca2e2fe176c9a7fc666c06a",
+    "correctness-lat20.log": "76f234571d6de0663d38086458c228beeb3ec1fd673387182af045a8984e8ea6",
+    "perf-lat10.log": "a6356cc19b625aba492172ceafc96554d80c5fb56f1c952c48dab1f80b7f0491",
+    "rv32im.log": "16af822e9314391d137d06296359e2937f5c8e1b38044fc5fa0e6e8425116e4b",
+    "upper-memory.log": "40cf3af8e916290cd90a7da1403ecad919087361369475c0b190bf8400ab9d25"
+  }
+}

@@ -1,0 +1,166 @@
+{
+  "profile": "small",
+  "arguments": [
+    "--rob",
+    "16",
+    "--prf",
+    "8",
+    "--iq",
+    "2",
+    "--issue-width",
+    "1",
+    "--dispatch-width",
+    "1",
+    "--commit-width",
+    "1",
+    "--icache-bytes",
+    "512",
+    "--dcache-bytes",
+    "1024",
+    "--icache-ways",
+    "2",
+    "--dcache-ways",
+    "1"
+  ],
+  "config": {
+    "robEntries": 16,
+    "iqEntries": 2,
+    "loadSlots": 8,
+    "storeSlots": 16,
+    "checkpoints": 3,
+    "renameWidth": 1,
+    "commitWidth": 1,
+    "integerPorts": 2,
+    "issueWidth": 1,
+    "prfEntries": 8,
+    "icacheWays": 2,
+    "dcacheWays": 1,
+    "icacheBytes": 512,
+    "dcacheBytes": 1024,
+    "dcacheLineBytes": 64,
+    "dMshrs": 4,
+    "fetchQueueEntries": 8,
+    "bhtEntries": 256,
+    "btbEntries": 32,
+    "localHistoryBits": 1,
+    "historyEntries": 64,
+    "maxMemOutstanding": 16,
+    "ramBytes": 268435456,
+    "controlTree": true,
+    "robWriteTree": true,
+    "cacheTree": true,
+    "commitTree": true,
+    "registerRedirect": true
+  },
+  "rtl_sha256": "78a73fe99311f6f178fbe195db982957a95341f697b78863401188bc3d78c18a",
+  "sim_sha256": "f1847aae8713dadb4973337a036f2f000bd7fb965bc94ac4d0a86c49eb88e772",
+  "latency": 10,
+  "geomean_ipc": 0.6923806862432081,
+  "performance": {
+    "median": {
+      "instructions": 6961,
+      "cycles": 9395
+    },
+    "multiply": {
+      "instructions": 21722,
+      "cycles": 24279
+    },
+    "qsort": {
+      "instructions": 139900,
+      "cycles": 306226
+    },
+    "rsort": {
+      "instructions": 195719,
+      "cycles": 373258
+    },
+    "towers": {
+      "instructions": 5278,
+      "cycles": 6180
+    },
+    "vvadd": {
+      "instructions": 4524,
+      "cycles": 5569
+    }
+  },
+  "performance_by_latency": {
+    "10": {
+      "geomean_ipc": 0.6923806862432081,
+      "benchmarks": {
+        "median": {
+          "instructions": 6961,
+          "cycles": 9395
+        },
+        "multiply": {
+          "instructions": 21722,
+          "cycles": 24279
+        },
+        "qsort": {
+          "instructions": 139900,
+          "cycles": 306226
+        },
+        "rsort": {
+          "instructions": 195719,
+          "cycles": 373258
+        },
+        "towers": {
+          "instructions": 5278,
+          "cycles": 6180
+        },
+        "vvadd": {
+          "instructions": 4524,
+          "cycles": 5569
+        }
+      }
+    }
+  },
+  "correctness_lat20": {
+    "add_to_100": 566,
+    "array_test1": 450,
+    "array_test2": 501,
+    "basicopt1": 184041,
+    "bulgarian": 303638,
+    "expr": 626,
+    "gcd": 394,
+    "hanoi": 5891,
+    "lvalue2": 305,
+    "magic": 550542,
+    "manyarguments": 287,
+    "multiarray": 2136,
+    "naive": 289,
+    "pi": 7561111,
+    "qsort": 1398929,
+    "queens": 411144,
+    "statement_test": 1113,
+    "superloop": 435734,
+    "tak": 1375457
+  },
+  "checks": {
+    "rv32im_86_named_checks": true,
+    "upper_RAM_instruction_address": true,
+    "official_basicopt": true
+  },
+  "source_sha256": {
+    "src/main/scala/tier3/ArchitectureProbe.scala": "a6205ab761be1ce4985b3421eb230916375a1732f3415a4e28521478e3654aab",
+    "src/main/scala/tier3/Attributes.scala": "259347537e1d49cf92647ee8c6b810b3d377848a01ec6312a538107aaee9fd41",
+    "src/main/scala/tier3/Bus.scala": "ddba554f9ff4a0cadeff01fe5262833e3bcfdef9287d4b031cfaf886071186c9",
+    "src/main/scala/tier3/Common.scala": "95ace316d448a7d15b6b1e92bedd0acdb903d508061522e2ea4c05951ff7d58f",
+    "src/main/scala/tier3/Core.scala": "2ee367cd0e6f984f56a5ccbcf04dc7b2d50cc615cc474db3b499306c0762e275",
+    "src/main/scala/tier3/DCache.scala": "8042c0d19bc2bb43e7640c4f1246d98afaeb3dd42bc623179df7bbb002181fec",
+    "src/main/scala/tier3/Decode.scala": "f4922deceac80b99c7f6e1d524499616c7515429630f3309050090ee9a7c1f0f",
+    "src/main/scala/tier3/Frontend.scala": "934f964c6dcff823950854913a2b287adedfa51383dd844386faf55b8b5016da",
+    "src/main/scala/tier3/Generate.scala": "022f051b65dd79917a1a9ec0e796237fe5632e066106d28efb33d6924cffd488",
+    "src/main/scala/tier3/LocalLogic.scala": "b1ab49cd4c39ea955d23663682c3cb3db84f90f468425d374918010806645d72",
+    "src/main/scala/tier3/MulDiv.scala": "f8064a5e59e26030703353c683d6d3d8ee947d0fe2869c841084c58d61b9ea30",
+    "src/main/scala/tier3/Rename.scala": "1dea8bb2b2ce37f0256d8b7538c9842f805a85821995df96a578d95e885adb91",
+    "src/main/scala/tier3/RenameInputProof.scala": "0265063b3c99d7d3ec4cb9ab12d59cf4904b90bcc203f03445c4f4cf03209e2d",
+    "src/main/scala/tier3/Select.scala": "84f78dfcc3d7fc22ebe70ba2cd867283d08f7a4cc519f03a410dafa69e6fbaad",
+    "src/main/scala/tier3/Top.scala": "be792634ee785c5e4d0472a1e64c8f0e7534ccb0ef36f2b705aea2381ea14b1a"
+  },
+  "logs_sha256": {
+    "basicopt.log": "be94e4efc3ccb382223c7b76c2c6abb376468652b8fa4c82038e32e5d0eea280",
+    "correctness-lat20.log": "a5b35f69c07498041cd8111892f44216440b968c2769b5b73cdb20919e01a00a",
+    "perf-lat10.log": "ebd8c0c4506a99fd6001bef3058ecb15f8bff3776ca490990da97746db9ac0dc",
+    "rv32im.log": "d9f2aa52713c24489289a826df8c5ca5a1141cbd38a74e1b8d09ccbdb7f75d3a",
+    "upper-memory.log": "0991f6b4db5f82914890a53fdf647c2c5cf16c0f9e32b375a2bba3d760cdd267"
+  }
+}

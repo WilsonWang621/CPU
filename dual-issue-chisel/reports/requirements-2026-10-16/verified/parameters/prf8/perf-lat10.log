@@ -1,0 +1,11 @@
+"python3" "/home/wangwenxuan/ACM/ParaRisc/scripts/testcase.py" --kind perf --build "build" \
+	--testcases "/home/wangwenxuan/ACM/ParaRisc/testcases" --max-cycles 20000000 --latency 10 \
+	--sim "/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/build/parameters/prf8/sim/sim" 
+benchmark                  instructions       cycles        IPC
+perf_median                        6961         7130     0.9763
+perf_multiply                     21722        17002     1.2776
+perf_qsort                       139900       129750     1.0782
+perf_rsort                       195719       128060     1.5283
+perf_towers                        5278         4861     1.0858
+perf_vvadd                         4524         3820     1.1843
+GEOMEAN                                                  1.1759

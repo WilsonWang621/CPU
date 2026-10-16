@@ -1,0 +1,255 @@
+{
+  "accepted": true,
+  "rtl_sha256": "47be40fda5f2efa7384113e6b8deb1e908c1c825f78a56b36ce2c6d9907a3b0e",
+  "frequency_mhz": 502.70004909180165,
+  "area_um2": 35930.96658000839,
+  "performance": {
+    "10": {
+      "geomean_ipc": 1.2221711020297619,
+      "benchmarks": {
+        "median": {
+          "instructions": 6961,
+          "cycles": 6615
+        },
+        "multiply": {
+          "instructions": 21722,
+          "cycles": 16794
+        },
+        "qsort": {
+          "instructions": 139900,
+          "cycles": 127719
+        },
+        "rsort": {
+          "instructions": 195719,
+          "cycles": 120418
+        },
+        "towers": {
+          "instructions": 5278,
+          "cycles": 4804
+        },
+        "vvadd": {
+          "instructions": 4524,
+          "cycles": 3614
+        }
+      }
+    },
+    "20": {
+      "geomean_ipc": 1.1138460959843028,
+      "benchmarks": {
+        "median": {
+          "instructions": 6961,
+          "cycles": 7233
+        },
+        "multiply": {
+          "instructions": 21722,
+          "cycles": 17029
+        },
+        "qsort": {
+          "instructions": 139900,
+          "cycles": 134993
+        },
+        "rsort": {
+          "instructions": 195719,
+          "cycles": 134501
+        },
+        "towers": {
+          "instructions": 5278,
+          "cycles": 5255
+        },
+        "vvadd": {
+          "instructions": 4524,
+          "cycles": 4405
+        }
+      }
+    }
+  },
+  "correctness_per_latency": {
+    "10": 19,
+    "20": 19
+  },
+  "parameter_configurations": {
+    "default": {
+      "ipc_lat10": 1.2221711020297619,
+      "correctness": 19
+    },
+    "issue1": {
+      "ipc_lat10": 0.8648666215373427,
+      "correctness": 19
+    },
+    "issue2": {
+      "ipc_lat10": 1.2157945449487466,
+      "correctness": 19
+    },
+    "rob16": {
+      "ipc_lat10": 1.214194149070544,
+      "correctness": 19
+    },
+    "prf8": {
+      "ipc_lat10": 1.1758514427207745,
+      "correctness": 19
+    },
+    "prf64": {
+      "ipc_lat10": 1.2221711020297619,
+      "correctness": 19
+    },
+    "iq2": {
+      "ipc_lat10": 1.1898726286996157,
+      "correctness": 19
+    },
+    "icache512": {
+      "ipc_lat10": 1.2203697751490505,
+      "correctness": 19
+    },
+    "dcache1024": {
+      "ipc_lat10": 1.1698961501586993,
+      "correctness": 19
+    },
+    "icache2": {
+      "ipc_lat10": 1.2221711020297619,
+      "correctness": 19
+    },
+    "dcache1": {
+      "ipc_lat10": 0.9525182108147215,
+      "correctness": 19
+    },
+    "int1": {
+      "ipc_lat10": 1.0556916630558428,
+      "correctness": 19
+    },
+    "small": {
+      "ipc_lat10": 0.6923806862432081,
+      "correctness": 19
+    },
+    "assoc4": {
+      "ipc_lat10": 1.2219325934598289,
+      "correctness": 19
+    }
+  },
+  "architecture_probes": 4,
+  "unit_checks": 13,
+  "requirements": {
+    "student_top_ports": {
+      "clock": [
+        "input",
+        1
+      ],
+      "reset": [
+        "input",
+        1
+      ],
+      "araddr": [
+        "output",
+        32
+      ],
+      "arvalid": [
+        "output",
+        1
+      ],
+      "arready": [
+        "input",
+        1
+      ],
+      "rdata": [
+        "input",
+        32
+      ],
+      "rresp": [
+        "input",
+        2
+      ],
+      "rvalid": [
+        "input",
+        1
+      ],
+      "rready": [
+        "output",
+        1
+      ],
+      "awaddr": [
+        "output",
+        32
+      ],
+      "awvalid": [
+        "output",
+        1
+      ],
+      "awready": [
+        "input",
+        1
+      ],
+      "wdata": [
+        "output",
+        32
+      ],
+      "wstrb": [
+        "output",
+        4
+      ],
+      "wvalid": [
+        "output",
+        1
+      ],
+      "wready": [
+        "input",
+        1
+      ],
+      "bresp": [
+        "input",
+        2
+      ],
+      "bvalid": [
+        "input",
+        1
+      ],
+      "bready": [
+        "output",
+        1
+      ]
+    },
+    "validated_parameter_values": {
+      "issueWidth": [
+        1,
+        2,
+        3
+      ],
+      "robEntries": [
+        16,
+        32
+      ],
+      "prfEntries": [
+        8,
+        32,
+        64
+      ],
+      "iqEntries": [
+        2,
+        4
+      ],
+      "icacheBytes": [
+        512,
+        1024
+      ],
+      "dcacheBytes": [
+        1024,
+        2048
+      ],
+      "icacheWays": [
+        1,
+        2,
+        4
+      ],
+      "dcacheWays": [
+        1,
+        2,
+        4
+      ]
+    },
+    "official_default_filelist_uses_native_Chisel": true,
+    "rv32im_named_checks": 86,
+    "out_of_order_execution": true,
+    "ordered_retirement": true,
+    "AXI_backpressure_errors_and_MMIO": true,
+    "reports_with_reproduction_commands": true
+  },
+  "scope": "Official synthesis/STA with ideal clock and no wire parasitics; directed architecture checks and official software regression, not full-CPU formal proof"
+}

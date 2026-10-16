@@ -1,0 +1,62 @@
+[info] welcome to sbt 1.10.2 (Ubuntu Java 21.0.12.1)
+[info] loading project definition from /home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/project
+[info] loading settings for project dual-issue-chisel from build.sbt ...
+[info] set current project to dual-issue-chisel (in build file:/home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/)
+[info] compiling 4 Scala sources to /home/wangwenxuan/ACM/ParaRisc/dual-issue-chisel/target/scala-2.13/classes ...
+[info] done compiling
+[info] running (fork) tier3.Generate --out build/parameters/default
+[success] Total time: 17 s, completed Oct 16, 2026, 6:18:45 PM
+[info] running (fork) tier3.Generate --out build/parameters/issue1 --issue-width 1
+[success] Total time: 10 s, completed Oct 16, 2026, 6:18:55 PM
+[info] running (fork) tier3.Generate --out build/parameters/issue2 --issue-width 2
+[success] Total time: 8 s, completed Oct 16, 2026, 6:19:03 PM
+[info] running (fork) tier3.Generate --out build/parameters/rob16 --rob 16
+[success] Total time: 8 s, completed Oct 16, 2026, 6:19:11 PM
+[info] running (fork) tier3.Generate --out build/parameters/prf8 --prf 8
+[success] Total time: 8 s, completed Oct 16, 2026, 6:19:19 PM
+[info] running (fork) tier3.Generate --out build/parameters/prf64 --prf 64
+[success] Total time: 11 s, completed Oct 16, 2026, 6:19:29 PM
+[info] running (fork) tier3.Generate --out build/parameters/iq2 --iq 2
+[success] Total time: 7 s, completed Oct 16, 2026, 6:19:36 PM
+[info] running (fork) tier3.Generate --out build/parameters/icache512 --icache-bytes 512
+[success] Total time: 7 s, completed Oct 16, 2026, 6:19:43 PM
+[info] running (fork) tier3.Generate --out build/parameters/dcache1024 --dcache-bytes 1024
+[success] Total time: 6 s, completed Oct 16, 2026, 6:19:50 PM
+[info] running (fork) tier3.Generate --out build/parameters/icache2 --icache-ways 2
+[success] Total time: 10 s, completed Oct 16, 2026, 6:19:59 PM
+[info] running (fork) tier3.Generate --out build/parameters/dcache1 --dcache-ways 1
+[success] Total time: 8 s, completed Oct 16, 2026, 6:20:07 PM
+[info] running (fork) tier3.Generate --out build/parameters/int1 --integer-ports 1
+[success] Total time: 7 s, completed Oct 16, 2026, 6:20:14 PM
+[info] running (fork) tier3.Generate --out build/parameters/small --rob 16 --prf 8 --iq 2 --issue-width 1 --dispatch-width 1 --commit-width 1 --icache-bytes 512 --dcache-bytes 1024 --icache-ways 2 --dcache-ways 1
+[success] Total time: 6 s, completed Oct 16, 2026, 6:20:20 PM
+[info] running (fork) tier3.Generate --out build/parameters/assoc4 --prf 64 --icache-ways 4 --dcache-ways 4
+[success] Total time: 8 s, completed Oct 16, 2026, 6:20:28 PM
+[info] running (fork) tier3.Generate --module architecture-probe --out build/probe-default
+[success] Total time: 10 s, completed Oct 16, 2026, 6:20:38 PM
+[info] running (fork) tier3.Generate --module architecture-probe --out build/probe-width1 --issue-width 1
+[success] Total time: 7 s, completed Oct 16, 2026, 6:20:46 PM
+[info] running (fork) tier3.Generate --module architecture-probe --out build/probe-width2 --issue-width 2
+[success] Total time: 8 s, completed Oct 16, 2026, 6:20:53 PM
+[info] running (fork) tier3.Generate --module architecture-probe --out build/probe-int1 --integer-ports 1 --prf 8
+[success] Total time: 8 s, completed Oct 16, 2026, 6:21:02 PM
+[info] running (fork) tier3.Generate --module frontend --cache-bytes 256 --queue-entries 4 --bht-entries 16 --btb-entries 4 --history-entries 4 --ways 1 --out build/frontend-ways1
+[success] Total time: 3 s, completed Oct 16, 2026, 6:21:05 PM
+[info] running (fork) tier3.Generate --module dcache --cache-bytes 512 --line-bytes 16 --mshrs 4 --load-slots 8 --store-slots 4 --credits 16 --ram-bytes 16384 --ways 1 --out build/dcache-return-ways1
+[success] Total time: 5 s, completed Oct 16, 2026, 6:21:10 PM
+[info] running (fork) tier3.Generate --module dcache --cache-bytes 2048 --line-bytes 16 --mshrs 2 --load-slots 4 --store-slots 4 --credits 8 --ways 1 --out build/dcache-write-ways1
+[success] Total time: 5 s, completed Oct 16, 2026, 6:21:14 PM
+[info] running (fork) tier3.Generate --module frontend --cache-bytes 256 --queue-entries 4 --bht-entries 16 --btb-entries 4 --history-entries 4 --ways 2 --out build/frontend-ways2
+[success] Total time: 3 s, completed Oct 16, 2026, 6:21:17 PM
+[info] running (fork) tier3.Generate --module dcache --cache-bytes 512 --line-bytes 16 --mshrs 4 --load-slots 8 --store-slots 4 --credits 16 --ram-bytes 16384 --ways 2 --out build/dcache-return-ways2
+[success] Total time: 3 s, completed Oct 16, 2026, 6:21:20 PM
+[info] running (fork) tier3.Generate --module dcache --cache-bytes 2048 --line-bytes 16 --mshrs 2 --load-slots 4 --store-slots 4 --credits 8 --ways 2 --out build/dcache-write-ways2
+[success] Total time: 5 s, completed Oct 16, 2026, 6:21:25 PM
+[info] running (fork) tier3.Generate --module frontend --cache-bytes 256 --queue-entries 4 --bht-entries 16 --btb-entries 4 --history-entries 4 --ways 4 --out build/frontend-ways4
+[success] Total time: 3 s, completed Oct 16, 2026, 6:21:28 PM
+[info] running (fork) tier3.Generate --module dcache --cache-bytes 512 --line-bytes 16 --mshrs 4 --load-slots 8 --store-slots 4 --credits 16 --ram-bytes 16384 --ways 4 --out build/dcache-return-ways4
+[success] Total time: 3 s, completed Oct 16, 2026, 6:21:31 PM
+[info] running (fork) tier3.Generate --module dcache --cache-bytes 2048 --line-bytes 16 --mshrs 2 --load-slots 4 --store-slots 4 --credits 8 --ways 4 --out build/dcache-write-ways4
+[success] Total time: 5 s, completed Oct 16, 2026, 6:21:36 PM
+[info] running (fork) tier3.Generate --module axi-adapter --out build/axi-unit
+[success] Total time: 2 s, completed Oct 16, 2026, 6:21:38 PM
