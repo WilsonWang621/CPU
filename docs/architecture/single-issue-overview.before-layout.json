@@ -1,0 +1,656 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "单发射 CPU：StudentTop → Core 总体架构",
+    "locale": "zh-CN",
+    "output": "docs/architecture/single-issue-overview.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "git@github.com:Team-Homework/ParaRISC.git",
+      "revision": "bec3010ab17a9293fa45db1f6486eb111986e1d7",
+      "link_mode": "local-only"
+    },
+    "legend": {
+      "entries": {
+        "frontend": {
+          "label": "取指前端"
+        },
+        "backend": {
+          "label": "计算与接口"
+        },
+        "database": {
+          "label": "寄存状态与缓存"
+        },
+        "messagebus": {
+          "label": "排队与选择"
+        }
+      }
+    },
+    "views": [
+      {
+        "id": "add-path",
+        "label": "ADD 主路径（经 IQ）",
+        "focus": [
+          "fetch",
+          "decode",
+          "rename",
+          "iq",
+          "execute",
+          "rob"
+        ],
+        "note": "以 direct=false 的合法 ADD 为例；详细步骤见同名说明卡。高亮不是周期仿真。"
+      },
+      {
+        "id": "memory-path",
+        "label": "访存与外部接口",
+        "focus": [
+          "execute",
+          "lsu",
+          "dcache",
+          "bus",
+          "fetch"
+        ],
+        "note": "MemPort 箭头表示 req 方向，rsp 沿配对接口返回。"
+      },
+      {
+        "id": "commit-recovery",
+        "label": "提交与恢复控制",
+        "focus": [
+          "rob",
+          "rename",
+          "fetch",
+          "lsu"
+        ],
+        "note": "虚线表示 retire / squash / redirect / train / commit；控制由 Core 逻辑拥有。"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "fetch",
+      "type": "frontend",
+      "label": "Frontend",
+      "sublabel": "fetch：取指与预测",
+      "pos": [
+        40,
+        40
+      ],
+      "size": [
+        190,
+        76
+      ],
+      "sources": [
+        {
+          "path": "single-issue-chisel/src/main/scala/tier2/Cache.scala",
+          "line": 250,
+          "end_line": 313,
+          "label": "前端接口与取指输出"
+        },
+        {
+          "path": "single-issue-chisel/src/main/scala/tier2/Cache.scala",
+          "line": 350,
+          "end_line": 394,
+          "label": "训练与重定向"
+        },
+        {
+          "path": "single-issue-chisel/src/main/scala/tier2/Core.scala",
+          "line": 7,
+          "end_line": 11,
+          "label": "实例与总线连接"
+        }
+      ]
+    },
+    {
+      "id": "decode",
+      "type": "backend",
+      "label": "Decoder",
+      "sublabel": "decoder：指令字段译码",
+      "pos": [
+        370,
+        40
+      ],
+      "size": [
+        190,
+        76
+      ],
+      "sources": [
+        {
+          "path": "single-issue-chisel/src/main/scala/tier2/Decode.scala",
+          "line": 5,
+          "end_line": 30,
+          "label": "Decoded 与译码"
+        },
+        {
+          "path": "single-issue-chisel/src/main/scala/tier2/Core.scala",
+          "line": 306,
+          "end_line": 311,
+          "label": "译码输入与分派握手"
+        }
+      ]
+    },
+    {
+      "id": "rename",
+      "type": "backend",
+      "label": "RenameEntry / SourceOperand",
+      "sublabel": "重命名与源操作数选择",
+      "pos": [
+        700,
+        40
+      ],
+      "size": [
+        190,
+        76
+      ],
+      "sources": [
+        {
+          "path": "single-issue-chisel/src/main/scala/tier2/Rename.scala",
+          "line": 8,
+          "end_line": 39,
+          "label": "映射及检查点"
+        },
+        {
+          "path": "single-issue-chisel/src/main/scala/tier2/Core.scala",
+          "line": 312,
+          "end_line": 321,
+          "label": "源操作数连接"
+        },
+        {
+          "path": "single-issue-chisel/src/main/scala/tier2/Core.scala",
+          "line": 419,
+          "end_line": 426,
+          "label": "分派提交恢复控制"
+        }
+      ]
+    },
+    {
+      "id": "iq",
+      "type": "messagebus",
+      "label": "IQ / OperandEntry",
+      "sublabel": "Core 内 qvalid / qtag",
+      "pos": [
+        1030,
+        40
+      ],
+      "size": [
+        190,
+        76
+      ],
+      "sources": [
+        {
+          "path": "single-issue-chisel/src/main/scala/tier2/Core.scala",
+          "line": 51,
+          "end_line": 58,
+          "label": "IQ 寄存器与操作数实例"
+        },
+        {
+          "path": "single-issue-chisel/src/main/scala/tier2/Core.scala",
+          "line": 248,
+          "end_line": 305,
+          "label": "就绪、年龄选择与发射"
+        },
+        {
+          "path": "single-issue-chisel/src/main/scala/tier2/Core.scala",
+          "line": 335,
+          "end_line": 382,
+          "label": "direct 及 IQ 入队"
+        }
+      ]
+    },
+    {
+      "id": "execute",
+      "type": "backend",
+      "label": "Execute / LocalWord",
+      "sublabel": "alu：执行与 x* 寄存器",
+      "pos": [
+        1030,
+        300
+      ],
+      "size": [
+        190,
+        76
+      ],
+      "sources": [
+        {
+          "path": "single-issue-chisel/src/main/scala/tier2/Decode.scala",
+          "line": 33,
+          "end_line": 52,
+          "label": "Execute 接口与计算"
+        },
+        {
+          "path": "single-issue-chisel/src/main/scala/tier2/Core.scala",
+          "line": 59,
+          "end_line": 93,
+          "label": "执行寄存器与分支检测"
+        },
+        {
+          "path": "single-issue-chisel/src/main/scala/tier2/Core.scala",
+          "line": 198,
+          "end_line": 244,
+          "label": "乘除连接与完成通路"
+        }
+      ]
+    },
+    {
+      "id": "rob",
+      "type": "database",
+      "label": "ROB / LocalResultWord",
+      "sublabel": "Core 内状态与顺序提交",
+      "pos": [
+        700,
+        300
+      ],
+      "size": [
+        190,
+        76
+      ],
+      "sources": [
+        {
+          "path": "single-issue-chisel/src/main/scala/tier2/Core.scala",
+          "line": 12,
+          "end_line": 50,
+          "label": "ROB、结果与架构寄存器"
+        },
+        {
+          "path": "single-issue-chisel/src/main/scala/tier2/Core.scala",
+          "line": 209,
+          "end_line": 244,
+          "label": "完成写回及 done"
+        },
+        {
+          "path": "single-issue-chisel/src/main/scala/tier2/Core.scala",
+          "line": 384,
+          "end_line": 448,
+          "label": "退休、训练与恢复"
+        }
+      ]
+    },
+    {
+      "id": "lsu",
+      "type": "messagebus",
+      "label": "LoadQueue / WordCache",
+      "sublabel": "Core 内 Store 表与转发",
+      "pos": [
+        700,
+        560
+      ],
+      "size": [
+        190,
+        76
+      ],
+      "sources": [
+        {
+          "path": "single-issue-chisel/src/main/scala/tier2/Core.scala",
+          "line": 94,
+          "end_line": 197,
+          "label": "Load、Store、L0 与转发"
+        },
+        {
+          "path": "single-issue-chisel/src/main/scala/tier2/Core.scala",
+          "line": 323,
+          "end_line": 333,
+          "label": "Store 表更新"
+        },
+        {
+          "path": "single-issue-chisel/src/main/scala/tier2/LoadQueue.scala",
+          "line": 8,
+          "end_line": 60,
+          "label": "队列接口及选择"
+        }
+      ]
+    },
+    {
+      "id": "mdu",
+      "type": "backend",
+      "label": "MulDiv",
+      "sublabel": "md：乘除请求与完成",
+      "pos": [
+        1030,
+        560
+      ],
+      "size": [
+        190,
+        76
+      ],
+      "sources": [
+        {
+          "path": "single-issue-chisel/src/main/scala/tier2/MulDiv.scala",
+          "line": 5,
+          "end_line": 81,
+          "label": "MDU 接口与状态机"
+        },
+        {
+          "path": "single-issue-chisel/src/main/scala/tier2/Core.scala",
+          "line": 197,
+          "end_line": 214,
+          "label": "请求、取消与响应连接"
+        }
+      ]
+    },
+    {
+      "id": "dcache",
+      "type": "database",
+      "label": "DataCache / Cache",
+      "sublabel": "dc：分 bank 数据缓存",
+      "pos": [
+        370,
+        560
+      ],
+      "size": [
+        190,
+        76
+      ],
+      "sources": [
+        {
+          "path": "single-issue-chisel/src/main/scala/tier2/Cache.scala",
+          "line": 10,
+          "end_line": 41,
+          "label": "Cache 与 SRAM 实例"
+        },
+        {
+          "path": "single-issue-chisel/src/main/scala/tier2/Cache.scala",
+          "line": 128,
+          "end_line": 240,
+          "label": "DataCache 接口及 bank 连接"
+        },
+        {
+          "path": "single-issue-chisel/src/main/scala/tier2/Core.scala",
+          "line": 94,
+          "end_line": 139,
+          "label": "Load/Store 与返回连接"
+        }
+      ]
+    },
+    {
+      "id": "bus",
+      "type": "backend",
+      "label": "MemoryArbiter / Bus",
+      "sublabel": "arb / bus：AXI 适配",
+      "pos": [
+        40,
+        560
+      ],
+      "size": [
+        190,
+        76
+      ],
+      "sources": [
+        {
+          "path": "single-issue-chisel/src/main/scala/tier2/Common.scala",
+          "line": 101,
+          "end_line": 143,
+          "label": "仲裁、归属与 AXI 通道"
+        },
+        {
+          "path": "single-issue-chisel/src/main/scala/tier2/Core.scala",
+          "line": 5,
+          "end_line": 11,
+          "label": "Core 接线"
+        },
+        {
+          "path": "single-issue-chisel/src/main/scala/tier2/Core.scala",
+          "line": 460,
+          "end_line": 470,
+          "label": "StudentTop 外部端口"
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "fetch-inst",
+      "from": "fetch",
+      "to": "decode",
+      "label": "out.bits.inst",
+      "variant": "emphasis"
+    },
+    {
+      "id": "decode-fields",
+      "from": "decode",
+      "to": "rename",
+      "label": "d.rs1 / d.rs2",
+      "variant": "emphasis"
+    },
+    {
+      "id": "operand-enqueue",
+      "from": "rename",
+      "to": "iq",
+      "label": "s1 / s2",
+      "variant": "emphasis"
+    },
+    {
+      "id": "issue-payload",
+      "from": "iq",
+      "to": "execute",
+      "label": "scheduled(...)",
+      "variant": "emphasis"
+    },
+    {
+      "id": "alu-complete",
+      "from": "execute",
+      "to": "rob",
+      "label": "cdb(0)",
+      "variant": "emphasis"
+    },
+    {
+      "id": "retired-source",
+      "from": "rob",
+      "to": "rename",
+      "label": "arch / values",
+      "variant": "default"
+    },
+    {
+      "id": "wake-operands",
+      "from": "rob",
+      "to": "iq",
+      "label": "preparedCdb",
+      "variant": "default"
+    },
+    {
+      "id": "multiply-request",
+      "from": "execute",
+      "to": "mdu",
+      "label": "md.io.req",
+      "variant": "default"
+    },
+    {
+      "id": "multiply-response",
+      "from": "mdu",
+      "to": "rob",
+      "label": "md.io.rsp",
+      "variant": "default"
+    },
+    {
+      "id": "memory-address",
+      "from": "execute",
+      "to": "lsu",
+      "label": "addressWord",
+      "variant": "default"
+    },
+    {
+      "id": "load-store-request",
+      "from": "lsu",
+      "to": "dcache",
+      "label": "req / store",
+      "variant": "default"
+    },
+    {
+      "id": "cache-return",
+      "from": "dcache",
+      "to": "lsu",
+      "label": "rsp / fill",
+      "variant": "default"
+    },
+    {
+      "id": "load-complete",
+      "from": "lsu",
+      "to": "rob",
+      "label": "cdb(1)",
+      "variant": "default"
+    },
+    {
+      "id": "dc-memory",
+      "from": "dcache",
+      "to": "bus",
+      "label": "dc.io.mem",
+      "variant": "default"
+    },
+    {
+      "id": "fetch-memory",
+      "from": "fetch",
+      "to": "bus",
+      "label": "fetch.io.mem",
+      "variant": "default"
+    },
+    {
+      "id": "commit-control",
+      "from": "rob",
+      "to": "rename",
+      "label": "retire / squash",
+      "variant": "dashed"
+    },
+    {
+      "id": "memory-recovery",
+      "from": "rob",
+      "to": "lsu",
+      "label": "retire / flush",
+      "variant": "dashed"
+    },
+    {
+      "id": "frontend-control",
+      "from": "rob",
+      "to": "fetch",
+      "label": "redirect / train / commit",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "阅读范围与图例",
+      "items": [
+        "本图对应 Config() 默认参数；Generate → StudentTop（RTL 名 student_top）→ c: Core。边界与主接线：Core.scala:5–11、460–501。",
+        "青色强调实线：选定 ADD 主数据路径；普通实线：其他数据/请求路径；虚线：恢复、训练及退休控制。箭头表示所标信号方向。",
+        "MemPort 标注指请求方向，配对 rsp 沿原接口反向返回；valid/ready 握手也有反向控制，未逐根展开。",
+        "ROB、IQ、Store 表、cdb 是 Core 内部逻辑分组，不是同名独立 Module。共同 clock/reset 及局部扇出单元在总体图中省略。"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Frontend",
+      "items": [
+        "职责：取指 Cache、取指队列、目标表、方向计数器与 RAS；实例名 fetch。默认 I-cache 4 KiB，Frontend 实际固定单路。",
+        "输入：io.mem.rsp、io.redirect、io.train、io.commit、io.out.ready；输出：io.mem.req、io.out（pc / inst / next / history）。",
+        "位置：Cache.scala:250–313、350–394；Core.scala:7–11、390–411。BTB/BHT/RAS 均由实际状态和读写逻辑确认。"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Decoder",
+      "items": [
+        "职责：把 32 位 io.inst 转为 Decoded；实例 decoder。ADD 对应 op=0x33、fn=0、sub=0、muldiv=false。",
+        "输入：fetch.io.out.bits.inst → decoder.io.inst；输出：d.rd / rs1 / rs2 / imm / fn 及 load、store、branch、muldiv 等控制。",
+        "位置：Decode.scala:5–30；Core.scala:306–311。d 还直接准备 qd 与 xdWord，图上经重命名分组呈现分派过程。"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "RenameEntry / SourceOperand",
+      "items": [
+        "职责：31 个 RenameEntry 保存 x1..x31 的 mapped / tag 及分支快照；SourceOperand 选择 arch、values 或本拍 completion。",
+        "输入：dispatch / d.rd / tail、retire / head、restore / squash，源寄存器及 preparedCdb；输出：mapped / mapping、s1 / s2 的 ready / data / tag。",
+        "位置：Rename.scala:8–39；Operand.scala:29–56；Core.scala:312–321、419–426。x0 固定未映射，且源值为 0。"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "IQ / OperandEntry",
+      "items": [
+        "职责：qvalid / qd / qtag 与两组 OperandEntry 保存等待指令及操作数；从 eligible 中按 ROB 年龄选一条。默认 p.iq=8。",
+        "输入：d、s1 / s2、preparedCdb、loadCredit、md.io.req.ready；输出：winner / issue 与 scheduled(...) 数据。",
+        "位置：Core.scala:51–58、248–305、335–382；Operand.scala:6–25。ready 与 tag 匹配构成可确认的唤醒/旁路。",
+        "分派例外：direct 为真时 qvalid(free):=!direct，不保留 IQ 项，直接准备 x*；单条新发射限制不等于每拍只能完成一个结果。"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Execute / LocalWord",
+      "items": [
+        "职责：xdWord / xaWord / xbWord 等寄存执行负载；alu: Execute 计算整数结果、分支 next / taken；addressWord 保存地址。",
+        "输入：xd / xpc / xa / xb，xt / xnext；输出：alu.io.result / next / taken，cdb(0)、md.io.req 和访存地址/数据。",
+        "位置：Core.scala:59–93、198–244、335–354；Decode.scala:33–52。branchMiss 与恢复信号属于 Core 控制，汇入 ROB 分组说明。"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "ROB / LocalResultWord",
+      "items": [
+        "职责：live / done / rd / writes、head / tail / count 与 resultWords 管理在途状态；architecturalWords 保存已提交寄存器。默认 p.rob=32。",
+        "输入：dispatch、cdb(0..2)、resultWords.io.completed、branchMiss；输出：values / arch、retire、flush、fetch.io.redirect / train / commit。",
+        "位置：Core.scala:12–50、209–244、384–448；LocalLogic.scala:69–108、135–142。preparedCdb 从 Core 完成信号接到 OperandEntry，并非先读结果寄存器。",
+        "顺序提交条件：count 非零且 atHead(done)，Store 还需 storeReady；retire 后推进 head。恢复清除年轻 live / qvalid，并恢复 RenameEntry。"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "LoadQueue / WordCache",
+      "items": [
+        "职责：汇总 Core 的 Store 表、逐字节转发、L0 WordCache 与 loadRequests: LoadQueue；不是一个独立 LSU 类。",
+        "输入：addressWord.io.value、xb、xd.fn、dc.io.rsp / fill、live / wrapped / squashMask；输出：dc.io.req / store、loadCredit 与 cdb(1)。",
+        "位置：Core.scala:94–197、323–333、384–388；LoadQueue.scala:8–60。默认 Load 槽 8、Store 表槽 8、L0 32 字。",
+        "Load 可 fullyForwarded 或 l0Hit 提前完成；否则排入 LoadQueue。Load 有老 Store 等待条件；Store 只在 ROB 头完成且可接收时进入 DataCache。"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "MulDiv",
+      "items": [
+        "职责：分段乘法与迭代除法；实例 md。默认 divStepBits=1、divResultCache=false，不把可选缓存画成启用功能。",
+        "输入：req（tag / a / b / fn）、kill；输出：req.ready、rsp（valid / tag / data）、activeTag。",
+        "位置：MulDiv.scala:5–81；Core.scala:197–214。rsp 接 cdb(2)；恢复通过 activeTag 年龄判定决定 kill。"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "DataCache / Cache",
+      "items": [
+        "职责：默认 4 bank 的 DataCache，内部 Cache 使用 Sram 数据/标签阵列、CacheOwner、每 bank Store 队列和请求/响应仲裁。",
+        "输入：req、store、candidates、squash / boundary / wrapped / squashMask、mem.rsp；输出：rsp、fill、loadReady、storeReady、mem.req。",
+        "位置：Cache.scala:10–41、128–240；Common.scala:90–97；Core.scala:94–139。默认总容量 4 KiB、每 bank 两路、64 B 行。",
+        "Sram 的 desiredName 为 sram_fakeram；这里只确认接口及实例，外部行为模型和实际时序/性能不由此图证明。"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "MemoryArbiter / Bus",
+      "items": [
+        "职责：arb 在 fetch.io.mem 与 dc.io.mem 间仲裁并记录 owners；bus 转换为 AXI，AW/W 分别跟踪握手。",
+        "输入：clients(0/1).req 与外部 arready / rdata / rresp / rvalid / awready / wready / bresp / bvalid；输出：配对 rsp 和 AXI 主机信号。",
+        "位置：Common.scala:101–143；Core.scala:5–11、460–470。StudentTop 只包裹 Core 并展平 axi；外部 RAM 不在此源码切片内。",
+        "Bus.io.in 为 MemPort，Bus.io.axi 为 Axi；请求含 addr / data / mask / write，响应含 data / error。owners/directions 队列深度均为 32。"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "主要指令路径：ADD（等待后经 IQ 发射）",
+      "items": [
+        "① Frontend：Cache 返回 inst，fetched.io.enq 输出 pc / inst / next / history（Cache.scala:289–313）。",
+        "② Decoder + 分派：译码 ADD；fetch.io.out.fire 产生 dispatch，ROB 以 tail 分配。选择 direct=false 的情况，例如源操作数未就绪（Core.scala:306–358）。",
+        "③ RenameEntry / SourceOperand → IQ：记录生产者标签；OperandEntry 比较 preparedCdb 的 tag，取得 data 并使 ready 成立（Operand.scala:6–25、29–48）。",
+        "④ winner / issue：在 eligible 中选最老者，scheduled(...) 写入 xdWord / xaWord / xbWord / xtWord（Core.scala:248–305、340–354）。",
+        "⑤ Execute → cdb(0)：合法存活的 ADD 以 xt 为标签返回 alu.io.result；LocalResultWord 写值并使 done 成立（Core.scala:209–244；Decode.scala:38–46）。",
+        "⑥ ROB → LocalArchWord：轮到 head 且 done 后，retire && atHead(writes) 写 rd / retiredValue，再推进 head（Core.scala:384、412–424）。不声称固定周期数。"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "事实边界与讨论问题",
+      "items": [
+        "源码确认：eligible 年龄选择允许就绪年轻指令越过未就绪老指令；retire 只看 ROB 头。该结构支持乱序执行、顺序提交，但本图未重新做运行验证。",
+        "源码确认：Common.scala:23 强制 issueWidth==1。Cache、操作数旁路和预测逻辑均有实际实例/连线；没有把 dual-issue-chisel 的结构混入本图。",
+        "未确认/未测量：任意程序正确性、具体 ADD 周期数、Fmax、面积和 IPC；外部 AXI 从机及 SRAM 模型内部实现不在此图范围。",
+        "本次只交付总体架构图；可讨论：direct 的适用条件、Load 对老 Store 的等待、branchMiss→flush 的边界。动画只表示连接方向，不是周期仿真。"
+      ]
+    }
+  ]
+}

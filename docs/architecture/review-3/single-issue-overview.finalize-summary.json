@@ -1,0 +1,316 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "architecture",
+  "quality": "showcase",
+  "specification": {
+    "path": "/home/wangwenxuan/ACM/大二上/ParaRisc/docs/architecture/single-issue-overview.json",
+    "sha256": "31d90e77ff460bda2d7b97aaa68e0cc04c1b735194d5969a0fee84d3254a1f65",
+    "bytes": 21365
+  },
+  "artifact": {
+    "path": "/home/wangwenxuan/ACM/大二上/ParaRisc/docs/architecture/single-issue-overview.html",
+    "sha256": "105466fed78f9c4375e7c438f20ee01922cfa6f9ffb211954fbb2143052cbc9e",
+    "bytes": 850411
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "/home/wangwenxuan/ACM/大二上/ParaRisc/docs/architecture/review-3/single-issue-overview.finalize.json",
+    "summaryReceipt": "/home/wangwenxuan/ACM/大二上/ParaRisc/docs/architecture/review-3/single-issue-overview.finalize-summary.json",
+    "browserCheckReceipt": "/home/wangwenxuan/ACM/大二上/ParaRisc/docs/architecture/review-3/single-issue-overview.browser-check.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-21T06:25:21.346Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 4598,
+  "browserCheck": {
+    "requested": true,
+    "ran": true
+  },
+  "visualReviewRecommendation": {
+    "action": "inspect-route-readability",
+    "signals": {
+      "resolvedCrossovers": 11,
+      "routesOverSuggestedBends": 5
+    },
+    "reason": "Automated gates passed, but crossings or detours still need perceptual review before claiming visual quality.",
+    "affectedRoutes": {
+      "crossings": [
+        {
+          "left": {
+            "id": "issue-payload",
+            "from": "iq",
+            "to": "execute",
+            "label": "scheduled(...)",
+            "collectionIndex": 3,
+            "artifactIndex": 4
+          },
+          "right": {
+            "id": "alu-complete",
+            "from": "execute",
+            "to": "rob",
+            "label": "cdb(0)",
+            "collectionIndex": 4,
+            "artifactIndex": 5
+          },
+          "point": [
+            986.8000000000002,
+            276
+          ],
+          "sharedNode": "execute"
+        },
+        {
+          "left": {
+            "id": "issue-payload",
+            "from": "iq",
+            "to": "execute",
+            "label": "scheduled(...)",
+            "collectionIndex": 3,
+            "artifactIndex": 4
+          },
+          "right": {
+            "id": "retired-source",
+            "from": "rob",
+            "to": "rename",
+            "label": "arch / values",
+            "collectionIndex": 5,
+            "artifactIndex": 6
+          },
+          "point": [
+            986.8000000000002,
+            140.00000000000003
+          ]
+        },
+        {
+          "left": {
+            "id": "issue-payload",
+            "from": "iq",
+            "to": "execute",
+            "label": "scheduled(...)",
+            "collectionIndex": 3,
+            "artifactIndex": 4
+          },
+          "right": {
+            "id": "frontend-control",
+            "from": "rob",
+            "to": "fetch",
+            "label": "redirect / train / commit",
+            "collectionIndex": 17,
+            "artifactIndex": 18
+          },
+          "point": [
+            972.6000000000004,
+            323.9999999999999
+          ]
+        },
+        {
+          "left": {
+            "id": "alu-complete",
+            "from": "execute",
+            "to": "rob",
+            "label": "cdb(0)",
+            "collectionIndex": 4,
+            "artifactIndex": 5
+          },
+          "right": {
+            "id": "frontend-control",
+            "from": "rob",
+            "to": "fetch",
+            "label": "redirect / train / commit",
+            "collectionIndex": 17,
+            "artifactIndex": 18
+          },
+          "point": [
+            972.6000000000004,
+            276
+          ],
+          "sharedNode": "rob"
+        },
+        {
+          "left": {
+            "id": "multiply-request",
+            "from": "execute",
+            "to": "mdu",
+            "label": "md.io.req",
+            "collectionIndex": 7,
+            "artifactIndex": 8
+          },
+          "right": {
+            "id": "load-complete",
+            "from": "lsu",
+            "to": "rob",
+            "label": "cdb(1)",
+            "collectionIndex": 12,
+            "artifactIndex": 13
+          },
+          "point": [
+            960,
+            468
+          ]
+        },
+        {
+          "left": {
+            "id": "multiply-request",
+            "from": "execute",
+            "to": "mdu",
+            "label": "md.io.req",
+            "collectionIndex": 7,
+            "artifactIndex": 8
+          },
+          "right": {
+            "id": "commit-control",
+            "from": "rob",
+            "to": "rename",
+            "label": "retire / squash",
+            "collectionIndex": 15,
+            "artifactIndex": 16
+          },
+          "point": [
+            960,
+            400
+          ]
+        },
+        {
+          "left": {
+            "id": "multiply-request",
+            "from": "execute",
+            "to": "mdu",
+            "label": "md.io.req",
+            "collectionIndex": 7,
+            "artifactIndex": 8
+          },
+          "right": {
+            "id": "memory-recovery",
+            "from": "rob",
+            "to": "lsu",
+            "label": "retire / flush",
+            "collectionIndex": 16,
+            "artifactIndex": 17
+          },
+          "point": [
+            960,
+            557
+          ]
+        },
+        {
+          "left": {
+            "id": "multiply-response",
+            "from": "mdu",
+            "to": "rob",
+            "label": "md.io.rsp",
+            "collectionIndex": 8,
+            "artifactIndex": 9
+          },
+          "right": {
+            "id": "memory-recovery",
+            "from": "rob",
+            "to": "lsu",
+            "label": "retire / flush",
+            "collectionIndex": 16,
+            "artifactIndex": 17
+          },
+          "point": [
+            1125,
+            557
+          ],
+          "sharedNode": "rob"
+        }
+      ],
+      "detours": [
+        {
+          "relationship": {
+            "id": "alu-complete",
+            "from": "execute",
+            "to": "rob",
+            "label": "cdb(0)",
+            "collectionIndex": 4,
+            "artifactIndex": 5
+          },
+          "bends": 3,
+          "stretch": 1.186
+        },
+        {
+          "relationship": {
+            "id": "retired-source",
+            "from": "rob",
+            "to": "rename",
+            "label": "arch / values",
+            "collectionIndex": 5,
+            "artifactIndex": 6
+          },
+          "bends": 4,
+          "stretch": 1
+        },
+        {
+          "relationship": {
+            "id": "commit-control",
+            "from": "rob",
+            "to": "rename",
+            "label": "retire / squash",
+            "collectionIndex": 15,
+            "artifactIndex": 16
+          },
+          "bends": 3,
+          "stretch": 1.138
+        },
+        {
+          "relationship": {
+            "id": "memory-recovery",
+            "from": "rob",
+            "to": "lsu",
+            "label": "retire / flush",
+            "collectionIndex": 16,
+            "artifactIndex": 17
+          },
+          "bends": 3,
+          "stretch": 1
+        },
+        {
+          "relationship": {
+            "id": "frontend-control",
+            "from": "rob",
+            "to": "fetch",
+            "label": "redirect / train / commit",
+            "collectionIndex": 17,
+            "artifactIndex": 18
+          },
+          "bends": 3,
+          "stretch": 1
+        }
+      ],
+      "truncated": true
+    },
+    "hints": [
+      "rob has 6 relationships facing its left side, which fits 4 ports: make that side at least 102px, or move some of those neighbours so they face another side of rob.",
+      "iq → execute and execute → rob cross next to execute: move node iq or rob so the two reach execute from different sides (for example one level with it, one directly above or below it).",
+      "iq → execute crosses rob → rename: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor.",
+      "iq → execute crosses rob → fetch: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor.",
+      "execute → rob and rob → fetch cross next to rob: move node execute or fetch so the two reach rob from different sides (for example one level with it, one directly above or below it).",
+      "execute → mdu crosses lsu → rob: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor.",
+      "execute → mdu crosses rob → rename: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor.",
+      "execute → mdu crosses rob → lsu: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor."
+    ],
+    "repair": "Trace these relationships at the desktop viewport. For Architecture, use references/architecture-layout-repair.md: reflow a blocked main path or tangled connected scene, and repair an isolated defect locally only when the surrounding composition is accepted. Preserve all semantic content and user-fixed geometry. Rerun finalize once after the edit."
+  }
+}

@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "architecture",
+  "quality": "showcase",
+  "specification": {
+    "path": "/home/wangwenxuan/ACM/大二上/ParaRisc/docs/architecture/single-issue-overview.json",
+    "sha256": "17e6f88d46667b5cfd80b3de60f02e88d6d04a5c9e6573b791567fbd9c15c3c1",
+    "bytes": 21365
+  },
+  "artifact": {
+    "path": "/home/wangwenxuan/ACM/大二上/ParaRisc/docs/architecture/single-issue-overview.html",
+    "sha256": "e21768ceaddfca3019b84cda34b06bdbc830d409af3ee97226faf1e2b73e99f1",
+    "bytes": 849181
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "/home/wangwenxuan/ACM/大二上/ParaRisc/docs/architecture/review-4/single-issue-overview.finalize.json",
+    "summaryReceipt": "/home/wangwenxuan/ACM/大二上/ParaRisc/docs/architecture/review-4/single-issue-overview.finalize-summary.json",
+    "browserCheckReceipt": "/home/wangwenxuan/ACM/大二上/ParaRisc/docs/architecture/review-4/single-issue-overview.browser-check.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-21T06:25:21.346Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 4524,
+  "browserCheck": {
+    "requested": true,
+    "ran": true
+  },
+  "visualReviewRecommendation": {
+    "action": "inspect-route-readability",
+    "signals": {
+      "resolvedCrossovers": 2,
+      "routesOverSuggestedBends": 1
+    },
+    "reason": "Automated gates passed, but crossings or detours still need perceptual review before claiming visual quality.",
+    "affectedRoutes": {
+      "crossings": [
+        {
+          "left": {
+            "id": "alu-complete",
+            "from": "execute",
+            "to": "rob",
+            "label": "cdb(0)",
+            "collectionIndex": 4,
+            "artifactIndex": 5
+          },
+          "right": {
+            "id": "wake-operands",
+            "from": "rob",
+            "to": "iq",
+            "label": "preparedCdb",
+            "collectionIndex": 6,
+            "artifactIndex": 7
+          },
+          "point": [
+            956.2,
+            276
+          ],
+          "sharedNode": "rob"
+        },
+        {
+          "left": {
+            "id": "multiply-response",
+            "from": "mdu",
+            "to": "rob",
+            "label": "md.io.rsp",
+            "collectionIndex": 8,
+            "artifactIndex": 9
+          },
+          "right": {
+            "id": "memory-address",
+            "from": "execute",
+            "to": "lsu",
+            "label": "addressWord",
+            "collectionIndex": 9,
+            "artifactIndex": 10
+          },
+          "point": [
+            914.0666666666667,
+            352
+          ]
+        }
+      ],
+      "detours": [
+        {
+          "relationship": {
+            "id": "alu-complete",
+            "from": "execute",
+            "to": "rob",
+            "label": "cdb(0)",
+            "collectionIndex": 4,
+            "artifactIndex": 5
+          },
+          "bends": 3,
+          "stretch": 1.203
+        }
+      ],
+      "truncated": false
+    },
+    "hints": [
+      "execute → rob and rob → iq cross next to rob: move node execute or iq so the two reach rob from different sides (for example one level with it, one directly above or below it).",
+      "mdu → rob crosses execute → lsu: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor.",
+      "execute → rob needs 3 bends: move node execute or rob so they share a row or column with matching centers, or sit diagonally with a clear corner."
+    ],
+    "repair": "Trace these relationships at the desktop viewport. For Architecture, use references/architecture-layout-repair.md: reflow a blocked main path or tangled connected scene, and repair an isolated defect locally only when the surrounding composition is accepted. Preserve all semantic content and user-fixed geometry. Rerun finalize once after the edit."
+  }
+}
