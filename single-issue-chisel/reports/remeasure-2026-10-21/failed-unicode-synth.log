@@ -1,0 +1,14 @@
+make: Entering directory '/home/wangwenxuan/ACM/大二上/ParaRisc/single-issue-chisel'
+make -C /home/wangwenxuan/ACM/大二上/ParaRisc synth FILELIST=single-issue-chisel/rtl/filelist.f SYNTH_OUT=single-issue-chisel/build/remeasure-2026-10-21/synth
+make[1]: Entering directory '/home/wangwenxuan/ACM/大二上/ParaRisc'
+"python3" "/home/wangwenxuan/ACM/大二上/ParaRisc/scripts/synth.py" --filelist "single-issue-chisel/rtl/filelist.f" --out "single-issue-chisel/build/remeasure-2026-10-21/synth" \
+	--mode "opt" --clock-period "2.0" \
+	--abc-driving-cell "INVx1_ASAP7_75t_R" --abc-load-ff "5.0" \
+	--appimage "/home/wangwenxuan/ACM/大二上/ParaRisc/cpu2026-tools-x86_64.AppImage"  \
+	  \
+	
+ERROR: Unsupported \uXXXX sequence in JSON string: FFFF.
+make[1]: *** [Makefile:86: synth] Error 1
+make[1]: Leaving directory '/home/wangwenxuan/ACM/大二上/ParaRisc'
+make: *** [Makefile:17: synth] Error 2
+make: Leaving directory '/home/wangwenxuan/ACM/大二上/ParaRisc/single-issue-chisel'

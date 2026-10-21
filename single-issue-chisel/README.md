@@ -10,7 +10,15 @@
 
 动画表示连接方向，不代表逐周期执行时序。[完整交互图 HTML](../docs/architecture/single-issue-overview.html) 需下载后用浏览器打开；[图源及使用说明](../docs/architecture/README.md)支持继续讨论和修改。
 
-## 验收与复现
+## 当前测量：2026-10-21 官方新综合流程
+
+当前默认电路仍为 v109，源码、参数和交付 RTL 均未改变。启用 ABC 缓冲插入和单元尺寸优化的官方流程下，重新测得 **423.32 MHz、18,831.74 μm²（含 SRAM 2,910.44 μm²）**。频率超过 400 MHz，但总面积超过 Tier2 的 18,000 μm² 门槛，**当前配置不再满足 95 分档，不能据频率单独计为 97 分**。
+
+本次两种内存延迟的完整正确性均为 **19/19**，性能均为 **6/6**；IPC 几何平均为 **0.87846442（延迟 10）/ 0.84602401（延迟 20）**。延迟 20 的六项周期与历史 v109 完全一致。
+
+完整输入哈希、两种延迟的逐项性能、正确性日志、官方综合/STA 原始结果及英文路径复现方法见 [本次复测报告](reports/remeasure-2026-10-21/report.md)；机器可读结果见 [latest-measurement.json](latest-measurement.json)。下列阶段 1–5 的数字均为当时流程的历史记录，不作为当前流程的达标结论。
+
+## 阶段历史与复现
 
 验收固定使用课程原样 `scripts/synth.py`、ASAP7 RVT TT 及课程默认时序约束；性能测试内存延迟 20、上限 30,000,000 周期。总面积包括 SRAM。
 
@@ -38,9 +46,9 @@ make synth
 
 阶段 1 固定基准为 v66：19/19 正确性、六项性能通过，IPC **0.84776**，默认综合 **304.22 MHz / 17,605.84 μm²**。面积包含 **2,910.44 μm² SRAM**，默认综合目标周期保持 **2 ns**。配置为 ROB 32、IQ 8、I/D cache 各 4 KiB、4 个 Dcache bank、64 字节 line、BTB 64、history 1 位、L0 32 字、每 bank 4 项 Store 缓冲、8 项 Store 地址表、8 项 Load 队列、4 项分支快照；保持每拍一条发射和一条退休。
 
-最终默认 CPU 为 **v109：342.13 MHz、17,942.62 μm²（其中 SRAM 2,910.44 μm²）、IPC 0.84602、正确性 19/19**。保留 v94 的 16 位发射分片及已有流水，在取指队列原有边界提前保存下一条输出，组合逐 bank 返回归属匹配与局部发射就绪；相对 v94 提升 **3.01%**，六项官方性能周期不变。400 MHz 和 500 MHz 都没有达到。
+阶段 5 历史默认 CPU 为 **v109：342.13 MHz、17,942.62 μm²（其中 SRAM 2,910.44 μm²）、IPC 0.84602、正确性 19/19**。保留 v94 的 16 位发射分片及已有流水，在取指队列原有边界提前保存下一条输出，组合逐 bank 返回归属匹配与局部发射就绪；相对 v94 提升 **3.01%**，六项官方性能周期不变。该阶段当时的 400 MHz 和 500 MHz 目标均未达到；当前新流程结果见上方复测。
 
-`baseline.json` 指向最终可复现的 Tier2 基准；`make generate` 从该基准冻结的 Chisel 源码重新生成并核对电路，再发布字节完全一致的已测 RTL。`Config()` 和直接 `sbt run` 的缺省参数也对应 v109；参数实验缺省值来自当前 `baseline.json`。直接从可编辑 `src/` 生成实验 RTL 可用 `sbt -batch 'run --out build/custom-rtl --rob 16'`，参数必须显式写在实验记录中。阶段 2 的 `baseline-v66`、阶段 4 的 `baseline-v75`、阶段 5 的 `baseline-v94` 明确复用前阶段测量作为优化前对照，没有重复宣称新的测量。
+`baseline.json` 指向历史流程下已验证的 v109 冻结基准；当前流程的成绩由 `latest-measurement.json` 单独记录。`make generate` 从该基准冻结的 Chisel 源码重新生成并核对电路，再发布字节完全一致的已测 RTL。`Config()` 和直接 `sbt run` 的缺省参数也对应 v109；参数实验缺省值来自当前 `baseline.json`。直接从可编辑 `src/` 生成实验 RTL 可用 `sbt -batch 'run --out build/custom-rtl --rob 16'`，参数必须显式写在实验记录中。阶段 2 的 `baseline-v66`、阶段 4 的 `baseline-v75`、阶段 5 的 `baseline-v94` 明确复用前阶段测量作为优化前对照，没有重复宣称新的测量。
 
 此前 v44 的默认综合频率为 **204.39 MHz**，但面积 **18,040.56 μm²** 超限，不能作为达标基准。参数实验、失败记录与未经完整验证的结果都单独标记。加法器的 65 位输入已经过 Yosys SAT 形式证明，见 `reports/validation/adder/`。
 
@@ -60,4 +68,4 @@ make synth
 | 访存归属 | `LoadQueue.scala`, `CacheOwner.scala` | 按 bank 准备 Load、旧 Store 等待、恢复后的 dead 响应排空 |
 | AXI / 局部逻辑 | `Common.scala`, `PreparedQueue.scala`, `LocalLogic.scala` | AXI AW/W 独立接收、仲裁、队列、局部译码与寄存反馈 |
 
-`rtl/` 已固定为最终选定的 Tier2 CPU；实验验收使用各目录内冻结的 RTL、源码哈希和原始日志。
+`rtl/` 已固定为选定的 v109 CPU；其历史 Tier2 成绩与当前新流程结果分开记录。实验验收使用各目录内冻结的 RTL、源码哈希和原始日志。

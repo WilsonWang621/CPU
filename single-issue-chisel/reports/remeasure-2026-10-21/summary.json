@@ -1,0 +1,289 @@
+{
+  "date": "2026-10-21",
+  "report": "reports/remeasure-2026-10-21",
+  "implementation": "single-issue-chisel v109 (unchanged)",
+  "rtl_sha256": "98875bedd710fc8373e539fd5ae3133ed8a3fa14b181335ec41198828eb58693",
+  "synthesis": {
+    "area_um2": 18831.740299999674,
+    "combinational_area_um2": 10469.548079999888,
+    "sequential_area_um2": 5451.7536,
+    "sram_area_um2": 2910.4386200000004,
+    "fmax_mhz": 423.3154195948739,
+    "minimum_period_ns": 2.3623046875,
+    "clock_period_ns": 2.0,
+    "worst_setup_slack_ns": -0.361838,
+    "abc_constraints": {
+      "driving_cell": "INVx1_ASAP7_75t_R",
+      "output_load_ff": 5.0
+    }
+  },
+  "latencies": {
+    "10": {
+      "correctness": {
+        "passed": 19,
+        "failed": 0,
+        "cases": [
+          {
+            "case": "correctness_add_to_100",
+            "cycles": 507
+          },
+          {
+            "case": "correctness_array_test1",
+            "cycles": 372
+          },
+          {
+            "case": "correctness_array_test2",
+            "cycles": 397
+          },
+          {
+            "case": "correctness_basicopt1",
+            "cycles": 526018
+          },
+          {
+            "case": "correctness_bulgarian",
+            "cycles": 275575
+          },
+          {
+            "case": "correctness_expr",
+            "cycles": 520
+          },
+          {
+            "case": "correctness_gcd",
+            "cycles": 438
+          },
+          {
+            "case": "correctness_hanoi",
+            "cycles": 4773
+          },
+          {
+            "case": "correctness_lvalue2",
+            "cycles": 208
+          },
+          {
+            "case": "correctness_magic",
+            "cycles": 483584
+          },
+          {
+            "case": "correctness_manyarguments",
+            "cycles": 192
+          },
+          {
+            "case": "correctness_multiarray",
+            "cycles": 1908
+          },
+          {
+            "case": "correctness_naive",
+            "cycles": 191
+          },
+          {
+            "case": "correctness_pi",
+            "cycles": 21982828
+          },
+          {
+            "case": "correctness_qsort",
+            "cycles": 1148471
+          },
+          {
+            "case": "correctness_queens",
+            "cycles": 302546
+          },
+          {
+            "case": "correctness_statement_test",
+            "cycles": 1034
+          },
+          {
+            "case": "correctness_superloop",
+            "cycles": 414322
+          },
+          {
+            "case": "correctness_tak",
+            "cycles": 1250664
+          }
+        ]
+      },
+      "performance": {
+        "cases": [
+          {
+            "case": "perf_median",
+            "instructions": 6961,
+            "cycles": 8178,
+            "ipc": 0.851186109073123
+          },
+          {
+            "case": "perf_multiply",
+            "instructions": 21722,
+            "cycles": 23333,
+            "ipc": 0.9309561565165216
+          },
+          {
+            "case": "perf_qsort",
+            "instructions": 139900,
+            "cycles": 167964,
+            "ipc": 0.8329165773618157
+          },
+          {
+            "case": "perf_rsort",
+            "instructions": 195719,
+            "cycles": 217393,
+            "ipc": 0.9003003776570543
+          },
+          {
+            "case": "perf_towers",
+            "instructions": 5278,
+            "cycles": 6062,
+            "ipc": 0.8706697459584296
+          },
+          {
+            "case": "perf_vvadd",
+            "instructions": 4524,
+            "cycles": 5093,
+            "ipc": 0.8882780286667976
+          }
+        ],
+        "ipc_geomean": 0.8784644236695732
+      }
+    },
+    "20": {
+      "correctness": {
+        "passed": 19,
+        "failed": 0,
+        "cases": [
+          {
+            "case": "correctness_add_to_100",
+            "cycles": 546
+          },
+          {
+            "case": "correctness_array_test1",
+            "cycles": 432
+          },
+          {
+            "case": "correctness_array_test2",
+            "cycles": 458
+          },
+          {
+            "case": "correctness_basicopt1",
+            "cycles": 526503
+          },
+          {
+            "case": "correctness_bulgarian",
+            "cycles": 275757
+          },
+          {
+            "case": "correctness_expr",
+            "cycles": 578
+          },
+          {
+            "case": "correctness_gcd",
+            "cycles": 488
+          },
+          {
+            "case": "correctness_hanoi",
+            "cycles": 4944
+          },
+          {
+            "case": "correctness_lvalue2",
+            "cycles": 247
+          },
+          {
+            "case": "correctness_magic",
+            "cycles": 483745
+          },
+          {
+            "case": "correctness_manyarguments",
+            "cycles": 232
+          },
+          {
+            "case": "correctness_multiarray",
+            "cycles": 1999
+          },
+          {
+            "case": "correctness_naive",
+            "cycles": 231
+          },
+          {
+            "case": "correctness_pi",
+            "cycles": 21982878
+          },
+          {
+            "case": "correctness_qsort",
+            "cycles": 1165371
+          },
+          {
+            "case": "correctness_queens",
+            "cycles": 302697
+          },
+          {
+            "case": "correctness_statement_test",
+            "cycles": 1133
+          },
+          {
+            "case": "correctness_superloop",
+            "cycles": 414382
+          },
+          {
+            "case": "correctness_tak",
+            "cycles": 1250737
+          }
+        ]
+      },
+      "performance": {
+        "cases": [
+          {
+            "case": "perf_median",
+            "instructions": 6961,
+            "cycles": 8527,
+            "ipc": 0.816348070833822
+          },
+          {
+            "case": "perf_multiply",
+            "instructions": 21722,
+            "cycles": 23421,
+            "ipc": 0.9274582639511549
+          },
+          {
+            "case": "perf_qsort",
+            "instructions": 139900,
+            "cycles": 170728,
+            "ipc": 0.8194320790965747
+          },
+          {
+            "case": "perf_rsort",
+            "instructions": 195719,
+            "cycles": 234842,
+            "ipc": 0.8334071418230129
+          },
+          {
+            "case": "perf_towers",
+            "instructions": 5278,
+            "cycles": 6291,
+            "ipc": 0.8389763153711651
+          },
+          {
+            "case": "perf_vvadd",
+            "instructions": 4524,
+            "cycles": 5352,
+            "ipc": 0.8452914798206278
+          }
+        ],
+        "ipc_geomean": 0.8460240058706379
+      }
+    }
+  },
+  "historical": {
+    "report": "reports/stage5/v109-final-cached-banked",
+    "area_um2": 17942.622739999555,
+    "fmax_mhz": 342.13164049448716,
+    "ipc_geomean_latency20": 0.8460240058706379
+  },
+  "comparison": {
+    "fmax_change_percent": 23.728813559322013,
+    "area_change_percent": 4.955337761285072
+  },
+  "local_threshold_assessment": {
+    "tier1": false,
+    "tier2": false,
+    "tier3": false,
+    "score": 85,
+    "basis": "Current official latency 10; correctness 19/19. Local measurement, not official grading."
+  }
+}

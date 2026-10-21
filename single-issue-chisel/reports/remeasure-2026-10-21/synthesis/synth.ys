@@ -1,0 +1,38 @@
+read_json "/tmp/pararisc-single-remeasure-20261021/build/synth/opt/ram/prepared.json"
+read_verilog "/tmp/pararisc-single-remeasure-20261021/build/synth/opt/ram/wrappers.v"
+read_liberty -lib -ignore_miss_func "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_AO_RVT_TT_nldm_211120.lib"
+read_liberty -lib -ignore_miss_func "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_INVBUF_RVT_TT_nldm_220122.lib"
+read_liberty -lib -ignore_miss_func "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_OA_RVT_TT_nldm_211120.lib"
+read_liberty -lib -ignore_miss_func "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_SEQ_RVT_TT_nldm_220123.lib"
+read_liberty -lib -ignore_miss_func "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib"
+read_liberty -lib -ignore_miss_func "/tmp/pararisc-single-remeasure-20261021/build/synth/opt/ram/fakeram_asap7_1024x8.lib"
+read_liberty -lib -ignore_miss_func "/tmp/pararisc-single-remeasure-20261021/build/synth/opt/ram/fakeram_asap7_128x8.lib"
+read_liberty -lib -ignore_miss_func "/tmp/pararisc-single-remeasure-20261021/build/synth/opt/ram/fakeram_asap7_64x20.lib"
+read_liberty -lib -ignore_miss_func "/tmp/pararisc-single-remeasure-20261021/build/synth/opt/ram/fakeram_asap7_8x39.lib"
+hierarchy -check -top student_top
+synth -top student_top -noabc -flatten
+check -assert
+select -assert-none a:init t:$dlatch* t:$_DLATCH*
+dfflibmap -liberty "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_SEQ_RVT_TT_nldm_220123.lib"
+abc -exe "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/bin/yosys-abc" -liberty "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_AO_RVT_TT_nldm_211120.lib" -liberty "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_INVBUF_RVT_TT_nldm_220122.lib" -liberty "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_OA_RVT_TT_nldm_211120.lib" -liberty "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_SEQ_RVT_TT_nldm_220123.lib" -liberty "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib" -constr "/tmp/pararisc-single-remeasure-20261021/build/synth/opt/abc.constr" -D 2000
+clean
+delete t:$scopeinfo
+clean -purge
+hilomap -hicell TIEHIx1_ASAP7_75t_R H -locell TIELOx1_ASAP7_75t_R L
+check -assert -mapped
+tee -o "/tmp/pararisc-single-remeasure-20261021/build/synth/opt/stat.json" stat -json -liberty "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_AO_RVT_TT_nldm_211120.lib" -liberty "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_INVBUF_RVT_TT_nldm_220122.lib" -liberty "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_OA_RVT_TT_nldm_211120.lib" -liberty "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_SEQ_RVT_TT_nldm_220123.lib" -liberty "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib" -liberty "/tmp/pararisc-single-remeasure-20261021/build/synth/opt/ram/fakeram_asap7_1024x8.lib" -liberty "/tmp/pararisc-single-remeasure-20261021/build/synth/opt/ram/fakeram_asap7_128x8.lib" -liberty "/tmp/pararisc-single-remeasure-20261021/build/synth/opt/ram/fakeram_asap7_64x20.lib" -liberty "/tmp/pararisc-single-remeasure-20261021/build/synth/opt/ram/fakeram_asap7_8x39.lib"
+write_json "/tmp/pararisc-single-remeasure-20261021/build/synth/opt/design.json"
+write_verilog -noattr -noexpr "/tmp/pararisc-single-remeasure-20261021/build/synth/opt/mapped.v"
+design -reset
+read_liberty -lib -ignore_miss_func "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_AO_RVT_TT_nldm_211120.lib"
+read_liberty -lib -ignore_miss_func "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_INVBUF_RVT_TT_nldm_220122.lib"
+read_liberty -lib -ignore_miss_func "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_OA_RVT_TT_nldm_211120.lib"
+read_liberty -lib -ignore_miss_func "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_SEQ_RVT_TT_nldm_220123.lib"
+read_liberty -lib -ignore_miss_func "/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/asap7/lib/asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib"
+read_liberty -lib -ignore_miss_func "/tmp/pararisc-single-remeasure-20261021/build/synth/opt/ram/fakeram_asap7_1024x8.lib"
+read_liberty -lib -ignore_miss_func "/tmp/pararisc-single-remeasure-20261021/build/synth/opt/ram/fakeram_asap7_128x8.lib"
+read_liberty -lib -ignore_miss_func "/tmp/pararisc-single-remeasure-20261021/build/synth/opt/ram/fakeram_asap7_64x20.lib"
+read_liberty -lib -ignore_miss_func "/tmp/pararisc-single-remeasure-20261021/build/synth/opt/ram/fakeram_asap7_8x39.lib"
+read_verilog "/tmp/pararisc-single-remeasure-20261021/build/synth/opt/mapped.v"
+hierarchy -check -top student_top
+check -assert -mapped

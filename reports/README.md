@@ -25,6 +25,8 @@
 
 单发射源码、生成器和数据归档集中在[独立工程](../single-issue-chisel/README.md)，避免混用两条实现路线的参数与成绩。
 
+2026-10-21 按新官方 ABC 约束/优化流程重测相同 v109 RTL，得到 **423.32 MHz、18,831.74 μm²**；面积超过 Tier2 上限，当前未达 95 分档。性能、正确性及原始记录见[本次复测](../single-issue-chisel/reports/remeasure-2026-10-21/report.md)，下表保留历史实验。
+
 | 阶段 | 性能 / 参数对照 | 实现与取舍 |
 | --- | --- | --- |
 | 1，v66 | [comparison](../single-issue-chisel/reports/stage1/comparison.md) | [优化记录](../single-issue-chisel/reports/stage1/optimization-notes.md) |
