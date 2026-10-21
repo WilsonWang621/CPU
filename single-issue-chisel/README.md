@@ -2,6 +2,16 @@
 
 本目录为独立的单发射乱序 RV32IM 工程，根目录为双发射工程。CPU 源码按译码/执行、乘除法、缓存/前端、总线、乱序核心分模块。
 
+## 我的单发射实现：动态架构图
+
+下图依据本目录 Chisel 源码绘制，展示我的单发射实现。模块职责、接口、源码位置与 ADD 指令处理路径见完整交互图。
+
+![我的单发射 Chisel CPU 动态架构图](../docs/architecture/single-issue-overview.gif)
+
+动画表示连接方向，不代表逐周期执行时序。[完整交互图 HTML](../docs/architecture/single-issue-overview.html) 需下载后用浏览器打开；[图源及使用说明](../docs/architecture/README.md)支持继续讨论和修改。
+
+## 验收与复现
+
 验收固定使用课程原样 `scripts/synth.py`、ASAP7 RVT TT 及课程默认时序约束；性能测试内存延迟 20、上限 30,000,000 周期。总面积包括 SRAM。
 
 | 实现阶段 | 必须保留的门槛 | 频率目标 | 当前状态 |

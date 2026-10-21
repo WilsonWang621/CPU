@@ -4,6 +4,18 @@
 
 可编辑图源：[single-issue-overview.json](single-issue-overview.json)。标题、组件、坐标、连线、源码引用、导览和节点说明卡分别位于 `meta`、`components`、`connections`、`sources`、`meta.views`、`cards`。不建议直接编辑生成的 HTML。
 
+## README 动画
+
+根目录和 `single-issue-chisel/README.md` 使用 [GIF 动画](single-issue-overview.gif)，可直接在 GitHub README 中播放。GitHub README 会过滤脚本和 iframe，完整 HTML 的交互功能保留在下载后打开的页面中。
+
+GIF 通过现有 HTML 的 `Archify.motion.recordWebm` 导出，再由 ffmpeg 转换，图中节点及连接来自同一张已验证架构图。它只展示连接方向，不是 CPU 周期仿真，也不提供节点选择等交互。导出未改写 HTML；来源及文件哈希见 [动画回执](single-issue-overview.gif.receipt.json)。
+
+重新导出（需 Node.js、Chromium 和 ffmpeg）：
+
+```sh
+ARCHIFY_CHROME=/path/to/chrome node docs/architecture/export-readme-animation.mjs
+```
+
 ## 阅读方法
 
 - 总体图包含 10 个组件；选择节点可查看关联连线和源码引用，页面说明卡补充职责、输入输出、条件及源码位置。

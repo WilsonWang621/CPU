@@ -2,6 +2,18 @@
 
 RV32IM CPU 工程。提供设计与周期行为一致的双发射 Verilog 和[原生双发射 Chisel](dual-issue-chisel/README.md) 实现；[single-issue-chisel/](single-issue-chisel/README.md) 独立保留单发射 Chisel 实现及其复现实验。
 
+## 我的单发射 Chisel 实现
+
+下面展示的是我在 [`single-issue-chisel/`](single-issue-chisel/) 中的单发射 RV32IM CPU 实现。架构图依据该目录的 Chisel 源码绘制，包含取指、译码、重命名、发射、执行、ROB 提交、访存与 AXI 接口。图中的 ROB、IQ 和 Store 表是 `Core` 内部逻辑分组；独立模块保留源码中的名称。
+
+![我的单发射 Chisel CPU 动态架构图](docs/architecture/single-issue-overview.gif)
+
+动画展示连接方向，不代表 CPU 的逐周期执行时序。青色强调实线展示经 IQ 的 ADD 数据路径，普通实线表示其他数据和请求，虚线表示提交、恢复及预测训练控制。
+
+[单发射实现说明](single-issue-chisel/README.md) · [完整交互图 HTML](docs/architecture/single-issue-overview.html) · [可编辑图源](docs/architecture/single-issue-overview.json)
+
+GitHub README 内直接播放 GIF；完整交互图需下载 HTML 后用浏览器打开，可缩放、选择节点、查看源码引用和切换路径导览。[打开及编辑说明](docs/architecture/README.md)。
+
 ## 当前默认版本
 
 默认课程入口 [verilog/filelist.f](verilog/filelist.f) 选择由原生 Chisel 生成的 [student_top.sv](dual-issue-chisel/rtl/student_top.sv)。根目录的 `make build/test/perf/synth` 使用该配置。旧 Verilog CPU 保留为参考，可通过 `FILELIST=verilog/reference_filelist.f` 构建。
