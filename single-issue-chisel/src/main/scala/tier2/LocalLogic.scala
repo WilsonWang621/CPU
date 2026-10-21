@@ -13,13 +13,13 @@ abstract class LocalLogic extends Module {
       firrtl.AttributeAnnotation(owner.toTarget,"keep_hierarchy = 1")
   })
 }
-class LocalMask(width: Int) extends LocalLogic {
+class LocalMask(width: Int) extends Module {
   val io = IO(new Bundle {
     val selected = Input(Bool()); val word = Input(UInt(width.W)); val value = Output(UInt(width.W))
   })
   io.value := io.word & Fill(width,io.selected)
 }
-class LocalWord(width: Int) extends LocalLogic {
+class LocalWord(width: Int) extends Module {
   val io = IO(new Bundle {
     val prepare = Input(Bool()); val data = Input(UInt(width.W)); val value = Output(UInt(width.W))
   })

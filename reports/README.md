@@ -25,7 +25,7 @@
 
 单发射源码、生成器和数据归档集中在[独立工程](../single-issue-chisel/README.md)，避免混用两条实现路线的参数与成绩。
 
-2026-10-21 按新官方 ABC 约束/优化流程重测相同 v109 RTL，得到 **423.32 MHz、18,831.74 μm²**；面积超过 Tier2 上限，当前未达 95 分档。性能、正确性及原始记录见[本次复测](../single-issue-chisel/reports/remeasure-2026-10-21/report.md)，下表保留历史实验。
+2026-10-21 的 [v110 面积优化](../single-issue-chisel/reports/area-recovery-2026-10-21/report.md)只取消 `LocalMask`、`LocalWord` 的强制综合层次，保留全部容量和性能周期，得到 **422.44 MHz / 17,933.13 μm²**，两种延迟正确性各 19/19，同时达到 Tier2 和 400 MHz 加分的本地门槛。[旧 v109 新流程复测](../single-issue-chisel/reports/remeasure-2026-10-21/report.md)的超面积结论及下表实验保留为历史记录。
 
 | 阶段 | 性能 / 参数对照 | 实现与取舍 |
 | --- | --- | --- |

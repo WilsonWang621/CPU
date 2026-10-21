@@ -1,6 +1,6 @@
 # 单发射实验报告
 
-默认电路为 v109。2026-10-21 新官方综合流程复测为 **423.32 MHz / 18,831.74 μm²**，超过 Tier2 面积上限；当前结果见 [复测报告](remeasure-2026-10-21/report.md) 和 [latest-measurement.json](../latest-measurement.json)。下方阶段表为历史记录。参数和冻结实验由 [baseline.json](../baseline.json)固定。生成、编译和测试命令见[工程说明](../README.md)。
+当前默认为 **v110：422.44 MHz / 17,933.13 μm²**，IPC 延迟 10/20 为 **0.87846442 / 0.84602401**，正确性各 19/19，达到 Tier2 + 400 MHz 的本地 97 分门槛。见 [v110 优化报告](area-recovery-2026-10-21/report.md)、[latest-measurement.json](../latest-measurement.json) 和 [baseline.json](../baseline.json)。[v109 新流程复测](remeasure-2026-10-21/report.md)保留超面积结论，下方阶段表保留历史记录。生成、编译和测试命令见[工程说明](../README.md)。
 
 | 阶段 | 性能 / 参数对照 | 优化记录 |
 | --- | --- | --- |

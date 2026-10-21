@@ -1,0 +1,645 @@
+make: Entering directory '/tmp/pararisc-single-area-20261021'
+"python3" "/tmp/pararisc-single-area-20261021/scripts/build.py" --filelist "flat-payload/rtl/filelist.f" --out "flat-payload/sim" --jobs 8 \
+	--appimage "/home/wangwenxuan/ACM/大二上/ParaRisc/cpu2026-tools-x86_64.AppImage" --cxx "g++" --ar "ar" --make "make" \
+	
+WARNING: could not create symlink
+WARNING: could not create symlink
+[build] Using AppImage Verilator
+%Warning-DECLFILENAME: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:23:8: Filename 'student_top' does not match MODULE name: 'ram_32x1'
+   23 | module ram_32x1(  
+      |        ^~~~~~~~
+                       ... For warning description see https://verilator.org/warn/DECLFILENAME?v=5.020
+                       ... Use "/* verilator lint_off DECLFILENAME */" and lint_on around source to disable this message.
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:18911:15: Bits of signal are not used: '_xdWord_io_value'[53:46,0]
+                                                                                                  : ... note: In instance 'student_top.c'
+18911 |   wire [63:0] _xdWord_io_value;  
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:19850:15: Bits of signal are not used: '_trainExecution_T_4'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+19850 |   wire [31:0] _trainExecution_T_4 = recoveryMask >> _GEN;  
+      |               ^~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:19976:15: Bits of signal are not used: '_readMask_T_6'[6:4]
+                                                                                                  : ... note: In instance 'student_top.c'
+19976 |   wire [6:0]  _readMask_T_6 =
+      |               ^~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:20064:15: Bits of signal are not used: '_forwarding_picked_T_144'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+20064 |   wire [31:0] _forwarding_picked_T_144 = wrapped >> _GEN_1;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:20065:15: Bits of signal are not used: '_matchingStores_T_108'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+20065 |   wire [31:0] _matchingStores_T_108 = wrapped >> _GEN;  
+      |               ^~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:20142:15: Bits of signal are not used: '_forwarding_picked_T_146'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+20142 |   wire [31:0] _forwarding_picked_T_146 = wrapped >> _GEN_2;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:20219:15: Bits of signal are not used: '_forwarding_picked_T_148'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+20219 |   wire [31:0] _forwarding_picked_T_148 = wrapped >> _GEN_3;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:20296:15: Bits of signal are not used: '_forwarding_picked_T_150'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+20296 |   wire [31:0] _forwarding_picked_T_150 = wrapped >> _GEN_4;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:20373:15: Bits of signal are not used: '_forwarding_picked_T_152'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+20373 |   wire [31:0] _forwarding_picked_T_152 = wrapped >> _GEN_5;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:20450:15: Bits of signal are not used: '_forwarding_picked_T_154'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+20450 |   wire [31:0] _forwarding_picked_T_154 = wrapped >> _GEN_6;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:20527:15: Bits of signal are not used: '_forwarding_picked_T_156'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+20527 |   wire [31:0] _forwarding_picked_T_156 = wrapped >> _GEN_7;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:20604:15: Bits of signal are not used: '_forwarding_picked_T_158'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+20604 |   wire [31:0] _forwarding_picked_T_158 = wrapped >> _GEN_8;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:21077:15: Bits of signal are not used: '_md_io_kill_T'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+21077 |   wire [31:0] _md_io_kill_T = recoveryMask >> _md_io_activeTag;  
+      |               ^~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:21094:15: Bits of signal are not used: '_cdb_2_valid_T_1'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+21094 |   wire [31:0] _cdb_2_valid_T_1 = recoveryMask >> _md_io_rsp_bits_tag;  
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:21101:15: Bits of signal are not used: '_winner_T'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+21101 |   wire [31:0] _winner_T = wrapped >> _GEN_9;  
+      |               ^~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:21185:15: Bits of signal are not used: '_winner_T_2'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+21185 |   wire [31:0] _winner_T_2 = wrapped >> _GEN_10;  
+      |               ^~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:21248:15: Bits of signal are not used: '_winner_T_4'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+21248 |   wire [31:0] _winner_T_4 = wrapped >> _GEN_11;  
+      |               ^~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:21311:15: Bits of signal are not used: '_winner_T_6'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+21311 |   wire [31:0] _winner_T_6 = wrapped >> _GEN_12;  
+      |               ^~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:21374:15: Bits of signal are not used: '_winner_T_8'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+21374 |   wire [31:0] _winner_T_8 = wrapped >> _GEN_13;  
+      |               ^~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:21437:15: Bits of signal are not used: '_winner_T_10'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+21437 |   wire [31:0] _winner_T_10 = wrapped >> _GEN_14;  
+      |               ^~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:21500:15: Bits of signal are not used: '_winner_T_12'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+21500 |   wire [31:0] _winner_T_12 = wrapped >> _GEN_15;  
+      |               ^~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:21563:15: Bits of signal are not used: '_winner_T_14'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+21563 |   wire [31:0] _winner_T_14 = wrapped >> _GEN_16;  
+      |               ^~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22391:15: Bits of signal are not used: '_GEN_51'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+22391 |   wire [31:0] _GEN_51 = recoveryMask >> _GEN_1;  
+      |               ^~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22392:15: Bits of signal are not used: '_GEN_52'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+22392 |   wire [31:0] _GEN_52 = recoveryMask >> _GEN_2;  
+      |               ^~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22393:15: Bits of signal are not used: '_GEN_53'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+22393 |   wire [31:0] _GEN_53 = recoveryMask >> _GEN_3;  
+      |               ^~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22394:15: Bits of signal are not used: '_GEN_54'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+22394 |   wire [31:0] _GEN_54 = recoveryMask >> _GEN_4;  
+      |               ^~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22395:15: Bits of signal are not used: '_GEN_55'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+22395 |   wire [31:0] _GEN_55 = recoveryMask >> _GEN_5;  
+      |               ^~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22396:15: Bits of signal are not used: '_GEN_56'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+22396 |   wire [31:0] _GEN_56 = recoveryMask >> _GEN_6;  
+      |               ^~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22397:15: Bits of signal are not used: '_GEN_57'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+22397 |   wire [31:0] _GEN_57 = recoveryMask >> _GEN_7;  
+      |               ^~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22398:15: Bits of signal are not used: '_GEN_58'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+22398 |   wire [31:0] _GEN_58 = recoveryMask >> _GEN_8;  
+      |               ^~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22399:15: Bits of signal are not used: '_GEN_59'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+22399 |   wire [31:0] _GEN_59 = recoveryMask >> cpOwner_0;  
+      |               ^~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22400:15: Bits of signal are not used: '_GEN_60'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+22400 |   wire [31:0] _GEN_60 = recoveryMask >> cpOwner_1;  
+      |               ^~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22401:15: Bits of signal are not used: '_GEN_61'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+22401 |   wire [31:0] _GEN_61 = recoveryMask >> cpOwner_2;  
+      |               ^~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22402:15: Bits of signal are not used: '_GEN_62'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+22402 |   wire [31:0] _GEN_62 = recoveryMask >> cpOwner_3;  
+      |               ^~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22403:15: Bits of signal are not used: '_GEN_63'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+22403 |   wire [31:0] _GEN_63 = recoveryMask >> _GEN_9;  
+      |               ^~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22404:15: Bits of signal are not used: '_GEN_64'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+22404 |   wire [31:0] _GEN_64 = recoveryMask >> _GEN_10;  
+      |               ^~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22405:15: Bits of signal are not used: '_GEN_65'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+22405 |   wire [31:0] _GEN_65 = recoveryMask >> _GEN_11;  
+      |               ^~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22406:15: Bits of signal are not used: '_GEN_66'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+22406 |   wire [31:0] _GEN_66 = recoveryMask >> _GEN_12;  
+      |               ^~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22407:15: Bits of signal are not used: '_GEN_67'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+22407 |   wire [31:0] _GEN_67 = recoveryMask >> _GEN_13;  
+      |               ^~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22408:15: Bits of signal are not used: '_GEN_68'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+22408 |   wire [31:0] _GEN_68 = recoveryMask >> _GEN_14;  
+      |               ^~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22409:15: Bits of signal are not used: '_GEN_69'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+22409 |   wire [31:0] _GEN_69 = recoveryMask >> _GEN_15;  
+      |               ^~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22410:15: Bits of signal are not used: '_GEN_70'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c'
+22410 |   wire [31:0] _GEN_70 = recoveryMask >> _GEN_16;  
+      |               ^~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22411:15: Bits of signal are not used: '_storeMask_0_T_5'[6:4]
+                                                                                                  : ... note: In instance 'student_top.c'
+22411 |   wire [6:0]  _storeMask_0_T_5 =
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22413:15: Bits of signal are not used: '_storeMask_1_T_5'[6:4]
+                                                                                                  : ... note: In instance 'student_top.c'
+22413 |   wire [6:0]  _storeMask_1_T_5 =
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22415:15: Bits of signal are not used: '_storeMask_2_T_5'[6:4]
+                                                                                                  : ... note: In instance 'student_top.c'
+22415 |   wire [6:0]  _storeMask_2_T_5 =
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22417:15: Bits of signal are not used: '_storeMask_3_T_5'[6:4]
+                                                                                                  : ... note: In instance 'student_top.c'
+22417 |   wire [6:0]  _storeMask_3_T_5 =
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22419:15: Bits of signal are not used: '_storeMask_4_T_5'[6:4]
+                                                                                                  : ... note: In instance 'student_top.c'
+22419 |   wire [6:0]  _storeMask_4_T_5 =
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22421:15: Bits of signal are not used: '_storeMask_5_T_5'[6:4]
+                                                                                                  : ... note: In instance 'student_top.c'
+22421 |   wire [6:0]  _storeMask_5_T_5 =
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22423:15: Bits of signal are not used: '_storeMask_6_T_5'[6:4]
+                                                                                                  : ... note: In instance 'student_top.c'
+22423 |   wire [6:0]  _storeMask_6_T_5 =
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22425:15: Bits of signal are not used: '_storeMask_7_T_5'[6:4]
+                                                                                                  : ... note: In instance 'student_top.c'
+22425 |   wire [6:0]  _storeMask_7_T_5 =
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22688:15: Bits of signal are not used: '_storeData_0_T_2'[62:32]
+                                                                                                  : ... note: In instance 'student_top.c'
+22688 |   wire [62:0] _storeData_0_T_2 = _GEN_106 << _GEN_107;  
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22689:15: Bits of signal are not used: '_storeData_1_T_2'[62:32]
+                                                                                                  : ... note: In instance 'student_top.c'
+22689 |   wire [62:0] _storeData_1_T_2 = _GEN_106 << _GEN_107;  
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22690:15: Bits of signal are not used: '_storeData_2_T_2'[62:32]
+                                                                                                  : ... note: In instance 'student_top.c'
+22690 |   wire [62:0] _storeData_2_T_2 = _GEN_106 << _GEN_107;  
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22691:15: Bits of signal are not used: '_storeData_3_T_2'[62:32]
+                                                                                                  : ... note: In instance 'student_top.c'
+22691 |   wire [62:0] _storeData_3_T_2 = _GEN_106 << _GEN_107;  
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22692:15: Bits of signal are not used: '_storeData_4_T_2'[62:32]
+                                                                                                  : ... note: In instance 'student_top.c'
+22692 |   wire [62:0] _storeData_4_T_2 = _GEN_106 << _GEN_107;  
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22693:15: Bits of signal are not used: '_storeData_5_T_2'[62:32]
+                                                                                                  : ... note: In instance 'student_top.c'
+22693 |   wire [62:0] _storeData_5_T_2 = _GEN_106 << _GEN_107;  
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22694:15: Bits of signal are not used: '_storeData_6_T_2'[62:32]
+                                                                                                  : ... note: In instance 'student_top.c'
+22694 |   wire [62:0] _storeData_6_T_2 = _GEN_106 << _GEN_107;  
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:22695:15: Bits of signal are not used: '_storeData_7_T_2'[62:32]
+                                                                                                  : ... note: In instance 'student_top.c'
+22695 |   wire [62:0] _storeData_7_T_2 = _GEN_106 << _GEN_107;  
+      |               ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:126:15: Bits of signal are not used: 'req_addr'[1:0]
+                                                                                                : ... note: In instance 'student_top.c.bus'
+  126 |   reg  [31:0] req_addr;  
+      |               ^~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:1467:17: Bits of signal are not used: 'io_train_bits_pc'[1:0]
+                                                                                                 : ... note: In instance 'student_top.c.fetch'
+ 1467 |   input  [31:0] io_train_bits_pc,  
+      |                 ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:1468:17: Bits of signal are not used: 'io_train_bits_target'[1:0]
+                                                                                                 : ... note: In instance 'student_top.c.fetch'
+ 1468 |                 io_train_bits_target,  
+      |                 ^~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:1473:17: Bits of signal are not used: 'io_train_bits_history'[1]
+                                                                                                 : ... note: In instance 'student_top.c.fetch'
+ 1473 |   input  [1:0]  io_train_bits_history,  
+      |                 ^~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:2513:15: Bits of signal are not used: 'casez_tmp_1'[0]
+                                                                                                 : ... note: In instance 'student_top.c.fetch'
+ 2513 |   reg  [1:0]  casez_tmp_1;  
+      |               ^~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:3166:15: Bits of signal are not used: 'casez_tmp_2'[0]
+                                                                                                 : ... note: In instance 'student_top.c.fetch'
+ 3166 |   reg  [1:0]  casez_tmp_2;  
+      |               ^~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:8634:17: Bits of signal are not used: 'io_req_bits_mem_addr'[31:8,5:0]
+                                                                                                 : ... note: In instance 'student_top.c.dc'
+ 8634 |   input  [31:0] io_req_bits_mem_addr,  
+      |                 ^~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:8752:15: Bits of signal are not used: '_caches_3_io_mem_req_bits_addr'[31:30]
+                                                                                                 : ... note: In instance 'student_top.c.dc'
+ 8752 |   wire [31:0] _caches_3_io_mem_req_bits_addr;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:8758:15: Bits of signal are not used: '_caches_3_io_fill_bits_addr'[31:30]
+                                                                                                 : ... note: In instance 'student_top.c.dc'
+ 8758 |   wire [31:0] _caches_3_io_fill_bits_addr;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:8765:15: Bits of signal are not used: '_caches_2_io_mem_req_bits_addr'[31:30]
+                                                                                                 : ... note: In instance 'student_top.c.dc'
+ 8765 |   wire [31:0] _caches_2_io_mem_req_bits_addr;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:8771:15: Bits of signal are not used: '_caches_2_io_fill_bits_addr'[31:30]
+                                                                                                 : ... note: In instance 'student_top.c.dc'
+ 8771 |   wire [31:0] _caches_2_io_fill_bits_addr;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:8778:15: Bits of signal are not used: '_caches_1_io_mem_req_bits_addr'[31:30]
+                                                                                                 : ... note: In instance 'student_top.c.dc'
+ 8778 |   wire [31:0] _caches_1_io_mem_req_bits_addr;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:8784:15: Bits of signal are not used: '_caches_1_io_fill_bits_addr'[31:30]
+                                                                                                 : ... note: In instance 'student_top.c.dc'
+ 8784 |   wire [31:0] _caches_1_io_fill_bits_addr;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:8791:15: Bits of signal are not used: '_caches_0_io_mem_req_bits_addr'[31:30]
+                                                                                                 : ... note: In instance 'student_top.c.dc'
+ 8791 |   wire [31:0] _caches_0_io_mem_req_bits_addr;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:8797:15: Bits of signal are not used: '_caches_0_io_fill_bits_addr'[31:30]
+                                                                                                 : ... note: In instance 'student_top.c.dc'
+ 8797 |   wire [31:0] _caches_0_io_fill_bits_addr;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:8800:15: Bits of signal are not used: '_trainAddress_masked_word_3_io_value'[5:0]
+                                                                                                 : ... note: In instance 'student_top.c.dc'
+ 8800 |   wire [31:0] _trainAddress_masked_word_3_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:8801:15: Bits of signal are not used: '_trainAddress_masked_word_2_io_value'[5:0]
+                                                                                                 : ... note: In instance 'student_top.c.dc'
+ 8801 |   wire [31:0] _trainAddress_masked_word_2_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:8802:15: Bits of signal are not used: '_trainAddress_masked_word_1_io_value'[5:0]
+                                                                                                 : ... note: In instance 'student_top.c.dc'
+ 8802 |   wire [31:0] _trainAddress_masked_word_1_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:8803:15: Bits of signal are not used: '_trainAddress_masked_word_io_value'[5:0]
+                                                                                                 : ... note: In instance 'student_top.c.dc'
+ 8803 |   wire [31:0] _trainAddress_masked_word_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:8845:15: Bits of signal are not used: 'selectedAddress'[7:6]
+                                                                                                 : ... note: In instance 'student_top.c.dc'
+ 8845 |   wire [31:0] selectedAddress =
+      |               ^~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:8866:15: Bits of signal are not used: 'selectedAddress_1'[7:6]
+                                                                                                 : ... note: In instance 'student_top.c.dc'
+ 8866 |   wire [31:0] selectedAddress_1 =
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:8887:15: Bits of signal are not used: 'selectedAddress_2'[7:6]
+                                                                                                 : ... note: In instance 'student_top.c.dc'
+ 8887 |   wire [31:0] selectedAddress_2 =
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:8906:15: Bits of signal are not used: 'selectedAddress_3'[7:6]
+                                                                                                 : ... note: In instance 'student_top.c.dc'
+ 8906 |   wire [31:0] selectedAddress_3 =
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:9408:15: Bits of signal are not used: 'rem'[32]
+                                                                                                 : ... note: In instance 'student_top.c.md'
+ 9408 |   reg  [32:0] rem;  
+      |               ^~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:9704:15: Bits of signal are not used: '_io_addr_adder_io_sum'[0]
+                                                                                                 : ... note: In instance 'student_top.c.alu'
+ 9704 |   wire [31:0] _io_addr_adder_io_sum;  
+      |               ^~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:9709:15: Bits of signal are not used: '_alu_T_1'[62:32]
+                                                                                                 : ... note: In instance 'student_top.c.alu'
+ 9709 |   wire [62:0] _alu_T_1 = {31'h0, a} << b[4:0];  
+      |               ^~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:9710:15: Bits of signal are not used: '_right_T_5'[32]
+                                                                                                 : ... note: In instance 'student_top.c.alu'
+ 9710 |   wire [32:0] _right_T_5 = $signed($signed({io_d_sub & a[31], a}) >>> b[4:0]);  
+      |               ^~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14830:15: Bits of signal are not used: '_io_candidates_3_bits_masked_word_7_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14830 |   wire [43:0] _io_candidates_3_bits_masked_word_7_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14831:15: Bits of signal are not used: '_io_candidates_3_bits_masked_word_6_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14831 |   wire [43:0] _io_candidates_3_bits_masked_word_6_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14832:15: Bits of signal are not used: '_io_candidates_3_bits_masked_word_5_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14832 |   wire [43:0] _io_candidates_3_bits_masked_word_5_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14833:15: Bits of signal are not used: '_io_candidates_3_bits_masked_word_4_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14833 |   wire [43:0] _io_candidates_3_bits_masked_word_4_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14834:15: Bits of signal are not used: '_io_candidates_3_bits_masked_word_3_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14834 |   wire [43:0] _io_candidates_3_bits_masked_word_3_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14835:15: Bits of signal are not used: '_io_candidates_3_bits_masked_word_2_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14835 |   wire [43:0] _io_candidates_3_bits_masked_word_2_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14836:15: Bits of signal are not used: '_io_candidates_3_bits_masked_word_1_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14836 |   wire [43:0] _io_candidates_3_bits_masked_word_1_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14837:15: Bits of signal are not used: '_io_candidates_3_bits_masked_word_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14837 |   wire [43:0] _io_candidates_3_bits_masked_word_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14838:15: Bits of signal are not used: '_io_candidates_2_bits_masked_word_7_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14838 |   wire [43:0] _io_candidates_2_bits_masked_word_7_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14839:15: Bits of signal are not used: '_io_candidates_2_bits_masked_word_6_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14839 |   wire [43:0] _io_candidates_2_bits_masked_word_6_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14840:15: Bits of signal are not used: '_io_candidates_2_bits_masked_word_5_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14840 |   wire [43:0] _io_candidates_2_bits_masked_word_5_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14841:15: Bits of signal are not used: '_io_candidates_2_bits_masked_word_4_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14841 |   wire [43:0] _io_candidates_2_bits_masked_word_4_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14842:15: Bits of signal are not used: '_io_candidates_2_bits_masked_word_3_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14842 |   wire [43:0] _io_candidates_2_bits_masked_word_3_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14843:15: Bits of signal are not used: '_io_candidates_2_bits_masked_word_2_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14843 |   wire [43:0] _io_candidates_2_bits_masked_word_2_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14844:15: Bits of signal are not used: '_io_candidates_2_bits_masked_word_1_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14844 |   wire [43:0] _io_candidates_2_bits_masked_word_1_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14845:15: Bits of signal are not used: '_io_candidates_2_bits_masked_word_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14845 |   wire [43:0] _io_candidates_2_bits_masked_word_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14846:15: Bits of signal are not used: '_io_candidates_1_bits_masked_word_7_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14846 |   wire [43:0] _io_candidates_1_bits_masked_word_7_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14847:15: Bits of signal are not used: '_io_candidates_1_bits_masked_word_6_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14847 |   wire [43:0] _io_candidates_1_bits_masked_word_6_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14848:15: Bits of signal are not used: '_io_candidates_1_bits_masked_word_5_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14848 |   wire [43:0] _io_candidates_1_bits_masked_word_5_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14849:15: Bits of signal are not used: '_io_candidates_1_bits_masked_word_4_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14849 |   wire [43:0] _io_candidates_1_bits_masked_word_4_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14850:15: Bits of signal are not used: '_io_candidates_1_bits_masked_word_3_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14850 |   wire [43:0] _io_candidates_1_bits_masked_word_3_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14851:15: Bits of signal are not used: '_io_candidates_1_bits_masked_word_2_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14851 |   wire [43:0] _io_candidates_1_bits_masked_word_2_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14852:15: Bits of signal are not used: '_io_candidates_1_bits_masked_word_1_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14852 |   wire [43:0] _io_candidates_1_bits_masked_word_1_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14853:15: Bits of signal are not used: '_io_candidates_1_bits_masked_word_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14853 |   wire [43:0] _io_candidates_1_bits_masked_word_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14854:15: Bits of signal are not used: '_io_candidates_0_bits_masked_word_7_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14854 |   wire [43:0] _io_candidates_0_bits_masked_word_7_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14855:15: Bits of signal are not used: '_io_candidates_0_bits_masked_word_6_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14855 |   wire [43:0] _io_candidates_0_bits_masked_word_6_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14856:15: Bits of signal are not used: '_io_candidates_0_bits_masked_word_5_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14856 |   wire [43:0] _io_candidates_0_bits_masked_word_5_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14857:15: Bits of signal are not used: '_io_candidates_0_bits_masked_word_4_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14857 |   wire [43:0] _io_candidates_0_bits_masked_word_4_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14858:15: Bits of signal are not used: '_io_candidates_0_bits_masked_word_3_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14858 |   wire [43:0] _io_candidates_0_bits_masked_word_3_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14859:15: Bits of signal are not used: '_io_candidates_0_bits_masked_word_2_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14859 |   wire [43:0] _io_candidates_0_bits_masked_word_2_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14860:15: Bits of signal are not used: '_io_candidates_0_bits_masked_word_1_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14860 |   wire [43:0] _io_candidates_0_bits_masked_word_1_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14861:15: Bits of signal are not used: '_io_candidates_0_bits_masked_word_io_value'[11:0]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14861 |   wire [43:0] _io_candidates_0_bits_masked_word_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14913:15: Bits of signal are not used: '_newer_T'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14913 |   wire [31:0] _newer_T = io_squashMask >> _GEN;  
+      |               ^~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:14914:15: Bits of signal are not used: '_admissible_olderStore_T_376'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+14914 |   wire [31:0] _admissible_olderStore_T_376 = io_wrapped >> _GEN;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:15015:15: Bits of signal are not used: '_newer_T_1'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+15015 |   wire [31:0] _newer_T_1 = io_squashMask >> _GEN_1;  
+      |               ^~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:15016:15: Bits of signal are not used: '_admissible_olderStore_T_790'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+15016 |   wire [31:0] _admissible_olderStore_T_790 = io_wrapped >> _GEN_1;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:15117:15: Bits of signal are not used: '_newer_T_2'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+15117 |   wire [31:0] _newer_T_2 = io_squashMask >> _GEN_3;  
+      |               ^~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:15118:15: Bits of signal are not used: '_admissible_olderStore_T_1204'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+15118 |   wire [31:0] _admissible_olderStore_T_1204 = io_wrapped >> _GEN_3;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:15219:15: Bits of signal are not used: '_newer_T_3'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+15219 |   wire [31:0] _newer_T_3 = io_squashMask >> _GEN_5;  
+      |               ^~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:15220:15: Bits of signal are not used: '_admissible_olderStore_T_1618'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+15220 |   wire [31:0] _admissible_olderStore_T_1618 = io_wrapped >> _GEN_5;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:15321:15: Bits of signal are not used: '_newer_T_4'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+15321 |   wire [31:0] _newer_T_4 = io_squashMask >> _GEN_7;  
+      |               ^~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:15322:15: Bits of signal are not used: '_admissible_olderStore_T_2032'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+15322 |   wire [31:0] _admissible_olderStore_T_2032 = io_wrapped >> _GEN_7;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:15423:15: Bits of signal are not used: '_newer_T_5'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+15423 |   wire [31:0] _newer_T_5 = io_squashMask >> _GEN_9;  
+      |               ^~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:15424:15: Bits of signal are not used: '_admissible_olderStore_T_2446'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+15424 |   wire [31:0] _admissible_olderStore_T_2446 = io_wrapped >> _GEN_9;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:15525:15: Bits of signal are not used: '_newer_T_6'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+15525 |   wire [31:0] _newer_T_6 = io_squashMask >> _GEN_11;  
+      |               ^~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:15526:15: Bits of signal are not used: '_admissible_olderStore_T_2860'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+15526 |   wire [31:0] _admissible_olderStore_T_2860 = io_wrapped >> _GEN_11;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:15627:15: Bits of signal are not used: '_newer_T_7'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+15627 |   wire [31:0] _newer_T_7 = io_squashMask >> _GEN_13;  
+      |               ^~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:15628:15: Bits of signal are not used: '_admissible_olderStore_T_3274'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+15628 |   wire [31:0] _admissible_olderStore_T_3274 = io_wrapped >> _GEN_13;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:15921:15: Bits of signal are not used: '_flowReady_newer_T'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+15921 |   wire [31:0] _flowReady_newer_T = io_squashMask >> _GEN_15;  
+      |               ^~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:15922:15: Bits of signal are not used: '_flowReady_olderStore_T_376'[31:1]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+15922 |   wire [31:0] _flowReady_olderStore_T_376 = io_wrapped >> _GEN_15;  
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:16344:15: Bits of signal are not used: '_io_deq_bits_T_14'[1]
+                                                                                                  : ... note: In instance 'student_top.c.loadRequests'
+16344 |   wire [43:0] _io_deq_bits_T_14 =
+      |               ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:470:15: Bits of signal are not used: '_requestWord_io_value'[1:0]
+                                                                                                : ... note: In instance 'student_top.c.fetch.cache'
+  470 |   wire [31:0] _requestWord_io_value;  
+      |               ^~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:7679:15: Bits of signal are not used: '_hits_T_2'[15:1]
+                                                                                                 : ... note: In instance 'student_top.c.dc.caches_3'
+ 7679 |   wire [15:0] _hits_T_2 = _tagRam_0_rdata[15:0] >> _GEN;  
+      |               ^~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:7681:15: Bits of signal are not used: '_hits_T_7'[15:1]
+                                                                                                 : ... note: In instance 'student_top.c.dc.caches_3'
+ 7681 |   wire [15:0] _hits_T_7 = _tagRam_1_rdata[15:0] >> _GEN;  
+      |               ^~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:8499:15: Bits of signal are not used: '_younger_T'[31:1]
+                                                                                                 : ... note: In instance 'student_top.c.dc.metadata_3'
+ 8499 |   wire [31:0] _younger_T = io_squashMask >> info_tag;  
+      |               ^~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:17386:17: Bits of signal are not used: 'io_address'[1:0]
+                                                                                                  : ... note: In instance 'student_top.c.l0.rows_31'
+17386 |   input  [31:0] io_address,  
+      |                 ^~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:17390:17: Bits of signal are not used: 'io_fill_bits_addr'[1:0]
+                                                                                                  : ... note: In instance 'student_top.c.l0.rows_31'
+17390 |   input  [31:0] io_fill_bits_addr,  
+      |                 ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:17393:17: Bits of signal are not used: 'io_store_bits_addr'[1:0]
+                                                                                                  : ... note: In instance 'student_top.c.l0.rows_31'
+17393 |   input  [31:0] io_store_bits_addr,  
+      |                 ^~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:26:16: Signal is not used: 'R0_clk'
+                                                                                               : ... note: In instance 'student_top.c.arb.owners.ram_ext'
+   26 |                R0_clk,
+      |                ^~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:385:16: Signal is not used: 'R0_clk'
+                                                                                                : ... note: In instance 'student_top.c.dc.caches_3.direction.ram_ext'
+  385 |                R0_clk,
+      |                ^~~~~~
+%Warning-UNUSEDSIGNAL: /tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv:8127:16: Signal is not used: 'R0_clk'
+                                                                                                 : ... note: In instance 'student_top.c.dc.requests.owners.ram_ext'
+ 8127 |                R0_clk,
+      |                ^~~~~~
+%Warning-BLKSEQ: /tmp/pararisc-single-area-20261021/scripts/ram/sram_fakeram.sv:43:35: Blocking assignment '=' in sequential logic process
+                                                                                     : ... Suggest using delayed assignment '<='
+   43 |                         next_word = words[addr];
+      |                                   ^
+%Warning-BLKSEQ: /tmp/pararisc-single-area-20261021/scripts/ram/sram_fakeram.sv:47:37: Blocking assignment '=' in sequential logic process
+                                                                                     : ... Suggest using delayed assignment '<='
+   47 |                                     = wdata[lane*WRITE_GRANULARITY +: WRITE_GRANULARITY];
+      |                                     ^
+%Warning-BLKSEQ: /tmp/pararisc-single-area-20261021/scripts/ram/sram_fakeram.sv:46:42: Blocking assignment '=' in sequential logic process
+                                                                                     : ... Suggest using delayed assignment '<='
+   46 |                                 next_word[lane*WRITE_GRANULARITY +: WRITE_GRANULARITY]
+      |                                          ^
+make[1]: Entering directory '/tmp/pararisc-single-area-20261021/flat-payload/sim/obj'
+/usr/bin/g++  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -Os -c -o sim.o /tmp/pararisc-single-area-20261021/scripts/sim.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -c -o verilated.o /tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/verilated.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -c -o verilated_vcd_c.o /tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/verilated_vcd_c.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -c -o verilated_threads.o /tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/verilated_threads.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -x c++-header Vstudent_top__pch.h -o Vstudent_top__pch.h.fast.gch
+/usr/bin/g++   -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -x c++-header Vstudent_top__pch.h -o Vstudent_top__pch.h.slow.gch
+echo "" > Vstudent_top__ALL.verilator_deplist.tmp
+/usr/bin/g++   -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top__ConstPool_0.o Vstudent_top__ConstPool_0.cpp
+/usr/bin/g++   -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top___024root__Slow.o Vstudent_top___024root__Slow.cpp
+/usr/bin/g++   -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top___024root__DepSet_h3ec42a3f__0__Slow.o Vstudent_top___024root__DepSet_h3ec42a3f__0__Slow.cpp
+/usr/bin/g++   -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top___024root__DepSet_h383d3863__0__Slow.o Vstudent_top___024root__DepSet_h383d3863__0__Slow.cpp
+/usr/bin/g++   -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top___024root__DepSet_h383d3863__1__Slow.o Vstudent_top___024root__DepSet_h383d3863__1__Slow.cpp
+/usr/bin/g++   -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top___024root__DepSet_h383d3863__2__Slow.o Vstudent_top___024root__DepSet_h383d3863__2__Slow.cpp
+/usr/bin/g++   -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top_Cache_1__Slow.o Vstudent_top_Cache_1__Slow.cpp
+/usr/bin/g++   -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top_Cache_1__DepSet_he2e31ee8__0__Slow.o Vstudent_top_Cache_1__DepSet_he2e31ee8__0__Slow.cpp
+/usr/bin/g++   -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top_Cache_1__DepSet_hc64716ec__0__Slow.o Vstudent_top_Cache_1__DepSet_hc64716ec__0__Slow.cpp
+/usr/bin/g++   -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top__Syms.o Vstudent_top__Syms.cpp
+/usr/bin/g++   -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top__Trace__0__Slow.o Vstudent_top__Trace__0__Slow.cpp
+/usr/bin/g++   -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top__TraceDecls__0__Slow.o Vstudent_top__TraceDecls__0__Slow.cpp
+/usr/bin/g++   -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.slow -c -o Vstudent_top__Trace__1__Slow.o Vstudent_top__Trace__1__Slow.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.fast -c -o Vstudent_top.o Vstudent_top.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.fast -c -o Vstudent_top___024root__DepSet_h3ec42a3f__0.o Vstudent_top___024root__DepSet_h3ec42a3f__0.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.fast -c -o Vstudent_top___024root__DepSet_h3ec42a3f__1.o Vstudent_top___024root__DepSet_h3ec42a3f__1.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.fast -c -o Vstudent_top___024root__DepSet_h3ec42a3f__2.o Vstudent_top___024root__DepSet_h3ec42a3f__2.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.fast -c -o Vstudent_top___024root__DepSet_h383d3863__0.o Vstudent_top___024root__DepSet_h383d3863__0.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.fast -c -o Vstudent_top___024root__DepSet_h383d3863__1.o Vstudent_top___024root__DepSet_h383d3863__1.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.fast -c -o Vstudent_top___024root__DepSet_h383d3863__2.o Vstudent_top___024root__DepSet_h383d3863__2.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.fast -c -o Vstudent_top_Cache_1__DepSet_hc64716ec__0.o Vstudent_top_Cache_1__DepSet_hc64716ec__0.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.fast -c -o Vstudent_top__Trace__0.o Vstudent_top__Trace__0.cpp
+/usr/bin/g++ -Os  -I.  -MMD -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include -I/tmp/appimage_extracted_90fb4ab12aa572d488eec12b9403c6f4/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-overloaded-virtual -Wno-shadow -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable     -std=c++17   -include Vstudent_top__pch.h.fast -c -o Vstudent_top__Trace__1.o Vstudent_top__Trace__1.cpp
+Archive /usr/bin/ar -rcs Vstudent_top__ALL.a Vstudent_top.o Vstudent_top___024root__DepSet_h3ec42a3f__0.o Vstudent_top___024root__DepSet_h3ec42a3f__1.o Vstudent_top___024root__DepSet_h3ec42a3f__2.o Vstudent_top___024root__DepSet_h383d3863__0.o Vstudent_top___024root__DepSet_h383d3863__1.o Vstudent_top___024root__DepSet_h383d3863__2.o Vstudent_top_Cache_1__DepSet_hc64716ec__0.o Vstudent_top__Trace__0.o Vstudent_top__Trace__1.o Vstudent_top__ConstPool_0.o Vstudent_top___024root__Slow.o Vstudent_top___024root__DepSet_h3ec42a3f__0__Slow.o Vstudent_top___024root__DepSet_h383d3863__0__Slow.o Vstudent_top___024root__DepSet_h383d3863__1__Slow.o Vstudent_top___024root__DepSet_h383d3863__2__Slow.o Vstudent_top_Cache_1__Slow.o Vstudent_top_Cache_1__DepSet_he2e31ee8__0__Slow.o Vstudent_top_Cache_1__DepSet_hc64716ec__0__Slow.o Vstudent_top__Syms.o Vstudent_top__Trace__0__Slow.o Vstudent_top__TraceDecls__0__Slow.o Vstudent_top__Trace__1__Slow.o
+/usr/bin/g++     sim.o verilated.o verilated_vcd_c.o verilated_threads.o Vstudent_top__ALL.a    -pthread -lpthread -latomic   -o /tmp/pararisc-single-area-20261021/flat-payload/sim/sim
+rm Vstudent_top__ALL.verilator_deplist.tmp
+make[1]: Leaving directory '/tmp/pararisc-single-area-20261021/flat-payload/sim/obj'
+/tmp/pararisc-single-area-20261021/flat-payload/sim/sim
+make: Leaving directory '/tmp/pararisc-single-area-20261021'

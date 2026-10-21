@@ -1,0 +1,13 @@
+make: Entering directory '/tmp/pararisc-single-area-20261021'
+"python3" "/tmp/pararisc-single-area-20261021/scripts/testcase.py" --kind perf --build "build" \
+	--testcases "/home/wangwenxuan/ACM/大二上/ParaRisc/testcases" --max-cycles 30000000 --latency 20 \
+	--sim "rob16/sim/sim" 
+benchmark                  instructions       cycles        IPC
+perf_median                        6961         8730     0.7974
+perf_multiply                     21722        23430     0.9271
+perf_qsort                       139900       170893     0.8186
+perf_rsort                       195719       236648     0.8270
+perf_towers                        5278         6291     0.8390
+perf_vvadd                         4524         5364     0.8434
+GEOMEAN                                                  0.8411
+make: Leaving directory '/tmp/pararisc-single-area-20261021'

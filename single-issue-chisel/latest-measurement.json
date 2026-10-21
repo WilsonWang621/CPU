@@ -1,17 +1,117 @@
 {
+  "stage": 6,
   "date": "2026-10-21",
-  "report": "reports/remeasure-2026-10-21",
-  "implementation": "single-issue-chisel v109 (unchanged)",
-  "rtl_sha256": "98875bedd710fc8373e539fd5ae3133ed8a3fa14b181335ec41198828eb58693",
+  "experiment": "v110-flat-payload",
+  "report": "reports/area-recovery-2026-10-21",
+  "implementation": "single-issue-chisel v110: flatten LocalMask and LocalWord only",
+  "parameters": {
+    "rob": 32,
+    "iq": 8,
+    "ic-bytes": 4096,
+    "dc-bytes": 4096,
+    "line-bytes": 64,
+    "ways": 2,
+    "banks": 4,
+    "early-recovery": 1,
+    "prefetch": 1,
+    "btb-entries": 64,
+    "history-bits": 1,
+    "l0-entries": 32,
+    "store-entries": 4,
+    "checkpoints": 4,
+    "fast-redirect": 1,
+    "store-slots": 8,
+    "load-entries": 8,
+    "debug": 0,
+    "l0-fill-stages": 1,
+    "l0-replacement": 1,
+    "ram-read-ahead": 0,
+    "l0-store-stages": 1,
+    "banked-load-payload": 1,
+    "cache-hierarchy": 0,
+    "prefetch-train-stages": 1,
+    "trusted-load-credit": 1,
+    "ras-write-stages": 1,
+    "registered-squash-mask": 1,
+    "issue-width": 1,
+    "issue-slice-bits": 16,
+    "banked-return-match": 1,
+    "local-issue-eligibility": 1,
+    "fetch-head-slice-bits": 0,
+    "div-step-bits": 1,
+    "div-result-cache": 0,
+    "parallel-dispatch-address": 0,
+    "cached-fetch-head": 1,
+    "result-slice-bits": 32,
+    "issue-age-matrix": 0,
+    "local-result-qualification": 0,
+    "prepared-load-result": 0,
+    "load-value-copies": 1,
+    "early-load-format": 0,
+    "cached-fetch-instruction": 0,
+    "separate-operand-ready": 0
+  },
+  "rtl_sha256": "1de5880caa3e1a2e0c609351e7b4701f021372a33b97d0007add7f280db81247",
+  "ipc_geomean": 0.8460240058706379,
+  "performance": [
+    {
+      "case": "perf_median",
+      "passed": true,
+      "instructions": 6961,
+      "cycles": 8527,
+      "ipc": 0.816348070833822
+    },
+    {
+      "case": "perf_multiply",
+      "passed": true,
+      "instructions": 21722,
+      "cycles": 23421,
+      "ipc": 0.9274582639511549
+    },
+    {
+      "case": "perf_qsort",
+      "passed": true,
+      "instructions": 139900,
+      "cycles": 170728,
+      "ipc": 0.8194320790965747
+    },
+    {
+      "case": "perf_rsort",
+      "passed": true,
+      "instructions": 195719,
+      "cycles": 234842,
+      "ipc": 0.8334071418230129
+    },
+    {
+      "case": "perf_towers",
+      "passed": true,
+      "instructions": 5278,
+      "cycles": 6291,
+      "ipc": 0.8389763153711651
+    },
+    {
+      "case": "perf_vvadd",
+      "passed": true,
+      "instructions": 4524,
+      "cycles": 5352,
+      "ipc": 0.8452914798206278
+    }
+  ],
+  "correctness": {
+    "status": "passed",
+    "passed": 19,
+    "failed": 0
+  },
   "synthesis": {
-    "area_um2": 18831.740299999674,
-    "combinational_area_um2": 10469.548079999888,
-    "sequential_area_um2": 5451.7536,
+    "status": "passed",
+    "fmax_mhz": 422.44224422442244,
+    "area_um2": 17933.13115999947,
+    "combinational_area_um2": 9614.095739999451,
+    "sequential_area_um2": 5408.5968,
     "sram_area_um2": 2910.4386200000004,
-    "fmax_mhz": 423.3154195948739,
-    "minimum_period_ns": 2.3623046875,
+    "minimum_period_ns": 2.3671875,
     "clock_period_ns": 2.0,
-    "worst_setup_slack_ns": -0.361838,
+    "worst_setup_slack_ns": -0.366516,
     "abc_constraints": {
       "driving_cell": "INVx1_ASAP7_75t_R",
       "output_load_ff": 5.0
@@ -105,36 +205,42 @@
         "cases": [
           {
             "case": "perf_median",
+            "passed": true,
             "instructions": 6961,
             "cycles": 8178,
             "ipc": 0.851186109073123
           },
           {
             "case": "perf_multiply",
+            "passed": true,
             "instructions": 21722,
             "cycles": 23333,
             "ipc": 0.9309561565165216
           },
           {
             "case": "perf_qsort",
+            "passed": true,
             "instructions": 139900,
             "cycles": 167964,
             "ipc": 0.8329165773618157
           },
           {
             "case": "perf_rsort",
+            "passed": true,
             "instructions": 195719,
             "cycles": 217393,
             "ipc": 0.9003003776570543
           },
           {
             "case": "perf_towers",
+            "passed": true,
             "instructions": 5278,
             "cycles": 6062,
             "ipc": 0.8706697459584296
           },
           {
             "case": "perf_vvadd",
+            "passed": true,
             "instructions": 4524,
             "cycles": 5093,
             "ipc": 0.8882780286667976
@@ -230,36 +336,42 @@
         "cases": [
           {
             "case": "perf_median",
+            "passed": true,
             "instructions": 6961,
             "cycles": 8527,
             "ipc": 0.816348070833822
           },
           {
             "case": "perf_multiply",
+            "passed": true,
             "instructions": 21722,
             "cycles": 23421,
             "ipc": 0.9274582639511549
           },
           {
             "case": "perf_qsort",
+            "passed": true,
             "instructions": 139900,
             "cycles": 170728,
             "ipc": 0.8194320790965747
           },
           {
             "case": "perf_rsort",
+            "passed": true,
             "instructions": 195719,
             "cycles": 234842,
             "ipc": 0.8334071418230129
           },
           {
             "case": "perf_towers",
+            "passed": true,
             "instructions": 5278,
             "cycles": 6291,
             "ipc": 0.8389763153711651
           },
           {
             "case": "perf_vvadd",
+            "passed": true,
             "instructions": 4524,
             "cycles": 5352,
             "ipc": 0.8452914798206278
@@ -269,21 +381,20 @@
       }
     }
   },
-  "historical": {
-    "report": "reports/stage5/v109-final-cached-banked",
-    "area_um2": 17942.622739999555,
-    "fmax_mhz": 342.13164049448716,
-    "ipc_geomean_latency20": 0.8460240058706379
+  "tier2_pass": true,
+  "stage_frequency_pass": true,
+  "local_threshold_assessment": {
+    "tier2": true,
+    "score": 97,
+    "basis": "Official latency 10; latency 20 independently also passes. Local threshold assessment, not official final grading."
   },
   "comparison": {
-    "fmax_change_percent": 23.728813559322013,
-    "area_change_percent": 4.955337761285072
-  },
-  "local_threshold_assessment": {
-    "tier1": false,
-    "tier2": false,
-    "tier3": false,
-    "score": 85,
-    "basis": "Current official latency 10; correctness 19/19. Local measurement, not official grading."
+    "before_report": "reports/remeasure-2026-10-21",
+    "before_area_um2": 18831.740299999674,
+    "before_fmax_mhz": 423.3154195948739,
+    "area_saved_um2": 898.6091400002042,
+    "area_change_percent": -4.771779589591196,
+    "area_margin_um2": 66.86884000053033,
+    "all_performance_cycles_unchanged": true
   }
 }

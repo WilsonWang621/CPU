@@ -6,14 +6,16 @@ work=$(mktemp -d /tmp/pararisc-single-remeasure-XXXXXX)
 export APPIMAGE_EXTRACT_AND_RUN=1 PYTHONUNBUFFERED=1
 python3 - "$repo" "$work" <<'PY'
 from pathlib import Path
-import hashlib,shutil,sys
+import gzip,hashlib,json,shutil,sys
 repo,work=map(Path,sys.argv[1:])
 shutil.copytree(repo/'scripts',work/'scripts',ignore=shutil.ignore_patterns('__pycache__'))
-shutil.copytree(repo/'single-issue-chisel/rtl',work/'single-issue-chisel/rtl')
+archive=repo/'single-issue-chisel/reports/remeasure-2026-10-21'
+rtl=work/'single-issue-chisel/rtl';rtl.mkdir(parents=True)
+(rtl/'student_top.sv').write_bytes(gzip.decompress((archive/'inputs/student_top.sv.gz').read_bytes()))
+shutil.copy2(archive/'inputs/filelist.f',rtl/'filelist.f')
+assert hashlib.sha256((rtl/'student_top.sv').read_bytes()).hexdigest()==json.loads((archive/'summary.json').read_text())['rtl_sha256']
 for file in ['Makefile','config.mk']:shutil.copy2(repo/file,work/file)
-for file in ['student_top.sv','filelist.f']:
- a=repo/'single-issue-chisel/rtl'/file;b=work/'single-issue-chisel/rtl'/file
- assert hashlib.sha256(a.read_bytes()).digest()==hashlib.sha256(b.read_bytes()).digest()
+
 PY
 printf 'Measurement workspace: %s\n' "$work"
 make -C "$work" build APPIMAGE="$repo/cpu2026-tools-x86_64.AppImage" \

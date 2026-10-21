@@ -69,6 +69,6 @@ GitHub API 核对的最新官方 main 为 [`302f0cf3cccdaa5de084a2120e0d950c663e
 bash single-issue-chisel/reports/remeasure-2026-10-21/reproduce.sh
 ```
 
-脚本在新的英文临时目录复制输入、编译、跑两种延迟的完整正确性及性能，再执行官方综合。它保留工作目录和原始日志，不会修改 CPU 源码。不同工具包、库、脚本或 RTL 必须重新记录身份，不能沿用本报告数值。
+脚本从本目录冻结的 `inputs/student_top.sv.gz` 取出 v109 RTL，再在新的英文临时目录复制输入、编译、跑两种延迟的完整正确性及性能，最后执行官方综合；后续默认版本变化不会替换这份历史输入。它保留工作目录和原始日志，不会修改 CPU 源码。不同工具包、库、脚本或 RTL 必须重新记录身份，不能沿用本报告数值。
 
-[baseline.json](../../baseline.json)继续选择已冻结的 v109 电路，原字段保留 stage5 历史成绩，不覆盖旧证据；新增指针指向 [latest-measurement.json](../../latest-measurement.json)中的当前测量。新结果单独归档，没有将新频率与旧面积拼接成一个“达标配置”。
+本次复测时默认仍是 v109；此处的 [summary.json](summary.json) 永久保留该输入与超面积结果。后续默认已更新为 [v110](../area-recovery-2026-10-21/report.md)，当前 [baseline.json](../../baseline.json) 和 [latest-measurement.json](../../latest-measurement.json) 指向新的已验证配置；两次测量不混用频率和面积。

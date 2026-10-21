@@ -363,7 +363,6 @@ endmodule
 
 // external module sram_fakeram
 
-(* keep_hierarchy = 1 *)
 module LocalWord(	// src/main/scala/tier2/LocalLogic.scala:22:7
   input         clock,	// src/main/scala/tier2/LocalLogic.scala:22:7
                 io_prepare,	// src/main/scala/tier2/LocalLogic.scala:23:14
@@ -1100,7 +1099,6 @@ module LocalIndexedWord_7(	// src/main/scala/tier2/LocalLogic.scala:61:7
   assign io_value = value;	// src/main/scala/tier2/LocalLogic.scala:61:7, :65:18
 endmodule
 
-(* keep_hierarchy = 1 *)
 module LocalMask(	// src/main/scala/tier2/LocalLogic.scala:16:7
   input         io_selected,	// src/main/scala/tier2/LocalLogic.scala:17:14
   input  [31:0] io_word,	// src/main/scala/tier2/LocalLogic.scala:17:14
@@ -1110,7 +1108,6 @@ module LocalMask(	// src/main/scala/tier2/LocalLogic.scala:16:7
   assign io_value = io_word & {32{io_selected}};	// src/main/scala/tier2/LocalLogic.scala:16:7, :20:{23,29}
 endmodule
 
-(* keep_hierarchy = 1 *)
 module LocalWord_1(	// src/main/scala/tier2/LocalLogic.scala:22:7
   input          clock,	// src/main/scala/tier2/LocalLogic.scala:22:7
                  io_prepare,	// src/main/scala/tier2/LocalLogic.scala:23:14
@@ -1126,7 +1123,6 @@ module LocalWord_1(	// src/main/scala/tier2/LocalLogic.scala:22:7
   assign io_value = value;	// src/main/scala/tier2/LocalLogic.scala:22:7, :26:18
 endmodule
 
-(* keep_hierarchy = 1 *)
 module LocalMask_8(	// src/main/scala/tier2/LocalLogic.scala:16:7
   input          io_selected,	// src/main/scala/tier2/LocalLogic.scala:17:14
   input  [104:0] io_word,	// src/main/scala/tier2/LocalLogic.scala:17:14
@@ -1242,7 +1238,6 @@ module PreparedQueue(	// src/main/scala/tier2/PreparedQueue.scala:8:7
   assign io_deq_bits_rasValid = _stored_T_2[0];	// src/main/scala/tier2/Common.scala:152:21, src/main/scala/tier2/PreparedQueue.scala:8:7, :53:14
 endmodule
 
-(* keep_hierarchy = 1 *)
 module LocalWord_3(	// src/main/scala/tier2/LocalLogic.scala:22:7
   input         clock,	// src/main/scala/tier2/LocalLogic.scala:22:7
                 io_prepare,	// src/main/scala/tier2/LocalLogic.scala:23:14
@@ -1258,7 +1253,6 @@ module LocalWord_3(	// src/main/scala/tier2/LocalLogic.scala:22:7
   assign io_value = value;	// src/main/scala/tier2/LocalLogic.scala:22:7, :26:18
 endmodule
 
-(* keep_hierarchy = 1 *)
 module LocalMask_10(	// src/main/scala/tier2/LocalLogic.scala:16:7
   input         io_selected,	// src/main/scala/tier2/LocalLogic.scala:17:14
   input  [97:0] io_word,	// src/main/scala/tier2/LocalLogic.scala:17:14
@@ -7460,7 +7454,6 @@ endmodule
 
 // external module sram_fakeram
 
-(* keep_hierarchy = 1 *)
 module LocalWord_16(	// src/main/scala/tier2/LocalLogic.scala:22:7
   input         clock,	// src/main/scala/tier2/LocalLogic.scala:22:7
                 io_prepare,	// src/main/scala/tier2/LocalLogic.scala:23:14
@@ -7476,7 +7469,6 @@ module LocalWord_16(	// src/main/scala/tier2/LocalLogic.scala:22:7
   assign io_value = value;	// src/main/scala/tier2/LocalLogic.scala:22:7, :26:18
 endmodule
 
-(* keep_hierarchy = 1 *)
 module LocalMask_26(	// src/main/scala/tier2/LocalLogic.scala:16:7
   input         io_selected,	// src/main/scala/tier2/LocalLogic.scala:17:14
   input  [68:0] io_word,	// src/main/scala/tier2/LocalLogic.scala:17:14
@@ -11220,7 +11212,6 @@ module LocalResultWord_31(	// src/main/scala/tier2/LocalLogic.scala:69:7
   assign io_value = value;	// src/main/scala/tier2/LocalLogic.scala:69:7, :88:18
 endmodule
 
-(* keep_hierarchy = 1 *)
 module LocalMask_66(	// src/main/scala/tier2/LocalLogic.scala:16:7
   input        io_selected,	// src/main/scala/tier2/LocalLogic.scala:17:14
   input  [3:0] io_word,	// src/main/scala/tier2/LocalLogic.scala:17:14
@@ -14706,7 +14697,6 @@ module OperandEntry(	// src/main/scala/tier2/Operand.scala:6:7
               : matches_2 ? io_completions_2_bits_data : value;	// src/main/scala/chisel3/util/Mux.scala:126:16, src/main/scala/tier2/Common.scala:80:95, src/main/scala/tier2/Operand.scala:6:7, :13:{18,81}, :15:82, :25:17
 endmodule
 
-(* keep_hierarchy = 1 *)
 module LocalWord_44(	// src/main/scala/tier2/LocalLogic.scala:22:7
   input         clock,	// src/main/scala/tier2/LocalLogic.scala:22:7
   input  [63:0] io_data,	// src/main/scala/tier2/LocalLogic.scala:23:14
@@ -14719,7 +14709,6 @@ module LocalWord_44(	// src/main/scala/tier2/LocalLogic.scala:22:7
   assign io_value = value;	// src/main/scala/tier2/LocalLogic.scala:22:7, :26:18
 endmodule
 
-(* keep_hierarchy = 1 *)
 module LocalWord_46(	// src/main/scala/tier2/LocalLogic.scala:22:7
   input        clock,	// src/main/scala/tier2/LocalLogic.scala:22:7
   input  [4:0] io_data,	// src/main/scala/tier2/LocalLogic.scala:23:14
@@ -14732,7 +14721,6 @@ module LocalWord_46(	// src/main/scala/tier2/LocalLogic.scala:22:7
   assign io_value = value;	// src/main/scala/tier2/LocalLogic.scala:22:7, :26:18
 endmodule
 
-(* keep_hierarchy = 1 *)
 module LocalWord_50(	// src/main/scala/tier2/LocalLogic.scala:22:7
   input        clock,	// src/main/scala/tier2/LocalLogic.scala:22:7
   input  [1:0] io_data,	// src/main/scala/tier2/LocalLogic.scala:23:14
@@ -14784,7 +14772,6 @@ module LocalCounter(	// src/main/scala/tier2/LocalLogic.scala:46:7
   assign io_value = value;	// src/main/scala/tier2/LocalLogic.scala:46:7, :48:22
 endmodule
 
-(* keep_hierarchy = 1 *)
 module LocalMask_106(	// src/main/scala/tier2/LocalLogic.scala:16:7
   input         io_selected,	// src/main/scala/tier2/LocalLogic.scala:17:14
   input  [43:0] io_word,	// src/main/scala/tier2/LocalLogic.scala:17:14
@@ -17383,7 +17370,6 @@ module LoadQueue(	// src/main/scala/tier2/LoadQueue.scala:8:7
             + {1'h0, {1'h0, valid_6} + {1'h0, valid_7}}});	// src/main/scala/tier2/LoadQueue.scala:8:7, :9:14, :18:22, :21:{28,37}
 endmodule
 
-(* keep_hierarchy = 1 *)
 module LocalMask_146(	// src/main/scala/tier2/LocalLogic.scala:16:7
   input  io_selected,	// src/main/scala/tier2/LocalLogic.scala:17:14
          io_word,	// src/main/scala/tier2/LocalLogic.scala:17:14
@@ -18458,7 +18444,6 @@ module IssueChoice_13(	// src/main/scala/tier2/IssueChoice.scala:8:7
          : 2'h0) | io_fallback & {2{eligible == 8'h0}};	// src/main/scala/chisel3/util/Mux.scala:30:73, src/main/scala/tier2/IssueChoice.scala:8:7, :20:{54,70}, :21:{51,55,72,84}, :22:{44,59,65,82}
 endmodule
 
-(* keep_hierarchy = 1 *)
 module LocalMask_562(	// src/main/scala/tier2/LocalLogic.scala:16:7
   input        io_selected,	// src/main/scala/tier2/LocalLogic.scala:17:14
   input  [4:0] io_word,	// src/main/scala/tier2/LocalLogic.scala:17:14

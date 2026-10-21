@@ -1,0 +1,6 @@
+read_verilog -sv -D SYNTHESIS "/tmp/pararisc-single-area-20261021/flat-payload/rtl/student_top.sv"
+read_verilog -sv -noblackbox -D SYNTHESIS "/tmp/pararisc-single-area-20261021/scripts/ram/sram_fakeram.sv"
+hierarchy -top student_top
+proc
+memory_collect
+write_json "/tmp/pararisc-single-area-20261021/flat-payload/synth/opt/elaborated.json"

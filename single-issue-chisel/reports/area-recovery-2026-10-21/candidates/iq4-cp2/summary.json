@@ -1,0 +1,151 @@
+{
+  "name": "iq4-cp2",
+  "parameters": {
+    "rob": 32,
+    "iq": 4,
+    "ic-bytes": 4096,
+    "dc-bytes": 4096,
+    "line-bytes": 64,
+    "ways": 2,
+    "banks": 4,
+    "early-recovery": 1,
+    "prefetch": 1,
+    "btb-entries": 64,
+    "history-bits": 1,
+    "l0-entries": 32,
+    "store-entries": 4,
+    "checkpoints": 2,
+    "fast-redirect": 1,
+    "store-slots": 8,
+    "load-entries": 8,
+    "debug": 0,
+    "l0-fill-stages": 1,
+    "l0-replacement": 1,
+    "ram-read-ahead": 0,
+    "l0-store-stages": 1,
+    "banked-load-payload": 1,
+    "cache-hierarchy": 0,
+    "prefetch-train-stages": 1,
+    "trusted-load-credit": 1,
+    "ras-write-stages": 1,
+    "registered-squash-mask": 1,
+    "issue-width": 1,
+    "issue-slice-bits": 16,
+    "banked-return-match": 1,
+    "local-issue-eligibility": 1,
+    "fetch-head-slice-bits": 0,
+    "div-step-bits": 1,
+    "div-result-cache": 0,
+    "parallel-dispatch-address": 0,
+    "cached-fetch-head": 1,
+    "result-slice-bits": 32,
+    "issue-age-matrix": 0,
+    "local-result-qualification": 0,
+    "prepared-load-result": 0,
+    "load-value-copies": 1,
+    "early-load-format": 0,
+    "cached-fetch-instruction": 0,
+    "separate-operand-ready": 0
+  },
+  "area_um2": 17681.159599999737,
+  "fmax_mhz": 465.03178928247047,
+  "performance": {
+    "10": {
+      "cases": [
+        {
+          "case": "perf_median",
+          "passed": true,
+          "instructions": 6961,
+          "cycles": 8462,
+          "ipc": 0.8226187662491137
+        },
+        {
+          "case": "perf_multiply",
+          "passed": true,
+          "instructions": 21722,
+          "cycles": 23333,
+          "ipc": 0.9309561565165216
+        },
+        {
+          "case": "perf_qsort",
+          "passed": true,
+          "instructions": 139900,
+          "cycles": 168487,
+          "ipc": 0.8303311234694665
+        },
+        {
+          "case": "perf_rsort",
+          "passed": true,
+          "instructions": 195719,
+          "cycles": 220838,
+          "ipc": 0.8862559885526947
+        },
+        {
+          "case": "perf_towers",
+          "passed": true,
+          "instructions": 5278,
+          "cycles": 6064,
+          "ipc": 0.8703825857519789
+        },
+        {
+          "case": "perf_vvadd",
+          "passed": true,
+          "instructions": 4524,
+          "cycles": 5148,
+          "ipc": 0.8787878787878788
+        }
+      ],
+      "ipc_geomean": 0.8691380540708297
+    },
+    "20": {
+      "cases": [
+        {
+          "case": "perf_median",
+          "passed": true,
+          "instructions": 6961,
+          "cycles": 8815,
+          "ipc": 0.7896766874645491
+        },
+        {
+          "case": "perf_multiply",
+          "passed": true,
+          "instructions": 21722,
+          "cycles": 23421,
+          "ipc": 0.9274582639511549
+        },
+        {
+          "case": "perf_qsort",
+          "passed": true,
+          "instructions": 139900,
+          "cycles": 171155,
+          "ipc": 0.8173877479477667
+        },
+        {
+          "case": "perf_rsort",
+          "passed": true,
+          "instructions": 195719,
+          "cycles": 237721,
+          "ipc": 0.8233138847640722
+        },
+        {
+          "case": "perf_towers",
+          "passed": true,
+          "instructions": 5278,
+          "cycles": 6297,
+          "ipc": 0.8381769096395109
+        },
+        {
+          "case": "perf_vvadd",
+          "passed": true,
+          "instructions": 4524,
+          "cycles": 5423,
+          "ipc": 0.8342245989304813
+        }
+      ],
+      "ipc_geomean": 0.8373222980032928
+    }
+  },
+  "correctness": "not_run",
+  "selected": false,
+  "reason": "Capacity reduction is unnecessary: selected hierarchy-only candidate preserves IPC at both latencies."
+}

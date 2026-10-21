@@ -1,0 +1,151 @@
+{
+  "name": "rob16",
+  "parameters": {
+    "rob": 16,
+    "iq": 8,
+    "ic-bytes": 4096,
+    "dc-bytes": 4096,
+    "line-bytes": 64,
+    "ways": 2,
+    "banks": 4,
+    "early-recovery": 1,
+    "prefetch": 1,
+    "btb-entries": 64,
+    "history-bits": 1,
+    "l0-entries": 32,
+    "store-entries": 4,
+    "checkpoints": 4,
+    "fast-redirect": 1,
+    "store-slots": 8,
+    "load-entries": 8,
+    "debug": 0,
+    "l0-fill-stages": 1,
+    "l0-replacement": 1,
+    "ram-read-ahead": 0,
+    "l0-store-stages": 1,
+    "banked-load-payload": 1,
+    "cache-hierarchy": 0,
+    "prefetch-train-stages": 1,
+    "trusted-load-credit": 1,
+    "ras-write-stages": 1,
+    "registered-squash-mask": 1,
+    "issue-width": 1,
+    "issue-slice-bits": 16,
+    "banked-return-match": 1,
+    "local-issue-eligibility": 1,
+    "fetch-head-slice-bits": 0,
+    "div-step-bits": 1,
+    "div-result-cache": 0,
+    "parallel-dispatch-address": 0,
+    "cached-fetch-head": 1,
+    "result-slice-bits": 32,
+    "issue-age-matrix": 0,
+    "local-result-qualification": 0,
+    "prepared-load-result": 0,
+    "load-value-copies": 1,
+    "early-load-format": 0,
+    "cached-fetch-instruction": 0,
+    "separate-operand-ready": 0
+  },
+  "area_um2": 17448.958519999716,
+  "fmax_mhz": 413.73737373737373,
+  "performance": {
+    "10": {
+      "cases": [
+        {
+          "case": "perf_median",
+          "passed": true,
+          "instructions": 6961,
+          "cycles": 8394,
+          "ipc": 0.8292828210626638
+        },
+        {
+          "case": "perf_multiply",
+          "passed": true,
+          "instructions": 21722,
+          "cycles": 23333,
+          "ipc": 0.9309561565165216
+        },
+        {
+          "case": "perf_qsort",
+          "passed": true,
+          "instructions": 139900,
+          "cycles": 168147,
+          "ipc": 0.8320100864124843
+        },
+        {
+          "case": "perf_rsort",
+          "passed": true,
+          "instructions": 195719,
+          "cycles": 219385,
+          "ipc": 0.8921257150671195
+        },
+        {
+          "case": "perf_towers",
+          "passed": true,
+          "instructions": 5278,
+          "cycles": 6060,
+          "ipc": 0.8709570957095709
+        },
+        {
+          "case": "perf_vvadd",
+          "passed": true,
+          "instructions": 4524,
+          "cycles": 5114,
+          "ipc": 0.8846304262807978
+        }
+      ],
+      "ipc_geomean": 0.872618059430283
+    },
+    "20": {
+      "cases": [
+        {
+          "case": "perf_median",
+          "passed": true,
+          "instructions": 6961,
+          "cycles": 8730,
+          "ipc": 0.7973654066437572
+        },
+        {
+          "case": "perf_multiply",
+          "passed": true,
+          "instructions": 21722,
+          "cycles": 23430,
+          "ipc": 0.9271020059752454
+        },
+        {
+          "case": "perf_qsort",
+          "passed": true,
+          "instructions": 139900,
+          "cycles": 170893,
+          "ipc": 0.818640903957447
+        },
+        {
+          "case": "perf_rsort",
+          "passed": true,
+          "instructions": 195719,
+          "cycles": 236648,
+          "ipc": 0.8270469220107501
+        },
+        {
+          "case": "perf_towers",
+          "passed": true,
+          "instructions": 5278,
+          "cycles": 6291,
+          "ipc": 0.8389763153711651
+        },
+        {
+          "case": "perf_vvadd",
+          "passed": true,
+          "instructions": 4524,
+          "cycles": 5364,
+          "ipc": 0.843400447427293
+        }
+      ],
+      "ipc_geomean": 0.8411342904042053
+    }
+  },
+  "correctness": "not_run",
+  "selected": false,
+  "reason": "Capacity reduction is unnecessary: selected hierarchy-only candidate preserves IPC at both latencies."
+}

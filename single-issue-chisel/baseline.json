@@ -1,14 +1,24 @@
 {
-  "stage": 5,
-  "report": "reports/stage5/v109-final-cached-banked",
-  "rtl_sha256": "98875bedd710fc8373e539fd5ae3133ed8a3fa14b181335ec41198828eb58693",
+  "stage": 6,
+  "report": "reports/area-recovery-2026-10-21",
+  "rtl_sha256": "1de5880caa3e1a2e0c609351e7b4701f021372a33b97d0007add7f280db81247",
   "ipc_geomean": 0.8460240058706379,
   "synthesis": {
     "status": "passed",
-    "fmax_mhz": 342.13164049448716,
-    "area_um2": 17942.622739999555
+    "fmax_mhz": 422.44224422442244,
+    "area_um2": 17933.13115999947,
+    "combinational_area_um2": 9614.095739999451,
+    "sequential_area_um2": 5408.5968,
+    "sram_area_um2": 2910.4386200000004,
+    "minimum_period_ns": 2.3671875,
+    "clock_period_ns": 2.0,
+    "worst_setup_slack_ns": -0.366516,
+    "abc_constraints": {
+      "driving_cell": "INVx1_ASAP7_75t_R",
+      "output_load_ff": 5.0
+    }
   },
-  "correctness": "19/19",
+  "correctness": "19/19 at latency 10 and 20",
   "parameters": {
     "rob": 32,
     "iq": 8,
@@ -57,7 +67,7 @@
     "separate-operand-ready": 0
   },
   "target_mhz": 400,
-  "target_reached": false,
-  "measurement_note": "stage5 历史综合结果；当前官方流程复测见 latest_measurement。生成器仍使用此处冻结的 v109 电路及参数。",
-  "latest_measurement": "latest-measurement.json"
+  "target_reached": true,
+  "latest_measurement": "latest-measurement.json",
+  "measurement_note": "Current official ABC-constrained flow; full capacities retained; v109 history remains in stage5 and remeasure-2026-10-21."
 }
