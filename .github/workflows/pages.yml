@@ -36,18 +36,38 @@ jobs:
           test -s _site/architecture/single-issue-overview.html
           ! rg -n '(/home/|/Users/|[A-Za-z]:\\\\)' _site
           test "$(find _site -type f | wc -l)" -eq 7
-      - name: Check local showcase links and selected assets
+      - name: Resolve repository links and check showcase targets
         run: |
           python3 - <<'PY'
+          import os
           from pathlib import Path
           import re
+          from urllib.parse import unquote, urlsplit
           root = Path('_site')
-          text = (root/'index.html').read_text()
+          index = root/'index.html'
+          repository = os.environ['GITHUB_REPOSITORY']
+          text = index.read_text().replace(
+              'https://github.com/WilsonWang621/CPU',
+              f'https://github.com/{repository}')
+          index.write_text(text)
           for href in re.findall(r'href="([^"]+)"', text):
-              if href.startswith(('https://', 'http://', '#')):
+              url = urlsplit(href)
+              if url.netloc == 'github.com':
+                  parts = unquote(url.path).strip('/').split('/')
+                  assert '/'.join(parts[:2]).casefold() == repository.casefold(), f'Wrong repository: {href}'
+                  target = parts[2:]
+                  if not target or target == ['actions']:
+                      continue
+                  assert len(target) >= 3 and target[0] in ('blob', 'tree') and target[1] == 'main', href
+                  path = Path('/'.join(target[2:]))
+                  assert not path.is_absolute() and '..' not in path.parts, href
+                  assert (path.is_file() if target[0] == 'blob' else path.is_dir()), f'Missing repository target: {href}'
+              elif href.startswith('#'):
                   continue
-              assert (root/href).is_file(), href
-          print('showcase links: PASS')
+              else:
+                  assert not url.scheme and not url.netloc and not url.path.startswith('/'), href
+                  assert (root/unquote(url.path)).is_file(), href
+          print(f'showcase links: PASS (local assets and {repository} targets)')
           PY
       - uses: actions/upload-pages-artifact@v3
         with:

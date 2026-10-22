@@ -1,14 +1,14 @@
 # 版本报告索引
 
-返回[仓库首页](../README.md)查看三套实现与运行命令，或进入[项目文档](../docs/README.md)查看架构和接口。**当前默认入口是双发射 Chisel**；本索引中的数字均为已归档测量，本次文档整理未重跑仿真、综合或 STA。旧阶段保留当时的实现、配置、工具流程和结论。
+这里收录三套 CPU 的测量报告和验证记录。默认构建的是双发射 Chisel，运行命令见[仓库首页](../README.md)，架构和接口见[项目文档](../docs/README.md)。下列结果来自各阶段的归档报告，应结合当时的实现、配置和工具版本阅读。
 
-三套实现的统一基准表见[统一实验索引](experiments/README.md)；运行 `python3 scripts/build_experiment_index.py` 可按稳定顺序从既有 JSON、CSV 和 manifest 重新生成 [index.csv](experiments/index.csv) / [index.json](experiments/index.json)。索引不改写历史报告，并把源码身份、归档提交和评测流程分别记录。
+三套实现选定的基准见[实验索引](experiments/README.md)。在仓库根目录运行 `python3 scripts/build_experiment_index.py`，可从已有报告和清单生成 [CSV](experiments/index.csv) / [JSON](experiments/index.json)。表中分别记录参与测量的源码、报告归档的提交，以及使用的评测流程。
 
 ## 默认双发射 Chisel
 
 2026-10-16 的[完整要求与架构权衡报告](../dual-issue-chisel/reports/requirements-2026-10-16/report.md)记录 **502.70 MHz、35,930.97 μm²、IPC 1.222171 / 1.113846（延迟 10 / 20）**，两种延迟的正确性各 19/19。[14 组参数实验](../dual-issue-chisel/reports/requirements-2026-10-16/parameter-sensitivity.md)记录各配置的实际测试范围，不能将默认配置的面积/频率推广到所有变体。
 
-[机器可读验收](../dual-issue-chisel/reports/requirements-2026-10-16/acceptance.json)与[冻结输入和原始日志](../dual-issue-chisel/reports/requirements-2026-10-16/verified/)绑定源码、RTL、课程工具和测试集身份。运行 `python3 dual-issue-chisel/scripts/audit_requirements.py` 可审计这些证据与当前输入的一致性；该命令不重新执行测试或测量。
+[验收结果](../dual-issue-chisel/reports/requirements-2026-10-16/acceptance.json)和[原始输入及日志](../dual-issue-chisel/reports/requirements-2026-10-16/verified/)记录了测量使用的源码、RTL、工具和测试集。运行 `python3 dual-issue-chisel/scripts/audit_requirements.py` 可检查归档输入与当前文件的哈希是否一致；该命令不重新执行仿真或测量。
 
 [v13 历史验收](../dual-issue-chisel/reports/final/report.md)保留全部正确性、两组性能的双 CPU 逐周期 AXI 对照，以及组件形式证明和有界检查范围。[迁移记录](../dual-issue-chisel/reports/progress.md)保留各候选与取舍。源码、生成和原生验证入口见[工程说明](../dual-issue-chisel/README.md)。
 
@@ -47,4 +47,4 @@
 
 [框架同步记录](framework/upstream-sync-2026-10-15.md)说明官方综合工具更新和复核。[Verilog 原始数据索引](data/README.md)按日期和阶段保存冻结输入、原始日志、报告及哈希清单；两套 Chisel 的原始归档位于各自工程的 `reports/`。综合条件与面积口径见[首页测量说明](../README.md#当前结果与测量条件)及各报告，不能混用不同工具流程的成绩。
 
-报告正文中的复现命令保留当时的路径与默认入口语境；执行前核对所选实现、filelist、`SIM` 和工作目录。当前通用命令以[首页](../README.md#快速运行)和各工程 README 为准，单发射冻结测量优先使用其报告中的 `reproduce.sh`。不改写冻结输入或历史报告来迎合当前导航。
+旧报告中的命令使用当时的路径和默认实现。复现时请先核对实现、filelist、`SIM` 和工作目录；当前常用命令见[首页](../README.md#快速运行)和各工程 README。复现单发射的归档测量时，使用对应报告中的 `reproduce.sh`。

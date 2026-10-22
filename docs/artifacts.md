@@ -1,24 +1,24 @@
 # 产物与实验归档规则
 
-当前仓库保留课程交付和可审计摘要；大型完整输出按实验打包，不继续把每次构建目录复制进 Git。当前跟踪文件的分类和大小见[审计报告](artifact-audit.md)及[机器可读结果](artifact-audit.json)。报告由以下命令从工作树和本地 Git refs 重新生成：
+Git 保存课程需要的文件、实验摘要、配置和关键日志。较大的完整输出按实验打包保存，避免反复提交整个构建目录。已跟踪文件的大小见[统计报告](artifact-audit.md)和 [JSON](artifact-audit.json)，可用以下命令更新：
 
 ```sh
 python3 scripts/audit_artifacts.py --history
 ```
 
-`--history` 只扫描本地 refs 能看到的 Git 历史，不推断远端是否完整。它不会改动文件。
+该命令更新统计报告，不会移动或删除已有产物。`--history` 只统计本地已有的 Git 历史；若本地历史不完整，结果也不包含缺失的部分。
 
-## 分类与保留边界
+## 各类文件如何保存
 
 | 类别 | Git 中保留 | 归档策略 |
 | --- | --- | --- |
 | 源码与配置 | Chisel、Verilog、脚本、Makefile、版本配置 | 必须跟踪；它们定义实验输入 |
 | 课程必需生成 RTL | 当前三套入口涉及的 `rtl/`、根 filelist 和 Verilog 导出 | 必须跟踪；课程构建和入口审计依赖它们 |
 | 工具包 | `cpu2026-tools-x86_64.AppImage` 及工具版本/哈希 | 当前历史输入保留；后续优先 Release 附件，Git 只保留哈希和下载信息 |
-| 实验摘要 | `summary.json`、`acceptance.json`、`identity.json`、CSV、报告正文、配置和 manifest | Git 保留；每个数值必须能指向原始证据 |
+| 实验摘要 | `summary.json`、`acceptance.json`、`identity.json`、CSV、报告正文、配置和 manifest | 提交到 Git，注明各项数值对应的原始记录 |
 | 完整日志和综合输出 | `.log`、`.rpt`、压缩报告、映射网表、巨型 JSON | 已有历史保留；新增实验放入外部归档包，Git 保留清单和关键报告 |
 | 波形 | VCD/FST/FSDB 等 | 不进 Git；仅在确需复现时放入带清单的归档包 |
-| 重复冻结输入 | `verified/`、`frozen-input/`、源码/RTL 快照和 `source.tar.gz` | 已有验收归档不移动；新实验只冻结一次，并在 manifest 记录源、RTL、工具和测试身份 |
+| 冻结输入 | `verified/`、`frozen-input/`、源码/RTL 快照和 `source.tar.gz` | 已有归档保留；新实验保存一份输入，并在 manifest 记录源码、RTL、工具和测试集的哈希或版本 |
 
 `.gitignore` 只忽略可重新生成的 `build/`、`target/`、`out/` 和缓存目录；没有忽略 `testcases/`，也没有用 `*.json`、`*.log` 等宽泛规则隐藏证据。
 
@@ -35,7 +35,7 @@ python3 scripts/archive_experiment.py \
 
 命令生成 `<id>.tar.gz` 与 `<id>.manifest.json`，manifest 为每个成员记录路径、大小和 SHA-256，并记录归档包 SHA-256；创建后会自动解包到临时目录逐文件核对。归档包不应包含 `.git/`、未声明的绝对路径或符号链接。Git 中提交摘要、配置、manifest、包 SHA-256 和关键报告；完整包可以留在受控对象存储或 Release 附件。
 
-当前脚本已用 `reports/experiments/` 做小型归档进行了还原验证；现有历史报告和链接未被移动或重写。
+脚本已用 `reports/experiments/` 验证过打包和还原。现有历史报告仍保存在原位置。
 
 ## 适合迁移到 Release 附件的历史文件
 
@@ -43,8 +43,8 @@ python3 scripts/archive_experiment.py \
 
 迁移步骤：
 
-1. 用 `audit_artifacts.py --history` 记录当前大小和对象身份，确定实验 ID 与包内容。
+1. 用 `audit_artifacts.py --history` 统计大小和 Git 对象哈希，确定实验 ID 与打包内容。
 2. 用 `archive_experiment.py` 生成包，保存 `.manifest.json`、包 SHA-256 和对应摘要链接。
-3. 在干净临时目录运行同一脚本的生成/解包校验，并用 manifest 定位源、RTL、工具和测试输入。
+3. 在临时目录解包并校验哈希，确认能根据 manifest 找到源码、RTL、工具和测试输入。
 4. 创建带实验 ID 的 Release 附件，说明工具链、约束和不可直接比较的流程差异。
-5. 先把报告链接切换到 Release 附件并保留本地 manifest；确认可访问后才考虑后续独立清理，当前任务不删除 Git 对象、不运行 `git filter-repo`。
+5. 确认附件可以下载后，更新报告中的链接并保留 manifest。删除旧文件或清理 Git 历史应另行安排。

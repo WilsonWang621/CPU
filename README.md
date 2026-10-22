@@ -2,7 +2,7 @@
 
 ## 项目简介
 
-项目展示首页：[本地静态展示](docs/site/index.html)；GitHub Pages 发布后使用项目站点 `/CPU/` 路径访问。首页只携带架构图和入口，不上传完整实验归档。
+在线查看[项目展示](https://wilsonwang621.github.io/CPU/)，包括交互架构图、测试方法和测量结果。也可以下载[页面文件](docs/site/index.html)后在本地打开。
 
 RV32IM CPU 工程，包含可参数化多发射乱序 Chisel CPU、独立单发射 Chisel CPU，以及双发射 Verilog 参考实现。**根目录默认构建双发射 Chisel 的已生成 RTL**：[verilog/filelist.f](verilog/filelist.f) 指向 [dual-issue-chisel/rtl/student_top.sv](dual-issue-chisel/rtl/student_top.sv)。`make` / `make code`、`make build/test/perf/synth` 均沿用这一默认入口；`make` 还会将编译出的模拟器复制为课程提交文件 `./code`。
 
@@ -14,7 +14,7 @@ RV32IM CPU 工程，包含可参数化多发射乱序 Chisel CPU、独立单发�
 | 单发射 Chisel | 独立单发射/单提交 CPU，用于单发射设计、参数及面积/时序实验 | [tier2 Scala](single-issue-chisel/src/main/scala/tier2/)，顶层及生成器在 [Core.scala](single-issue-chisel/src/main/scala/tier2/Core.scala) | [single-issue-chisel/rtl/filelist.f](single-issue-chisel/rtl/filelist.f) |
 | 双发射 Verilog 参考 | 保留的参考电路，用于独立构建、迁移对照和等价检查 | [模块源码](verilog/area_v2/)、[顶层](verilog/student_top.sv)、[AXI 适配器](verilog/pararisc_axi_adapter.sv) | 显式指定 [verilog/reference_filelist.f](verilog/reference_filelist.f) |
 
-三套交付顶层均名为 `student_top`，分别构建，不把它们的 filelist 合并使用。filelist 中的 RTL 路径相对于该 filelist 所在目录解析。
+三套实现的顶层都叫 `student_top`，需要分别构建。filelist 中的 RTL 路径相对于该 filelist 所在目录解析。
 
 - **双发射生成**：`make -C dual-issue-chisel generate` 经 sbt 调用 [tier3.Generate](dual-issue-chisel/src/main/scala/tier3/Generate.scala)，从可编辑源码生成 `rtl/student_top.sv` 和 `rtl/elaboration.json`。
 - **单发射生成**：`make -C single-issue-chisel generate` 调用 [generate_baseline.py](single-issue-chisel/scripts/generate_baseline.py)，依据 [baseline.json](single-issue-chisel/baseline.json) 从选定报告的冻结 Chisel 源码重建并核对电路，再发布字节一致的已测 RTL。直接从可编辑 `src/` 生成实验版本使用该目录的 `tier2.Generate` / sbt 入口，见[单发射说明](single-issue-chisel/README.md)；默认交付不会自动采用 `src/` 中的实验修改。
@@ -28,7 +28,7 @@ RV32IM CPU 工程，包含可参数化多发射乱序 Chisel CPU、独立单发�
 
 ![默认双发射 Chisel CPU 动态总体架构图](docs/architecture/dual-issue-overview.gif)
 
-[交互图 HTML](docs/architecture/dual-issue-overview.html) · [可编辑图源](docs/architecture/dual-issue-overview.json) · [源码盘点](docs/architecture/dual-issue-overview.md) · [文字架构说明](docs/architecture.md)
+[在线交互图](https://wilsonwang621.github.io/CPU/architecture/dual-issue-overview.html) · [HTML 文件](docs/architecture/dual-issue-overview.html) · [可编辑图源](docs/architecture/dual-issue-overview.json) · [源码说明](docs/architecture/dual-issue-overview.md) · [架构说明](docs/architecture.md)
 
 强调实线展示 ADD 数据路径，普通实线表示其他数据和请求，虚线表示提交、恢复与预测训练控制。GIF 展示连接方向，不代表逐周期时序。GitHub 首页播放 GIF；下载 HTML 后用浏览器打开，可选择节点、切换导览、缩放和播放动效。[使用与验证说明](docs/architecture/README.md)。
 
@@ -83,9 +83,7 @@ APPIMAGE_EXTRACT_AND_RUN=1 make synth \
 
 ## 当前结果与测量条件
 
-三套实现的统一基准表见[统一实验索引](reports/experiments/README.md)，机器可读版本为 [index.csv](reports/experiments/index.csv) 和 [index.json](reports/experiments/index.json)。首页下表只引用其中三条当前基准；它们是历史归档数值，本次整理没有重新测量。
-
-下表是**已归档测量**，本次文档整理没有重新运行 CPU 仿真、综合或 STA。结论只适用于对应报告记录的源码、RTL、参数、工具和约束，不代表任意参数组合或官方最终评分。
+下表汇总三套实现选定基准的历史测量结果。完整记录见[实验索引](reports/experiments/README.md)，也可下载 [CSV](reports/experiments/index.csv) 或 [JSON](reports/experiments/index.json)。结果只适用于报告中记录的源码、参数、工具和约束，不能直接推广到其他配置，也不是官方最终评分。
 
 | 实现 / 归档日期 | Fmax MHz | 总面积 μm² | 全部六项性能 IPC 几何平均，延迟 10 / 20 | 正确性记录 | 证据 |
 | --- | ---: | ---: | --- | --- | --- |
@@ -97,12 +95,13 @@ APPIMAGE_EXTRACT_AND_RUN=1 make synth \
 
 面积包含实际使用的 FakeRAM：双发射两套归档的 SRAM 项为 0，缓存触发器面积计入逻辑；单发射 v110 的 SRAM 面积为 2,910.44 μm²，已计入总面积。阶段和工具流程变化会改变面积及频率，不能混用不同报告的结果。逐拍 AXI 对照与组件形式证明的范围见 [v13 历史验收](dual-issue-chisel/reports/final/report.md)，参数实验见 [14 组参数敏感度](dual-issue-chisel/reports/requirements-2026-10-16/parameter-sensitivity.md)。
 
-多发射主线的 104 分档目标仍是全部必需正确性、总面积 ≤36,000 μm²、全部官方 `perf_*` 的 IPC 几何平均 ≥1.0985、实测 Fmax ≥500 MHz 同时满足；上表为具体配置的本地历史证据。
+多发射主线以 104 分档为目标：通过全部必需正确性测试，同时满足总面积 ≤36,000 μm²、全部官方 `perf_*` 的 IPC 几何平均 ≥1.0985、实测 Fmax ≥500 MHz。上表记录的是各配置当时的本地测量结果。
 
 ## 深入阅读入口
 
 | 入口 | 内容 |
 | --- | --- |
+| [在线展示](https://wilsonwang621.github.io/CPU/) | 交互架构图、测试方法和测量报告 |
 | [项目文档索引](docs/README.md) | 架构、参数、AXI、SRAM 和两套架构图 |
 | [测量与验证报告索引](reports/README.md) | 按实现区分的验收、阶段历史、输入身份和原始日志 |
 | [双发射 Chisel 工程](dual-issue-chisel/README.md) | 默认源码生成、原生单元、参数矩阵、形式证明及逐拍对照 |
@@ -119,4 +118,4 @@ APPIMAGE_EXTRACT_AND_RUN=1 make synth \
 
 ![独立单发射 Chisel CPU 动态架构图](docs/architecture/single-issue-overview.gif)
 
-[单发射交互图 HTML](docs/architecture/single-issue-overview.html) · [单发射可编辑图源](docs/architecture/single-issue-overview.json) · [图表索引与源码快照说明](docs/architecture/README.md)。动画表示连接方向，不是 CPU 周期仿真。
+[在线单发射交互图](https://wilsonwang621.github.io/CPU/architecture/single-issue-overview.html) · [HTML 文件](docs/architecture/single-issue-overview.html) · [可编辑图源](docs/architecture/single-issue-overview.json) · [图表说明](docs/architecture/README.md)。动画表示连接方向，不是 CPU 周期仿真。

@@ -1,6 +1,6 @@
 # 项目文档
 
-从[仓库首页](../README.md)开始选择实现和运行命令；[报告索引](../reports/README.md)按实现提供历史测量、验证范围与原始证据。根目录默认 CPU 是 `dual-issue-chisel`，单发射 Chisel 和 Verilog 参考实现分别保留。
+[仓库首页](../README.md)介绍三套实现和运行命令，[在线展示](https://wilsonwang621.github.io/CPU/)提供交互架构图，[报告索引](../reports/README.md)收录测量结果和测试记录。根目录默认构建 `dual-issue-chisel`；单发射 Chisel 和 Verilog 参考实现需要分别构建。
 
 | 文档 | 内容 |
 | --- | --- |
@@ -13,11 +13,11 @@
 | [AXI4-Lite](axi4-lite.md) | 通道、握手、地址和响应约定 |
 | [SRAM](sram.md) | 课程 SRAM 模型与综合约定 |
 | [Agent 工程指令](../AGENTS.md) | 当前构建/验证入口、协作约束与证据要求 |
-| [GitHub Actions](ci.md) | PR 快速检查、Chisel 重生成一致性、手动完整验证及本地/runner 边界 |
-| [统一实验索引](../reports/experiments/README.md) | 三套实现的当前基准、身份、评测流程、比较边界与原始证据路径 |
+| [GitHub Actions](ci.md) | PR 检查、Chisel 生成一致性、手动完整验证和已执行的检查 |
+| [实验索引](../reports/experiments/README.md) | 三套实现的基准结果、源码哈希、评测流程和原始报告 |
 | [产物与实验归档规则](artifacts.md) | 跟踪文件审计、分类、可验证打包和 Release 附件迁移步骤 |
-| [静态项目展示首页](site/index.html) | 架构、验证方式、基准结果和详细报告入口；Pages 使用 `/CPU/` 相对资源路径 |
-| [GitHub Pages 展示说明](pages.md) | 部署包范围、触发条件和首次启用所需的 GitHub 设置 |
+| [在线展示](https://wilsonwang621.github.io/CPU/) / [页面文件](site/index.html) | 架构图、测试方法、基准结果和详细报告 |
+| [网站部署说明](pages.md) | Pages 构建、链接检查和仓库设置 |
 
-源码与生成命令见[双发射 Chisel](../dual-issue-chisel/README.md)及[单发射 Chisel](../single-issue-chisel/README.md)；Verilog 参考构建使用首页列出的显式 filelist。完整评测规则见[课程说明](../README-ZH.md)。架构图验证与历史测量均不等同于本次重新运行 CPU 回归。
+源码和生成命令见[双发射 Chisel](../dual-issue-chisel/README.md)及[单发射 Chisel](../single-issue-chisel/README.md)。Verilog 参考构建需要指定首页列出的 filelist。完整评测规则见[课程说明](../README-ZH.md)，各项测试的执行日期和结果见对应报告。
 
