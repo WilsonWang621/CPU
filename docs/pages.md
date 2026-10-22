@@ -1,13 +1,18 @@
-# GitHub Pages 展示站点
+# 网站部署
 
-`.github/workflows/pages.yml` 只把 `docs/site/index.html`、两张 Archify HTML、两份 JSON 图源和两张 GIF 复制到 `_site/`；完整报告、原始日志和实验归档不会进入部署包。页面使用相对资源路径，因此项目站点位于 `/CPU/` 时仍能找到 `architecture/` 下的资源。
+网站地址为 **https://wilsonwang621.github.io/CPU/**，首页和 README 都提供两套 CPU 架构图的链接。离线浏览时，可以下载 [HTML 页面](site/index.html)及其引用的架构图。
 
-Pull request 只运行 build、资源存在性、相对链接和本机绝对路径检查，并上传临时 Pages artifact；`main` 推送和手动 `workflow_dispatch` 才执行 deploy job。部署前后不修改 CPU 源码或评测输入。
+[pages.yml](../.github/workflows/pages.yml) 将首页、两张交互架构图、JSON 图源和 GIF 放入 `_site/`，共 7 个文件。完整报告和实验日志留在 GitHub 仓库。站点内的资源使用相对路径，在 `/CPU/` 下访问时不需要额外配置。
 
-## 首次启用需要在 GitHub 设置
+首页默认链接到 `WilsonWang621/CPU`。构建时会根据 `GITHUB_REPOSITORY` 设置实际仓库地址，并检查源码、报告和本地资源是否存在；链接指向错误仓库或缺少文件时，构建会失败。架构图保留生成时记录的源码版本。
 
-1. 在仓库 `Settings → Pages → Build and deployment` 将 Source 设为 **GitHub Actions**，不要选择 branch/folder 构建。
-2. 确认 Actions 未被仓库或组织策略禁用，并允许 workflow 使用 `actions/checkout`、`actions/upload-pages-artifact` 和 `actions/deploy-pages`。
-3. 在 `Settings → Actions → General` 保留 workflow 的 `read` 内容权限；部署 job 需要 Pages write 和 OIDC ID token 权限，workflow 已按 job 声明。
-4. 推送到 `main` 或手动运行 `Publish project showcase`，检查 `github-pages` environment 的部署记录和生成的 `/CPU/` 页面。
-5. 若使用自定义域名，单独在 Pages 设置中配置域名和 DNS；本次 workflow 不写入 `CNAME`，也不发布自定义域名。
+PR 会构建并检查网站，上传预览文件；推送到 `main` 或手动运行 workflow 时会部署。手动部署指定分支，可以更新网站而不合并代码；部署前需要在 `github-pages` 环境中允许该分支。
+
+## 仓库设置
+
+1. 在 `Settings → Pages → Build and deployment` 中将 Source 设为 **GitHub Actions**。
+2. 允许仓库运行 `actions/checkout`、`actions/upload-pages-artifact` 和 `actions/deploy-pages`。
+3. Workflow 默认只读仓库内容；部署任务另有 `pages: write` 和 `id-token: write` 权限。
+4. 在 Actions 中打开 **Publish project showcase** 查看构建与部署结果，也可以点击 **Run workflow** 选择分支手动部署。
+
+如需自定义域名，在 Pages 设置中填写域名并配置 DNS。默认使用上面的 GitHub Pages 地址。
