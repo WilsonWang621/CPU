@@ -1,9 +1,12 @@
-testcases/
+# Course testcase submodule is required input; keep this line absent.
 
-# Local Mill and RTL unit-test outputs
-/out/
+# Local build products only. Do not add broad *.json, *.log or reports rules:
+# archived evidence and course inputs are intentionally tracked.
 /build/
-
-__pycache__/
+**/build/
+**/target/
+**/.bsp/
+/out/
+**/__pycache__/
 *.py[cod]
 /.private/

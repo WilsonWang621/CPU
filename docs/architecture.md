@@ -17,6 +17,8 @@ Verilog 参考实现保留为三个文件：[核心](../verilog/area_v2_core.v)�
 
 默认保留 32 项 ROB、三组 4 项 IQ、三个检查点、8 个 Load 槽、16 个 Store 槽、1 KiB 指令缓存和 2 KiB 两路数据缓存，数据缓存行宽 64 B，四个 MSHR。顶层允许最多 16 笔在途外部请求。容量推导见[参数说明](parameters.md)。
 
-恢复、ROB、缓存、提交和地址选择使用普通 RTL 定义的反相器分发树，综合后单元的面积和延迟纳入默认流程。最终验收同时绑定导出文件、工具配置与输入哈希；503.69 MHz 的详细测量及功能结论见[阶段 10 报告](../reports/dual-issue/frequency-stage10.md)。
+恢复、ROB、缓存、提交和地址选择使用普通 RTL 定义的反相器分发树，综合后单元的面积和延迟纳入课程流程。默认双发射 Chisel 的已归档结果为 502.70 MHz，输入身份和验证范围见[Chisel 要求报告](../dual-issue-chisel/reports/requirements-2026-10-16/report.md)；503.69 MHz 属于 Verilog 参考实现，见[阶段 10 报告](../reports/dual-issue/frequency-stage10.md)。这些是各报告的历史测量，本次文档整理未重新评测。
+
+[双发射交互总体图](architecture/dual-issue-overview.html)及[源码盘点](architecture/dual-issue-overview.md)列出实际模块、Core 内部逻辑分组、主要接口和指令路径；[图表索引](architecture/README.md)同时保留独立单发射图。返回[文档索引](README.md)或[仓库首页](../README.md)。
 
 单发射实现的模块划分、SBT 生成入口和冻结基准见[独立工程](../single-issue-chisel/README.md)。

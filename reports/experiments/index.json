@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "generated_by": "scripts/build_experiment_index.py",
+  "rows": [
+    {
+      "experiment_id": "dual-chisel-requirements-2026-10-16",
+      "implementation_type": "dual-issue Chisel (default)",
+      "source_identity": "source_sha256 in verified/inputs.json; src/main/scala/tier3/ArchitectureProbe.scala=a6205ab761be1ce4985b3421eb230916375a1732f3415a4e28521478e3654aab; src/main/scala/tier3/Attributes.scala=259347537e1d49cf92647ee8c6b810b3d377848a01ec6312a538107aaee9fd41; src/main/scala/tier3/Bus.scala=ddba554f9ff4a0cadeff01fe5262833e3bcfdef9287d4b031cfaf886071186c9; src/main/scala/tier3/Common.scala=95ace316d448a7d15b6b1e92bedd0acdb903d508061522e2ea4c05951ff7d58f; src/main/scala/tier3/Core.scala=2ee367cd0e6f984f56a5ccbcf04dc7b2d50cc615cc474db3b499306c0762e275; src/main/scala/tier3/DCache.scala=8042c0d19bc2bb43e7640c4f1246d98afaeb3dd42bc623179df7bbb002181fec; src/main/scala/tier3/Decode.scala=f4922deceac80b99c7f6e1d524499616c7515429630f3309050090ee9a7c1f0f; src/main/scala/tier3/Frontend.scala=934f964c6dcff823950854913a2b287adedfa51383dd844386faf55b8b5016da; src/main/scala/tier3/Generate.scala=022f051b65dd79917a1a9ec0e796237fe5632e066106d28efb33d6924cffd488; src/main/scala/tier3/LocalLogic.scala=b1ab49cd4c39ea955d23663682c3cb3db84f90f468425d374918010806645d72; src/main/scala/tier3/MulDiv.scala=f8064a5e59e26030703353c683d6d3d8ee947d0fe2869c841084c58d61b9ea30; src/main/scala/tier3/Rename.scala=1dea8bb2b2ce37f0256d8b7538c9842f805a85821995df96a578d95e885adb91; src/main/scala/tier3/RenameInputProof.scala=0265063b3c99d7d3ec4cb9ab12d59cf4904b90bcc203f03445c4f4cf03209e2d; src/main/scala/tier3/Select.scala=84f78dfcc3d7fc22ebe70ba2cd867283d08f7a4cc519f03a410dafa69e6fbaad; src/main/scala/tier3/Top.scala=be792634ee785c5e4d0472a1e64c8f0e7534ccb0ef36f2b705aea2381ea14b1a; rtl_sha256=47be40fda5f2efa7384113e6b8deb1e908c1c825f78a56b36ce2c6d9907a3b0e",
+      "archive_commit": "unknown",
+      "configuration_identity": "acceptance.json requirements; default tier3 parameters",
+      "evaluation_flow": "official commit 302f0cf3; tool/input hashes in verified/inputs.json; constraints in verified/synthesis/",
+      "correctness_lat10": "19/19",
+      "correctness_lat20": "19/19",
+      "ipc_lat10": 1.2221711020297619,
+      "ipc_lat20": 1.1138460959843028,
+      "area_um2": 35930.96658000839,
+      "fmax_mhz": 502.70004909180165,
+      "comparison_baseline": "official target: area<=36000 um2; Fmax>=500 MHz; IPC geomean>=1.0985",
+      "comparable_with": "dual Chisel records using the same official flow; not directly with single v110 or Verilog because source/tool/archive inputs differ",
+      "adopted": "yes",
+      "report_path": "dual-issue-chisel/reports/requirements-2026-10-16/report.md",
+      "evidence_paths": "dual-issue-chisel/reports/requirements-2026-10-16/acceptance.json; dual-issue-chisel/reports/requirements-2026-10-16/verified/inputs.json; dual-issue-chisel/reports/requirements-2026-10-16/verified/synthesis/report.json.gz"
+    },
+    {
+      "experiment_id": "single-chisel-v110-2026-10-21",
+      "implementation_type": "single-issue Chisel v110",
+      "source_identity": "source_sha256 in manifest.json; source_commit=b953bb4a1258ccc69eb72b93f9f7be421c82ada8; rtl_sha256=1de5880caa3e1a2e0c609351e7b4701f021372a33b97d0007add7f280db81247",
+      "archive_commit": "b953bb4a1258ccc69eb72b93f9f7be421c82ada8",
+      "configuration_identity": "manifest.json parameters (issue-width=1; v110-flat-payload); baseline.json report=reports/area-recovery-2026-10-21",
+      "evaluation_flow": "official commit 302f0cf3cccdaa5de084a2120e0d950c663e4cf5; testcases 29f980727f7d99a1842a58f34091c7579ba3fe85; Yosys Yosys 0.63 (git sha1 70a11c6bf, g++ 13.3.0-6ubuntu2~24.04.1 -fPIC -O3); OpenSTA 3.1.0; ABC constraints in summary.json",
+      "correctness_lat10": "19/19",
+      "correctness_lat20": "19/19",
+      "ipc_lat10": 0.8784644236695732,
+      "ipc_lat20": 0.8460240058706379,
+      "area_um2": 17933.13115999947,
+      "fmax_mhz": 422.44224422442244,
+      "comparison_baseline": "single Chisel v109 new-flow remeasurement (area/fmax comparison in summary.json)",
+      "comparable_with": "single Chisel stage records using the same official flow; not directly with dual Chisel or Verilog due to implementation/configuration differences",
+      "adopted": "yes",
+      "report_path": "single-issue-chisel/reports/area-recovery-2026-10-21/report.md",
+      "evidence_paths": "single-issue-chisel/reports/area-recovery-2026-10-21/summary.json; single-issue-chisel/reports/area-recovery-2026-10-21/manifest.json; single-issue-chisel/reports/area-recovery-2026-10-21/performance-lat10.csv; single-issue-chisel/reports/area-recovery-2026-10-21/performance-lat20.csv"
+    },
+    {
+      "experiment_id": "verilog-reference-stage10-2026-10-16",
+      "implementation_type": "dual-issue Verilog reference",
+      "source_identity": "export-manifest.json sources_sha256; verilog/area_v2/alu.sv=900408c25a80e4d69d1aa6ffaf3fa69a5f7d019361cc9d40f5b760132bcbef80; verilog/area_v2/branch_unit.sv=24f48d8a96a17af442d46e5977ece5be4664bdf42a5527de5dc4021a3acc8bd5; verilog/area_v2/cpu_pkg.sv=091cff8f3e304844564d9524e9702f2228119a792cb7e235a61887c973c21aac; verilog/area_v2/cpu_top.sv=1bf08018ea7ef724f29b3aea000e6e59a1741b6d3b21c0b3d6c1413b9d608e30; verilog/area_v2/decoder.sv=ded522812f105f78d7e4c38a7f38d1484f54149547dc1e853bba92ca51ea5158; verilog/area_v2/memory_controller.sv=eed1ac5d2adab83e127c5514b939120305e0d936b65c1d8e0806a9c05b254a87; verilog/area_v2/muldiv.sv=189bc12a20def1e64b7a60a9935cfdf2e643688484eac6c12629f78ae7003cce; verilog/area_v2/v2_arch_word.sv=1086df2aca1c2332238fa8f3ce46980f05dce2de86555e17d279692c333ea721; verilog/area_v2/v2_cache_lookup.sv=63b5fdce77da5ba8219ca232e836410e773f9a836cea9da73257512125b27430; verilog/area_v2/v2_cache_read.sv=d9b5af24966060bc9e6aeecee03852b3208149d7b0d8158fb24ba4fe82d34c6b; verilog/area_v2/v2_cache_tag_match.sv=a1edbbd4dbf753822878b62b2e27374e81212e46f98ef7fb84c74b31b7208631; verilog/area_v2/v2_circular_grant.sv=4b728cc83ebd2fdb11f50dc310e128e370fe4ac7fba8828639c5993b276df161; verilog/area_v2/v2_dcache.sv=f044ce2b8d232f4d47c94dbcf1006ea4209a97d12de9b6745b8ecd0a41d243b5; verilog/area_v2/v2_distribution.sv=7349279f377c9d768ad7658a383c08c5ea87db21d2a5371086ac6ffc89e24769; verilog/area_v2/v2_distribution_inverter.sv=25a26a64e9fb31e9006a45ff8704567bf13f96d558758884e5b914c2ea0b0c2f; verilog/area_v2/v2_frontend.sv=db458a637d820908c7490a966d5aaf4323e3922813653b1887d00f3fb9c485b1; verilog/area_v2/v2_grant_read.sv=bea1d176e570d6fe18b70b22f3c6007b578111d378466a049168f9f9de7e03d5; verilog/area_v2/v2_increment.sv=23f21543d30c26ebfb44abf7568333d4f5545619f49c8d0cf08c730c1a64a2c0; verilog/area_v2/v2_iq_read.sv=74100370f9949d4ee2010406848a08a2745ed44d455320b9b25adc361fa92af5; verilog/area_v2/v2_operand.sv=0c827e76fa7952d17bb6c377408106b38d7320264be6b65723cb0816f426425d; verilog/area_v2/v2_order_compare.sv=2b7e49194e5a47bb75a5ca2f97f1cb60eecbdefcd063f8eb0bbb6f5565ff9ef7; verilog/area_v2/v2_parallel_select.sv=7ef6aee773305e00ca5b4bf0bf2764f380f11b827d7f207992a604f66797a2f5; verilog/area_v2/v2_prefix_adder.sv=0538855fe7f357f54687fdc5f7e02aa541448bbeb2c5b1b3f6883df1c576db90; verilog/area_v2/v2_prefix_node.sv=60c976d7b4b71a4891dde169e1a89dcad9d1e1b626102a68332792627c48515c; verilog/area_v2/v2_priority_mux.sv=d4e5aff593b43d26c388fc4399ba2dd1caaf1d71e34fc06f2d336fd7d1c866d3; verilog/area_v2/v2_priority_register.sv=5cfcfe03657f3105d02c73873ff0f0d3e47f0a71650a6029349dc6d939da5fff; verilog/area_v2/v2_read.sv=4135acfbd48ec595788c3ca567d32c790d57dcb6f39851dbd6d0636460ae7a9d; verilog/area_v2/v2_registered_grant.sv=11b85ab0f38b64b295f61c5b1e5a56987a851666416d192f3887bff54c952151; verilog/area_v2/v2_rename.sv=e4dbcc04d700541c085c6514652fef5bc2bb89c12e22a777db938c7f954f6bf0; verilog/area_v2/v2_retire_read.sv=d91340bc220c7c6fb7e082b03de83c78e0d8493330f0c9167794daac66bc027b; verilog/area_v2/v2_select.sv=8d0c230f94fa99e8f4bb14213230157cbf2f2a4cbb2c4b1e72f8cbcc18062ec7; exported RTL_sha256=94b3f7083e789a30c5282fb88fcd9ee1c5c8f2d05e3e73db7498a87c028712af",
+      "archive_commit": "unknown",
+      "configuration_identity": "reports/data/.../clean-default/rtl/filelist.f and stage10 default input",
+      "evaluation_flow": "official commit 302f0cf3cccdaa5de084a2120e0d950c663e4cf5; simulator identity in identity.json; ABC constraints driving=INVx1_ASAP7_75t_R, load=5.0fF",
+      "correctness_lat10": "unknown",
+      "correctness_lat20": "19/19",
+      "ipc_lat10": 1.2221711020297619,
+      "ipc_lat20": 1.1138460959843028,
+      "area_um2": 35900.334000011164,
+      "fmax_mhz": 503.68912936546974,
+      "comparison_baseline": "stage 10 Verilog reference selected default at measurement time",
+      "comparable_with": "directly comparable only to records with the same stage10 official flow and constraints; implementation differs from native Chisel",
+      "adopted": "yes (reference only)",
+      "report_path": "reports/dual-issue/frequency-stage10.md",
+      "evidence_paths": "reports/data/2026-10-16/timing-stage10/clean-default/identity.json; reports/data/2026-10-16/timing-stage10/clean-default/export-manifest.json; reports/data/2026-10-16/timing-stage10/clean-default/timing.json; reports/data/2026-10-16/timing-stage10/clean-default/rtl/source-hashes.json"
+    }
+  ]
+}
