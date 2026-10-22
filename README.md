@@ -81,6 +81,8 @@ APPIMAGE_EXTRACT_AND_RUN=1 make synth \
 
 ## 当前结果与测量条件
 
+三套实现的统一基准表见[统一实验索引](reports/experiments/README.md)，机器可读版本为 [index.csv](reports/experiments/index.csv) 和 [index.json](reports/experiments/index.json)。首页下表只引用其中三条当前基准；它们是历史归档数值，本次整理没有重新测量。
+
 下表是**已归档测量**，本次文档整理没有重新运行 CPU 仿真、综合或 STA。结论只适用于对应报告记录的源码、RTL、参数、工具和约束，不代表任意参数组合或官方最终评分。
 
 | 实现 / 归档日期 | Fmax MHz | 总面积 μm² | 全部六项性能 IPC 几何平均，延迟 10 / 20 | 正确性记录 | 证据 |

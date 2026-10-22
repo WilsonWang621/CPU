@@ -2,6 +2,8 @@
 
 返回[仓库首页](../README.md)查看三套实现与运行命令，或进入[项目文档](../docs/README.md)查看架构和接口。**当前默认入口是双发射 Chisel**；本索引中的数字均为已归档测量，本次文档整理未重跑仿真、综合或 STA。旧阶段保留当时的实现、配置、工具流程和结论。
 
+三套实现的统一基准表见[统一实验索引](experiments/README.md)；运行 `python3 scripts/build_experiment_index.py` 可按稳定顺序从既有 JSON、CSV 和 manifest 重新生成 [index.csv](experiments/index.csv) / [index.json](experiments/index.json)。索引不改写历史报告，并把源码身份、归档提交和评测流程分别记录。
+
 ## 默认双发射 Chisel
 
 2026-10-16 的[完整要求与架构权衡报告](../dual-issue-chisel/reports/requirements-2026-10-16/report.md)记录 **502.70 MHz、35,930.97 μm²、IPC 1.222171 / 1.113846（延迟 10 / 20）**，两种延迟的正确性各 19/19。[14 组参数实验](../dual-issue-chisel/reports/requirements-2026-10-16/parameter-sensitivity.md)记录各配置的实际测试范围，不能将默认配置的面积/频率推广到所有变体。
