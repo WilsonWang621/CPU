@@ -16,6 +16,8 @@
 | [GitHub Actions](ci.md) | PR 快速检查、Chisel 重生成一致性、手动完整验证及本地/runner 边界 |
 | [统一实验索引](../reports/experiments/README.md) | 三套实现的当前基准、身份、评测流程、比较边界与原始证据路径 |
 | [产物与实验归档规则](artifacts.md) | 跟踪文件审计、分类、可验证打包和 Release 附件迁移步骤 |
+| [静态项目展示首页](site/index.html) | 架构、验证方式、基准结果和详细报告入口；Pages 使用 `/CPU/` 相对资源路径 |
+| [GitHub Pages 展示说明](pages.md) | 部署包范围、触发条件和首次启用所需的 GitHub 设置 |
 
 源码与生成命令见[双发射 Chisel](../dual-issue-chisel/README.md)及[单发射 Chisel](../single-issue-chisel/README.md)；Verilog 参考构建使用首页列出的显式 filelist。完整评测规则见[课程说明](../README-ZH.md)。架构图验证与历史测量均不等同于本次重新运行 CPU 回归。
 

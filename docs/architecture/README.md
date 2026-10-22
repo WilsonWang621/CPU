@@ -1,8 +1,10 @@
 # CPU 交互架构图索引
 
+项目展示首页：[本地静态首页](../site/index.html)。GitHub Pages 构建只复制本页引用的两张架构 HTML、图源和 GIF，不上传完整报告归档。
+
 | 实现 | 交互图 | 可编辑图源 | 范围 |
 | --- | --- | --- | --- |
-| 当前可参数化多发射 `dual-issue-chisel` | [总体架构 HTML](dual-issue-overview.html) | [JSON](dual-issue-overview.json) | 11 个组件；源码快照 `a922b00` |
+| 当前可参数化多发射 `dual-issue-chisel` | [总体架构 HTML](dual-issue-overview.html) | [JSON](dual-issue-overview.json) | 11 个组件；源码快照 `e79c50f` |
 | 保留的单发射 `single-issue-chisel` | [总体架构 HTML](single-issue-overview.html) | [JSON](single-issue-overview.json) | 旧图与旧证据保持原样；快照 `bec3010` |
 
 ## 当前多发射图：打开、阅读与编辑

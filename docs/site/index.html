@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ParaRISC · CPU architecture</title>
+  <style>
+    :root{--bg:#0b1220;--panel:#111c2e;--line:#263b55;--text:#e8f0f7;--muted:#9fb1c3;--accent:#57d6d0;--orange:#ffb86b}
+    *{box-sizing:border-box} body{margin:0;background:linear-gradient(145deg,#0b1220,#14263a);color:var(--text);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+    main{max-width:1120px;margin:auto;padding:48px 24px 72px} a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+    .hero{padding:18px 0 30px;border-bottom:1px solid var(--line)} .eyebrow{color:var(--accent);letter-spacing:.12em;text-transform:uppercase;font-size:12px;font-weight:700}
+    h1{font-size:clamp(34px,6vw,68px);line-height:1.04;margin:12px 0} h2{font-size:25px;margin:0 0 16px} h3{margin:0 0 6px;font-size:18px} p{color:var(--muted);margin:8px 0 0}.lead{max-width:760px;font-size:19px}
+    .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}.button{border:1px solid var(--accent);padding:10px 16px;border-radius:8px;color:var(--text)}.button.primary{background:var(--accent);color:#081217;font-weight:700}
+    section{margin-top:36px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}.card{background:rgba(17,28,46,.9);border:1px solid var(--line);border-radius:12px;padding:18px}.tag{display:inline-block;color:#071218;background:var(--accent);border-radius:999px;padding:2px 9px;font-size:12px;font-weight:700;margin-bottom:10px}.tag.orange{background:var(--orange)}
+    table{width:100%;border-collapse:collapse;background:rgba(17,28,46,.8);border:1px solid var(--line);border-radius:10px;overflow:hidden}th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--accent);font-size:13px}td{color:var(--muted)}
+    .note{border-left:3px solid var(--orange);padding:10px 14px;background:rgba(255,184,107,.08);color:var(--muted)}footer{margin-top:48px;color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+<main>
+  <header class="hero">
+    <div class="eyebrow">ParaRISC · RV32IM</div>
+    <h1>从源码到可验证 CPU</h1>
+    <p class="lead">这里展示当前默认的双发射 Chisel 实现：源码、生成 RTL、验证入口和已归档测量证据彼此对应。单发射 Chisel 与 Verilog 参考实现保留为独立对照。</p>
+    <div class="actions"><a class="button primary" href="../architecture/dual-issue-overview.html">打开双发射交互架构图</a><a class="button" href="../architecture/single-issue-overview.html">查看单发射架构图</a><a class="button" href="https://github.com/Team-Homework/ParaRISC">查看源码仓库</a></div>
+  </header>
+
+  <section><h2>架构入口</h2><div class="grid">
+    <article class="card"><span class="tag">默认</span><h3>双发射 Chisel</h3><p><code>dual-issue-chisel/src/main/scala/tier3</code> 生成 <code>student_top</code>；根目录默认 filelist 指向它。</p><p><a href="../architecture/dual-issue-overview.html">交互图</a> · <a href="https://github.com/Team-Homework/ParaRISC/tree/main/dual-issue-chisel">源码入口</a></p></article>
+    <article class="card"><span class="tag orange">独立对照</span><h3>单发射 Chisel</h3><p><code>single-issue-chisel/src/main/scala/tier2</code> 是独立实现，使用冻结 baseline 生成交付 RTL。</p><p><a href="../architecture/single-issue-overview.html">交互图</a> · <a href="https://github.com/Team-Homework/ParaRISC/tree/main/single-issue-chisel">工程说明</a></p></article>
+    <article class="card"><span class="tag orange">参考实现</span><h3>Verilog</h3><p><code>verilog/reference_filelist.f</code> 显式选择 Verilog 参考实现，用于独立检查和对照。</p><p><a href="https://github.com/Team-Homework/ParaRISC/tree/main/verilog">源码目录</a> · <a href="https://github.com/Team-Homework/ParaRISC/blob/main/reports/dual-issue/frequency-stage10.md">阶段报告</a></p></article>
+  </div></section>
+
+  <section><h2>验证方式</h2><div class="grid">
+    <article class="card"><h3>PR 快速检查</h3><p>Verilog 导出一致性、参考 RTL 单元检查；默认 Chisel 临时生成并逐字节比较课程入口 RTL，随后运行原生单元检查和高地址测试。</p><a href="https://github.com/Team-Homework/ParaRISC/blob/main/docs/ci.md">CI 说明</a></article>
+    <article class="card"><h3>手动完整流程</h3><p>workflow dispatch 可选择实现，复用课程 Docker 工具链运行完整正确性、LATENCY=10/20 性能、综合和 STA。</p><a href="https://github.com/Team-Homework/ParaRISC/actions">Actions 入口</a></article>
+    <article class="card"><h3>证据追溯</h3><p>实验索引记录源码身份、配置、评测流程、正确性、IPC、面积、Fmax 和原始证据路径。</p><a href="https://github.com/Team-Homework/ParaRISC/blob/main/reports/experiments/README.md">统一实验索引</a></article>
+  </div></section>
+
+  <section><h2>已归档基准（历史测量）</h2><div class="note">下表来自归档报告，本页没有重新仿真、综合或 STA。不同实现、工具链和约束不能直接横向比较。</div><table><thead><tr><th>实现</th><th>Fmax</th><th>面积</th><th>IPC（LATENCY 10 / 20）</th><th>证据</th></tr></thead><tbody>
+    <tr><td>默认双发射 Chisel</td><td>502.70 MHz</td><td>35,930.97 µm²</td><td>1.222171 / 1.113846</td><td><a href="https://github.com/Team-Homework/ParaRISC/blob/main/dual-issue-chisel/reports/requirements-2026-10-16/report.md">报告</a></td></tr>
+    <tr><td>单发射 Chisel v110</td><td>422.44 MHz</td><td>17,933.13 µm²</td><td>0.878464 / 0.846024</td><td><a href="https://github.com/Team-Homework/ParaRISC/blob/main/single-issue-chisel/reports/area-recovery-2026-10-21/report.md">报告</a></td></tr>
+    <tr><td>双发射 Verilog 参考</td><td>503.69 MHz</td><td>35,900.33 µm²</td><td>1.222171 / 1.113846</td><td><a href="https://github.com/Team-Homework/ParaRISC/blob/main/reports/dual-issue/frequency-stage10.md">报告</a></td></tr>
+  </tbody></table></section>
+
+  <section><h2>深入阅读</h2><div class="grid"><article class="card"><h3>工程与参数</h3><p><a href="https://github.com/Team-Homework/ParaRISC/blob/main/README.md">根 README</a> · <a href="https://github.com/Team-Homework/ParaRISC/blob/main/docs/README.md">文档索引</a> · <a href="https://github.com/Team-Homework/ParaRISC/blob/main/docs/parameters.md">参数说明</a></p></article><article class="card"><h3>实验和归档</h3><p><a href="https://github.com/Team-Homework/ParaRISC/blob/main/reports/README.md">报告索引</a> · <a href="https://github.com/Team-Homework/ParaRISC/blob/main/docs/artifacts.md">产物归档规则</a> · <a href="https://github.com/Team-Homework/ParaRISC/tree/main/reports/data">原始数据目录</a></p></article></div></section>
+  <footer>页面资源使用相对路径，适用于项目站点 <code>/CPU/</code>；详细报告保留在 GitHub 仓库，不复制到 Pages 部署包。</footer>
+</main>
+</body></html>

@@ -2,6 +2,8 @@
 
 ## 项目简介
 
+项目展示首页：[本地静态展示](docs/site/index.html)；GitHub Pages 发布后使用项目站点 `/CPU/` 路径访问。首页只携带架构图和入口，不上传完整实验归档。
+
 RV32IM CPU 工程，包含可参数化多发射乱序 Chisel CPU、独立单发射 Chisel CPU，以及双发射 Verilog 参考实现。**根目录默认构建双发射 Chisel 的已生成 RTL**：[verilog/filelist.f](verilog/filelist.f) 指向 [dual-issue-chisel/rtl/student_top.sv](dual-issue-chisel/rtl/student_top.sv)。`make` / `make code`、`make build/test/perf/synth` 均沿用这一默认入口；`make` 还会将编译出的模拟器复制为课程提交文件 `./code`。
 
 ## 实现对照表

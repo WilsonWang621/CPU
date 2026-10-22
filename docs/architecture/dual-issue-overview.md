@@ -2,7 +2,7 @@
 
 [打开交互图](dual-issue-overview.html) · [编辑 JSON 图源](dual-issue-overview.json) · [返回图表索引](README.md)
 
-本图依据 `main` 的 `a922b00ea0db34e3bd9f73fd97703d2b43bbb984` 源码，展示 `dual-issue-chisel` 的默认 `Config()`。仓库身份为 `git@github.com:Team-Homework/ParaRISC.git`，源码引用使用 `local-only`，在其他机器上仍可读相对路径和行号。开始审计时工作区干净，当前分支跟踪 `mine/main`；已检查本地、远程分支、最近历史与测试子模块，没有切换或覆盖其他实现。
+本图依据当前提交 `e79c50f4f0d758c1e85240aba265f19013cb5728` 的源码，展示 `dual-issue-chisel` 的默认 `Config()`。仓库身份为 `git@github.com:Team-Homework/ParaRISC.git`，源码引用使用 `local-only`，在其他机器上仍可读相对路径和行号。源码模块与连线已重新核对；本次展示改动未修改 CPU 源码或默认参数。
 
 图中的 11 个节点分别代表真实模块或明确标注的 `Core` 内部逻辑分组。`StudentTop` 的两个直接实例是 `core: Core` 和 `bridge: AxiAdapter`；其他 10 个节点均属于 `Core`。`Generate` 默认生成 `StudentTop(p)`，其 RTL 名为 `student_top`，`Core` 的 RTL 名为 `cpu_top`。
 
