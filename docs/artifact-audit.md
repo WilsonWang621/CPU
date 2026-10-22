@@ -2,7 +2,7 @@
 
 范围：当前工作树中 Git 已跟踪文件。Git 历史对象仅在使用 `--history` 时扫描本地 refs；不代表远端完整历史。
 
-总计：5754 个文件，595.75 MiB
+总计：5766 个文件，596.53 MiB
 
 ## 按类别
 
@@ -10,9 +10,9 @@
 | --- | ---: | ---: |
 | `complete_logs_outputs` | 1376 | 209.72 MiB |
 | `course_inputs` | 27 | 76.63 KiB |
-| `experiment_summaries` | 900 | 80.66 MiB |
+| `experiment_summaries` | 905 | 80.76 MiB |
 | `frozen_inputs` | 2732 | 245.71 MiB |
-| `other_tracked` | 480 | 15.12 MiB |
+| `other_tracked` | 487 | 15.80 MiB |
 | `required_generated_rtl` | 6 | 7.30 MiB |
 | `source_and_config` | 229 | 1.69 MiB |
 | `toolkit` | 4 | 35.47 MiB |
@@ -23,7 +23,7 @@
 | --- | ---: | ---: |
 | `.github/scripts` | 1 | 6.38 KiB |
 | `.github/tests` | 1 | 4.87 KiB |
-| `.github/workflows` | 1 | 8.01 KiB |
+| `.github/workflows` | 2 | 10.26 KiB |
 | `.gitignore` | 1 | 295.00 B |
 | `.gitmodules` | 1 | 114.00 B |
 | `AGENTS.md` | 1 | 10.79 KiB |
@@ -31,20 +31,22 @@
 | `Makefile` | 1 | 3.47 KiB |
 | `README-EN.md` | 1 | 18.18 KiB |
 | `README-ZH.md` | 1 | 17.78 KiB |
-| `README.md` | 1 | 10.74 KiB |
+| `README.md` | 1 | 10.93 KiB |
 | `archive/README.md` | 1 | 912.00 B |
 | `archive/chisel-prototype` | 7 | 11.70 KiB |
 | `archive/planning` | 1 | 10.91 KiB |
 | `archive/rtl` | 7 | 41.55 KiB |
 | `config.mk` | 1 | 1.62 KiB |
 | `cpu2026-tools-x86_64.AppImage` | 1 | 35.46 MiB |
-| `docs/README.md` | 1 | 2.04 KiB |
-| `docs/architecture` | 40 | 8.25 MiB |
+| `docs/README.md` | 1 | 2.30 KiB |
+| `docs/architecture` | 49 | 9.02 MiB |
 | `docs/architecture.md` | 1 | 2.55 KiB |
 | `docs/artifacts.md` | 1 | 3.88 KiB |
 | `docs/axi4-lite.md` | 1 | 1.77 KiB |
 | `docs/ci.md` | 1 | 7.25 KiB |
+| `docs/pages.md` | 1 | 1.35 KiB |
 | `docs/parameters.md` | 1 | 2.64 KiB |
+| `docs/site` | 1 | 6.99 KiB |
 | `docs/sram.md` | 1 | 896.00 B |
 | `dual-issue-chisel/.gitattributes` | 1 | 99.00 B |
 | `dual-issue-chisel/.gitignore` | 1 | 52.00 B |
