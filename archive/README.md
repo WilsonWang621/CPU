@@ -8,4 +8,4 @@
 | [chisel-prototype/](chisel-prototype/) | 早期 Mill 配置及对应译码/数据通路测试，原配套 `cpu2026` 源码已不在当前工程中 |
 | [planning/](planning/) | 初始开发计划，保留当时的任务和状态 |
 
-早期原型目录用于历史查阅，其 Mill 和测试脚本依赖当时的源码布局。当前可生成的 Chisel 实现位于 [single-issue-chisel/](../single-issue-chisel/README.md)，使用该目录的 SBT 与 Makefile。
+早期原型目录用于历史查阅，其 Mill 和测试脚本依赖当时的源码布局。当前默认 Chisel 实现位于 [dual-issue-chisel/](../dual-issue-chisel/README.md)，独立单发射实现位于 [single-issue-chisel/](../single-issue-chisel/README.md)，均使用各自的 sbt 与 Makefile。生成入口和课程 filelist 对照见[仓库首页](../README.md#实现对照表)。
