@@ -107,6 +107,7 @@ APPIMAGE_EXTRACT_AND_RUN=1 make synth \
 | [单发射 Chisel 工程](single-issue-chisel/README.md) | 冻结基准生成、实验参数、v110 与历史阶段 |
 | [Agent 工程指令](AGENTS.md) | 实现入口、协作约束和验证规则 |
 | [GitHub Actions 验证](docs/ci.md) | PR 中的 Chisel 生成一致性与快速检查，手动完整回归/性能/综合 |
+| [产物与实验归档规则](docs/artifacts.md) | 大型产物审计、可验证打包、清单和 Release 附件迁移 |
 | [课程中文说明](README-ZH.md) / [English](README-EN.md) | 评测接口、工具链与要求 |
 | [历史原型与计划](archive/README.md) | 停用的 RTL、Mill 原型和初始计划 |
 
