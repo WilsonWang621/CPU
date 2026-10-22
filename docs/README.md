@@ -13,6 +13,7 @@
 | [AXI4-Lite](axi4-lite.md) | 通道、握手、地址和响应约定 |
 | [SRAM](sram.md) | 课程 SRAM 模型与综合约定 |
 | [Agent 工程指令](../AGENTS.md) | 当前构建/验证入口、协作约束与证据要求 |
+| [GitHub Actions](ci.md) | PR 快速检查、Chisel 重生成一致性、手动完整验证及本地/runner 边界 |
 
 源码与生成命令见[双发射 Chisel](../dual-issue-chisel/README.md)及[单发射 Chisel](../single-issue-chisel/README.md)；Verilog 参考构建使用首页列出的显式 filelist。完整评测规则见[课程说明](../README-ZH.md)。架构图验证与历史测量均不等同于本次重新运行 CPU 回归。
 
