@@ -5,16 +5,39 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      implementation:
+        description: Implementation for the full correctness/performance/synthesis run
+        type: choice
+        default: dual-issue-chisel
+        options:
+          - dual-issue-chisel
+          - single-issue-chisel
+          - verilog-reference
 
 permissions:
   contents: read
 
+concurrency:
+  group: validate-rtl-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  PYTHONDONTWRITEBYTECODE: '1'
+
 jobs:
   validate:
+    name: Verilog reference - export and RTL units
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - uses: actions/setup-python@v5
         with:
@@ -25,16 +48,184 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y iverilog verilator
 
-      - name: Check deterministic Verilog export
+      - name: Verilog reference - check deterministic export
         run: |
           make export-verilog
           git diff --exit-code -- verilog/area_v2_core.v verilog/area_v2_core.json
 
-      - name: Run RTL unit checks
-        run: make verify-rtl
+      - name: Verilog reference - run existing RTL unit checks
+        run: |
+          mkdir -p build/ci/reference
+          make verify-rtl 2>&1 | tee build/ci/reference/units.log
 
-      - name: Build default simulator
-        run: make build CONFIG=/dev/null APPIMAGE= VERILATOR=verilator BUILD=build/ci JOBS=2
+      - name: Preserve reference diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verilog-reference-checks
+          path: build/ci/reference/
+          retention-days: 14
 
-      - name: Check high memory addresses
-        run: make run SIM=build/ci/sim PROGRAM=tests/rtl/high_address.data EXPECTED=0x40100 LATENCY=20 MAX_CYCLES=100000
+  chisel:
+    name: Default Chisel - regenerate, units and high address
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      JAVA_TOOL_OPTIONS: -Xmx3G -XX:ActiveProcessorCount=2
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # checkout converts the public git@github.com submodule URL to HTTPS.
+          submodules: recursive
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17.0.12+7'
+          cache: sbt
+          cache-dependency-path: |
+            dual-issue-chisel/build.sbt
+            dual-issue-chisel/project/build.properties
+
+      - uses: sbt/setup-sbt@v1
+        with:
+          sbt-runner-version: '1.10.2'
+
+      - name: Install RTL tools and record versions
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y iverilog verilator
+          java -version
+          verilator --version
+          iverilog -V
+
+      - name: Test the consistency check's failure boundaries
+        run: python3 -m unittest discover -s .github/tests -v
+
+      - name: Default Chisel - regenerate and compare course delivery
+        # Chisel 6.5.0 resolves firtool 1.62.0; the check verifies the header too.
+        run: python3 .github/scripts/check_generated_rtl.py
+
+      - name: Native Chisel - run existing module suite
+        run: |
+          mkdir -p build/ci/chisel
+          make -C dual-issue-chisel verify-units 2>&1 | tee build/ci/chisel/units.log
+
+      - name: Default Chisel - build course entry without FILELIST overrides
+        run: |
+          make build CONFIG=/dev/null APPIMAGE= VERILATOR=verilator BUILD=build/ci/chisel/sim JOBS=2 \
+            2>&1 | tee build/ci/chisel/build.log
+
+      - name: Default Chisel - check high memory addresses
+        run: |
+          make run CONFIG=/dev/null SIM=build/ci/chisel/sim/sim PROGRAM=tests/rtl/high_address.data \
+            EXPECTED=0x40100 LATENCY=20 MAX_CYCLES=100000 \
+            2>&1 | tee build/ci/chisel/high-address.log
+
+      - name: Print native unit failure details
+        if: failure()
+        run: |
+          for log in dual-issue-chisel/build/unit-results/*.log; do
+            if [[ -f "$log" ]]; then
+              printf '\n--- %s ---\n' "$log"
+              tail -n 80 "$log"
+            fi
+          done
+
+      - name: Preserve Chisel diagnostics and exact diffs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: default-chisel-checks
+          path: |
+            build/ci/chisel-consistency/
+            build/ci/chisel/
+            !build/ci/chisel/sim/**
+            dual-issue-chisel/build/unit-results/
+          retention-days: 14
+
+  full:
+    name: Manual - ${{ inputs.implementation }} full validation
+    if: github.event_name == 'workflow_dispatch'
+    needs: [validate, chisel]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    env:
+      IMPLEMENTATION: ${{ inputs.implementation }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Select the implementation and record input identity
+        run: |
+          case "$IMPLEMENTATION" in
+            dual-issue-chisel) ci_filelist=verilog/filelist.f; ci_limit=20000000 ;;
+            single-issue-chisel) ci_filelist=single-issue-chisel/rtl/filelist.f; ci_limit=30000000 ;;
+            verilog-reference) ci_filelist=verilog/reference_filelist.f; ci_limit=20000000 ;;
+            *) printf 'Unknown implementation: %s\n' "$IMPLEMENTATION" >&2; exit 1 ;;
+          esac
+          echo "CI_FILELIST=$ci_filelist" >> "$GITHUB_ENV"
+          echo "CI_MAX_CYCLES=$ci_limit" >> "$GITHUB_ENV"
+          mkdir -p build/ci/full
+          git rev-parse HEAD > build/ci/full/revision.txt
+          git submodule status >> build/ci/full/revision.txt
+          printf 'implementation=%s\nfilelist=%s\n' "$IMPLEMENTATION" "$ci_filelist" >> build/ci/full/revision.txt
+
+      - name: Build the repository's pinned course toolchain
+        run: |
+          docker build --build-arg BUILD_JOBS=2 -t pararisc-course-ci . \
+            2>&1 | tee build/ci/full/toolchain-build.log
+          docker run --rm pararisc-course-ci bash -c \
+            'cat /opt/versions.txt /opt/asap7/SHA256SUMS; verilator --version' \
+            | tee build/ci/full/toolchain-versions.txt
+
+      - name: Build selected CPU with the course Makefile
+        run: |
+          docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/work" -w /work pararisc-course-ci \
+            make build CONFIG=/dev/null APPIMAGE= FILELIST="$CI_FILELIST" BUILD=build/ci/full/sim JOBS=2 \
+            2>&1 | tee build/ci/full/build.log
+
+      - name: All official correctness cases - latency 10 and 20
+        run: |
+          for latency in 10 20; do
+            docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/work" -w /work pararisc-course-ci \
+              make test CONFIG=/dev/null APPIMAGE= SIM=build/ci/full/sim/sim \
+              LATENCY="$latency" MAX_CYCLES="$CI_MAX_CYCLES" \
+              2>&1 | tee "build/ci/full/correctness-lat${latency}.log"
+          done
+
+      - name: All official performance cases - latency 10 and 20
+        run: |
+          for latency in 10 20; do
+            docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/work" -w /work pararisc-course-ci \
+              make perf CONFIG=/dev/null APPIMAGE= SIM=build/ci/full/sim/sim \
+              LATENCY="$latency" MAX_CYCLES="$CI_MAX_CYCLES" \
+              2>&1 | tee "build/ci/full/perf-lat${latency}.log"
+          done
+
+      - name: Course synthesis and STA - unchanged default constraints
+        run: |
+          docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/work" -w /work pararisc-course-ci \
+            make synth CONFIG=/dev/null APPIMAGE= FILELIST="$CI_FILELIST" SYNTH_OUT=build/ci/full/synth \
+            2>&1 | tee build/ci/full/synth.log
+
+      - name: Preserve new measurements and failure logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-${{ inputs.implementation }}-${{ github.run_id }}
+          path: |
+            build/ci/full/*.log
+            build/ci/full/*.txt
+            build/ci/full/synth/opt/report.*
+            build/ci/full/synth/opt/timing.*
+            build/ci/full/synth/opt/stat.json
+            build/ci/full/synth/opt/constraints.sdc
+            build/ci/full/synth/opt/abc.constr
+            build/ci/full/synth/opt/synth.ys
+          retention-days: 14
