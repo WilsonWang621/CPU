@@ -1,4 +1,4 @@
-# ParaRisc
+# RISC-V-CPU
 
 ## 项目简介
 
