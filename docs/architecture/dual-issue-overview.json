@@ -1,0 +1,760 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "可参数化多发射 CPU：StudentTop → Core 总体架构",
+    "locale": "zh-CN",
+    "output": "docs/architecture/dual-issue-overview.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "git@github.com:Team-Homework/ParaRISC.git",
+      "revision": "a922b00ea0db34e3bd9f73fd97703d2b43bbb984",
+      "link_mode": "local-only"
+    },
+    "legend": {
+      "entries": {
+        "frontend": {
+          "label": "取指前端"
+        },
+        "backend": {
+          "label": "组合计算与总线接口"
+        },
+        "database": {
+          "label": "重命名、寄存状态与缓存"
+        },
+        "messagebus": {
+          "label": "队列、选择与访存管理"
+        }
+      }
+    },
+    "views": [
+      {
+        "id": "add-path",
+        "label": "ADD 主路径（经整数 IQ）",
+        "focus": [
+          "fetch",
+          "decode",
+          "rename",
+          "iq",
+          "execute",
+          "rob"
+        ],
+        "note": "合法 ADD，rd≠0，经 bank0 或 bank1；图中采用 bank1 的 wb_value(1) 例子。依赖、资源与提交条件见说明卡，动画不是逐拍仿真。"
+      },
+      {
+        "id": "memory-path",
+        "label": "访存与外部 AXI",
+        "focus": [
+          "iq",
+          "lsu",
+          "dcache",
+          "memory",
+          "axi",
+          "fetch"
+        ],
+        "note": "访存 bank2 选择最老项，操作数未就绪会等待。mem_req_* 箭头仅标请求方向，mem_rsp_* 沿同一接口反向返回。"
+      },
+      {
+        "id": "commit-recovery",
+        "label": "提交、唤醒与分支恢复",
+        "focus": [
+          "execute",
+          "rob",
+          "rename",
+          "iq",
+          "lsu",
+          "fetch"
+        ],
+        "note": "虚线表示 Core 所有的提交、恢复和训练控制。wb_* 实线还携带旁路数据；ROB 分组不代表独立的 ROB 模块。"
+      },
+      {
+        "id": "muldiv-path",
+        "label": "MulDiv 与整数端口 0",
+        "focus": [
+          "iq",
+          "execute",
+          "mdu",
+          "rob"
+        ],
+        "note": "MulDiv 的请求来自 executing(0)，响应优先使用 wb_*(0)；bank1 仅执行 Alu。不能把三路发射等同于三路整数 ALU。"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "fetch",
+      "type": "frontend",
+      "label": "Frontend",
+      "sublabel": "I-cache · 预测 · FIFO",
+      "pos": [
+        40,
+        40
+      ],
+      "size": [
+        210,
+        86
+      ],
+      "sources": [
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/Frontend.scala",
+          "line": 16,
+          "end_line": 50,
+          "label": "接口与 I-cache / 预测状态"
+        },
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/Frontend.scala",
+          "line": 76,
+          "end_line": 125,
+          "label": "预测与双取指条件"
+        },
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/Core.scala",
+          "line": 116,
+          "end_line": 133,
+          "label": "实例、训练与总线接线"
+        }
+      ]
+    },
+    {
+      "id": "decode",
+      "type": "backend",
+      "label": "Decoder ×2 / 分派",
+      "sublabel": "decoded · Core 逻辑",
+      "pos": [
+        340,
+        40
+      ],
+      "size": [
+        210,
+        86
+      ],
+      "sources": [
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/Decode.scala",
+          "line": 35,
+          "end_line": 79,
+          "label": "Decoder 输入输出与 RV32IM 译码"
+        },
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/Core.scala",
+          "line": 147,
+          "end_line": 149,
+          "label": "两个 Decoder 实例"
+        },
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/Core.scala",
+          "line": 330,
+          "end_line": 366,
+          "label": "端口分派、容量与阻塞条件"
+        }
+      ]
+    },
+    {
+      "id": "rename",
+      "type": "database",
+      "label": "Rename / 操作数读",
+      "sublabel": "rename_maps · Core 逻辑",
+      "pos": [
+        650,
+        40
+      ],
+      "size": [
+        220,
+        86
+      ],
+      "sources": [
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/Rename.scala",
+          "line": 7,
+          "end_line": 68,
+          "label": "RAT、组内依赖与检查点"
+        },
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/Core.scala",
+          "line": 158,
+          "end_line": 174,
+          "label": "映射接线及 PRF / ARF 读"
+        },
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/Core.scala",
+          "line": 367,
+          "end_line": 388,
+          "label": "dispatch_payload 与写回旁路"
+        }
+      ]
+    },
+    {
+      "id": "iq",
+      "type": "messagebus",
+      "label": "IQ / Operand",
+      "sublabel": "queue(0..2) · Core 逻辑",
+      "pos": [
+        990,
+        40
+      ],
+      "size": [
+        210,
+        86
+      ],
+      "sources": [
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/Core.scala",
+          "line": 193,
+          "end_line": 248,
+          "label": "整数就绪选择与发射宽度限制"
+        },
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/Core.scala",
+          "line": 528,
+          "end_line": 570,
+          "label": "入队、Operand 唤醒与地址预准备"
+        },
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/Select.scala",
+          "line": 41,
+          "end_line": 58,
+          "label": "ParallelSelect 的最老就绪选择"
+        }
+      ]
+    },
+    {
+      "id": "execute",
+      "type": "backend",
+      "label": "Alu ×2 / BranchUnit",
+      "sublabel": "executing(0/1) · Core 接线",
+      "pos": [
+        990,
+        310
+      ],
+      "size": [
+        210,
+        86
+      ],
+      "sources": [
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/Core.scala",
+          "line": 175,
+          "end_line": 191,
+          "label": "Alu 与 BranchUnit 实例、结果捕获"
+        },
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/Core.scala",
+          "line": 285,
+          "end_line": 311,
+          "label": "三组 wb_* 的生成与 MDU 优先级"
+        },
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/Decode.scala",
+          "line": 82,
+          "end_line": 103,
+          "label": "Alu 与 BranchUnit 接口及计算"
+        }
+      ]
+    },
+    {
+      "id": "rob",
+      "type": "database",
+      "label": "ROB / PRF / ArchWord",
+      "sublabel": "提交与恢复 · Core 逻辑",
+      "pos": [
+        650,
+        310
+      ],
+      "size": [
+        220,
+        86
+      ],
+      "sources": [
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/Core.scala",
+          "line": 23,
+          "end_line": 70,
+          "label": "ROB、PRF、队列与恢复控制"
+        },
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/Core.scala",
+          "line": 93,
+          "end_line": 146,
+          "label": "提交读口、ARF、训练与退出端口"
+        },
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/Core.scala",
+          "line": 314,
+          "end_line": 325,
+          "label": "队首连续前缀提交门控"
+        }
+      ]
+    },
+    {
+      "id": "lsu",
+      "type": "messagebus",
+      "label": "访存逻辑 / loads / stores",
+      "sublabel": "prepared_address · Core 逻辑",
+      "pos": [
+        650,
+        600
+      ],
+      "size": [
+        220,
+        86
+      ],
+      "sources": [
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/Core.scala",
+          "line": 250,
+          "end_line": 311,
+          "label": "地址、转发、请求及访存完成"
+        },
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/Core.scala",
+          "line": 582,
+          "end_line": 609,
+          "label": "Store 提交 / 发送与 Load 取消"
+        },
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/Core.scala",
+          "line": 528,
+          "end_line": 552,
+          "label": "bank2 的地址预准备"
+        }
+      ]
+    },
+    {
+      "id": "dcache",
+      "type": "database",
+      "label": "DCache",
+      "sublabel": "dcache · 2 KiB / 2 路",
+      "pos": [
+        340,
+        310
+      ],
+      "size": [
+        210,
+        86
+      ],
+      "sources": [
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/DCache.scala",
+          "line": 19,
+          "end_line": 85,
+          "label": "接口、阵列、MSHR 与响应"
+        },
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/DCache.scala",
+          "line": 86,
+          "end_line": 143,
+          "label": "Load 命中 / 合并和 Store 约束"
+        },
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/Core.scala",
+          "line": 267,
+          "end_line": 306,
+          "label": "Core 的 Load / Store / result 接线"
+        }
+      ]
+    },
+    {
+      "id": "memory",
+      "type": "backend",
+      "label": "MemoryController",
+      "sublabel": "memory_bus · I/D 仲裁",
+      "pos": [
+        40,
+        310
+      ],
+      "size": [
+        210,
+        86
+      ],
+      "sources": [
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/Bus.scala",
+          "line": 7,
+          "end_line": 58,
+          "label": "双源仲裁与响应 owner FIFO"
+        },
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/Core.scala",
+          "line": 125,
+          "end_line": 135,
+          "label": "源 0=Frontend，源 1=DCache"
+        },
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/Core.scala",
+          "line": 141,
+          "end_line": 146,
+          "label": "Core mem_req_* 与退出复用"
+        }
+      ]
+    },
+    {
+      "id": "axi",
+      "type": "backend",
+      "label": "AxiAdapter",
+      "sublabel": "bridge · AXI4-Lite 端口",
+      "pos": [
+        40,
+        600
+      ],
+      "size": [
+        210,
+        86
+      ],
+      "sources": [
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/Top.scala",
+          "line": 5,
+          "end_line": 28,
+          "label": "StudentTop 顶层与 bridge 接线"
+        },
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/Bus.scala",
+          "line": 60,
+          "end_line": 107,
+          "label": "AXI 通道与方向 FIFO"
+        }
+      ]
+    },
+    {
+      "id": "mdu",
+      "type": "backend",
+      "label": "MulDiv",
+      "sublabel": "mdu · 整数端口 0",
+      "pos": [
+        990,
+        600
+      ],
+      "size": [
+        210,
+        86
+      ],
+      "sources": [
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/MulDiv.scala",
+          "line": 11,
+          "end_line": 53,
+          "label": "请求、响应、乘除和 kill 接口"
+        },
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/Core.scala",
+          "line": 78,
+          "end_line": 83,
+          "label": "mdu 实例与 executing(0) 接线"
+        },
+        {
+          "path": "dual-issue-chisel/src/main/scala/tier3/Core.scala",
+          "line": 289,
+          "end_line": 297,
+          "label": "MDU 响应优先写回端口 0"
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "fetch-decode",
+      "from": "fetch",
+      "to": "decode",
+      "label": "packet_*",
+      "variant": "emphasis"
+    },
+    {
+      "id": "decode-rename",
+      "from": "decode",
+      "to": "rename",
+      "label": "decoded",
+      "variant": "emphasis"
+    },
+    {
+      "id": "rename-iq",
+      "from": "rename",
+      "to": "iq",
+      "label": "dispatch_payload",
+      "variant": "emphasis"
+    },
+    {
+      "id": "iq-execute",
+      "from": "iq",
+      "to": "execute",
+      "label": "executing(0/1)",
+      "variant": "emphasis"
+    },
+    {
+      "id": "execute-rob",
+      "from": "execute",
+      "to": "rob",
+      "label": "wb_value(0/1)",
+      "variant": "emphasis"
+    },
+    {
+      "id": "dispatch-rob",
+      "from": "decode",
+      "to": "rob",
+      "label": "dispatch_valid",
+      "variant": "default"
+    },
+    {
+      "id": "rob-read",
+      "from": "rob",
+      "to": "rename",
+      "label": "values / architectural",
+      "variant": "default"
+    },
+    {
+      "id": "execute-wake",
+      "from": "execute",
+      "to": "iq",
+      "label": "wb_good / wb_value",
+      "variant": "default"
+    },
+    {
+      "id": "iq-memory",
+      "from": "iq",
+      "to": "lsu",
+      "label": "executing(2)",
+      "variant": "default"
+    },
+    {
+      "id": "lsu-writeback",
+      "from": "lsu",
+      "to": "rob",
+      "label": "wb_value(2)",
+      "variant": "default"
+    },
+    {
+      "id": "lsu-wake",
+      "from": "lsu",
+      "to": "iq",
+      "label": "wb_*(2)",
+      "variant": "default"
+    },
+    {
+      "id": "lsu-dcache",
+      "from": "lsu",
+      "to": "dcache",
+      "label": "load_* / store_*",
+      "variant": "default",
+      "labelDx": -6
+    },
+    {
+      "id": "dcache-result",
+      "from": "dcache",
+      "to": "lsu",
+      "label": "result_* / load_data",
+      "variant": "default"
+    },
+    {
+      "id": "fetch-memory",
+      "from": "fetch",
+      "to": "memory",
+      "label": "mem_req_*",
+      "variant": "default"
+    },
+    {
+      "id": "dcache-memory",
+      "from": "dcache",
+      "to": "memory",
+      "label": "mem_req_*",
+      "variant": "default"
+    },
+    {
+      "id": "memory-axi",
+      "from": "memory",
+      "to": "axi",
+      "label": "mem_req_*",
+      "variant": "default"
+    },
+    {
+      "id": "execute-mdu",
+      "from": "execute",
+      "to": "mdu",
+      "label": "req_*",
+      "variant": "default"
+    },
+    {
+      "id": "mdu-execute",
+      "from": "mdu",
+      "to": "execute",
+      "label": "rsp_*",
+      "variant": "default"
+    },
+    {
+      "id": "branch-recovery",
+      "from": "execute",
+      "to": "rob",
+      "label": "branch_*_q",
+      "variant": "dashed"
+    },
+    {
+      "id": "commit-rename",
+      "from": "rob",
+      "to": "rename",
+      "label": "commit / restore",
+      "variant": "dashed"
+    },
+    {
+      "id": "recovery-iq",
+      "from": "rob",
+      "to": "iq",
+      "label": "recoveryControl",
+      "variant": "dashed"
+    },
+    {
+      "id": "commit-memory",
+      "from": "rob",
+      "to": "lsu",
+      "label": "提交 / 恢复",
+      "variant": "dashed"
+    },
+    {
+      "id": "frontend-control",
+      "from": "rob",
+      "to": "fetch",
+      "label": "redirect / train_*",
+      "variant": "dashed"
+    },
+    {
+      "id": "exit-axi",
+      "from": "rob",
+      "to": "axi",
+      "label": "exit_send",
+      "variant": "default"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "读图边界与图例",
+      "items": [
+        "11 个核心组件。青色强调实线为选定 ADD 的主数据路径；普通实线为其他数据、请求及带数据的唤醒；虚线为提交、分支恢复和预测训练控制。交叉线不表示信号汇合。",
+        "箭头是总体连接摘要。mem_req_* 仅标请求方向，mem_rsp_*、ready 及 error 通过配对接口返回；LSU / DCache 另画返回数据。req_* / rsp_* 为 MulDiv 的真实双向握手。",
+        "顶层 StudentTop（student_top）只有 core: Core 与 bridge: AxiAdapter；其余 10 个节点均位于 Core（cpu_top）内部。ROB / IQ / 访存及分派为逻辑分组，并非同名独立 Module。",
+        "源码快照 a922b00；只确认源级结构与条件，不将图中动态效果解释为真实周期、执行证明、IPC、面积或 Fmax。clock/reset、局部 Read / Distribution 树和外部从机内部未展开。"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Frontend｜职责与接口",
+      "items": [
+        "frontend: Frontend 在 Core.scala:116–133 实例化；集成取指 PC、I-cache、预测状态与 fifo。默认 1 KiB、1 路、32 B 行，取指队列 8 项。",
+        "输入：stop、redirect、redirect_pc、pop_count、train_history / train_valid / train_taken / train_op / train_pc / train_target，以及 mem_req_ready、mem_rsp_*。输出：packet_valid / packet_pc / packet_inst / packet_prediction / packet_fault / packet_inst_valid / packet_history、mem_req_*、idle / miss_count。",
+        "双取指需首字可用、首预测为顺序、未跨行且 FIFO 有两个空位；不是无条件每拍两条。BHT、BTB 和 local_history 的查询与训练可在 Frontend.scala:76–125,155–161,195–199 确认。"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Decoder ×2 / 分派｜职责与接口",
+      "items": [
+        "两个 d: Decoder 把 frontend.packet_inst 分成两条 32 位指令，输出 dec 并转换成 Decoded。Decoded 保留 op、rs1 / rs2 / rd、uses_rs*、writes_rd、use_imm、imm、mem_size、load_signed 与 illegal。",
+        "Core 分派输入：decoded、packet_valid、ROB / PRF / IQ 剩余容量与检查点可用性；输出：dispatch_payload、dispatch_rid / dispatch_bank / dispatch_index、dispatch_valid / dispatch_count、rename_* 和 save_checkpoint。",
+        "Core.scala:330–366：内存类固定 bank2，分支 / MDU 固定 bank0，普通 ALU 可选 bank0 / bank1；同拍每个 bank 最多分派一条。lane1 必须在 lane0 未阻塞后才能分派；faulting 指令进入 ROB 完成态而不进入普通 IQ。"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Rename / 操作数读｜职责与接口",
+      "items": [
+        "rename_maps: Rename 保存 pending_q / tag_q，以及分支检查点 checkpoint_pending / checkpoint_tag；映射 tag 是 ROB rid，不应将其误画成独立 physical index。",
+        "Rename 输入：dispatch_valid / prepare_valid / dispatch_rd / dispatch_slot、source_register、commit_*、save_*、restore_*。输出：source_pending / source_slot。检查点保存可包含 lane0 或两条 lane，restore_index 来自 branch_checkpoint_q。",
+        "Core 依据 source_slot 读 values 和 ROB 完成状态；未 pending 时读 architectural（32 个 ArchWord）。dispatch_payload.a / b 与 ready_a / ready_b 同时接收 wb_good / wb_rid / wb_value 旁路；组内 RAW 在 lane1 保持未就绪（Core.scala:367–388）。"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "IQ / Operand｜职责与接口",
+      "items": [
+        "queue 是 Core 中 Reg(Vec(3, Vec(p.iqEntries, IssueEntry)))；默认三组各 4 项。每项 A/B 各实例化一个 Operand，保存 source_a / source_b、a / b 与 ready_a / ready_b。",
+        "输入：dispatch_payload、dispatch_prepare / dispatch_valid、wb_good / wb_rid / wb_value、recoveryControl；输出：selected / selected_valid、executing(0..2)、select_valid，issue_fire 或恢复时释放项。",
+        "整数 bank0/1：ParallelSelect 仅在 valid && ready_a && ready_b 项中选最老者，允许较年轻就绪指令越过未就绪老指令。访存 bank2：Select + RegisteredGrant 提前选择最老 valid 项，之后再检查操作数就绪；不能描述成任意 Load 乱序越过。",
+        "Operand 接 wb_* 三组完成广播，命中 tag 时更新 next_ready / next_value（LocalLogic.scala:217–231；Core.scala:528–544）。issueWidth 非默认时还有跨 bank 的年龄及数量门控（Core.scala:237–248）。"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Alu ×2 / BranchUnit｜职责与接口",
+      "items": [
+        "Core.scala:175–191 实例化两个 a: Alu 与 branch_i: BranchUnit。Alu 输入 op / a / b / pc / imm，输出 result；b 在 use_imm 时选择 imm。BranchUnit 仅接 executing(0)，输出 result / next_pc / taken / misaligned。",
+        "Core 写回组合逻辑输出 wb_valid / wb_rid / wb_value / wb_fault / wb_address；bank1 仅 Alu，bank0 在 MDU 响应、MDU 请求、分支或 ALU 之间仲裁。wb_* 同拍连接 PRF / ROB 完成状态和 Operand 唤醒，不要求先写 PRF 再唤醒。",
+        "branch_capture 与 branch_*_q 将执行结果交给 Core 恢复逻辑；默认 registerRedirect=true。比较实际 next_pc 与 prediction 后才恢复；train_valid 还要求 branch_fire && !branch_bad_q。"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "ROB / PRF / ArchWord｜职责与接口",
+      "items": [
+        "逻辑分组包含 rob / values、head / tail / rob_count、RetireRead、32 个 ArchWord 及 Core 的提交恢复控制。默认 ROB32、推测值槽 PRF32；另有固定 32 字 committed ARF。prfEntries≠robEntries 时通过 prfOwner 与 physicalAllocation 独立分配（Core.scala:23–35,512–526）。",
+        "输入：dispatch_valid / dispatch_rid / decoded、wb_*、branch_*_q 与访存状态。输出：retirement_meta / retirement_value、commit_*、architectural、retire_*、redirect / recoveryControl、frontend.train_* / stop，以及 faulted / halted。",
+        "Core.scala:314–325 从 head 连续前缀提交：done、无 fault、非 exiting、未被前项阻塞才 allowed；受 commitWidth 限制，同拍最多一个 Store。commit_valid 只表示写非零 rd，不能等同于所有退休指令有效。",
+        "ROB 的写回 / 分派 / 恢复状态更新见 Core.scala:453–510；RetireRead / ArchWord 的实现见 LocalLogic.scala:175–205。提交匹配才清除 Rename pending；恢复会保留老项，清除年轻 ROB / IQ / 未提交 Store，并把在途 Load 标 canceled。",
+        "退出 Store 到 0x80000000 进入 drain，待 stores、dcache、frontend、memory_bus 排空后 exit_send 经 Core mem_req_* 直接送 bridge，绕过 memory_bus 请求。详见 Core.scala:136–146,434–447。"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "访存逻辑 / loads / stores｜职责与接口",
+      "items": [
+        "Core 内部逻辑，不存在独立 LSU 类。输入 executing(2)、prepared_address、Store 表、Load 空槽与 DCache 返回；输出 memory_address / memory_data / memory_mask、dcache.load_* / store_*、wb_*(2) 与 issue_fire(2)。",
+        "prepared_address 使用 PrefixAdder 预准备 a+imm；先检查对齐和范围。Store 表匹配同字及掩码，经 CircularGrant 选转发候选；掩码全覆盖才 forward_full 完成，部分覆盖时等待，不发 DCache Load（Core.scala:250–283）。",
+        "Load 命中 / 转发可直接完成；miss 分配 loads 槽，dcache.result_* 返回后按 tag 找 rid；canceled / younger / 无效 ROB 结果不发布。Store 执行先填 stores，ROB 提交后才通过 dcache.store_valid 发送，store_done 后回收。",
+        "默认 Load8 / Store16。Core.scala:582–609 可确认 committed、issued、done、canceled 的写入条件。load_replay_count 固定输出 0（Core.scala:140），不能据此宣称已实现 Load 重放机制。"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "DCache｜职责与接口",
+      "items": [
+        "dcache: DCache 默认 2 KiB / 2 路、64 B 行、4 个 MSHR；内部 data / tags / word_valid、misses、waiters 和 owners。阵列在 Chisel 中用 Reg / Reg(Vec) 描述，未见 sram_fakeram 实例，不把它画成 FakeRAM。",
+        "输入 load_valid / load_address / load_tag、store_valid / store_address / store_data / store_mask / store_tag、result_ready 和 mem_rsp_*。输出 load_ready / load_hit / load_data、result_valid / result_tag / result_data / result_error、store_ready / store_done / store_error / store_done_tag 与 mem_req_*。",
+        "Load miss 可合并到已有 misses 或分配空闲 MSHR；每个缓存行的关键字优先发请求。Store 接收后排外部写请求，命中时同时更新缓存；未见脏行写回状态机，不按 write-back cache 描述（DCache.scala:118–143,209–224）。"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "MemoryController｜职责与接口",
+      "items": [
+        "memory_bus: MemoryController；Core.scala:125–133 把 Frontend 接源0、DCache 接源1。输入 s_req_valid / s_req_write / s_req_addr / s_req_wdata / s_req_wstrb 和 mem_rsp_*；输出 s_req_ready、s_rsp_*、mem_req_* 与 idle。",
+        "Bus.scala:18–55：请求寄存器和 next_owner 在两个源间选择，owners FIFO 记录每个外部事务的源；响应按 FIFO 头路由到原缓存。默认 maxMemOutstanding=16。这不是两条独立 AXI 总线，也不是带 AXI ID 的乱序返回。",
+        "图中三个 mem_req_* 连线都包含相反方向的 mem_rsp_* / ready / error 配对接口；Frontend 与 DCache 的 mem_rsp_ready 均接 true.B。退出请求另由 Core 直接复用顶层端口。"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "AxiAdapter｜职责与接口",
+      "items": [
+        "StudentTop 的 bridge: AxiAdapter，与 core 同级；StudentTop.desiredName=student_top，Core.desiredName=cpu_top，AxiAdapter.desiredName=pararisc_axi_adapter（Top.scala:5–24；Bus.scala:60–70）。",
+        "内部输入 req_valid / req_write / req_addr / req_data / req_mask、resp_ready，输出 req_ready / resp_valid / resp_data / resp_error。Top.scala:14–19 将 Core mem_req_* / mem_rsp_* 与之相连；resp_ready=core.mem_rsp_ready || core.halted。",
+        "外部输出 araddr / arvalid / rready、awaddr / awvalid、wdata / wstrb / wvalid、bready；输入 arready / rdata / rresp / rvalid、awready / wready / bresp / bvalid。AXI4-Lite 为 32 位数据；AW 和 W 可分开握手，directions FIFO 保留读写响应顺序。"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "MulDiv｜职责与接口",
+      "items": [
+        "mdu: MulDiv 接 executing(0).op / a / b / rid 作为 req_op / req_a / req_b / req_tag；req_valid 受 select_valid(0)、flush_all、mdu.rsp_valid 和 younger 条件限制。",
+        "输出 req_ready、rsp_valid / rsp_result / rsp_tag，rsp_ready=!flush_all；kill=flush_all，kill_mask 来自无效 ROB 槽。Core.scala:289–297 中 rsp_valid 优先占 wb_*(0)，与端口0普通 ALU / Branch 共享写回。",
+        "MulDiv.scala:11–53 可确认三项乘法结果状态、迭代除法及握手。只在总体图展示端口，不推断固定延迟、每拍吞吐或除法性能。"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "ADD 主路径｜有条件的数据流，不是逐周期时序",
+      "items": [
+        "① 选合法 ADD rd, rs1, rs2（rd≠0）。Frontend.packet_inst / packet_pc → 两个 Decoder 之一，decoded.op=ADD（Decode.scala:48–49,62–68；Core.scala:147–149）。I-cache miss 时先回填，图不假定每拍取到。",
+        "② 分派资源可用、未 flush_all / redirect 时，Core 选择普通整数 bank。此例限定 bank1 可用并被 bankChoice 选中；Rename 查 source_pending / source_slot，Core 从 values 或 architectural 或写回旁路构造 dispatch_payload（Core.scala:330–388）。",
+        "③ queue(1) 的 A/B 都 ready 后，ParallelSelect 选择该 bank 最老就绪项。满足 select_valid(1) 且不 younger 时，经 executing(1) 送 Alu；ADD 结果为 a+b。此前可等待依赖，不能把箭头当作固定拍数。",
+        "④ issue_fire(1) 释放 IQ 项，wb_valid(1) / wb_rid(1) / wb_value(1) 更新 ROB.done 与 values，同时 Operand 用匹配 tag 唤醒等待者（Core.scala:300,453–494,528–544）。",
+        "⑤ 指令到 head 连续可提交前缀、done 且无 fault / exit 后，commit_* 与 retirement_value 使 ArchWord 更新 architectural[rd]，Rename 清对应 pending，head 按 commit_count 前进（Core.scala:93–115,314–325,412；Rename.scala:34–42）。"
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "参数、已确认能力与尚未验证的结论",
+      "items": [
+        "Config 默认 renameWidth=2、commitWidth=2、integerPorts=2、issueWidth=3；issueWidth 包含两个整数端口和一个 LSU。宽度只支持源码 require 的范围，并非任意 N 路：renameWidth / commitWidth / integerPorts∈{1,2}，issueWidth∈[1,integerPorts+1]。",
+        "Common.scala:11–44 与 Generate.scala:30–42 定义 ROB / PRF / IQ / 缓存容量与相联度参数。Config 与 rtl/elaboration.json 的当前默认值一致；本次未重新生成 CPU 或复跑参数矩阵。",
+        "已确认结构：整数就绪驱动乱序选择、顺序提交、三 bank 并发发射上限、I/D-cache、BHT / BTB / 局部历史预测、结果旁路 / 唤醒、Store 到 Load 转发；每项均以上述源码接线和状态写入为依据。",
+        "未验证：此图不提供当前快照运行正确性、实测 IPC / Fmax / 面积及任意参数组合正确性的结论。外部 AXI 从机 / FakeRAM 内部未展开。后续细图可按重命名与唤醒、分支恢复、Load miss / Store 提交流程逐步补充。"
+      ]
+    }
+  ]
+}

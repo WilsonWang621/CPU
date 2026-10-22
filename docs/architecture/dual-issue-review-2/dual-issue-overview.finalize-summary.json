@@ -1,0 +1,280 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "architecture",
+  "quality": "showcase",
+  "specification": {
+    "path": "/home/wangwenxuan/ACM/大二上/ParaRisc/docs/architecture/dual-issue-overview.json",
+    "sha256": "0018cc35f64025c205ef2b365636b129afb553d1a752fa23c79de46d4c24695b",
+    "bytes": 29136
+  },
+  "artifact": {
+    "path": "/home/wangwenxuan/ACM/大二上/ParaRisc/docs/architecture/dual-issue-overview.html",
+    "sha256": "0472a601dc9cb1816966b8b180b3ba5a84762cbc175bd40d69b6e052bddb8998",
+    "bytes": 863510
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "/home/wangwenxuan/ACM/大二上/ParaRisc/docs/architecture/dual-issue-review-2/dual-issue-overview.finalize.json",
+    "summaryReceipt": "/home/wangwenxuan/ACM/大二上/ParaRisc/docs/architecture/dual-issue-review-2/dual-issue-overview.finalize-summary.json",
+    "browserCheckReceipt": "/home/wangwenxuan/ACM/大二上/ParaRisc/docs/architecture/dual-issue-review-2/dual-issue-overview.browser-check.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-21T06:25:21.346Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 5384,
+  "browserCheck": {
+    "requested": true,
+    "ran": true
+  },
+  "visualReviewRecommendation": {
+    "action": "inspect-route-readability",
+    "signals": {
+      "resolvedCrossovers": 9,
+      "routesOverSuggestedBends": 2
+    },
+    "reason": "Automated gates passed, but crossings or detours still need perceptual review before claiming visual quality.",
+    "affectedRoutes": {
+      "crossings": [
+        {
+          "left": {
+            "id": "execute-rob",
+            "from": "execute",
+            "to": "rob",
+            "label": "wb_value(0/1)",
+            "collectionIndex": 4,
+            "artifactIndex": 5
+          },
+          "right": {
+            "id": "iq-memory",
+            "from": "iq",
+            "to": "lsu",
+            "label": "executing(2)",
+            "collectionIndex": 8,
+            "artifactIndex": 9
+          },
+          "point": [
+            964,
+            286
+          ]
+        },
+        {
+          "left": {
+            "id": "execute-rob",
+            "from": "execute",
+            "to": "rob",
+            "label": "wb_value(0/1)",
+            "collectionIndex": 4,
+            "artifactIndex": 5
+          },
+          "right": {
+            "id": "lsu-wake",
+            "from": "lsu",
+            "to": "iq",
+            "label": "wb_*(2)",
+            "collectionIndex": 10,
+            "artifactIndex": 11
+          },
+          "point": [
+            966,
+            286
+          ]
+        },
+        {
+          "left": {
+            "id": "execute-rob",
+            "from": "execute",
+            "to": "rob",
+            "label": "wb_value(0/1)",
+            "collectionIndex": 4,
+            "artifactIndex": 5
+          },
+          "right": {
+            "id": "recovery-iq",
+            "from": "rob",
+            "to": "iq",
+            "label": "recoveryControl",
+            "collectionIndex": 20,
+            "artifactIndex": 21
+          },
+          "point": [
+            930.0000000000001,
+            286
+          ],
+          "sharedNode": "rob"
+        },
+        {
+          "left": {
+            "id": "iq-memory",
+            "from": "iq",
+            "to": "lsu",
+            "label": "executing(2)",
+            "collectionIndex": 8,
+            "artifactIndex": 9
+          },
+          "right": {
+            "id": "branch-recovery",
+            "from": "execute",
+            "to": "rob",
+            "label": "branch_*_q",
+            "collectionIndex": 18,
+            "artifactIndex": 19
+          },
+          "point": [
+            964,
+            353
+          ]
+        },
+        {
+          "left": {
+            "id": "lsu-writeback",
+            "from": "lsu",
+            "to": "rob",
+            "label": "wb_value(2)",
+            "collectionIndex": 9,
+            "artifactIndex": 10
+          },
+          "right": {
+            "id": "commit-memory",
+            "from": "rob",
+            "to": "lsu",
+            "label": "提交 / 恢复",
+            "collectionIndex": 21,
+            "artifactIndex": 22
+          },
+          "point": [
+            753,
+            575.9333333333333
+          ],
+          "sharedNode": "lsu"
+        },
+        {
+          "left": {
+            "id": "lsu-wake",
+            "from": "lsu",
+            "to": "iq",
+            "label": "wb_*(2)",
+            "collectionIndex": 10,
+            "artifactIndex": 11
+          },
+          "right": {
+            "id": "branch-recovery",
+            "from": "execute",
+            "to": "rob",
+            "label": "branch_*_q",
+            "collectionIndex": 18,
+            "artifactIndex": 19
+          },
+          "point": [
+            966,
+            353
+          ]
+        },
+        {
+          "left": {
+            "id": "lsu-dcache",
+            "from": "lsu",
+            "to": "dcache",
+            "label": "load_* / store_*",
+            "collectionIndex": 11,
+            "artifactIndex": 12
+          },
+          "right": {
+            "id": "dcache-result",
+            "from": "dcache",
+            "to": "lsu",
+            "label": "result_* / load_data",
+            "collectionIndex": 12,
+            "artifactIndex": 13
+          },
+          "point": [
+            600,
+            636
+          ],
+          "sharedNode": "lsu"
+        },
+        {
+          "left": {
+            "id": "lsu-dcache",
+            "from": "lsu",
+            "to": "dcache",
+            "label": "load_* / store_*",
+            "collectionIndex": 11,
+            "artifactIndex": 12
+          },
+          "right": {
+            "id": "exit-axi",
+            "from": "rob",
+            "to": "axi",
+            "label": "exit_send",
+            "collectionIndex": 23,
+            "artifactIndex": 24
+          },
+          "point": [
+            600,
+            576
+          ]
+        }
+      ],
+      "detours": [
+        {
+          "relationship": {
+            "id": "iq-memory",
+            "from": "iq",
+            "to": "lsu",
+            "label": "executing(2)",
+            "collectionIndex": 8,
+            "artifactIndex": 9
+          },
+          "bends": 4,
+          "stretch": 1
+        },
+        {
+          "relationship": {
+            "id": "lsu-wake",
+            "from": "lsu",
+            "to": "iq",
+            "label": "wb_*(2)",
+            "collectionIndex": 10,
+            "artifactIndex": 11
+          },
+          "bends": 3,
+          "stretch": 1.059
+        }
+      ],
+      "truncated": true
+    },
+    "hints": [
+      "execute → rob crosses iq → lsu: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor.",
+      "execute → rob crosses lsu → iq: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor.",
+      "execute → rob and rob → iq cross next to rob: move node execute or iq so the two reach rob from different sides (for example one level with it, one directly above or below it).",
+      "iq → lsu crosses execute → rob: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor.",
+      "lsu → rob and rob → lsu cross next to lsu: move node rob or rob so the two reach lsu from different sides (for example one level with it, one directly above or below it).",
+      "lsu → iq crosses execute → rob: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor.",
+      "lsu → dcache and dcache → lsu cross next to lsu: move node dcache or dcache so the two reach lsu from different sides (for example one level with it, one directly above or below it).",
+      "lsu → dcache crosses rob → axi: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor."
+    ],
+    "repair": "Trace these relationships at the desktop viewport. For Architecture, use references/architecture-layout-repair.md: reflow a blocked main path or tangled connected scene, and repair an isolated defect locally only when the surrounding composition is accepted. Preserve all semantic content and user-fixed geometry. Rerun finalize once after the edit."
+  }
+}
