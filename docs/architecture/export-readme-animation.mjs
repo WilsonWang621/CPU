@@ -1,5 +1,5 @@
 // Export the existing Archify motion scene; do not modify the validated HTML.
-// Usage: ARCHIFY_CHROME=/path/to/chrome node docs/architecture/export-readme-animation.mjs
+// Usage: ARCHIFY_CHROME=/path/to/chrome node docs/architecture/export-readme-animation.mjs [single-issue-overview|dual-issue-overview]
 import { spawn, spawnSync } from 'node:child_process';
 import { readFile, writeFile, mkdtemp, rm } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
@@ -8,16 +8,20 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const directory = dirname(fileURLToPath(import.meta.url));
+const stem = process.argv[2] ?? 'single-issue-overview';
+if (process.argv.length > 3 || !['single-issue-overview', 'dual-issue-overview'].includes(stem)) {
+  throw new Error('Choose single-issue-overview or dual-issue-overview.');
+}
 const chrome = process.env.ARCHIFY_CHROME;
 if (!chrome) throw new Error('Set ARCHIFY_CHROME to a Chrome/Chromium executable.');
-const htmlPath = join(directory, 'single-issue-overview.html');
+const htmlPath = join(directory, `${stem}.html`);
 const html = await readFile(htmlPath);
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
-const delivery = JSON.parse(await readFile(join(directory, 'single-issue-overview.delivery.json'), 'utf8'));
+const delivery = JSON.parse(await readFile(join(directory, `${stem}.delivery.json`), 'utf8'));
 if (delivery.status !== 'current' || delivery.artifact.sha256 !== sha256(html)) {
   throw new Error('Archify HTML differs from its delivery receipt; finalize it first.');
 }
-const work = await mkdtemp(join(tmpdir(), 'single-issue-animation-'));
+const work = await mkdtemp(join(tmpdir(), `${stem}-animation-`));
 const browser = spawn(chrome, ['--headless=new', '--no-sandbox', '--disable-gpu',
   '--disable-dev-shm-usage', '--no-first-run', '--disable-background-timer-throttling',
   '--remote-debugging-pipe', `--user-data-dir=${join(work, 'profile')}`, 'about:blank'],
@@ -72,14 +76,14 @@ try {
   if (evaluated.exceptionDetails) throw new Error(JSON.stringify(evaluated.exceptionDetails));
   const webm = join(work, 'overview.webm');
   await writeFile(webm, Buffer.from(evaluated.result.value.split(',')[1], 'base64'));
-  const output = join(directory, 'single-issue-overview.gif');
+  const output = join(directory, `${stem}.gif`);
   const filter = 'fps=10,split[a][b];[a]palettegen=max_colors=128:stats_mode=diff[p];[b][p]paletteuse=dither=sierra2_4a:diff_mode=rectangle';
   const conversion = spawnSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-i', webm,
     '-filter_complex', filter, '-loop', '0', output], { encoding: 'utf8' });
   if (conversion.status !== 0) throw new Error(conversion.stderr || 'ffmpeg conversion failed');
   const gif = await readFile(output);
-  await writeFile(join(directory, 'single-issue-overview.gif.receipt.json'), JSON.stringify({
-    source: 'single-issue-overview.html', source_sha256: sha256(html),
+  await writeFile(join(directory, `${stem}.gif.receipt.json`), JSON.stringify({
+    source: `${stem}.html`, source_sha256: sha256(html),
     export: 'Archify.motion.recordWebm', duration_ms: 8000, capture_fps: 12,
     gif_fps: 10, gif_loop: 0, gif_sha256: sha256(gif), gif_bytes: gif.length,
     note: '连接方向动画；不是 CPU 周期仿真。GIF 不保留交互。',

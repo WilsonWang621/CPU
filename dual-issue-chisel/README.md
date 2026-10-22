@@ -1,5 +1,13 @@
 # 双发射 Chisel 实现
 
+## 交互式总体架构
+
+![可参数化多发射 Chisel CPU 动态总体架构图](../docs/architecture/dual-issue-overview.gif)
+
+[交互图 HTML](../docs/architecture/dual-issue-overview.html) · [可编辑 JSON](../docs/architecture/dual-issue-overview.json) · [模块盘点与源码依据](../docs/architecture/dual-issue-overview.md)。11 个组件依据当前源码绘制，节点说明含职责、I/O 和源码位置；青色实线突出 ADD 数据路径，虚线表示提交与恢复控制。动画表示连接方向，不是周期仿真。GitHub 上播放 GIF，下载 HTML 后可在浏览器中交互阅读。
+
+## 实现与验证
+
 以保留的双发射 Verilog 参考实现（`d134aa1`，ROB32 版本）逐模块迁移的原生 Chisel 工程。CPU、缓存、译码、乘除法及 AXI 适配器均由 Scala/Chisel 生成；构建不读取或嵌入 Verilog 参考 CPU。生成器使用已缓存的 Chisel 6.5.0、Scala 2.13.12、sbt 1.10.2 和 firtool 1.62.0。根目录课程默认 filelist 现在直接选择本工程的生成 RTL。
 
 保留双分派、双整数发射、独立访存端口、双提交、32 项 ROB、三组各 4 项 IQ、3 个分支检查点、8 个 Load 槽、16 个 Store 槽、1 KiB I-cache、2 KiB D-cache。同步复位、空闲行预准备、访存选择提前一拍、缓存返回选择、取消响应排空和分支恢复的时钟边界均对应原设计。前缀节点、局部掩码、字节控制及反相器分发树继续使用 `keep_hierarchy`，面积和延迟均计入官方综合。

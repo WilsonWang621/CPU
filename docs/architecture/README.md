@@ -1,4 +1,30 @@
-# single-issue-chisel 总体架构图
+# CPU 交互架构图索引
+
+| 实现 | 交互图 | 可编辑图源 | 范围 |
+| --- | --- | --- | --- |
+| 当前可参数化多发射 `dual-issue-chisel` | [总体架构 HTML](dual-issue-overview.html) | [JSON](dual-issue-overview.json) | 11 个组件；源码快照 `a922b00` |
+| 保留的单发射 `single-issue-chisel` | [总体架构 HTML](single-issue-overview.html) | [JSON](single-issue-overview.json) | 旧图与旧证据保持原样；快照 `bec3010` |
+
+## 当前多发射图：打开、阅读与编辑
+
+下载 [dual-issue-overview.html](dual-issue-overview.html) 后用 Chrome、Chromium、Edge 或 Firefox 直接打开，无需编译 CPU 或启动服务器。HTML 为独立文件；点“动态 / Live”播放，点“静止 / Still”暂停。可缩放、切换主题、选择节点查看源码引用，通过 ADD、访存、提交恢复和 MulDiv 导览聚焦讨论。
+
+图中青色强调实线为 ADD 主数据路径，普通实线为其他数据和请求，虚线为控制关系；动态效果不是 CPU 逐周期仿真。模块职责、I/O、连接约束和事实边界见页面说明卡及[源码盘点](dual-issue-overview.md)。缓存、预测、旁路和整数乱序选择均从实际源码确认；没有据架构图重新宣称性能或正确性验收。
+
+编辑 [JSON 图源](dual-issue-overview.json)，不要直接修改 HTML。重新生成和验证命令见[多发射图说明](dual-issue-overview.md#编辑与重新验证)。根 README 和双发射工程 README 展示 [GIF](dual-issue-overview.gif)，GitHub 内不执行 HTML 的交互脚本。
+
+当前交付见[最终自动验证回执](dual-issue-review-2/dual-issue-overview.finalize-summary.json)及[截图审阅记录](dual-issue-overview.review.json)。初版布局回执为历史证据；9 处保留的交叉有跨线标记，不代表信号汇合。
+
+重导多发射动画（需 Node.js、Chromium 和 ffmpeg）：
+
+```sh
+ARCHIFY_CHROME=/path/to/chrome \
+node docs/architecture/export-readme-animation.mjs dual-issue-overview
+```
+
+导出使用已验证 HTML 的 `Archify.motion.recordWebm`，再转换 GIF；不修改 HTML。导出脚本不传参数时仍处理旧单发射图。本轮不重导或覆盖旧图。
+
+## 保留的单发射图：原始说明
 
 打开 [交互式总体架构图](single-issue-overview.html)。文件是独立 HTML，可以下载到本机后用 Chrome、Chromium、Edge 或 Firefox 打开，不需要运行 CPU 或启动服务器。
 

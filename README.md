@@ -2,7 +2,19 @@
 
 RV32IM CPU 工程。提供设计与周期行为一致的双发射 Verilog 和[原生双发射 Chisel](dual-issue-chisel/README.md) 实现；[single-issue-chisel/](single-issue-chisel/README.md) 独立保留单发射 Chisel 实现及其复现实验。
 
-## 我的单发射 Chisel 实现
+## 可参数化多发射 Chisel：当前总体架构
+
+下面展示默认 [`dual-issue-chisel/`](dual-issue-chisel/) 的源码架构：11 个核心组件，保留 `StudentTop`、`Core` 及实际子模块名，并把 Core 内部的 ROB、IQ、分派和访存逻辑明确标为分组。默认双分派、双提交、两个整数端口加一个独立访存端口；`issueWidth=3` 统计三类端口的新发射总上限。
+
+![可参数化多发射 Chisel CPU 动态总体架构图](docs/architecture/dual-issue-overview.gif)
+
+青色强调实线展示经整数 IQ 的 ADD 主数据路径，普通实线表示其他数据和请求，虚线表示提交、恢复与预测训练控制。动画展示连接方向，不代表 CPU 逐周期时序。节点说明含职责、主要 I/O、条件和源码位置；支持 ADD、访存、提交恢复、MulDiv 四个导览。
+
+[完整交互图 HTML](docs/architecture/dual-issue-overview.html) · [可编辑图源](docs/architecture/dual-issue-overview.json) · [模块盘点与源码依据](docs/architecture/dual-issue-overview.md)
+
+GitHub README 直接播放 GIF；下载 HTML 后用浏览器打开，在页面中切换“动态 / Live”播放，选择节点查看关联连线和源码引用。本轮先完成总体图，后续以相同源码证据逐步补充细图。[打开、编辑和验证说明](docs/architecture/README.md)。
+
+## 保留：单发射 Chisel 架构
 
 下面展示的是我在 [`single-issue-chisel/`](single-issue-chisel/) 中的单发射 RV32IM CPU 实现。架构图依据该目录的 Chisel 源码绘制，包含取指、译码、重命名、发射、执行、ROB 提交、访存与 AXI 接口。图中的 ROB、IQ 和 Store 表是 `Core` 内部逻辑分组；独立模块保留源码中的名称。
 
